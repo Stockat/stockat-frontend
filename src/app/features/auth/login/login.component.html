@@ -1,0 +1,35 @@
+<p-toast></p-toast>
+<div class="login-bg">
+  <p-card class="login-card">
+    <div class="login-header">
+      <h1>Welcome Back</h1>
+      <p class="login-subheadline">Enter your email and password to access your account.</p>
+    </div>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <label for="email">Email</label>
+      <input pInputText id="email" formControlName="email" placeholder="Email" type="email" class="login-input" />
+       <label for="password">Password</label>
+      <p-password
+        id="password"
+        formControlName="password"
+        placeholder="Password"
+        [feedback]="false"
+        [toggleMask]="true"
+        [inputStyle]="{ fontSize: '1rem' }"
+        styleClass="login-input">
+      </p-password>
+      <div class="login-options">
+        <span></span>
+        <a routerLink="/forgot-password" class="forgot-link">Forgot your password?</a>
+      </div>
+      <button pButton type="submit" label="Log In" [loading]="loading" class="login-btn" [style]="{width: '100%'}"></button>
+    </form>
+    <div class="login-divider">
+      <span>or</span>
+    </div>
+    <div id="google-btn" class="login-social-btn"></div>
+    <div class="login-register-link">
+      Don't have an account? <a routerLink="/register">Register Now.</a>
+    </div>
+  </p-card>
+</div>

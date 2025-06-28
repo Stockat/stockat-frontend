@@ -1,0 +1,55 @@
+<p-toast></p-toast>
+<div class="login-bg">
+  <p-card class="login-card">
+    <div class="login-header">
+      <h1>Create Account</h1>
+      <p class="login-subheadline">Join us and start managing your inventory today.</p>
+    </div>
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-row">
+        <div class="form-col">
+          <label for="firstName">First Name</label>
+          <input pInputText id="firstName" formControlName="firstName" placeholder="First Name" class="login-input" />
+        </div>
+        <div class="form-col">
+          <label for="lastName">Last Name</label>
+          <input pInputText id="lastName" formControlName="lastName" placeholder="Last Name" class="login-input" />
+        </div>
+      </div>
+      <label for="email">Email</label>
+      <input pInputText id="email" formControlName="email" placeholder="Email" type="email" class="login-input" />
+      <label for="phoneNumber">Phone Number</label>
+      <input pInputText id="phoneNumber" formControlName="phoneNumber" placeholder="Phone Number" class="login-input" />
+      <label for="password">Password</label>
+      <p-password
+        id="password"
+        formControlName="password"
+        placeholder="Password"
+        [feedback]="false"
+        [toggleMask]="true"
+        [inputStyle]="{ fontSize: '1rem' }"
+        styleClass="login-input">
+      </p-password>
+
+      <label for="confirmPassword">Confirm Password</label>
+      <p-password
+        id="confirmPassword"
+        formControlName="confirmPassword"
+        placeholder="Confirm Password"
+        [feedback]="false"
+        [toggleMask]="true"
+        [inputStyle]="{ fontSize: '1rem' }"
+        styleClass="login-input">
+      </p-password>
+
+      <button pButton type="submit" label="Create Account" [loading]="loading" class="login-btn" [style]="{width: '100%'}"></button>
+    </form>
+    <div class="login-divider">
+      <span>or</span>
+    </div>
+    <div id="google-btn-register" class="login-social-btn"></div>
+    <div class="login-register-link">
+      Already have an account? <a class="link-btn" [routerLink]="['/login']">Sign In.</a>
+    </div>
+  </p-card>
+</div>

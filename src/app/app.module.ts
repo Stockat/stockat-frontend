@@ -1,0 +1,37 @@
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
+import { ReactiveFormsModule } from '@angular/forms';
+import { SocialLoginModule, SocialAuthServiceConfig } from '@abacritt/angularx-social-login';
+import { GoogleLoginProvider } from '@abacritt/angularx-social-login';
+
+import { AppComponent } from './app.component';
+
+@NgModule({
+  imports: [
+    BrowserModule,
+    CommonModule,
+    HttpClientModule,
+    ReactiveFormsModule,
+    SocialLoginModule
+    // import your AuthModule or feature modules here if needed
+  ],
+  providers: [
+    {
+      provide: 'SocialAuthServiceConfig',
+      useValue: {
+        autoLogin: false,
+        providers: [
+          {
+            id: GoogleLoginProvider.PROVIDER_ID,
+            provider: new GoogleLoginProvider(
+              '788632771940-ra18rrnebhm7co6at9vbg5ktir3kpglv.apps.googleusercontent.com'
+            )
+          }
+        ]
+      } as SocialAuthServiceConfig,
+    },
+  ]
+})
+export class AppModule { }
