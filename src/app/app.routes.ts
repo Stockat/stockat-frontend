@@ -25,6 +25,10 @@ export const routes: Routes = [
         path: 'confirm-email',
         loadComponent: () => import('./features/auth/confirm-email/confirm-email.component').then(m => m.ConfirmEmailComponent)
     },
+    {
+        path: 'profile',
+        loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
+    },
     // Admin
     {
         path: 'admin',
