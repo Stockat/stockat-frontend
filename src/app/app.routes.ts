@@ -2,8 +2,14 @@ import { Routes } from '@angular/router';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
+import { ProductCardComponent } from './features/Home/product-card/product-card.component';
 
 export const routes: Routes = [
+  // Anonymous routes
+  {
+    path: '',
+    component: ProductCardComponent
+},
     // Auth
     {
         path: 'login',
