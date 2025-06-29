@@ -4,7 +4,11 @@
   <!-- Sidebar Tabs -->
   <div class="w-full lg:w-1/4 xl:w-1/5 bg-gray-50 flex flex-col gap-2 p-4 lg:p-8 border-b lg:border-b-0 lg:border-r border-gray-200 min-h-[120px] lg:min-h-screen">
     <button (click)="switchTab('about')" [ngClass]="{'bg-primary text-white': activeTab === 'about', 'bg-white text-gray-700': activeTab !== 'about'}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors mb-2">
-      <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 text-lg font-bold">M</span>
+      <img
+        [src]="user?.profileImageUrl || 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc'"
+        alt="Profile"
+        class="inline-flex items-center justify-center w-10 h-10 rounded-full object-cover bg-gray-200 text-lg font-bold"
+      />
       About
     </button>
     <button (click)="switchTab('edit')" [ngClass]="{'bg-primary text-white': activeTab === 'edit', 'bg-white text-gray-700': activeTab !== 'edit'}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors mb-2">
@@ -27,9 +31,13 @@
         <h2 class="text-2xl font-bold mb-4">About Me</h2>
         <div class="bg-white rounded-xl shadow p-6 flex flex-col md:flex-row items-center gap-8">
           <div class="flex flex-col items-center">
-            <span class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gray-200 text-4xl font-bold mb-2">M</span>
-            <span class="text-xl font-semibold">Muhammad</span>
-            <span class="text-gray-500">Guest</span>
+            <img
+              [src]="user?.profileImageUrl || 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc'"
+              alt="Profile"
+              class="w-24 h-24 rounded-full object-cover shadow-lg border-4 border-white mb-2"
+            />
+            <span class="text-xl font-semibold">{{ user?.firstName }} {{ user?.lastName }}</span>
+            <span class="text-gray-500">{{ (user?.roles?.length ? user?.roles?.join(' / ') : 'No roles') }}</span>
           </div>
           <div class="flex-1">
             <div class="bg-pink-100 rounded-lg p-6 flex flex-col items-start">
@@ -64,32 +72,39 @@
                   </div>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <input pInputText type="text" placeholder="First Name" class="w-full" formControlName="firstName" />
+                      <input pInputText type="text" placeholder="First Name" class="w-full" formControlName="firstName" [readonly]="!editMode" />
                     </div>
                     <div>
-                      <input pInputText type="text" placeholder="Last Name" class="w-full" formControlName="lastName" />
+                      <input pInputText type="text" placeholder="Last Name" class="w-full" formControlName="lastName" [readonly]="!editMode" />
                     </div>
                   </div>
                   <div>
-                    <input pInputText type="text" placeholder="Address" class="w-full" formControlName="address" />
+                    <input pInputText type="text" placeholder="Address" class="w-full" formControlName="address" [readonly]="!editMode" />
                   </div>
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <input pInputText type="text" placeholder="City" class="w-full" formControlName="city" />
+                      <input pInputText type="text" placeholder="City" class="w-full" formControlName="city" [readonly]="!editMode" />
                     </div>
                     <div>
-                      <input pInputText type="text" placeholder="Country" class="w-full" formControlName="country" />
+                      <input pInputText type="text" placeholder="Country" class="w-full" formControlName="country" [readonly]="!editMode" />
                     </div>
                     <div>
-                      <input pInputText type="text" placeholder="Postal Code" class="w-full" formControlName="postalCode" />
+                      <input pInputText type="text" placeholder="Postal Code" class="w-full" formControlName="postalCode" [readonly]="!editMode" />
                     </div>
                   </div>
                   <div>
                     <label class="block text-gray-700 mb-1">About Me</label>
-                    <textarea pInputTextarea rows="4" placeholder="About Me" class="w-full" formControlName="aboutMe"></textarea>
+                    <textarea pInputTextarea rows="4" placeholder="About Me" class="w-full" formControlName="aboutMe" [readonly]="!editMode"></textarea>
                   </div>
                   <div class="flex justify-end">
-                    <button pButton type="submit" label="Update Profile" class="bg-pink-600 text-white px-8 py-2 rounded-lg font-semibold shadow-md hover:bg-pink-700 transition-colors" style="background: #e53935; border: none;"></button>
+                    <button
+                      pButton
+                      type="button"
+                      [label]="editMode ? 'Submit' : 'Update Profile'"
+                      class="bg-pink-600 text-white px-8 py-2 rounded-lg font-semibold shadow-md hover:bg-pink-700 transition-colors"
+                      style="background: #e53935; border: none;"
+                      (click)="onEditButtonClick()"
+                    ></button>
                   </div>
                 </form>
               </div>
@@ -98,20 +113,37 @@
           <!-- Profile Card -->
           <div class="w-full xl:w-auto">
             <div class="bg-white rounded-2xl shadow-lg flex flex-col items-center">
-              <div class="mt-4 mb-4">
+              <div class="mt-4 mb-2 relative">
                 <img
                   [src]="user?.profileImageUrl || 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc'"
                   alt="Profile"
                   class="w-28 h-28 rounded-full object-cover shadow-lg border-4 border-white"
                 />
+                <!-- File input overlay -->
+                <div class="absolute inset-0 flex items-center justify-center group">
+                  <input
+                    type="file"
+                    #fileInput
+                    (change)="onFileSelected($event)"
+                    accept="image/*"
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    style="z-index: 10;"
+                  />
+                  <div class="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-30 rounded-full transition-all duration-200 flex items-center justify-center">
+                    <i class="pi pi-camera text-gray text-xl opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                  </div>
+                </div>
               </div>
               <div class="p-6 text-center">
-                <h6 class="card-category text-gray-500 mb-1">CEO / Co-Founder</h6>
-                <h4 class="text-xl font-bold mb-2">Alec Thompson</h4>
+                <h6 class="card-category text-gray-500 mb-1">
+                  {{ (user?.roles?.length ? user?.roles?.join(' / ') : 'No roles') }}
+                </h6>
+                <h4 class="text-xl font-bold mb-2">
+                  {{ user?.firstName }} {{ user?.lastName }}
+                </h4>
                 <p class="text-gray-600 text-center mb-4">
-                  Don't be scared of the truth because we need to restart the human foundation in truth And I love you like Kanye loves Kanye I love Rick Owens' bed design but the back is...
+                  {{ user?.aboutMe }}
                 </p>
-                <button pButton label="Follow" class="bg-pink-600 text-white px-8 py-2 rounded-full font-semibold shadow-md hover:bg-pink-700 transition-colors" style="background: #e53935; border: none;"></button>
               </div>
             </div>
           </div>

@@ -22,6 +22,8 @@ export class ProfileComponent implements OnInit {
   loading = false;
   error: string | null = null;
   editForm: FormGroup;
+  editMode = false;
+  originalUser: UserReadDto | null = null;
 
   constructor(
     private userService: UserService,
@@ -38,6 +40,7 @@ export class ProfileComponent implements OnInit {
       postalCode: [''],
       aboutMe: ['']
     });
+    this.editForm.disable();
   }
 
   ngOnInit() {
@@ -46,6 +49,10 @@ export class ProfileComponent implements OnInit {
 
   switchTab(tab: string) {
     this.activeTab = tab;
+    if (tab !== 'edit') {
+      this.editMode = false;
+      this.editForm.disable();
+    }
   }
 
   fetchUser() {
@@ -56,8 +63,11 @@ export class ProfileComponent implements OnInit {
         if (this.user) {
           this.editForm.patchValue(this.user);
         }
-        console.log('User data loaded:', this.user);
+        this.editForm.disable();
         this.loading = false;
+        console.log('User data loaded:', this.user);
+        console.log('Loaded roles:', this.user?.roles);
+
       },
       error: (err) => {
         this.error = 'Failed to load user data.';
@@ -71,6 +81,20 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  enableEdit() {
+    this.editMode = true;
+    this.originalUser = this.user ? { ...this.user } : null;
+    this.editForm.enable();
+  }
+
+  onEditButtonClick() {
+    if (!this.editMode) {
+      this.enableEdit();
+    } else {
+      this.onEditSubmit();
+    }
+  }
+
   onEditSubmit() {
     if (this.editForm.valid) {
       this.confirmationService.confirm({
@@ -79,6 +103,15 @@ export class ProfileComponent implements OnInit {
         icon: 'pi pi-exclamation-triangle',
         accept: () => {
           this.updateUser(this.editForm.value);
+          this.editMode = false;
+        },
+        reject: () => {
+          // Revert form to original user data
+          if (this.originalUser) {
+            this.editForm.patchValue(this.originalUser);
+          }
+          this.editForm.disable();
+          this.editMode = false;
         }
       });
     }
@@ -92,6 +125,8 @@ export class ProfileComponent implements OnInit {
         if (this.user) {
           this.editForm.patchValue(this.user);
         }
+        this.editForm.disable();
+        this.editMode = false;
         this.loading = false;
         this.messageService.add({
           severity: 'success',
@@ -115,7 +150,10 @@ export class ProfileComponent implements OnInit {
     this.loading = true;
     this.userService.updateProfileImage(file).subscribe({
       next: (res) => {
-        this.user = res.data;
+        console.log('Profile image updated:', res);
+        if (this.user) {
+            this.user.profileImageUrl = res.data;
+        }
         this.loading = false;
         this.messageService.add({
           severity: 'success',
@@ -156,5 +194,41 @@ export class ProfileComponent implements OnInit {
         });
       }
     });
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Invalid File',
+          detail: 'Please select an image file.'
+        });
+        return;
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'File Too Large',
+          detail: 'Please select an image smaller than 5MB.'
+        });
+        return;
+      }
+      // Show confirmation dialog
+      this.confirmationService.confirm({
+        message: 'Are you sure you want to update your profile image?',
+        header: 'Confirm Image Update',
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+          this.updateProfileImage(file);
+        },
+        reject: () => {
+          // Do nothing, user cancelled
+        }
+      });
+    }
   }
 }
