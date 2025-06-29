@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
+import { SellerLayoutComponent } from './layouts/seller-layout/seller-layout.component';
+import { sellerRoutes } from './features/seller/seller.routes';
 
 export const routes: Routes = [
     // Auth
@@ -30,4 +32,10 @@ export const routes: Routes = [
         path: 'admin',
         component: AdminLayoutComponent
     },
+    // Seller
+    {
+        path: 'seller',
+        component: SellerLayoutComponent,
+        children: sellerRoutes
+    }
 ];
