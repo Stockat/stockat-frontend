@@ -1,3 +1,5 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
 <div class="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
   <!-- Sidebar Tabs -->
   <div class="w-full lg:w-1/4 xl:w-1/5 bg-gray-50 flex flex-col gap-2 p-4 lg:p-8 border-b lg:border-b-0 lg:border-r border-gray-200 min-h-[120px] lg:min-h-screen">
@@ -51,43 +53,40 @@
                 <p class="text-pink-100">Complete your profile</p>
               </div>
               <div class="p-8">
-                <form class="space-y-6">
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <form [formGroup]="editForm" (ngSubmit)="onEditSubmit()" class="space-y-6">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <input pInputText type="text" placeholder="Company (disabled)" class="w-full" disabled />
+                      <input pInputText type="text" placeholder="Username" class="w-full" [value]="user?.userName" disabled />
                     </div>
                     <div>
-                      <input pInputText type="text" placeholder="Username" class="w-full" />
-                    </div>
-                    <div>
-                      <input pInputText type="email" placeholder="Email address" class="w-full" />
+                      <input pInputText type="email" placeholder="Email address" class="w-full" [value]="user?.email" disabled />
                     </div>
                   </div>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <input pInputText type="text" placeholder="First Name" class="w-full" />
+                      <input pInputText type="text" placeholder="First Name" class="w-full" formControlName="firstName" />
                     </div>
                     <div>
-                      <input pInputText type="text" placeholder="Last Name" class="w-full" />
+                      <input pInputText type="text" placeholder="Last Name" class="w-full" formControlName="lastName" />
                     </div>
                   </div>
                   <div>
-                    <input pInputText type="text" placeholder="Address" class="w-full" />
+                    <input pInputText type="text" placeholder="Address" class="w-full" formControlName="address" />
                   </div>
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <input pInputText type="text" placeholder="City" class="w-full" />
+                      <input pInputText type="text" placeholder="City" class="w-full" formControlName="city" />
                     </div>
                     <div>
-                      <input pInputText type="text" placeholder="Country" class="w-full" />
+                      <input pInputText type="text" placeholder="Country" class="w-full" formControlName="country" />
                     </div>
                     <div>
-                      <input pInputText type="text" placeholder="Postal Code" class="w-full" />
+                      <input pInputText type="text" placeholder="Postal Code" class="w-full" formControlName="postalCode" />
                     </div>
                   </div>
                   <div>
                     <label class="block text-gray-700 mb-1">About Me</label>
-                    <textarea pInputTextarea rows="4" placeholder="Lamborghini Mercy, Your chick she so thirsty, I'm in that two seat Lambo." class="w-full"></textarea>
+                    <textarea pInputTextarea rows="4" placeholder="About Me" class="w-full" formControlName="aboutMe"></textarea>
                   </div>
                   <div class="flex justify-end">
                     <button pButton type="submit" label="Update Profile" class="bg-pink-600 text-white px-8 py-2 rounded-lg font-semibold shadow-md hover:bg-pink-700 transition-colors" style="background: #e53935; border: none;"></button>
@@ -99,8 +98,12 @@
           <!-- Profile Card -->
           <div class="w-full xl:w-auto">
             <div class="bg-white rounded-2xl shadow-lg flex flex-col items-center">
-              <div class="-mt-12 mb-4">
-                <img src="./assets/img/faces/marc.jpg" alt="Profile" class="w-28 h-28 rounded-full object-cover shadow-lg border-4 border-white" />
+              <div class="mt-4 mb-4">
+                <img
+                  [src]="user?.profileImageUrl || 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc'"
+                  alt="Profile"
+                  class="w-28 h-28 rounded-full object-cover shadow-lg border-4 border-white"
+                />
               </div>
               <div class="p-6 text-center">
                 <h6 class="card-category text-gray-500 mb-1">CEO / Co-Founder</h6>
