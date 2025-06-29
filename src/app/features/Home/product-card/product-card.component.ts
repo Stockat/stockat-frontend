@@ -15,6 +15,7 @@ import { CurrencyPipe, DatePipe, TitleCasePipe } from '@angular/common';
 import { ProductService } from '../../../core/services/product.service';
 import { ProductFilters } from '../../../core/models/product-models/product-filters';
 import { ProductDto } from '../../../core/models/product-models/productDto';
+import { RouterOutlet } from '@angular/router';
 
 interface City {
   name: string;
@@ -32,6 +33,7 @@ interface City {
     InputNumberModule,
     PaginatorModule,
     CurrencyPipe,
+    RouterOutlet
   ],
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.css',

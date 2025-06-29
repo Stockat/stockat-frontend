@@ -6,23 +6,13 @@ import { ProductDto } from '../models/product-models/productDto';
 import { Router } from '@angular/router';
 import { PaginationDto } from '../models/pagination-Dto';
 import { GenericRequestModel } from '../models/generic-request-Dto';
+import { ProductDetailsDto } from '../models/product-models/ProductDetails';
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService {
   private apiUrl = 'http://localhost:5250/api/Product';
   constructor(private http: HttpClient, private router: Router) {}
-
-  // getAllProductsPAginated(filters: ProductFilters): Observable<ProductDto> {
-
-  //     this.http.get<GenericRequestModel<ProductDto>>(`${this.apiUrl}?${filters}`).subscribe({
-  //       next: (res) => {
-  //         console.log(res);
-  //       },
-  //       error: (err) => observer.error(err),
-  //     });
-  //   };
-  // }
 
   getAllProductsPaginated(filters: ProductFilters): Observable<GenericRequestModel<PaginationDto<ProductDto>>> {
     // Example of setting up filters
@@ -34,6 +24,13 @@ export class ProductService {
     const params = new HttpParams({ fromObject: filters as any });
 
     return this.http.get<GenericRequestModel<PaginationDto<ProductDto>>>(this.apiUrl, { params });
+  }
+
+  getProductsDetails(productId: number): Observable<GenericRequestModel<ProductDetailsDto>> {
+
+    // const params = new HttpParams({ fromObject: productId as any });
+
+    return this.http.get<GenericRequestModel<ProductDetailsDto>>(`${this.apiUrl}/${productId}`);
   }
 
 
