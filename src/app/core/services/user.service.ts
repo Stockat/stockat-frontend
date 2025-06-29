@@ -1,45 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-export interface UserReadDto {
-  id: string;
-  userName: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  address?: string;
-  city?: string;
-  country?: string;
-  postalCode?: string;
-  aboutMe?: string;
-  profileImageUrl?: string;
-  isApproved: boolean;
-  isDeleted: boolean;
-  needsVerification: boolean;
-  roles: string[]; 
-}
-
-
-export interface UserUpdateDto {
-  firstName: string;
-  lastName: string;
-  address?: string;
-  city?: string;
-  country?: string;
-  postalCode?: string;
-  aboutMe?: string;
-}
-
-export interface ChangePasswordDto {
-  currentPassword: string;
-  newPassword: string;
-}
-
-export interface UserImageUpdateDto {
-  profileImage: File;
-}
-
+import { UserUpdateDto } from '../models/user-models/user-update.dto';
+import { ChangePasswordDto } from '../models/user-models/change-password.dto';
+import { UserReadDto } from '../models/user-models/user-read.dto';
+import { TokenDto } from '../models/auth-models/auth-response.dto';
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private apiUrl = 'http://localhost:5250/api/User';

@@ -1,12 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { UserService, UserReadDto, UserUpdateDto, ChangePasswordDto } from '../../core/services/user.service';
+import { UserService } from '../../core/services/user.service';
+import { UserReadDto } from '../../core/models/user-models/user-read.dto';
+import { UserUpdateDto } from '../../core/models/user-models/user-update.dto';
+import { ChangePasswordDto } from '../../core/models/user-models/change-password.dto';
 
 @Component({
   selector: 'app-profile',
@@ -24,6 +27,7 @@ export class ProfileComponent implements OnInit {
   editForm: FormGroup;
   editMode = false;
   originalUser: UserReadDto | null = null;
+  changePasswordForm: FormGroup;
 
   constructor(
     private userService: UserService,
@@ -41,6 +45,10 @@ export class ProfileComponent implements OnInit {
       aboutMe: ['']
     });
     this.editForm.disable();
+    this.changePasswordForm = this.fb.group({
+      currentPassword: ['', Validators.required],
+      newPassword: ['', [Validators.required, Validators.minLength(6)]]
+    });
   }
 
   ngOnInit() {
@@ -230,5 +238,47 @@ export class ProfileComponent implements OnInit {
         }
       });
     }
+  }
+
+  onChangePasswordSubmit() {
+    if (this.changePasswordForm.invalid) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Invalid Input',
+        detail: 'Please fill in both fields. New password must be at least 6 characters.'
+      });
+      return;
+    }
+    const dto = {
+      currentPassword: this.changePasswordForm.value.currentPassword,
+      newPassword: this.changePasswordForm.value.newPassword
+    };
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to change your password?',
+      header: 'Confirm Password Change',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.userService.changePassword(dto).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Password Changed',
+              detail: 'Your password has been changed successfully.'
+            });
+            this.changePasswordForm.reset();
+          },
+          error: (err) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Change Failed',
+              detail: err?.error?.message || 'Failed to change password.'
+            });
+          }
+        });
+      },
+      reject: () => {
+        // Do nothing if cancelled
+      }
+    });
   }
 }

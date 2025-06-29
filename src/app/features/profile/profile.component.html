@@ -15,10 +15,6 @@
       <i class="pi pi-user-edit text-xl"></i>
       Edit User Profile
     </button>
-    <button (click)="switchTab('reset')" [ngClass]="{'bg-primary text-white': activeTab === 'reset', 'bg-white text-gray-700': activeTab !== 'reset'}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors mb-2">
-      <i class="pi pi-key text-xl"></i>
-      Change Password
-    </button>
     <button (click)="switchTab('verify')" [ngClass]="{'bg-primary text-white': activeTab === 'verify', 'bg-white text-gray-700': activeTab !== 'verify'}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors">
       <i class="pi pi-id-card text-xl"></i>
       Verify User Docs
@@ -113,7 +109,7 @@
           <!-- Profile Card -->
           <div class="w-full xl:w-auto">
             <div class="bg-white rounded-2xl shadow-lg flex flex-col items-center">
-              <div class="mt-4 mb-2 relative">
+              <div class="mt-4 mb-4 relative">
                 <img
                   [src]="user?.profileImageUrl || 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc'"
                   alt="Profile"
@@ -129,8 +125,8 @@
                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     style="z-index: 10;"
                   />
-                  <div class="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-30 rounded-full transition-all duration-200 flex items-center justify-center">
-                    <i class="pi pi-camera text-gray text-xl opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                  <div class="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-30 rounded-full transition-all duration-200 flex items-center justify-center">
+                    <i class="pi pi-camera text-white text-xl opacity-0 group-hover:opacity-100 transition-opacity"></i>
                   </div>
                 </div>
               </div>
@@ -145,6 +141,21 @@
                   {{ user?.aboutMe }}
                 </p>
               </div>
+            </div>
+            <!-- Change Password Card -->
+            <div class="bg-white rounded-2xl shadow-lg flex flex-col items-center mt-8 w-full">
+              <form [formGroup]="changePasswordForm" (ngSubmit)="onChangePasswordSubmit()" class="w-full p-6 space-y-4">
+                <h4 class="text-lg font-bold mb-2 text-center">Change Password</h4>
+                <div>
+                  <input pInputText type="password" formControlName="currentPassword" placeholder="Current Password" class="w-full" />
+                </div>
+                <div>
+                  <input pInputText type="password" formControlName="newPassword" placeholder="New Password" class="w-full" />
+                </div>
+                <div class="flex justify-end">
+                  <button pButton type="submit" label="Change Password" class="bg-pink-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-pink-700 transition-colors" style="background: #e53935; border: none;"></button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
