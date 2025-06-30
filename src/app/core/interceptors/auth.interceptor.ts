@@ -45,7 +45,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
       const accessToken = localStorage.getItem('accessToken');
       const refreshToken = localStorage.getItem('refreshToken');
-
+      console.log('Refreshing token...');
       if (!accessToken || !refreshToken) {
         this.isRefreshing = false;
         this.handleLogout();

@@ -1,18 +1,19 @@
-import { Component, OnInit, inject, AfterViewInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { HttpClientModule } from '@angular/common/http';
-import { RouterModule } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { CheckboxModule } from 'primeng/checkbox';
+import { UserService } from '../../../core/services/user.service';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 declare const google: any;
 
@@ -30,31 +31,52 @@ declare const google: any;
     ToastModule,
     CardModule,
     InputGroupModule,
-    CheckboxModule
+    CheckboxModule,
+    ConfirmDialogModule
   ],
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit{
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   loading = false;
   submitted = false;
   error: string | null = null;
   message = '';
   token: string | null = null;
-  private authService = inject(AuthService);
 
-  constructor(private fb: FormBuilder, private router: Router, private messageService: MessageService) {
+  private authService = inject(AuthService);
+  private confirmationService = inject(ConfirmationService);
+  private userService = inject(UserService);
+
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private messageService: MessageService
+  ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
   }
 
-  get f() { return this.loginForm.controls; }
+  get f() {
+    return this.loginForm.controls;
+  }
 
   ngOnInit(): void {
+    // Show deactivation toast if redirected from deactivation
+    if (localStorage.getItem('showDeactivatedToast') === '1') {
+      setTimeout(() => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Account Deactivated',
+          detail: 'Your account has been deactivated.'
+        });
+        localStorage.removeItem('showDeactivatedToast');
+      }, 100);
+    }
     if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
       google.accounts.id.initialize({
         client_id: '788632771940-ra18rrnebhm7co6at9vbg5ktir3kpglv.apps.googleusercontent.com',
@@ -63,16 +85,45 @@ export class LoginComponent implements OnInit{
           if (resp.credential) {
             this.authService.googleLogin(resp.credential).subscribe({
               next: (res: any) => {
-                this.token = res.token?.accessToken || null;
-                if (res.isAuthSuccessful) {
-                  this.messageService.add({severity:'success', summary:'Google Login', detail:'Login successful!'});
+                if (res.isDeleted) {
+                  this.confirmationService.confirm({
+                    message: 'Your account is deactivated. Do you want to reactivate it?',
+                    header: 'Reactivate Account',
+                    icon: 'pi pi-exclamation-triangle',
+                    accept: () => {
+                      this.authService.setTokens(res.token);
+                      this.userService.toggleUserActivation().subscribe({
+                        next: () => {
+                          this.messageService.add({ severity: 'success', summary: 'Account Reactivated', detail: 'Welcome back!' });
+                          this.router.navigate(['/admin']);
+                        },
+                        error: () => {
+                          this.messageService.add({ severity: 'error', summary: 'Reactivation Failed', detail: 'Could not reactivate your account.' });
+                        }
+                      });
+                    },
+                    reject: () => {
+                      this.messageService.add({
+                        severity: 'info',
+                        summary: 'Login Cancelled',
+                        detail: 'You must reactivate your account to log in.'
+                      });
+                    }
+                  });
+                } else if (res.isAuthSuccessful) {
+                  this.authService.setTokens(res.token);
+                  this.messageService.add({ severity: 'success', summary: 'Google Login', detail: 'Login successful!' });
                   this.router.navigate(['/admin']);
                 } else {
-                  this.messageService.add({severity:'error', summary:'Google Login', detail:'Google login failed.'});
+                  this.messageService.add({ severity: 'error', summary: 'Google Login', detail: 'Google login failed.' });
                 }
               },
               error: (err: any) => {
-                this.messageService.add({severity:'error', summary:'Google Login', detail:'Google login failed: ' + (err.error?.title || err.statusText)});
+                this.messageService.add({
+                  severity: 'error',
+                  summary: 'Google Login',
+                  detail: 'Google login failed: ' + (err.error?.title || err.statusText)
+                });
               }
             });
           } else {
@@ -92,6 +143,7 @@ export class LoginComponent implements OnInit{
           logo_alignment: 'left',
           locale: 'en'
         });
+
         setTimeout(() => {
           const googleBtn = btn.querySelector('div');
           if (googleBtn) {
@@ -104,31 +156,63 @@ export class LoginComponent implements OnInit{
     }
   }
 
-
-  onSubmit() {
+  onSubmit(): void {
     this.submitted = true;
     this.error = null;
+
     if (this.loginForm.invalid) return;
+
     this.loading = true;
+
     this.authService.login(this.loginForm.value).subscribe({
-      next: () => {
+      next: (res) => {
         this.loading = false;
-        this.messageService.add({severity:'success', summary:'Login Successful', detail:'Welcome back!'});
-        this.router.navigate(['/admin']);
+
+        if (res.isDeleted) {
+          // Show reactivation confirmation
+          this.confirmationService.confirm({
+            message: 'Your account is deactivated. Do you want to reactivate it?',
+            header: 'Reactivate Account',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+              this.authService.setTokens(res.token);
+
+              this.userService.toggleUserActivation().subscribe({
+                next: () => {
+                  this.messageService.add({ severity: 'success', summary: 'Account Reactivated', detail: 'Welcome back!' });
+                  this.router.navigate(['/admin']);
+                },
+                error: () => {
+                  this.messageService.add({ severity: 'error', summary: 'Reactivation Failed', detail: 'Could not reactivate your account.' });
+                }
+              });
+            },
+            reject: () => {
+              this.messageService.add({
+                severity: 'info',
+                summary: 'Login Cancelled',
+                detail: 'You must reactivate your account to log in.'
+              });
+            }
+          });
+        } else {
+          this.authService.setTokens(res.token);
+          this.messageService.add({ severity: 'success', summary: 'Login Successful', detail: 'Welcome back!' });
+          this.router.navigate(['/admin']);
+        }
       },
       error: (err: any) => {
         this.loading = false;
-        console.log(err);
-        const detail = (typeof err.error === 'string' ? err.error : err.error?.Message) || 'Login failed';
+        const detail = (typeof err.error === 'string' ? err.error : err.error?.message) || 'Wrong email or password';
+
         if (detail === 'Email not confirmed') {
           this.messageService.add({
             severity: 'warn',
             summary: 'Email Not Confirmed',
             detail: 'Please check your inbox and confirm your email before logging in.'
-
           });
         } else {
-          this.messageService.add({severity:'error', summary:'Login Failed', detail});
+          this.messageService.add({ severity: 'error', summary: 'Login Failed', detail });
         }
       }
     });

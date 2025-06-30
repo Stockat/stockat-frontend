@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -10,6 +10,10 @@ import { UserService } from '../../core/services/user.service';
 import { UserReadDto } from '../../core/models/user-models/user-read.dto';
 import { UserUpdateDto } from '../../core/models/user-models/user-update.dto';
 import { ChangePasswordDto } from '../../core/models/user-models/change-password.dto';
+import { UserVerificationCreateDto } from '../../core/models/user-models/user-verification-create.dto';
+import { UserVerificationReadDto } from '../../core/models/user-models/user-verification-read.dto';
+import { UserVerificationUpdateDto } from '../../core/models/user-models/user-verification-update.dto';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-profile',
@@ -28,12 +32,17 @@ export class ProfileComponent implements OnInit {
   editMode = false;
   originalUser: UserReadDto | null = null;
   changePasswordForm: FormGroup;
+  verification: UserVerificationReadDto | null = null;
+  verificationLoading = false;
+  deactivateLoading = false;
+  verifyForm: FormGroup;
 
   constructor(
     private userService: UserService,
     private fb: FormBuilder,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private authService: AuthService
   ) {
     this.editForm = this.fb.group({
       firstName: [''],
@@ -49,10 +58,16 @@ export class ProfileComponent implements OnInit {
       currentPassword: ['', Validators.required],
       newPassword: ['', [Validators.required, Validators.minLength(6)]]
     });
+    this.verifyForm = this.fb.group({
+      nationalId: ['', [Validators.required, Validators.pattern(/^[2-3]\d{13}$/)]],
+      image: [null],
+      imagePreview: ['']
+    });
   }
 
   ngOnInit() {
     this.fetchUser();
+    this.fetchUserVerification();
   }
 
   switchTab(tab: string) {
@@ -60,6 +75,9 @@ export class ProfileComponent implements OnInit {
     if (tab !== 'edit') {
       this.editMode = false;
       this.editForm.disable();
+    }
+    if (tab === 'verify') {
+      this.fetchUserVerification();
     }
   }
 
@@ -85,6 +103,30 @@ export class ProfileComponent implements OnInit {
           summary: 'Load Failed',
           detail: 'Failed to load user data.'
         });
+      }
+    });
+  }
+
+  fetchUserVerification() {
+    // this.verificationLoading = true;
+    this.userService.getUserVerification().subscribe({
+      next: (res) => {
+        this.verification = res.data;
+        // this.verificationLoading = false;
+        if (this.verification) {
+          this.verifyForm.patchValue({
+            nationalId: this.verification.nationalId,
+            image: null,
+            imagePreview: ''
+          });
+        } else {
+          this.verifyForm.reset();
+        }
+      },
+      error: (err) => {
+        this.verification = null;
+        // this.verificationLoading = false;
+        this.verifyForm.reset();
       }
     });
   }
@@ -280,5 +322,124 @@ export class ProfileComponent implements OnInit {
         // Do nothing if cancelled
       }
     });
+  }
+
+  createUserVerification(form: FormGroup) {
+    if (form.invalid) {
+      this.messageService.add({ severity: 'warn', summary: 'Invalid Input', detail: 'Please fill in all fields and upload an image.' });
+      return;
+    }
+    const dto: UserVerificationCreateDto = {
+      nationalId: form.value.nationalId,
+      image: form.value.image
+    };
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to submit your verification documents?',
+      header: 'Confirm Verification',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        // this.verificationLoading = true;
+        this.userService.createUserVerification(dto).subscribe({
+          next: (res) => {
+            this.messageService.add({ severity: 'success', summary: 'Submitted', detail: 'Verification submitted successfully.' });
+            this.fetchUserVerification();
+            form.reset();
+            // this.verificationLoading = false;
+          },
+          error: (err) => {
+            this.messageService.add({ severity: 'error', summary: 'Failed', detail: err?.error?.message || 'Failed to submit verification.' });
+            // this.verificationLoading = false;
+          }
+        });
+      }
+    });
+  }
+
+  updateUserVerification(form: FormGroup) {
+    if (form.invalid) {
+      this.messageService.add({ severity: 'warn', summary: 'Invalid Input', detail: 'Please fill in all fields.' });
+      return;
+    }
+    const dto: UserVerificationUpdateDto = {
+      nationalId: form.value.nationalId,
+      image: form.value.image
+    };
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to update your verification documents?',
+      header: 'Confirm Update',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        // this.verificationLoading = true;
+        this.userService.updateUserVerification(dto).subscribe({
+          next: (res) => {
+            this.messageService.add({ severity: 'success', summary: 'Updated', detail: 'Verification updated successfully.' });
+            this.fetchUserVerification();
+            form.reset();
+            // this.verificationLoading = false;
+          },
+          error: (err) => {
+            this.messageService.add({ severity: 'error', summary: 'Failed', detail: err?.error?.message || 'Failed to update verification.' });
+            // this.verificationLoading = false;
+          }
+        });
+      }
+    });
+  }
+
+  deleteUserVerification() {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to delete your verification entry?',
+      header: 'Confirm Delete',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        // this.verificationLoading = true;
+        this.userService.deleteUserVerification().subscribe({
+          next: (res) => {
+            this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Verification entry deleted.' });
+            this.fetchUserVerification();
+            // this.verificationLoading = false;
+          },
+          error: (err) => {
+            this.messageService.add({ severity: 'error', summary: 'Failed', detail: err?.error?.message || 'Failed to delete verification.' });
+            // this.verificationLoading = false;
+          }
+        });
+      }
+    });
+  }
+
+  deactivateUser() {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to deactivate your account? This action cannot be undone.',
+      header: 'Confirm Deactivation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.deactivateLoading = true;
+        this.userService.toggleUserActivation().subscribe({
+          next: (res) => {
+            this.authService.clearTokens();
+            localStorage.setItem('showDeactivatedToast', '1');
+            window.location.href = '/login';
+            this.deactivateLoading = false;
+          },
+          error: (err) => {
+            this.messageService.add({ severity: 'error', summary: 'Failed', detail: err?.error?.message || 'Failed to deactivate account.' });
+            this.deactivateLoading = false;
+          }
+        });
+      }
+    });
+  }
+
+  onVerifyImageSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.verifyForm.patchValue({ image: file });
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.verifyForm.patchValue({ imagePreview: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
   }
 }
