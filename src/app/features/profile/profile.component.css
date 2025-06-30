@@ -1,0 +1,6 @@
+.bg-primary {
+  @apply bg-blue-600;
+}
+.text-primary {
+  @apply text-blue-600;
+}
