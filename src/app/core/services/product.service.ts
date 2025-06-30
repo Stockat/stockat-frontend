@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { map, Observable } from 'rxjs';
 import { ProductFilters } from '../models/product-models/product-filters';
 import { ProductDto } from '../models/product-models/productDto';
 import { Router } from '@angular/router';
@@ -32,6 +32,7 @@ export class ProductService {
 
     return this.http.get<GenericRequestModel<ProductDetailsDto>>(`${this.apiUrl}/${productId}`);
   }
+
 
 
 //! End Of Service
