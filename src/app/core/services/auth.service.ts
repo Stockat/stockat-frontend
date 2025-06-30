@@ -27,9 +27,7 @@ export class AuthService {
     return new Observable<AuthResponseDto>(observer => {
       this.http.post<AuthResponseDto>(`${this.apiUrl}/login`, data).subscribe({
         next: (res) => {
-          if (res.token) {
-            this.setTokens(res.token);
-          }
+          console.log(res); 
           observer.next(res);
           observer.complete();
         },
@@ -42,9 +40,6 @@ export class AuthService {
     return new Observable<AuthResponseDto>(observer => {
       this.http.post<AuthResponseDto>(`${this.apiUrl}/googleLogin`, { provider: 'GOOGLE', idToken }).subscribe({
         next: (res) => {
-          if (res.token) {
-            this.setTokens(res.token);
-          }
           observer.next(res);
           observer.complete();
         },
