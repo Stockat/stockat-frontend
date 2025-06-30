@@ -2,19 +2,18 @@ import { Routes } from '@angular/router';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
+import { SellerLayoutComponent } from './layouts/seller-layout/seller-layout.component';
+import { sellerRoutes } from './features/seller/seller.routes';
 import { ProductCardComponent } from './features/Home/product-card/product-card.component';
 import { ProductDetailsComponent } from './features/ProductDetails/product-details/product-details.component';
 
 export const routes: Routes = [
-  // Anonymous routes
-
   {
     path: '',
-    component: ProductCardComponent,children: [
-
-    ]
+    component: ProductCardComponent,
+    children: [],
   },
-  {path:"ProductDetails/:id", component:ProductDetailsComponent },
+  { path: 'ProductDetails/:id', component: ProductDetailsComponent },
   // Auth
   {
     path: 'login',
@@ -62,5 +61,11 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: AdminLayoutComponent,
+  },
+  // Seller
+  {
+    path: 'seller',
+    component: SellerLayoutComponent,
+    children: sellerRoutes,
   },
 ];

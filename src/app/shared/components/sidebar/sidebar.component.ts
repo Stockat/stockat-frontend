@@ -6,16 +6,20 @@ import { PanelMenuModule } from 'primeng/panelmenu';
 import { MenuItem } from 'primeng/api';
 import { BadgeModule } from 'primeng/badge';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+
 
 
 @Component({
   selector: 'app-sidebar',
-  imports: [CommonModule,DrawerModule,AvatarModule,ButtonModule,PanelMenuModule,BadgeModule],
+  imports: [CommonModule, DrawerModule, AvatarModule, ButtonModule, PanelMenuModule, BadgeModule, RouterModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css'
 })
 
 export class SidebarComponent {
+
+
 
   @Input() visible:boolean = false;
   @Input() items:MenuItem[] = [];
