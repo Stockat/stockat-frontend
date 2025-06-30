@@ -1,0 +1,45 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-white/20 to-black/20">
+  <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md relative animate-fade-in">
+    <button class="absolute top-3 right-3 text-gray-500 hover:text-gray-800" (click)="handleClose()">✕</button>
+
+    <h2 class="text-2xl font-bold mb-4">Request This Service</h2>
+
+    <form [formGroup]="requestForm" (ngSubmit)="submitRequest()" class="space-y-4">
+      <div>
+        <label class="block font-medium mb-1">Quantity</label>
+        <input
+          formControlName="requestedQuantity"
+          type="number"
+          class="w-full border rounded-lg px-3 py-2"
+          [class.border-red-500]="requestForm.get('requestedQuantity')?.invalid && requestForm.get('requestedQuantity')?.touched"
+          [min]="minQuantity"
+        />
+        <div *ngIf="requestForm.get('requestedQuantity')?.invalid && requestForm.get('requestedQuantity')?.touched" class="text-red-500 text-sm mt-1">
+          <span *ngIf="requestForm.get('requestedQuantity')?.errors?.['required']">Quantity is required</span>
+          <span *ngIf="requestForm.get('requestedQuantity')?.errors?.['min']">Quantity must be at least {{minQuantity}}</span>
+          <span *ngIf="requestForm.get('requestedQuantity')?.errors?.['pattern']">Please enter a valid number</span>
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1">Description</label>
+        <textarea
+          formControlName="requestDescription"
+          rows="4"
+          class="w-full border rounded-lg px-3 py-2"
+          [class.border-red-500]="requestForm.get('requestDescription')?.invalid && requestForm.get('requestDescription')?.touched"
+        ></textarea>
+        <div *ngIf="requestForm.get('requestDescription')?.invalid && requestForm.get('requestDescription')?.touched" class="text-red-500 text-sm mt-1">
+          <span *ngIf="requestForm.get('requestDescription')?.errors?.['required']">Description is required</span>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full"
+      >
+        Send Request
+      </button>
+    </form>
+  </div>
+</div>

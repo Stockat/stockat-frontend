@@ -30,4 +30,9 @@ export const routes: Routes = [
         path: 'admin',
         component: AdminLayoutComponent
     },
+    // Services
+    {
+      path: 'services',
+      loadChildren: () => import('./features/service/service.module').then(m => m.ServiceModule)
+    }
 ];

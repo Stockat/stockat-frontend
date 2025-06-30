@@ -1,0 +1,30 @@
+<!-- all-services.component.html -->
+<div class="p-8 bg-gray-50 min-h-screen">
+  <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">All Available Services</h2>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div
+      *ngFor="let service of services"
+      class="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-lg transition-shadow p-7 flex flex-col items-stretch"
+    >
+      <img
+        [src]="service.imageUrl || 'https://via.placeholder.com/400x200?text=No+Image'"
+        alt="Service Image"
+        class="rounded-lg w-full h-48 object-cover mb-4"
+      />
+
+      <div class="space-y-2 flex-1">
+        <h3 class="text-xl font-semibold text-gray-800">{{ service.name }}</h3>
+        <p class="text-gray-600 text-sm">{{ service.description }}</p>
+        <p class="text-base font-medium text-blue-700 mt-2">Price: ${{ service.pricePerProduct }}</p>
+      </div>
+
+      <a
+        [routerLink]="['/services', service.id]"
+        class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold w-full text-center transition-colors duration-150"
+      >
+        View Details
+      </a>
+    </div>
+  </div>
+</div>

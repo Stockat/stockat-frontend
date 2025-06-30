@@ -5,8 +5,10 @@ import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SocialLoginModule, SocialAuthServiceConfig } from '@abacritt/angularx-social-login';
 import { GoogleLoginProvider } from '@abacritt/angularx-social-login';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 import { AppComponent } from './app.component';
+import { ServiceModule } from './features/service/service.module';
 
 @NgModule({
   imports: [
@@ -14,7 +16,8 @@ import { AppComponent } from './app.component';
     CommonModule,
     HttpClientModule,
     ReactiveFormsModule,
-    SocialLoginModule
+    SocialLoginModule,
+    ServiceModule
     // import your AuthModule or feature modules here if needed
   ],
   providers: [
@@ -32,6 +35,7 @@ import { AppComponent } from './app.component';
         ]
       } as SocialAuthServiceConfig,
     },
+
   ]
 })
 export class AppModule { }
