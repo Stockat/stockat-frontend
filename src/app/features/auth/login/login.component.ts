@@ -57,7 +57,11 @@ export class LoginComponent implements OnInit {
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required]
+      password: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/)
+      ]]
     });
   }
 
@@ -75,7 +79,18 @@ export class LoginComponent implements OnInit {
           detail: 'Your account has been deactivated.'
         });
         localStorage.removeItem('showDeactivatedToast');
-      }, 100);
+      }, 2000);
+    }
+    // Show registration success toast if redirected from registration
+    if (localStorage.getItem('showRegistrationSuccessToast') === '1') {
+      setTimeout(() => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Registration Successful',
+          detail: 'Please check your email and verify your account before logging in.'
+        });
+        localStorage.removeItem('showRegistrationSuccessToast');
+      }, 5000);
     }
     if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
       google.accounts.id.initialize({

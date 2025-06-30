@@ -36,6 +36,8 @@ export class ProfileComponent implements OnInit {
   verificationLoading = false;
   deactivateLoading = false;
   verifyForm: FormGroup;
+  changePasswordLoading = false;
+  submitted = false;
 
   constructor(
     private userService: UserService,
@@ -45,8 +47,10 @@ export class ProfileComponent implements OnInit {
     private authService: AuthService
   ) {
     this.editForm = this.fb.group({
-      firstName: [''],
-      lastName: [''],
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      phoneNumber: ['', Validators.required],
       address: [''],
       city: [''],
       country: [''],
@@ -295,6 +299,7 @@ export class ProfileComponent implements OnInit {
       currentPassword: this.changePasswordForm.value.currentPassword,
       newPassword: this.changePasswordForm.value.newPassword
     };
+    this.changePasswordLoading = true;
     this.confirmationService.confirm({
       message: 'Are you sure you want to change your password?',
       header: 'Confirm Password Change',
@@ -308,6 +313,7 @@ export class ProfileComponent implements OnInit {
               detail: 'Your password has been changed successfully.'
             });
             this.changePasswordForm.reset();
+            this.changePasswordLoading = false;
           },
           error: (err) => {
             this.messageService.add({
@@ -315,16 +321,18 @@ export class ProfileComponent implements OnInit {
               summary: 'Change Failed',
               detail: err?.error?.message || 'Failed to change password.'
             });
+            this.changePasswordLoading = false;
           }
         });
       },
       reject: () => {
-        // Do nothing if cancelled
+        this.changePasswordLoading = false;
       }
     });
   }
 
   createUserVerification(form: FormGroup) {
+    this.submitted = true;
     if (form.invalid) {
       this.messageService.add({ severity: 'warn', summary: 'Invalid Input', detail: 'Please fill in all fields and upload an image.' });
       return;
@@ -338,17 +346,17 @@ export class ProfileComponent implements OnInit {
       header: 'Confirm Verification',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        // this.verificationLoading = true;
+        this.verificationLoading = true;
         this.userService.createUserVerification(dto).subscribe({
           next: (res) => {
             this.messageService.add({ severity: 'success', summary: 'Submitted', detail: 'Verification submitted successfully.' });
             this.fetchUserVerification();
             form.reset();
-            // this.verificationLoading = false;
+            this.verificationLoading = false;
           },
           error: (err) => {
             this.messageService.add({ severity: 'error', summary: 'Failed', detail: err?.error?.message || 'Failed to submit verification.' });
-            // this.verificationLoading = false;
+            this.verificationLoading = false;
           }
         });
       }
@@ -369,17 +377,17 @@ export class ProfileComponent implements OnInit {
       header: 'Confirm Update',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        // this.verificationLoading = true;
+        this.verificationLoading = true;
         this.userService.updateUserVerification(dto).subscribe({
           next: (res) => {
             this.messageService.add({ severity: 'success', summary: 'Updated', detail: 'Verification updated successfully.' });
             this.fetchUserVerification();
             form.reset();
-            // this.verificationLoading = false;
+            this.verificationLoading = false;
           },
           error: (err) => {
             this.messageService.add({ severity: 'error', summary: 'Failed', detail: err?.error?.message || 'Failed to update verification.' });
-            // this.verificationLoading = false;
+            this.verificationLoading = false;
           }
         });
       }
@@ -392,16 +400,16 @@ export class ProfileComponent implements OnInit {
       header: 'Confirm Delete',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        // this.verificationLoading = true;
+        this.verificationLoading = true;
         this.userService.deleteUserVerification().subscribe({
           next: (res) => {
             this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Verification entry deleted.' });
             this.fetchUserVerification();
-            // this.verificationLoading = false;
+            this.verificationLoading = false;
           },
           error: (err) => {
             this.messageService.add({ severity: 'error', summary: 'Failed', detail: err?.error?.message || 'Failed to delete verification.' });
-            // this.verificationLoading = false;
+            this.verificationLoading = false;
           }
         });
       }

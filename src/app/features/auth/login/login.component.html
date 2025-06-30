@@ -9,7 +9,12 @@
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
       <label for="email">Email</label>
       <input pInputText id="email" formControlName="email" placeholder="Email" type="email" class="login-input" />
-       <label for="password">Password</label>
+      <div *ngIf="submitted && loginForm.controls['email'].errors" class="text-red-500 text-xs mt-1">
+        <div *ngIf="loginForm.controls['email'].errors['required']">Email is required.</div>
+        <div *ngIf="loginForm.controls['email'].errors['email']">Invalid email format.</div>
+        <div *ngIf="loginForm.controls['email'].errors['server']">{{ loginForm.controls['email'].errors['server'] }}</div>
+      </div>
+      <label for="password">Password</label>
       <p-password
         id="password"
         formControlName="password"
@@ -19,6 +24,12 @@
         [inputStyle]="{ fontSize: '1rem' }"
         styleClass="login-input">
       </p-password>
+      <div *ngIf="submitted && loginForm.controls['password'].errors" class="text-red-500 text-xs mt-1">
+        <div *ngIf="loginForm.controls['password'].errors['required']">Password is required.</div>
+        <div *ngIf="loginForm.controls['password'].errors['minlength']">Password must be at least 8 characters.</div>
+        <div *ngIf="loginForm.controls['password'].errors['pattern']">Password must contain uppercase, lowercase, number, and special character.</div>
+        <div *ngIf="loginForm.controls['password'].errors['server']">{{ loginForm.controls['password'].errors['server'] }}</div>
+      </div>
       <div class="login-options">
         <span></span>
         <a routerLink="/forgot-password" class="forgot-link">Forgot your password?</a>

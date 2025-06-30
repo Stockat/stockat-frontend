@@ -74,9 +74,17 @@
                       <input pInputText type="text" placeholder="Last Name" class="w-full" formControlName="lastName" [readonly]="!editMode" />
                     </div>
                   </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <input pInputText type="text" placeholder="Phone Number" class="w-full" formControlName="phoneNumber" [readonly]="!editMode" />
+                      <div *ngIf="editForm.get('phoneNumber')?.invalid && (editForm.get('phoneNumber')?.dirty || editForm.get('phoneNumber')?.touched)" class="text-red-500 text-xs mt-1">
+                        <div *ngIf="editForm.get('phoneNumber')?.errors?.['required']">Phone number is required.</div>
+                      </div>
+                    </div>
                   <div>
                     <input pInputText type="text" placeholder="Address" class="w-full" formControlName="address" [readonly]="!editMode" />
                   </div>
+                </div>
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <input pInputText type="text" placeholder="City" class="w-full" formControlName="city" [readonly]="!editMode" />
@@ -100,6 +108,8 @@
                       class="bg-pink-600 text-white px-8 py-2 rounded-lg font-semibold shadow-md hover:bg-pink-700 transition-colors"
                       style="background: #e53935; border: none;"
                       (click)="onEditButtonClick()"
+                      [loading]="loading"
+                      [disabled]="loading"
                     ></button>
                   </div>
                 </form>
@@ -153,7 +163,7 @@
                   <input pInputText type="password" formControlName="newPassword" placeholder="New Password" class="w-full" />
                 </div>
                 <div class="flex justify-end">
-                  <button pButton type="submit" label="Change Password" class="bg-pink-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-pink-700 transition-colors" style="background: #e53935; border: none;"></button>
+                  <button pButton type="submit" label="Change Password" class="bg-pink-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-pink-700 transition-colors" style="background: #e53935; border: none;" [loading]="changePasswordLoading" [disabled]="changePasswordLoading"></button>
                 </div>
               </form>
             </div>
@@ -168,107 +178,104 @@
         </div>
       </div>
       <div *ngIf="activeTab === 'verify'">
-        <div *ngIf="verificationLoading" class="flex justify-center items-center py-8">
-          <i class="pi pi-spin pi-spinner text-3xl text-pink-600"></i>
-        </div>
-        <div *ngIf="!verificationLoading">
-          <!-- No verification entry -->
-          <div *ngIf="!verification">
-            <div class="mb-8 flex justify-center">
-              <div class="flex items-center gap-3 bg-yellow-100 text-yellow-800 rounded-xl shadow px-8 py-4 text-lg font-semibold">
-                <i class="pi pi-exclamation-triangle text-2xl"></i>
-                <span>You need to verify your docs!</span>
-              </div>
-            </div>
-            <div class="bg-white rounded-2xl shadow-lg max-w-lg mx-auto flex flex-col">
-              <div class="bg-pink-700 rounded-t-2xl px-8 py-6">
-                <h4 class="text-white text-2xl font-bold">Verify User Docs</h4>
-                <p class="text-pink-100">Submit your document for verification</p>
-              </div>
-              <form [formGroup]="verifyForm" (ngSubmit)="createUserVerification(verifyForm)" class="flex flex-col gap-6 items-center p-8">
-                <div class="w-full flex flex-col items-center">
-                  <label class="text-lg font-semibold text-gray-700 mb-2">Upload Document Image</label>
-                  <label class="w-64 h-64 flex flex-col items-center justify-center border-4 border-dashed border-pink-300 rounded-lg cursor-pointer hover:bg-pink-50 transition mb-2 relative">
-                    <input type="file" accept="image/*" (change)="onVerifyImageSelected($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                    <ng-container *ngIf="!verifyForm.value.imagePreview">
-                      <i class="pi pi-camera text-4xl text-pink-400 mb-2"></i>
-                      <span class="text-gray-400">Click or drag to upload</span>
-                    </ng-container>
-                    <ng-container *ngIf="verifyForm.value.imagePreview">
-                      <img [src]="verifyForm.value.imagePreview" alt="Preview" class="w-full h-full object-cover rounded-lg" />
-                    </ng-container>
-                  </label>
-                  <span *ngIf="verifyForm.value.image" class="text-xs text-gray-500 mt-1">{{ verifyForm.value.image.name }}</span>
-                </div>
-                <div class="w-full">
-                  <label class="block text-gray-700 mb-2 font-semibold">National ID</label>
-                  <input pInputText type="text" formControlName="nationalId" placeholder="Enter your National ID" class="w-full" />
-                </div>
-                <button pButton type="submit" label="Submit for Verification" class="bg-pink-600 text-white px-8 py-2 rounded-lg font-semibold shadow-md hover:bg-pink-700 transition-colors w-full" [disabled]="verificationLoading"></button>
-              </form>
+        <div *ngIf="!verification">
+          <div class="mb-8 flex justify-center">
+            <div class="flex items-center gap-3 bg-yellow-100 text-yellow-800 rounded-xl shadow px-8 py-4 text-lg font-semibold">
+              <i class="pi pi-exclamation-triangle text-2xl"></i>
+              <span>You need to verify your docs!</span>
             </div>
           </div>
-          <!-- Verification entry exists -->
-          <div *ngIf="verification" class="bg-white rounded-2xl shadow-lg max-w-4xl mx-auto flex flex-col relative">
-            <!-- Spinner Overlay -->
-            <div *ngIf="verificationLoading" class="absolute inset-0 bg-white bg-opacity-60 z-10 flex items-center justify-center rounded-2xl">
-              <i class="pi pi-spin pi-spinner text-4xl text-pink-600"></i>
-            </div>
-            <!-- Card Header -->
+          <div class="bg-white rounded-2xl shadow-lg max-w-lg mx-auto flex flex-col">
             <div class="bg-pink-700 rounded-t-2xl px-8 py-6">
-              <h4 class="text-white text-2xl font-bold">Docs Verification</h4>
-              <p class="text-pink-100">Manage your document verification</p>
+              <h4 class="text-white text-2xl font-bold">Verify User Docs</h4>
+              <p class="text-pink-100">Submit your document for verification</p>
             </div>
-            <!-- Card Content -->
-            <div class="flex flex-col xl:flex-row gap-8 p-8">
-              <!-- Summary Card -->
-              <div class="flex-1 flex flex-col items-center mb-4 xl:mb-0">
-                <span class="text-lg font-semibold text-gray-700 mb-1">Current Document</span>
-                <img [src]="verification.imageURL" alt="Document" class="w-64 h-64 object-cover rounded-lg border-4 border-pink-200 shadow-lg mb-2" />
-                <span class="text-lg font-semibold">National ID: <span class="font-mono">{{ verification.nationalId }}</span></span>
-                <span class="flex items-center gap-2 ">
-                  <span [ngClass]="{
-                    'bg-yellow-100 text-yellow-800': verification.status === 'Pending',
-                    'bg-green-100 text-green-800': verification.status === 'Approved',
-                    'bg-red-100 text-red-800': verification.status === 'Rejected'
-                  }" class="px-3 py-1 rounded-full text-xs font-bold">
-                    {{ verification.status }}
-                  </span>
-                </span>
-                <span class="text-gray-400 text-sm">Created: {{ verification.createdAt ? (verification.createdAt | date:'medium') : 'N/A' }}</span>
-                <span *ngIf="verification.updatedAt" class="text-gray-400 text-sm">Updated: {{ verification.updatedAt ? (verification.updatedAt | date:'medium') : 'N/A' }}</span>
-                <button pButton type="button" label="Delete" class="mt-6 bg-red-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-red-700 transition-colors w-full" (click)="deleteUserVerification()" [disabled]="verificationLoading"></button>
+            <form [formGroup]="verifyForm" (ngSubmit)="createUserVerification(verifyForm)" class="flex flex-col gap-6 items-center p-8">
+              <div class="w-full flex flex-col items-center">
+                <label class="text-lg font-semibold text-gray-700 mb-2">Upload Document Image</label>
+                <label class="w-64 h-64 flex flex-col items-center justify-center border-4 border-dashed border-pink-300 rounded-lg cursor-pointer hover:bg-pink-50 transition mb-2 relative">
+                  <input type="file" accept="image/*" (change)="onVerifyImageSelected($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <ng-container *ngIf="!verifyForm.value.imagePreview">
+                    <i class="pi pi-camera text-4xl text-pink-400 mb-2"></i>
+                    <span class="text-gray-400">Click or drag to upload</span>
+                  </ng-container>
+                  <ng-container *ngIf="verifyForm.value.imagePreview">
+                    <img [src]="verifyForm.value.imagePreview" alt="Preview" class="w-full h-full object-cover rounded-lg" />
+                  </ng-container>
+                </label>
+                <span *ngIf="verifyForm.value.image" class="text-xs text-gray-500 mt-1">{{ verifyForm.value.image.name }}</span>
               </div>
-              <!-- Update Form -->
-              <form [formGroup]="verifyForm" (ngSubmit)="updateUserVerification(verifyForm)" class="flex-1 flex flex-col gap-6 items-center">
-                <div class="w-full flex flex-col items-center">
-                  <label class="text-lg font-semibold text-gray-700 mb-2">Update Document</label>
-                  <label class="w-64 h-64 flex flex-col items-center justify-center border-4 border-dashed border-pink-300 rounded-lg cursor-pointer hover:bg-pink-50 transition mb-2 relative">
-                    <input type="file" accept="image/*" (change)="onVerifyImageSelected($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                    <ng-container *ngIf="!verifyForm.value.imagePreview">
-                      <i class="pi pi-camera text-4xl text-pink-400 mb-2"></i>
-                      <span class="text-gray-400">Click or drag to upload</span>
-                    </ng-container>
-                    <ng-container *ngIf="verifyForm.value.imagePreview">
-                      <img [src]="verifyForm.value.imagePreview" alt="Preview" class="w-full h-full object-cover rounded-lg" />
-                    </ng-container>
-                  </label>
-                  <span *ngIf="verifyForm.value.image" class="text-xs text-gray-500 mt-1">{{ verifyForm.value.image.name }}</span>
+              <div class="w-full">
+                <label class="block text-gray-700 mb-2 font-semibold">National ID</label>
+                <input pInputText type="text" formControlName="nationalId" placeholder="Enter your National ID" class="w-full" />
+                <div *ngIf="(submitted || verifyForm.get('nationalId')?.dirty || verifyForm.get('nationalId')?.touched) && verifyForm.get('nationalId')?.invalid" class="text-red-500 text-xs mt-1">
+                  <div *ngIf="verifyForm.get('nationalId')?.errors?.['required']">National ID is required.</div>
+                  <div *ngIf="verifyForm.get('nationalId')?.errors?.['pattern']">National ID must start with 2 or 3 and be 14 digits.</div>
                 </div>
-                <div class="w-full">
-                  <label class="block text-gray-700 mb-2 font-semibold">Update National ID</label>
-                  <input pInputText type="text" formControlName="nationalId" placeholder="Update your National ID" class="w-full" />
-                </div>
-                <div class="flex gap-2 justify-end w-full">
-                  <button pButton type="submit" label="Update" class="bg-pink-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-pink-700 transition-colors" [disabled]="verificationLoading"></button>
-                </div>
-              </form>
-            </div>
+              </div>
+              <button pButton type="submit" label="Submit for Verification" class="bg-pink-600 text-white px-8 py-2 rounded-lg font-semibold shadow-md hover:bg-pink-700 transition-colors w-full" [loading]="verificationLoading" [disabled]="verificationLoading"></button>
+            </form>
           </div>
         </div>
-        <!-- Deactivate Account Button -->
+        <!-- Verification entry exists -->
+        <div *ngIf="verification" class="bg-white rounded-2xl shadow-lg max-w-4xl mx-auto flex flex-col relative">
+          <!-- Card Header -->
+          <div class="bg-pink-700 rounded-t-2xl px-8 py-6">
+            <h4 class="text-white text-2xl font-bold">Docs Verification</h4>
+            <p class="text-pink-100">Manage your document verification</p>
+          </div>
+          <!-- Card Content -->
+          <div class="flex flex-col xl:flex-row gap-8 p-8">
+            <!-- Summary Card -->
+            <div class="flex-1 flex flex-col items-center mb-4 xl:mb-0">
+              <span class="text-lg font-semibold text-gray-700 mb-1">Current Document</span>
+              <img [src]="verification.imageURL" alt="Document" class="w-64 h-64 object-cover rounded-lg border-4 border-pink-200 shadow-lg mb-2" />
+              <span class="text-lg font-semibold">National ID: <span class="font-mono">{{ verification.nationalId }}</span></span>
+              <span class="flex items-center gap-2 ">
+                <span [ngClass]="{
+                  'bg-yellow-100 text-yellow-800': verification.status === 'Pending',
+                  'bg-green-100 text-green-800': verification.status === 'Approved',
+                  'bg-red-100 text-red-800': verification.status === 'Rejected'
+                }" class="px-3 py-1 rounded-full text-xs font-bold">
+                  {{ verification.status }}
+                </span>
+              </span>
+              <span class="text-gray-400 text-sm">Created: {{ verification.createdAt ? (verification.createdAt | date:'medium') : 'N/A' }}</span>
+              <span *ngIf="verification.updatedAt" class="text-gray-400 text-sm">Updated: {{ verification.updatedAt ? (verification.updatedAt | date:'medium') : 'N/A' }}</span>
+              <button pButton type="button" label="Delete" class="mt-6 bg-red-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-red-700 transition-colors w-full" (click)="deleteUserVerification()" [loading]="verificationLoading" [disabled]="verificationLoading"></button>
+            </div>
+            <!-- Update Form -->
+            <form [formGroup]="verifyForm" (ngSubmit)="updateUserVerification(verifyForm)" class="flex-1 flex flex-col gap-6 items-center">
+              <div class="w-full flex flex-col items-center">
+                <label class="text-lg font-semibold text-gray-700 mb-2">Update Document</label>
+                <label class="w-64 h-64 flex flex-col items-center justify-center border-4 border-dashed border-pink-300 rounded-lg cursor-pointer hover:bg-pink-50 transition mb-2 relative">
+                  <input type="file" accept="image/*" (change)="onVerifyImageSelected($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <ng-container *ngIf="!verifyForm.value.imagePreview">
+                    <i class="pi pi-camera text-4xl text-pink-400 mb-2"></i>
+                    <span class="text-gray-400">Click or drag to upload</span>
+                  </ng-container>
+                  <ng-container *ngIf="verifyForm.value.imagePreview">
+                    <img [src]="verifyForm.value.imagePreview" alt="Preview" class="w-full h-full object-cover rounded-lg" />
+                  </ng-container>
+                </label>
+                <span *ngIf="verifyForm.value.image" class="text-xs text-gray-500 mt-1">{{ verifyForm.value.image.name }}</span>
+              </div>
+              <div class="w-full">
+                <label class="block text-gray-700 mb-2 font-semibold">Update National ID</label>
+                <input pInputText type="text" formControlName="nationalId" placeholder="Update your National ID" class="w-full" />
+                <div *ngIf="(submitted || verifyForm.get('nationalId')?.dirty || verifyForm.get('nationalId')?.touched) && verifyForm.get('nationalId')?.invalid" class="text-red-500 text-xs mt-1">
+                  <div *ngIf="verifyForm.get('nationalId')?.errors?.['required']">National ID is required.</div>
+                  <div *ngIf="verifyForm.get('nationalId')?.errors?.['pattern']">National ID must start with 2 or 3 and be 14 digits.</div>
+                </div>
+              </div>
+              <div class="flex gap-2 justify-end w-full">
+                <button pButton type="submit" label="Update" class="bg-pink-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-pink-700 transition-colors" [loading]="verificationLoading" [disabled]="verificationLoading"></button>
+              </div>
+            </form>
+          </div>
+        </div>
         <div class="flex justify-center mt-8">
-          <button pButton type="button" label="Deactivate Account" class="bg-gray-700 text-white px-8 py-2 rounded-lg font-semibold shadow-md hover:bg-gray-900 transition-colors" (click)="deactivateUser()" [disabled]="deactivateLoading"></button>
+          <button pButton type="button" label="Deactivate Account" class="bg-gray-700 text-white px-8 py-2 rounded-lg font-semibold shadow-md hover:bg-gray-900 transition-colors" (click)="deactivateUser()" [loading]="deactivateLoading" [disabled]="deactivateLoading"></button>
         </div>
       </div>
     </div>
