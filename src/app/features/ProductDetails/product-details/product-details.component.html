@@ -1,0 +1,105 @@
+<!-- <p>product-details works!</p>
+
+<div class="card inline-block">
+  <p-galleria
+    [value]="images"
+    [showIndicators]="true"
+    [showThumbnails]="false"
+    [changeItemOnIndicatorHover]="true"
+    [containerStyle]="{ 'max-width': '640px' }"
+  >
+    <ng-template #item let-item>
+      <img [src]="item" style="width: 50%; display: block;" onchange="" />
+    </ng-template>
+  </p-galleria>
+</div>
+<p-card [style]="{ width: '25rem', overflow: 'hidden' }">
+  <ng-template #title> Advanced Card </ng-template>
+  <ng-template #subtitle> Card subtitle </ng-template>
+  <p>
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Inventore sed consequuntur error repudiandae numquam deserunt
+      quisquam repellat libero asperiores earum nam nobis, culpa ratione quam perferendis esse, cupiditate neque quas!
+  </p>
+  <ng-template #footer>
+      <!-- <div class="flex gap-4 mt-1">
+          <p-button label="Cancel" severity="secondary" class="w-full" [outlined]="true" styleClass="w-full" />
+          <p-button label="Save" class="w-full" styleClass="w-full" />
+      </div> -->
+  <!-- </ng-template>
+</p-card> -->
+
+
+<!-- <div class="card inline-block">
+  <p-card>
+    <ng-template pTemplate="header">
+      <h2>{{ product?.name }}</h2>
+    </ng-template>
+    <ng-template pTemplate="content">
+      <p>{{ product?.description }}</p>
+      <p>Price: {{ product?.price| currency }}</p>
+      <p>Category: {{ product?.minQuantity }}</p>
+    </ng-template>
+  </p-card> -->
+
+
+
+
+  <!-- ////// -->
+
+  <!-- ////// -->
+  <div class="flex flex-row gap-8 items-start w-full p-6">
+
+    <!-- Left: Image Gallery -->
+    <div class="w-1/2 shadow-xl">
+      <p-galleria
+        [value]="images"
+        [showIndicators]="true"
+        [showThumbnails]="false"
+        [changeItemOnIndicatorHover]="true"
+        [containerStyle]="{ 'max-width': '100%' }"
+      >
+        <ng-template #item let-item>
+          <img [src]="item" class="w-50 rounded-xl  bg-none" />
+        </ng-template>
+      </p-galleria>
+    </div>
+
+    <!-- Right: Product Info -->
+    <div class="w-1/2 shadow-xl">
+      <p-card [style]="{ overflow: 'hidden' }" class="shadow-lg">
+        <ng-template #title>
+          <h2 class="text-2xl font-bold text-gray-900">{{product?.name}}</h2>
+        </ng-template>
+
+        <ng-template #subtitle>
+          <span class="text-sm text-gray-500">Electronics • Noise Cancelling Fixed Category</span>
+        </ng-template>
+
+        <p class="text-gray-700 mt-5">
+
+          <span class="w-1/2 inline-block">
+            <label class="mr-2" for="Price">Price :</label>
+            <input class="" id="price" disabled [value]="product?.price|currency" />
+          </span>
+
+          <span class="w-1/2 inline-block">
+            <label class="mr-2" for="minQty">MinQty :</label>
+            <input class="" id="minQty" disabled [value]="product?.minQuantity" />
+          </span>
+        </p>
+
+        <p class="mt-2">
+          <label  for="description">Description :</label>
+          <span id="description" disabled class="w-full h-24 p-2  rounded" [textContent]="product?.description" ></span>
+        </p>
+
+        <ng-template #footer>
+          <div class="flex gap-3 mt-4">
+            <p-button label="View Stocks" [raised]="true" class="w-full" styleClass="w-full" severity="info" rounded="true" />
+            <p-button label="Make Request" [raised]="true" class="w-full" styleClass="w-full" severity="success" rounded="true" />
+          </div>
+        </ng-template>
+      </p-card>
+    </div>
+
+  </div>

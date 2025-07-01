@@ -10,16 +10,30 @@
         <div class="form-col">
           <label for="firstName">First Name</label>
           <input pInputText id="firstName" formControlName="firstName" placeholder="First Name" class="login-input" />
+          <div *ngIf="submitted && f['firstName'].errors" class="text-red-500 text-xs mt-1">
+            <div *ngIf="f['firstName'].errors['required']">First name is required.</div>
+            <div *ngIf="f['firstName'].errors['server']">{{ f['firstName'].errors['server'] }}</div>
+          </div>
         </div>
+
         <div class="form-col">
           <label for="lastName">Last Name</label>
           <input pInputText id="lastName" formControlName="lastName" placeholder="Last Name" class="login-input" />
+          <div *ngIf="submitted && f['lastName'].errors" class="text-red-500 text-xs mt-1">
+            <div *ngIf="f['lastName'].errors['required']">Last name is required.</div>
+            <div *ngIf="f['lastName'].errors['server']">{{ f['lastName'].errors['server'] }}</div>
+          </div>
         </div>
       </div>
+
       <label for="email">Email</label>
       <input pInputText id="email" formControlName="email" placeholder="Email" type="email" class="login-input" />
-      <label for="phoneNumber">Phone Number</label>
-      <input pInputText id="phoneNumber" formControlName="phoneNumber" placeholder="Phone Number" class="login-input" />
+      <div *ngIf="submitted && f['email'].errors" class="text-red-500 text-xs mt-1">
+        <div *ngIf="f['email'].errors['required']">Email is required.</div>
+        <div *ngIf="f['email'].errors['email']">Invalid email format.</div>
+        <div *ngIf="f['email'].errors['server']">{{ f['email'].errors['server'] }}</div>
+      </div>
+
       <label for="password">Password</label>
       <p-password
         id="password"
@@ -30,6 +44,12 @@
         [inputStyle]="{ fontSize: '1rem' }"
         styleClass="login-input">
       </p-password>
+      <div *ngIf="submitted && f['password'].errors" class="text-red-500 text-xs mt-1">
+        <div *ngIf="f['password'].errors['required']">Password is required.</div>
+        <div *ngIf="f['password'].errors['minlength']">Password must be at least 8 characters.</div>
+        <div *ngIf="f['password'].errors['pattern']">Password must contain uppercase, lowercase, number, and special character.</div>
+        <div *ngIf="f['password'].errors['server']">{{ f['password'].errors['server'] }}</div>
+      </div>
 
       <label for="confirmPassword">Confirm Password</label>
       <p-password
@@ -41,13 +61,21 @@
         [inputStyle]="{ fontSize: '1rem' }"
         styleClass="login-input">
       </p-password>
+      <div *ngIf="submitted && f['confirmPassword'].errors" class="text-red-500 text-xs mt-1">
+        <div *ngIf="f['confirmPassword'].errors['required']">Confirm password is required.</div>
+        <div *ngIf="f['confirmPassword'].errors['mismatch']">Passwords do not match.</div>
+        <div *ngIf="f['confirmPassword'].errors['server']">{{ f['confirmPassword'].errors['server'] }}</div>
+      </div>
 
       <button pButton type="submit" label="Create Account" [loading]="loading" class="login-btn" [style]="{width: '100%'}"></button>
     </form>
+
     <div class="login-divider">
       <span>or</span>
     </div>
+
     <div id="google-btn-register" class="login-social-btn"></div>
+
     <div class="login-register-link">
       Already have an account? <a class="link-btn" [routerLink]="['/login']">Sign In.</a>
     </div>

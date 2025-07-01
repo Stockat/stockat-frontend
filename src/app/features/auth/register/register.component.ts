@@ -48,41 +48,94 @@ export class RegisterComponent implements OnInit {
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      phoneNumber: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/)
+      ]],
       confirmPassword: ['', Validators.required]
-    }, { validator: this.passwordMatchValidator });
+    }, { validators: this.passwordMatchValidator });
+    
   }
 
   passwordMatchValidator(form: FormGroup) {
-    return form.get('password')!.value === form.get('confirmPassword')!.value ? null : { mismatch: true };
+    const password = form.get('password')?.value;
+    const confirmPassword = form.get('confirmPassword')?.value;
+  
+    if (password !== confirmPassword) {
+      form.get('confirmPassword')?.setErrors({ mismatch: true });
+      return { mismatch: true };
+    } else {
+      if (form.get('confirmPassword')?.hasError('mismatch')) {
+        form.get('confirmPassword')?.setErrors(null);
+      }
+      return null;
+    }
   }
+  
 
-  get f() { return this.registerForm.controls; }
+  get f() {
+    return this.registerForm.controls;
+  }
+  
 
   onSubmit() {
     this.submitted = true;
     this.error = null;
-    if (this.registerForm.invalid) return;
+  
+    if (this.registerForm.invalid) {
+      const firstInvalid = document.querySelector('.ng-invalid');
+      if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+  
     this.loading = true;
+  
     this.authService.register(this.registerForm.value).subscribe({
       next: () => {
         this.loading = false;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Registration Successful',
-          detail: 'Please check your email and verify your account before logging in.'
-        });
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 2000);
+        localStorage.setItem('showRegistrationSuccessToast', '1');
+        this.router.navigate(['/login']);
       },
+   
       error: (err: any) => {
         this.loading = false;
-        this.messageService.add({severity:'error', summary:'Registration Failed', detail: err.error?.message || 'Registration failed'});
+        console.error('Registration error:', err);
+
+        if (err.status === 400 && err.error) {
+          const validationErrors = err.error;
+          if (validationErrors.DuplicateEmail) {
+            const control = this.registerForm.get('email');
+            if (control) {
+              control.setErrors({ server: validationErrors.DuplicateEmail[0] });
+            }
+          }
+          // Handle other errors if present
+          for (const key in validationErrors) {
+            if (key !== 'DuplicateEmail' && validationErrors.hasOwnProperty(key)) {
+              const controlName = key.charAt(0).toLowerCase() + key.slice(1);
+              const control = this.registerForm.get(controlName);
+              if (control) {
+                control.setErrors({ server: validationErrors[key][0] });
+              } else {
+                this.messageService.add({
+                  severity: 'error',
+                  summary: 'Validation Error',
+                  detail: validationErrors[key][0]
+                });
+              }
+            }
+          }
+        } else {
+          const message = typeof err.error === 'string'
+            ? err.error
+            : err.error?.message || 'Registration failed';
+          this.messageService.add({ severity: 'error', summary: 'Registration Failed', detail: message });
+        }
       }
     });
   }
+  
 
   ngOnInit(): void {
     if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
