@@ -21,7 +21,7 @@ export class ServiceService {
     return this.http.get<Service>(`${this.baseUrl}/${id}`);
   }
 
-  getSellerServices(sellerId: number): Observable<Service[]> {
+  getSellerServices(sellerId: string | null): Observable<Service[]> {
     return this.http.get<Service[]>(`${this.baseUrl}/seller/${sellerId}`);
   }
 
@@ -39,8 +39,14 @@ export class ServiceService {
     return this.http.post(`${this.baseUrl}/${serviceId}/upload-image`, formData);
   }
 
+  uploadImage(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post(`${this.baseUrl}/upload-image`, formData);
+  }
+
   updateService(service: Service): Observable<Service> {
-    return this.http.put<Service>(`${this.baseUrl}/${service.id}`, service);
+    return this.http.patch<Service>(`${this.baseUrl}/${service.id}`, service);
   }
 
   deleteService(id: number): Observable<void> {

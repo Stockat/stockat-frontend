@@ -5,11 +5,13 @@ import { ServiceService } from '../../../core/services/service.service';
 import { CommonModule } from '@angular/common';
 import { RequestModalComponent } from '../request-modal/request-modal.component';
 import { ServiceRequestService } from '../../../core/services/service-request.service';
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-service-details',
   templateUrl: './service-details.component.html',
-  imports: [CommonModule, RequestModalComponent],
+  imports: [CommonModule, RequestModalComponent, DialogModule, ButtonModule],
 })
 
 export class ServiceDetailsComponent {
@@ -36,5 +38,10 @@ export class ServiceDetailsComponent {
 
   openRequestModal() {
     this.isModalOpen = true;
+  }
+
+  onRequestSubmitted() {
+    this.hasPendingRequest = true;
+    this.isModalOpen = false;
   }
 }

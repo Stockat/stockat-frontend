@@ -5,6 +5,7 @@ export interface Service {
   minQuantity: number;
   pricePerProduct: number;
   estimatedTime: string;
-  imageUrl?: string;
-  imageId?: string;
+  imageUrl: string;
+  imageId: string;
+  sellerName: string;
 }

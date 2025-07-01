@@ -33,7 +33,8 @@ export class ServiceRequestService {
   }
 
   setSellerOffer(requestId: number, offer: object): Observable<any> {
-    return this.http.patch(`${this.baseUrl}/${requestId}/seller-offer`, { offer });
+    // Send offer fields at root, not wrapped in { offer }
+    return this.http.patch(`${this.baseUrl}/${requestId}/seller-offer`, offer);
   }
 
   updateRequestStatus(requestId: number, status: string): Observable<any> {

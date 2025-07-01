@@ -1,0 +1,58 @@
+<div class="p-8 bg-gray-50 min-h-screen">
+  <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">My Services</h2>
+  <div class="flex justify-end mb-6">
+    <button pButton label="Add New Service" icon="pi pi-plus" class="p-button-success p-button-lg" (click)="addService()"></button>
+  </div>
+  <p-table
+    [value]="services"
+    class="shadow rounded-2xl"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[5,10,20]"
+    responsiveLayout="scroll"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Price</th>
+        <th>Min Qty</th>
+        <th>Estimated Time</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-service>
+      <tr>
+        <td class="font-semibold text-blue-900">{{ service.name }}</td>
+        <td class="text-gray-700 max-w-xs truncate">{{ service.description }}</td>
+        <td class="text-green-700 font-bold">${{ service.pricePerProduct }}</td>
+        <td>{{ service.minQuantity }}</td>
+        <td>{{ service.estimatedTime }}</td>
+        <td class="space-x-2">
+          <button pButton icon="pi pi-eye" class="p-button-sm p-button-rounded p-button-help" [routerLink]="['/seller/services', service.id]"></button>
+          <button pButton icon="pi pi-pencil" class="p-button-sm p-button-rounded p-button-info" (click)="editService(service)"></button>
+          <button pButton icon="pi pi-trash" class="p-button-sm p-button-rounded p-button-danger" (click)="deleteService(service)"></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="text-center text-gray-500">No services found.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+  <app-service-edit-modal
+    [visible]="editModalVisible"
+    [service]="selectedService"
+    (close)="handleEditModalClose()"
+    (save)="handleEditModalSave($event)"
+  ></app-service-edit-modal>
+
+  <app-service-add-modal
+    [visible]="addModalVisible"
+    [isAddingService]="isAddingService"
+    (close)="addModalVisible = false"
+    (save)="handleAddModalSave($event)"
+  ></app-service-add-modal>
+
+</div>

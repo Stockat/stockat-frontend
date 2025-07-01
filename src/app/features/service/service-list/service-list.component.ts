@@ -3,10 +3,13 @@ import { ServiceService } from '../../../core/services/service.service';
 import { ServiceRequestService } from '../../../core/services/service-request.service';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { DashNavbarComponent } from "../../../shared/components/dash-navbar/dash-navbar.component";
 
 @Component({
   selector: 'app-service-list',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, CardModule, ButtonModule, DashNavbarComponent],
   templateUrl: './service-list.component.html',
   styleUrl: './service-list.component.css'
 })
@@ -21,6 +24,7 @@ export class ServiceListComponent {
     this.serviceService.getAllServices().subscribe({
       next: (data) => {
         this.services = data;
+        console.log('Services fetched successfully:', this.services);
       },
       error: (error) => {
         console.error('Error fetching services:', error);

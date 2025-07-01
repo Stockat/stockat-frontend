@@ -5,17 +5,21 @@ import { ServiceRequestService } from '../../../core/services/service-request.se
 import { ServiceService } from '../../../core/services/service.service';
 import { Service } from '../../../core/models/service-models/service.dto';
 import Swal from 'sweetalert2';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputTextarea } from 'primeng/inputtextarea';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-request-modal',
   templateUrl: './request-modal.component.html',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule]
+  imports: [ReactiveFormsModule, CommonModule, InputTextModule, InputTextarea, ButtonModule]
 })
 export class RequestModalComponent {
   @Input() serviceId!: number;
   @Input() minQuantity!: number;
   @Output() close = new EventEmitter<void>();
+  @Output() requestSubmitted = new EventEmitter<void>();
   service!:Service;
   requestForm!: FormGroup;
 
@@ -55,6 +59,7 @@ export class RequestModalComponent {
 
     this.requestService.createRequest(payload).subscribe({
       next: () => {
+        this.requestSubmitted.emit();
         Swal.fire({
           icon: 'success',
           title: 'Request sent successfully',
@@ -64,11 +69,10 @@ export class RequestModalComponent {
         this.close.emit();
       },
       error: (err) => {
-        console.error('Error creating request:', err.error);
         Swal.fire({
           icon: 'error',
           title: 'Request failed',
-          text: err?.error || 'An error occurred. Please try again.',
+          text: err?.error|| 'An error occurred. Please try again.',
         });
       }
     });

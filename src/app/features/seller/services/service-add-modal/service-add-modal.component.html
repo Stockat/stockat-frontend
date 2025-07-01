@@ -1,0 +1,44 @@
+<p-dialog [(visible)]="visible" [modal]="true" [closable]="true" [style]="{width: '400px'}" (onHide)="close.emit()">
+  <ng-template pTemplate="header">
+    <span>Add New Service</span>
+  </ng-template>
+  <form *ngIf="form" [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+    <div *ngIf="isAddingService" class="flex justify-center items-center py-2">
+      <i class="pi pi-spin pi-spinner text-xl mr-2"></i>
+      <span>Uploading and saving, please wait...</span>
+    </div>
+    <div [class.opacity-50]="isAddingService">
+      <div>
+        <label class="block font-medium mb-1">Name</label>
+        <input pInputText formControlName="name" class="w-full" />
+      </div>
+      <div>
+        <label class="block font-medium mb-1">Description</label>
+        <textarea pInputTextarea formControlName="description" class="w-full min-h-[80px] max-h-[200px] resize-y border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400" rows="3"></textarea>
+      </div>
+      <div class="flex gap-2">
+        <div class="flex-1">
+          <label class="block font-medium mb-1">Price</label>
+          <input pInputText type="number" formControlName="pricePerProduct" class="w-full" />
+        </div>
+        <div class="flex-1">
+          <label class="block font-medium mb-1">Min Qty</label>
+          <input pInputText type="number" formControlName="minQuantity" class="w-full" />
+        </div>
+      </div>
+      <div>
+        <label class="block font-medium mb-1">Estimated Time</label>
+        <input pInputText formControlName="estimatedTime" class="w-full" />
+      </div>
+      <div>
+        <label class="block font-medium mb-1">Service Image</label>
+        <input type="file" accept="image/*" (change)="onFileSelected($event)" class="w-full border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400" [disabled]="isAddingService" />
+      </div>
+      <div *ngIf="feedbackMessage" class="text-sm text-red-500 mt-2">{{ feedbackMessage }}</div>
+      <div class="flex justify-end gap-2 mt-4">
+        <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="close.emit()" [disabled]="isAddingService"></button>
+        <button pButton type="submit" label="Add" class="p-button-success" [disabled]="form.invalid || isAddingService"></button>
+      </div>
+    </div>
+  </form>
+</p-dialog>
