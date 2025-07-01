@@ -1,0 +1,139 @@
+<div class="auctions-container">
+  <div class="header-section">
+    <h1>Live Auctions</h1>
+    <p>Browse our exclusive collection of rare items</p>
+  </div>
+
+  <div class="filters-section">
+    <div class="search-filter">
+      <span class="p-input-icon-left">
+        <i class="pi pi-search"></i>
+        <input 
+          type="text" 
+          pInputText 
+          placeholder="Search auctions..." 
+          [(ngModel)]="searchText"
+          (input)="onSearchChange()"
+        />
+      </span>
+    </div>
+
+    <div class="toggle-filters">
+      <p-toggleButton 
+        [(ngModel)]="filters.hasBid" 
+        (onChange)="onFilterChange()"
+        onLabel="Has Bids" 
+        offLabel="All Bids"
+      ></p-toggleButton>
+    
+      <p-toggleButton 
+        [(ngModel)]="filters.isClosed" 
+        (onChange)="onFilterChange()"
+        onLabel="Closed Only" 
+        offLabel="Include Closed"
+      ></p-toggleButton>
+    
+      <p-toggleButton 
+        [(ngModel)]="filters.activeOnly" 
+        (onChange)="onFilterChange()"
+        onLabel="Active Only" 
+        offLabel="All Statuses"
+      ></p-toggleButton>
+    </div>
+  </div>
+
+  <div class="auctions-grid">
+    <p-card 
+      *ngFor="let auction of filteredAuctions" 
+      class="auction-card"
+      [ngClass]="{'closed-auction': auction.isClosed}"
+    >
+    <div class="card-header">
+      <div class="badge-container">
+        <p-tag 
+          *ngIf="auction.currentBid > auction.startingPrice" 
+          value="Active Bids" 
+          severity="success" 
+          icon="pi pi-bolt"
+        ></p-tag>
+        <p-tag 
+          *ngIf="auction.isClosed" 
+          value="Closed" 
+          severity="danger" 
+          icon="pi pi-lock"
+        ></p-tag>
+      </div>
+      <div class="time-remaining">
+        <i class="pi pi-clock"></i>
+        {{ getTimeRemaining(auction.endTime) }}
+      </div>
+    </div>
+
+    <div class="card-content">
+      <div class="image-container">
+        <img 
+          src="https://primefaces.org/cdn/primeng/images/card-ng.jpg" 
+          alt="{{ auction.name }}"
+          class="auction-image"
+        />
+      </div>
+
+      <div class="auction-info">
+        <h3>{{ auction.name }}</h3>
+        <p class="description">{{ auction.description || 'No description available' }}</p>
+        
+        <div class="bid-info">
+          <div class="bid-item">
+            <span>Current Bid</span>
+            <span class="bid-amount">${{ auction.currentBid | number }}</span>
+          </div>
+          <div class="bid-item">
+            <span>Starting Price</span>
+            <span>${{ auction.startingPrice | number }}</span>
+          </div>
+        </div>
+        
+        <div class="bid-stats">
+          <div class="stat-item">
+            <i class="pi pi-users"></i>
+            <span>{{ auction.buyerId ? 'Bidders' : 'No bids yet' }}</span>
+          </div>
+          <div class="stat-item">
+            <i class="pi pi-eye"></i>
+            <span>1.2k views</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <p-button 
+        *ngIf="!auction.isClosed"
+        [routerLink]="['/auction', auction.id]"
+        label="Place Bid"
+        icon="pi pi-gavel"
+        styleClass="p-button-raised p-button-warning"
+      ></p-button>
+      
+      <p-button 
+        *ngIf="auction.isClosed"
+        [routerLink]="['/auction', auction.id]"
+        label="View Results"
+        icon="pi pi-chart-bar"
+        styleClass="p-button-raised p-button-secondary"
+      ></p-button>
+    </div>
+    </p-card>
+  </div>
+
+  <div *ngIf="filteredAuctions.length === 0" class="no-results">
+    <i class="pi pi-search" style="font-size: 3rem"></i>
+    <h3>No auctions match your search</h3>
+    <p>Try adjusting your filters or search terms</p>
+    <p-button 
+      label="Clear Filters" 
+      icon="pi pi-filter-slash"
+      (click)="clearFilters()"
+    ></p-button>
+  </div>
+</div>
