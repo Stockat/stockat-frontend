@@ -1,6 +1,7 @@
 import { Routes } from "@angular/router";
 import { DashboardComponent } from "./dashboard/dashboard.component";
 import { AllStocksComponent } from "./stocks/all-stocks/all-stocks.component";
+import { AddproductComponent } from "./products/addproduct/addproduct.component";
 import { SellerServiceListComponent } from "./services/seller-service-list/seller-service-list.component";
 import { SellerServiceDetailsPageComponent } from './services/seller-service-details-page/seller-service-details-page.component';
 
@@ -12,6 +13,10 @@ export const sellerRoutes: Routes = [
     {
         path: 'stocks',
         component: AllStocksComponent
+    },
+    {
+        path: 'add-product',
+        component: AddproductComponent
     },
     {
       path: 'services',
