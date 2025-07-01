@@ -1,0 +1,11 @@
+/* Chat page layout styles */
+.flex { display: flex; }
+.h-full { height: 100%; }
+.gap-4 { gap: 1rem; }
+.flex-col { flex-direction: column; }
+.flex-1 { flex: 1; }
+.w-80 { width: 20rem; }
+.bg-gray-50 { background: #f9fafb; }
+.p-4 { padding: 1rem; }
+.rounded-xl { border-radius: 1rem; }
+.shadow { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }

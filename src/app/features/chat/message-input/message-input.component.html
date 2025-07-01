@@ -1,0 +1,4 @@
+<form #msgForm="ngForm" class="flex gap-2 items-center" (ngSubmit)="sendMessage()">
+  <input type="text" class="flex-1 p-2 border rounded-lg" placeholder="Type a message..." [(ngModel)]="message" name="messageInput" required />
+  <button class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold" type="submit">Send</button>
+</form>

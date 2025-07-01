@@ -1,0 +1,13 @@
+/* Conversation list styles for card-based, modern look */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.gap-2 { gap: 0.5rem; }
+.bg-white { background: #fff; }
+.rounded-xl { border-radius: 1rem; }
+.shadow { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.p-2 { padding: 0.5rem; }
+.cursor-pointer { cursor: pointer; }
+.selected { background: #db2777; color: #fff; }
+.font-semibold { font-weight: 600; }
+.text-gray-800 { color: #1f2937; }
+.text-xs { font-size: 0.75rem; }

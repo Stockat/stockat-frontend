@@ -1,0 +1,13 @@
+/* Message input styles for modern chat UI */
+.flex { display: flex; }
+.gap-2 { gap: 0.5rem; }
+.items-center { align-items: center; }
+.flex-1 { flex: 1; }
+.p-2 { padding: 0.5rem; }
+.border { border: 1px solid #e5e7eb; }
+.rounded-lg { border-radius: 0.5rem; }
+.bg-pink-600 { background: #db2777; }
+.text-white { color: #fff; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.font-semibold { font-weight: 600; }

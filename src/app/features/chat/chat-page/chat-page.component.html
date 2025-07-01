@@ -1,0 +1,28 @@
+<div class="flex h-screen bg-gray-100">
+  <!-- Sidebar: Conversation List -->
+  <aside class="w-80 bg-white border-r border-gray-200 flex flex-col">
+    <app-conversation-list
+      [conversations]="conversations"
+      [selectedConversationId]="selectedConversation ? selectedConversation.conversationId.toString() : null"
+      (selectConversation)="selectConversation($event)"
+      (startChat)="startChatWithUser($event)">
+    </app-conversation-list>
+  </aside>
+
+  <!-- Main Chat Area -->
+  <main class="flex-1 flex flex-col">
+    <header class="chat-header p-4 border-b border-gray-200 bg-white" *ngIf="selectedConversation">
+      <div class="chat-title text-lg font-semibold">
+        {{ selectedConversation?.user1FullName }} &amp; {{ selectedConversation?.user2FullName }}
+      </div>
+      <div class="chat-members text-xs text-gray-500">2 members</div>
+    </header>
+    <section class="flex-1 overflow-y-auto bg-gray-50">
+      <app-chat-window [messages]="messages"></app-chat-window>
+      <div *ngIf="isTyping" class="typing-indicator px-4 py-2 text-xs text-gray-400">Someone is typing...</div>
+    </section>
+    <footer class="chat-input p-4 bg-white border-t border-gray-200">
+      <app-message-input (send)="sendMessage($event)"></app-message-input>
+    </footer>
+  </main>
+</div>

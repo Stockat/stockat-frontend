@@ -68,4 +68,11 @@ export const routes: Routes = [
     component: SellerLayoutComponent,
     children: sellerRoutes,
   },
+  {
+    path: 'chat',
+    loadComponent: () =>
+      import('./features/chat/chat-page/chat-page.component').then(
+        (m) => m.ChatPageComponent
+      ),
+  },
 ];
