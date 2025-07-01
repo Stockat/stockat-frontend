@@ -1,8 +1,26 @@
 <!-- all-services.component.html -->
 <div class="p-8 bg-gray-50 min-h-screen">
   <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">All Available Services</h2>
+  <div class="flex flex-col md:flex-row gap-4 mb-8 items-center justify-center">
+    <input
+      pInputText
+      type="text"
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearchOrFilter()"
+      placeholder="Search by service name..."
+      class="w-full md:w-64 border border-gray-300 rounded px-3 py-2"
+    />
+    <select
+      [(ngModel)]="sellerFilter"
+      (ngModelChange)="onSearchOrFilter()"
+      class="w-full md:w-48 border border-gray-300 rounded px-3 py-2"
+    >
+      <option value="">All Sellers</option>
+      <option *ngFor="let seller of sellerNames" [value]="seller">{{ seller }}</option>
+    </select>
+  </div>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-    <p-card *ngFor="let service of services" class="mb-4">
+    <p-card *ngFor="let service of filteredServices" class="mb-4">
       <ng-template pTemplate="header">
         <img
           [src]="service.imageUrl || 'https://via.placeholder.com/400x200?text=No+Image'"
