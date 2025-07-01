@@ -19,12 +19,13 @@ export class ServiceAddModalComponent {
   selectedFile: File | null = null;
   feedbackMessage: string = '';
   @Input() isAddingService = false;
+  submitted = false;
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
       name: ['', Validators.required],
       description: ['', Validators.required],
-      pricePerProduct: [0, [Validators.required, Validators.min(0)]],
+      pricePerProduct: [0.01, [Validators.required, Validators.min(0.01)]],
       minQuantity: [1, [Validators.required, Validators.min(1)]],
       estimatedTime: ['', Validators.required],
     });
@@ -45,7 +46,8 @@ export class ServiceAddModalComponent {
   }
 
   submit() {
-    if (this.form.valid && !this.isAddingService) {
+    this.submitted = true;
+    if (this.form.valid && !this.isAddingService && this.selectedFile) {
       this.save.emit({ service: this.form.value, file: this.selectedFile });
     }
   }

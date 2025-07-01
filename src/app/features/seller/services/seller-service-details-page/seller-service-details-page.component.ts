@@ -80,14 +80,25 @@ export class SellerServiceDetailsPageComponent implements OnInit {
     this.offerError = '';
     this.offerSuccess = '';
     const offer = this.offerForm.value;
-    console.log('Submitting offer:', offer);
     this.serviceRequestService.setSellerOffer(this.selectedRequest.id, offer).subscribe({
       next: () => {
         this.offerSuccess = 'Offer sent successfully!';
-        this.offerLoading = false;
-        setTimeout(() => {
-          this.closeOfferModal();
-        }, 1000);
+        // Refresh requests to show updated offer immediately
+        this.serviceRequestService.getSellerRequestsByServiceId(this.service.id).subscribe({
+          next: (requests) => {
+            this.requests = requests;
+            this.offerLoading = false;
+            setTimeout(() => {
+              this.closeOfferModal();
+            }, 1000);
+          },
+          error: () => {
+            this.offerLoading = false;
+            setTimeout(() => {
+              this.closeOfferModal();
+            }, 1000);
+          }
+        });
       },
       error: (err) => {
         this.offerError = 'Failed to send offer.';

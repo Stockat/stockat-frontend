@@ -5,13 +5,11 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { DashNavbarComponent } from "../../../shared/components/dash-navbar/dash-navbar.component";
 
 @Component({
   selector: 'app-service-list',
-  imports: [CommonModule, RouterLink, CardModule, ButtonModule, DashNavbarComponent],
+  imports: [CommonModule, RouterLink, CardModule, ButtonModule],
   templateUrl: './service-list.component.html',
-  styleUrl: './service-list.component.css'
 })
 export class ServiceListComponent {
   services: any[] = [];

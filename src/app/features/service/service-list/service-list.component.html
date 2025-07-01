@@ -11,7 +11,9 @@
         />
       </ng-template>
       <h3 class="text-xl font-semibold text-gray-800">{{ service.name }}</h3>
-      <p class="text-gray-600 text-sm">{{ service.description }}</p>
+      <p class="text-gray-600 text-sm truncate" [title]="service.description">
+        {{ service.description | slice:0:80 }}<span *ngIf="service.description.length > 80">...</span>
+      </p>
       <p class="text-base font-medium text-blue-700 mt-2">Price: ${{ service.pricePerProduct }}</p>
       <p class="text-sm mt-2">
         Seller:

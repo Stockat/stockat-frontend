@@ -68,27 +68,6 @@ export const routes: Routes = [
     component: SellerLayoutComponent,
     children: sellerRoutes,
   },
-    // Auth
-    {
-        path: 'login',
-        loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent)
-    },
-    {
-        path: 'register',
-        loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent)
-    },
-    {
-        path: 'forgot-password',
-        loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
-    },
-    {
-        path: 'reset-password',
-        loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
-    },
-    {
-        path: 'confirm-email',
-        loadComponent: () => import('./features/auth/confirm-email/confirm-email.component').then(m => m.ConfirmEmailComponent)
-    },
     // Admin
     {
         path: 'admin',
@@ -98,5 +77,14 @@ export const routes: Routes = [
     {
       path: 'services',
       loadChildren: () => import('./features/service/service.module').then(m => m.ServiceModule)
+    },
+    //Auction
+    {
+        path: 'auctions',
+        loadComponent: () => import('./features/Auction/auctions-list/auctions-list.component').then(m => m.AuctionsListComponent)
+    },
+    {
+        path: 'auction/:id',
+        loadComponent: () => import('./features/Auction/auction-details/auction-details.component').then(m => m.AuctionDetailsComponent)
     }
 ];

@@ -1,0 +1,162 @@
+<body ng-app="auctionApp" ng-controller="auctionCtrl">
+  <div class="container">
+      <div class="auction-header">
+          <div class="logo">ArtVenture</div>
+          <div class="auction-actions">
+              <button class="btn-icon"><i class="fas fa-heart"></i></button>
+              <button class="btn-icon"><i class="fas fa-share-alt"></i></button>
+          </div>
+      </div>
+
+    <div *ngIf="auction; else loading">
+      <p-messages [(value)]="messages"></p-messages>
+      <h1 class="auction-title">
+        {{ auction?.name }}
+      </h1>
+      
+      <div class="auction-main">
+        <!-- Image Section -->
+        <div class="auction-image-wrapper">
+          <div class="image-badge">Premium Auction</div>
+          <img
+            [src]=" 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&auto=format&fit=crop&w=1399&q=80'"
+            [alt]="auction?.name"
+            class="auction-image"
+          />
+        </div>
+      
+        <!-- Auction Info -->
+        <div class="auction-info">
+          <!-- Status Section -->
+          <div class="info-section">
+            <div class="section-heading">
+              <i class="fas fa-clock"></i>
+              <span>Auction Status</span>
+            </div>
+            <div class="countdown-container">
+              <div class="countdown-label">TIME REMAINING</div>
+              <div class="countdown">{{ timeLeft }}</div>
+              <div class="end-date">
+                Ends on {{ auction?.endTime | date:'fullDate' }} at {{ auction?.endTime | date:'shortTime' }} GMT
+              </div>
+            </div>
+          </div>
+      
+          <!-- Bidding Section -->
+          <div class="info-section">
+            <div class="section-heading">
+              <i class="fas fa-gavel"></i>
+              <span>Place Your Bid</span>
+            </div>
+      
+            <div class="bid-section">
+              <div class="bid-box">
+                <div class="current-bid-label">CURRENT BID</div>
+                <div class="current-bid">${{ auction?.currentBid }}</div>
+                <div class="bid-increment">Minimum increment: ${{ auction?.incrementUnit }}</div>
+              </div>
+      
+              <div class="bid-box">
+                <div class="current-bid-label">STARTING BID</div>
+                <div class="current-bid">${{ auction?.startingPrice }}</div>
+                <div class="bid-increment">Opening price</div>
+              </div>
+            </div>
+      
+            <div class="bid-input-wrapper">
+              <label class="input-label">YOUR BID AMOUNT</label>
+              <div class="bid-input-container">
+                <span class="currency-symbol">$</span>
+                <input
+                  type="number"
+                  [(ngModel)]="bidAmount"
+                  [min]="minBid"
+                  class="bid-input"
+                />
+              </div>
+              <div class="min-bid">
+                Minimum bid: <span>${{ minBid }}</span>
+              </div>
+            </div>
+      
+            <button class="place-bid-button" (click)="placeBid()">
+              PLACE BID NOW
+            </button>
+          </div>
+      
+          <!-- Shipping Section -->
+          <div class="info-section" style="border-bottom: none; padding-bottom: 0;">
+            <div class="section-heading">
+              <i class="fas fa-truck"></i>
+              <span>Shipping & Payment</span>
+            </div>
+            <p>
+              Free worldwide shipping. Authenticity guaranteed. Payment methods: Credit Card, PayPal, Wire Transfer.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      
+      <div class="auction-meta">
+          <div class="meta-item">
+              <div class="meta-label">BIDS</div>
+              <div class="meta-value">27</div>
+          </div>
+          <div class="meta-item">
+              <div class="meta-label">VIEWS</div>
+              <div class="meta-value">1,842</div>
+          </div>
+          <div class="meta-item">
+              <div class="meta-label">WATCHING</div>
+              <div class="meta-value">48</div>
+          </div>
+          <div class="meta-item">
+              <div class="meta-label">ITEM #</div>
+              <div class="meta-value">RV1950S</div>
+          </div>
+      </div>
+      
+      <div class="auction-description">
+          <h3 class="description-title">Item Description</h3>
+          <p class="description-content">
+              This exquisite vintage Rolex Submariner from the 1950s is a true collector's item. Featuring the original 
+              <br><br>
+              The watch comes with its original riveted bracelet and clasp, both showing appropriate signs of wear consistent 
+          </p>
+      </div>
+      
+      <div class="bid-history">
+          <h3 class="history-title">Bid History</h3>
+          <div class="history-item">
+              <div class="bidder-info">
+                  <div class="bidder-avatar">JD</div>
+                  <div>
+                      <div class="bidder-name">John Doe</div>
+                      <div class="bid-time">5 minutes ago</div>
+                  </div>
+              </div>
+              <div class="bid-amount">$12,750</div>
+          </div>
+          <div class="history-item">
+              <div class="bidder-info">
+                  <div class="bidder-avatar">SR</div>
+                  <div>
+                      <div class="bidder-name">Sarah Reynolds</div>
+                      <div class="bid-time">12 minutes ago</div>
+                  </div>
+              </div>
+              <div class="bid-amount">$12,500</div>
+          </div>
+          
+      </div>
+              
+    </div>
+      
+      
+  </div>
+  <ng-template #loading>
+    <p>Loading auction details...</p>
+  </ng-template>
+  
+</body>

@@ -26,7 +26,7 @@ export class ServiceEditModalComponent {
       this.form = this.fb.group({
         name: [this.service.name, Validators.required],
         description: [this.service.description, Validators.required],
-        pricePerProduct: [this.service.pricePerProduct, [Validators.required, Validators.min(0)]],
+        pricePerProduct: [this.service.pricePerProduct, [Validators.required, Validators.min(0.01)]],
         minQuantity: [this.service.minQuantity, [Validators.required, Validators.min(1)]],
         estimatedTime: [this.service.estimatedTime, Validators.required],
       });

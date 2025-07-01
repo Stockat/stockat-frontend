@@ -69,12 +69,12 @@
         <form [formGroup]="offerForm" (ngSubmit)="submitOffer()" class="space-y-4">
           <div>
             <label class="block font-medium mb-1">Price per Product</label>
-            <input pInputText type="number" min="1" class="w-full" formControlName="pricePerProduct" placeholder="Enter price" [disabled]="offerLoading" />
+            <input pInputText type="number" min="1" class="w-full border border-gray-300 rounded px-3 py-2" formControlName="pricePerProduct" placeholder="Enter price" [disabled]="offerLoading" />
             <div *ngIf="offerForm.get('pricePerProduct')?.invalid && offerForm.get('pricePerProduct')?.touched" class="text-red-500 text-xs mt-1">Required and must be positive.</div>
           </div>
           <div>
             <label class="block font-medium mb-1">Estimated Time</label>
-            <input pInputText type="text" class="w-full" formControlName="estimatedTime" placeholder="e.g. 3 days" [disabled]="offerLoading" />
+            <input pInputText type="text" class="w-full border border-gray-300 rounded px-3 py-2" formControlName="estimatedTime" placeholder="e.g. 3 days" [disabled]="offerLoading" />
             <div *ngIf="offerForm.get('estimatedTime')?.invalid && offerForm.get('estimatedTime')?.touched" class="text-red-500 text-xs mt-1">Required.</div>
           </div>
           <div *ngIf="offerError" class="text-red-500 text-sm">{{ offerError }}</div>

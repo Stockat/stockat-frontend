@@ -31,13 +31,14 @@
         <input pInputText formControlName="estimatedTime" class="w-full" />
       </div>
       <div>
-        <label class="block font-medium mb-1">Service Image</label>
-        <input type="file" accept="image/*" (change)="onFileSelected($event)" class="w-full border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400" [disabled]="isAddingService" />
+        <label class="block font-medium mb-1">Service Image <span class="text-red-500">*</span></label>
+        <input type="file" accept="image/*" (change)="onFileSelected($event)" class="w-full border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400" [disabled]="isAddingService" required />
+        <div *ngIf="submitted && !selectedFile" class="text-xs text-red-500 mt-1">Image is required.</div>
       </div>
       <div *ngIf="feedbackMessage" class="text-sm text-red-500 mt-2">{{ feedbackMessage }}</div>
       <div class="flex justify-end gap-2 mt-4">
         <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="close.emit()" [disabled]="isAddingService"></button>
-        <button pButton type="submit" label="Add" class="p-button-success" [disabled]="form.invalid || isAddingService"></button>
+        <button pButton type="submit" label="Add" class="p-button-success" [disabled]="form.invalid || isAddingService || !selectedFile"></button>
       </div>
     </div>
   </form>

@@ -74,6 +74,7 @@ export class RequestModalComponent {
           title: 'Request failed',
           text: err?.error|| 'An error occurred. Please try again.',
         });
+        this.close.emit(); // Close modal after error
       }
     });
   }
