@@ -1,0 +1,33 @@
+<p-dialog [(visible)]="visible" [modal]="true" [closable]="true" [style]="{width: '400px'}" (onHide)="close.emit()">
+  <ng-template pTemplate="header">
+    <span>Edit Service</span>
+  </ng-template>
+  <form *ngIf="form" [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+    <div>
+      <label class="block font-medium mb-1">Name</label>
+      <input pInputText formControlName="name" class="w-full" />
+    </div>
+    <div>
+      <label class="block font-medium mb-1">Description</label>
+      <input pInputText formControlName="description" class="w-full" />
+    </div>
+    <div class="flex gap-2">
+      <div class="flex-1">
+        <label class="block font-medium mb-1">Price</label>
+        <input pInputText type="number" formControlName="pricePerProduct" class="w-full" />
+      </div>
+      <div class="flex-1">
+        <label class="block font-medium mb-1">Min Qty</label>
+        <input pInputText type="number" formControlName="minQuantity" class="w-full" />
+      </div>
+    </div>
+    <div>
+      <label class="block font-medium mb-1">Estimated Time</label>
+      <input pInputText formControlName="estimatedTime" class="w-full" />
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="close.emit()"></button>
+      <button pButton type="submit" label="Save" class="p-button-success" [disabled]="form.invalid"></button>
+    </div>
+  </form>
+</p-dialog>

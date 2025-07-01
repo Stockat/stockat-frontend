@@ -1,0 +1,90 @@
+<div class="p-8 bg-gray-50 min-h-screen">
+  <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Service Details</h2>
+  <div *ngIf="loading" class="text-center py-8">
+    <i class="pi pi-spin pi-spinner text-2xl"></i> Loading...
+  </div>
+  <div *ngIf="service && !loading">
+    <div class="flex flex-col md:flex-row gap-8 mb-8 items-start">
+      <img *ngIf="service.imageUrl" [src]="service.imageUrl" alt="Service Image" class="w-40 h-40 object-cover rounded shadow border" />
+      <div>
+        <h3 class="text-2xl font-bold mb-2 text-blue-900">{{ service.name }}</h3>
+        <p class="mb-2 text-gray-700"><b>Description:</b> {{ service.description }}</p>
+        <div class="flex flex-wrap gap-4 mb-2">
+          <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded text-sm font-semibold">Price: ${{ service.pricePerProduct }}</span>
+          <span class="bg-green-100 text-green-800 px-3 py-1 rounded text-sm font-semibold">Min Qty: {{ service.minQuantity }}</span>
+          <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-sm font-semibold">Est. Time: {{ service.estimatedTime }}</span>
+        </div>
+      </div>
+    </div>
+    <h4 class="text-lg font-semibold mb-4 text-gray-800">Buyer Requests</h4>
+    <p-table [value]="requests" [paginator]="true" [rows]="5" *ngIf="requests && requests.length > 0" class="shadow rounded-xl">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Buyer</th>
+          <th>Quantity</th>
+          <th>Status</th>
+          <th>Offer Price</th>
+          <th>Offer Time</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-request>
+        <tr>
+          <td class="font-semibold text-blue-900">{{ request.buyerName }}</td>
+          <td class="text-gray-700">{{ request.requestedQuantity }}</td>
+          <td>
+            <span [ngClass]="{
+              'bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs': request.serviceStatus === 'Pending',
+              'bg-green-100 text-green-800 px-2 py-1 rounded text-xs': request.serviceStatus === 'Approved',
+              'bg-red-100 text-red-800 px-2 py-1 rounded text-xs': request.serviceStatus === 'Rejected'
+            }">{{ request.serviceStatus }}</span>
+          </td>
+          <td>
+            <span *ngIf="request.pricePerProduct != null && request.pricePerProduct !== 0; else notSet">{{ request.pricePerProduct }}</span>
+            <ng-template #notSet><span class="text-gray-400 italic">Not set</span></ng-template>
+          </td>
+          <td>
+            <span *ngIf="request.estimatedTime; else notSetTime">{{ request.estimatedTime }}</span>
+            <ng-template #notSetTime><span class="text-gray-400 italic">Not set</span></ng-template>
+          </td>
+          <td>
+            <button pButton label="Set Offer" class="p-button-sm p-button-success" (click)="openOfferModal(request)"
+              *ngIf="request.serviceStatus !== 'Approved'"
+              [disabled]="request.pricePerProduct != null && request.estimatedTime">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+    <div *ngIf="!requests || requests.length === 0" class="text-gray-500 mt-2">No buyer requests for this service.</div>
+  </div>
+  <!-- Offer Modal -->
+  <p-dialog [(visible)]="offerModalVisible" [modal]="true" [closable]="true" [style]="{width: '400px'}" (onHide)="closeOfferModal()">
+    <ng-template pTemplate="header">
+      <span>Make Offer</span>
+    </ng-template>
+    <div *ngIf="selectedRequest">
+      <div class="mb-4">
+        <p class="mb-2">Make your offer for <b>{{ selectedRequest.buyerName }}</b> (Qty: {{ selectedRequest.requestedQuantity }})</p>
+        <form [formGroup]="offerForm" (ngSubmit)="submitOffer()" class="space-y-4">
+          <div>
+            <label class="block font-medium mb-1">Price per Product</label>
+            <input pInputText type="number" min="1" class="w-full border border-gray-300 rounded px-3 py-2" formControlName="pricePerProduct" placeholder="Enter price" [disabled]="offerLoading" />
+            <div *ngIf="offerForm.get('pricePerProduct')?.invalid && offerForm.get('pricePerProduct')?.touched" class="text-red-500 text-xs mt-1">Required and must be positive.</div>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Estimated Time</label>
+            <input pInputText type="text" class="w-full border border-gray-300 rounded px-3 py-2" formControlName="estimatedTime" placeholder="e.g. 3 days" [disabled]="offerLoading" />
+            <div *ngIf="offerForm.get('estimatedTime')?.invalid && offerForm.get('estimatedTime')?.touched" class="text-red-500 text-xs mt-1">Required.</div>
+          </div>
+          <div *ngIf="offerError" class="text-red-500 text-sm">{{ offerError }}</div>
+          <div *ngIf="offerSuccess" class="text-green-600 text-sm">{{ offerSuccess }}</div>
+        </form>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button pButton type="button" label="Close" class="p-button-secondary" (click)="closeOfferModal()" [disabled]="offerLoading"></button>
+      <button pButton type="button" label="Send Offer" class="p-button-success" (click)="submitOffer()" [disabled]="offerForm.invalid || offerLoading"></button>
+    </div>
+  </p-dialog>
+</div>

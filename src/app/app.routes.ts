@@ -68,6 +68,16 @@ export const routes: Routes = [
     component: SellerLayoutComponent,
     children: sellerRoutes,
   },
+    // Admin
+    {
+        path: 'admin',
+        component: AdminLayoutComponent
+    },
+    // Services
+    {
+      path: 'services',
+      loadChildren: () => import('./features/service/service.module').then(m => m.ServiceModule)
+    },
     //Auction
     {
         path: 'auctions',
