@@ -277,10 +277,8 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
       });
       this.chatService.sendTypingNotification(this.selectedConversation.conversationId);
     } else if (this.selectedUserForNewChat && this.currentUserId && !this.isCreatingConversation) {
-      // No conversation yet: create it, then send the message
       this.isCreatingConversation = true;
       this.chatService.createConversationSignalR(this.selectedUserForNewChat.userId);
-      // Wait for ConversationCreated event, then send the message
       const sub = this.chatService.getConversations$().subscribe(convs => {
         const conv = convs.find(c =>
           (c.user1Id === this.currentUserId && c.user2Id === this.selectedUserForNewChat!.userId) ||
@@ -289,13 +287,16 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
         if (conv) {
           this.selectedConversation = conv;
           this.selectedUserForNewChat = null;
-          this.chatService.sendMessageSignalR({
-            conversationId: conv.conversationId,
-            messageText
-          });
-          this.chatService.sendTypingNotification(conv.conversationId);
-          sub.unsubscribe();
-          this.isCreatingConversation = false;
+          // Wait a tick to ensure joinConversation is called in the ConversationCreated handler
+          setTimeout(() => {
+            this.chatService.sendMessageSignalR({
+              conversationId: conv.conversationId,
+              messageText
+            });
+            this.chatService.sendTypingNotification(conv.conversationId);
+            sub.unsubscribe();
+            this.isCreatingConversation = false;
+          }, 200); // 200ms delay to ensure group join
         }
       });
     }
