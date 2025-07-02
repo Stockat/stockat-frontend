@@ -242,12 +242,15 @@ export class ChatService {
     });
 
     this.hubConnection.on('ConversationCreated', (conversation: ChatConversationDto) => {
-      console.log('Received ConversationCreated event:', conversation);
+      console.log('Received ConversationCreated:', conversation);
       const current = this.conversations$.getValue();
-      // Check if conversation already exists to avoid duplicates
       const exists = current.some(c => c.conversationId === conversation.conversationId);
       if (!exists) {
+        console.log('Adding new conversation to sidebar:', conversation);
         this.conversations$.next([conversation, ...current]);
+        this.joinConversation(conversation.conversationId);
+      } else {
+        console.log('Conversation already exists in sidebar:', conversation.conversationId);
       }
     });
 

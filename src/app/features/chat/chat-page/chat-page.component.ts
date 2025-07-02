@@ -24,6 +24,7 @@ import { ToastModule } from 'primeng/toast';
 export class ChatPageComponent implements OnInit, AfterViewInit {
   conversations: ChatConversationDto[] = [];
   selectedConversation: ChatConversationDto | null = null;
+  selectedUserForNewChat: UserChatInfoDto | null = null;
   messages: ChatMessageDto[] = [];
   isTyping: boolean = false;
   typingUserName: string = '';
@@ -31,6 +32,7 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   currentUser: any = null;
   currentUserProfileImageUrl: string = 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc';
   defaultAvatar = 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc';
+  isCreatingConversation = false;
 
   constructor(
     private chatService: ChatService,
@@ -267,63 +269,43 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   }
 
   sendMessage(messageText: string) {
-    if (!this.selectedConversation || !this.currentUserId) {
-      return;
-    }
-    
-    // Don't send messages to temporary conversations (conversationId === 0)
-    if (this.selectedConversation.conversationId === 0) {
-      // Store the message to send it when the conversation is created
-      this.pendingMessage = messageText;
-      this.messageService.add({
-        severity: 'info',
-        summary: 'Creating conversation...',
-        detail: 'Your message will be sent once the conversation is ready.',
-        life: 3000
+    if (this.selectedConversation && this.currentUserId) {
+      // Existing conversation: send as usual
+      this.chatService.sendMessageSignalR({
+        conversationId: this.selectedConversation.conversationId,
+        messageText
       });
-      return;
+      this.chatService.sendTypingNotification(this.selectedConversation.conversationId);
+    } else if (this.selectedUserForNewChat && this.currentUserId && !this.isCreatingConversation) {
+      // No conversation yet: create it, then send the message
+      this.isCreatingConversation = true;
+      this.chatService.createConversationSignalR(this.selectedUserForNewChat.userId);
+      // Wait for ConversationCreated event, then send the message
+      const sub = this.chatService.getConversations$().subscribe(convs => {
+        const conv = convs.find(c =>
+          (c.user1Id === this.currentUserId && c.user2Id === this.selectedUserForNewChat!.userId) ||
+          (c.user2Id === this.currentUserId && c.user1Id === this.selectedUserForNewChat!.userId)
+        );
+        if (conv) {
+          this.selectedConversation = conv;
+          this.selectedUserForNewChat = null;
+          this.chatService.sendMessageSignalR({
+            conversationId: conv.conversationId,
+            messageText
+          });
+          this.chatService.sendTypingNotification(conv.conversationId);
+          sub.unsubscribe();
+          this.isCreatingConversation = false;
+        }
+      });
     }
-    
-    // Send via SignalR for real-time
-    this.chatService.sendMessageSignalR({
-      conversationId: this.selectedConversation.conversationId,
-      messageText
-    });
-    
-    // Send typing notification (optional, e.g. on send)
-    this.chatService.sendTypingNotification(this.selectedConversation.conversationId);
   }
 
   startChatWithUser(user: UserChatInfoDto) {
-    let conversation = this.conversations.find(conv =>
-      (conv.user1Id === user.userId || conv.user2Id === user.userId)
-    );
-    if (conversation) {
-      this.selectConversation(conversation);
-    } else {
-      // Use SignalR to create the conversation first
-      this.chatService.createConversationSignalR(user.userId);
-      
-      // Create a temporary conversation object for immediate UI feedback
-      const tempConversation: ChatConversationDto = {
-        conversationId: 0, // Temporary ID (will be replaced)
-        user1Id: this.currentUserId!,
-        user2Id: user.userId,
-        lastMessageAt: new Date().toISOString(),
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        messages: [],
-        lastMessage: null as any,
-        user1FullName: this.currentUser?.fullName || '',
-        user2FullName: user.fullName,
-        user1ProfileImageUrl: this.currentUser?.profileImageUrl || '',
-        user2ProfileImageUrl: user.profileImageUrl || ''
-      };
-      
-      // Add to conversations and select it immediately
-      this.conversations.unshift(tempConversation);
-      this.selectConversation(tempConversation);
-    }
+    // Only set the user, do not create a conversation or add to sidebar
+    this.selectedUserForNewChat = user;
+    this.selectedConversation = null;
+    this.messages = [];
   }
 
   getReceiverName(conv: ChatConversationDto | null): string {
