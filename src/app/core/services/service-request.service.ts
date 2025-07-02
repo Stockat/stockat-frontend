@@ -38,10 +38,14 @@ export class ServiceRequestService {
   }
 
   updateRequestStatus(requestId: number, status: string): Observable<any> {
-    return this.http.patch(`${this.baseUrl}/${requestId}/status/update`, { status });
+    return this.http.patch(`${this.baseUrl}/${requestId}/status/update`, { status:status });
   }
 
   getServiceIdsWithPendingRequests(): Observable<number[]> {
     return this.http.get<number[]>(`${this.baseUrl}/buyer/pending-services`);
+  }
+
+  cancelRequest(requestId: number): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/${requestId}/buyer-cancel`, {});
   }
 }

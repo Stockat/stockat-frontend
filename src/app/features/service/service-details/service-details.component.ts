@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Service } from '../../../core/models/service-models/service.dto';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ServiceService } from '../../../core/services/service.service';
 import { CommonModule } from '@angular/common';
 import { RequestModalComponent } from '../request-modal/request-modal.component';
@@ -22,7 +22,8 @@ export class ServiceDetailsComponent {
   constructor(
     private route: ActivatedRoute,
     private serviceService: ServiceService,
-    private requestService: ServiceRequestService
+    private requestService: ServiceRequestService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -43,5 +44,9 @@ export class ServiceDetailsComponent {
   onRequestSubmitted() {
     this.hasPendingRequest = true;
     this.isModalOpen = false;
+  }
+
+  goBackToServices() {
+    this.router.navigate(['/services']);
   }
 }

@@ -17,15 +17,34 @@
       </div>
     </div>
     <h4 class="text-lg font-semibold mb-4 text-gray-800">Buyer Requests</h4>
-    <p-table [value]="requests" [paginator]="true" [rows]="5" *ngIf="requests && requests.length > 0" class="shadow rounded-xl">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+      <div class="flex gap-2 items-center bg-white rounded shadow px-3 py-2 border border-gray-200">
+        <i class="pi pi-search text-gray-400 text-lg"></i>
+        <input pInputText type="text" [(ngModel)]="searchText" placeholder="Search by buyer name..." class="p-inputtext-sm w-64 border-0 focus:ring-0 outline-none" />
+      </div>
+      <div class="flex gap-4 items-center bg-white rounded shadow px-3 py-2 border border-gray-200">
+        <div class="flex gap-2 items-center">
+          <label class="font-medium text-gray-700">Status:</label>
+          <p-dropdown [options]="statusFilterOptions" [(ngModel)]="statusFilter" placeholder="All" [showClear]="true" class="p-dropdown-sm w-32"></p-dropdown>
+        </div>
+        <div class="flex gap-2 items-center">
+          <label class="font-medium text-gray-700">Approval:</label>
+          <p-dropdown [options]="approvalFilterOptions" [(ngModel)]="approvalFilter" placeholder="All" [showClear]="true" class="p-dropdown-sm w-32"></p-dropdown>
+        </div>
+      </div>
+    </div>
+    <p-table [value]="filteredRequests()" [paginator]="true" [rows]="5" *ngIf="filteredRequests().length > 0" class="shadow rounded-xl">
       <ng-template pTemplate="header">
         <tr>
           <th>Buyer</th>
           <th>Quantity</th>
           <th>Status</th>
+          <th>Buyer Approval</th>
           <th>Offer Price</th>
+          <th>Total Price</th>
           <th>Offer Time</th>
-          <th>Actions</th>
+          <th>Description</th>
+          <th class="text-center align-middle" style="vertical-align: middle; text-align: center;">Actions</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-request>
@@ -40,18 +59,61 @@
             }">{{ request.serviceStatus }}</span>
           </td>
           <td>
+            <span [ngClass]="{
+              'bg-yellow-50 text-yellow-700 px-2 py-1 rounded text-xs': request.buyerApprovalStatus === 'Pending',
+              'bg-green-50 text-green-700 px-2 py-1 rounded text-xs': request.buyerApprovalStatus === 'Approved',
+              'bg-red-50 text-red-700 px-2 py-1 rounded text-xs': request.buyerApprovalStatus === 'Rejected'
+            }">{{ request.buyerApprovalStatus || 'N/A' }}</span>
+          </td>
+          <td>
             <span *ngIf="request.pricePerProduct != null && request.pricePerProduct !== 0; else notSet">{{ request.pricePerProduct }}</span>
             <ng-template #notSet><span class="text-gray-400 italic">Not set</span></ng-template>
+          </td>
+          <td>
+            <span *ngIf="request.pricePerProduct != null && request.pricePerProduct !== 0 && request.requestedQuantity != null && request.requestedQuantity !== 0; else notSetTotal">
+              {{ request.totalPrice | number:'1.2-2' }}
+            </span>
+            <ng-template #notSetTotal><span class="text-gray-400 italic">Not set</span></ng-template>
           </td>
           <td>
             <span *ngIf="request.estimatedTime; else notSetTime">{{ request.estimatedTime }}</span>
             <ng-template #notSetTime><span class="text-gray-400 italic">Not set</span></ng-template>
           </td>
           <td>
-            <button pButton label="Set Offer" class="p-button-sm p-button-success" (click)="openOfferModal(request)"
-              *ngIf="request.serviceStatus !== 'Approved'"
-              [disabled]="request.pricePerProduct != null && request.estimatedTime">
-            </button>
+            <button pButton type="button" icon="pi pi-info-circle" class="p-button-xs p-button-rounded p-button-info" (click)="openDescriptionModal(request)" pTooltip="View Description" tooltipPosition="top"></button>
+          </td>
+          <td class="text-center align-middle">
+            <div class="inline-flex flex-col md:flex-row md:items-center gap-2 justify-center">
+              <button pButton label="Set Offer" class="p-button-sm p-button-success" (click)="openOfferModal(request)"
+                [disabled]="!canSetOffer(request)"
+                [pTooltip]="getSetOfferTooltip(request)"
+                tooltipPosition="top">
+              </button>
+              <span class="relative inline-block">
+                <button pButton label="View Updates" class="p-button-sm p-button-info" (click)="openUpdatesModal(request)"
+                  [disabled]="request.buyerApprovalStatus !== 'Approved'"
+                  [pTooltip]="getViewUpdatesTooltip(request)"
+                  tooltipPosition="top">
+                </button>
+                <span *ngIf="getPendingUpdatesCount(request) > 0"
+                  class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 border border-white shadow">
+                  {{ getPendingUpdatesCount(request) }}
+                </span>
+              </span>
+              <div class="flex items-center gap-1">
+                <p-dropdown [options]="requestStatusOptions"
+                  [(ngModel)]="request._newStatus"
+                  [style]="{width: '140px', minWidth: '120px', maxWidth: '180px'}"
+                  [autoDisplayFirst]="false"
+                  [showClear]="false"
+                  [disabled]="request.buyerApprovalStatus !== 'Approved'"
+                  [ngClass]="'p-dropdown-sm'"
+                  [appendTo]="'body'"
+                  placeholder="Change Status">
+                </p-dropdown>
+                <button pButton type="button" icon="pi pi-check" class="p-button-xs p-button-rounded p-button-primary" (click)="changeRequestStatus(request)" [disabled]="request._newStatus === request.serviceStatus || request.buyerApprovalStatus !== 'Approved'" pTooltip="Save Status" tooltipPosition="top"></button>
+              </div>
+            </div>
           </td>
         </tr>
       </ng-template>
@@ -85,6 +147,57 @@
     <div class="flex justify-end gap-2 mt-4">
       <button pButton type="button" label="Close" class="p-button-secondary" (click)="closeOfferModal()" [disabled]="offerLoading"></button>
       <button pButton type="button" label="Send Offer" class="p-button-success" (click)="submitOffer()" [disabled]="offerForm.invalid || offerLoading"></button>
+    </div>
+  </p-dialog>
+  <!-- Updates Modal -->
+  <p-dialog [(visible)]="updatesModalVisible" [modal]="true" [closable]="true" [style]="{width: '600px'}" (onHide)="closeUpdatesModal()">
+    <ng-template pTemplate="header">
+      <span>Request Updates</span>
+    </ng-template>
+    <div *ngIf="selectedUpdatesRequest">
+      <div class="font-semibold mb-2 text-pink-700 flex items-center gap-2">
+        <span>Updates for {{ selectedUpdatesRequest.buyerName }}</span>
+        <i *ngIf="selectedUpdatesRequest.updatesLoading" class="pi pi-spin pi-spinner text-pink-700"></i>
+      </div>
+      <div *ngIf="selectedUpdatesRequest.updatesLoading" class="text-pink-700">Loading updates...</div>
+      <div *ngIf="!selectedUpdatesRequest.updatesLoading && selectedUpdatesRequest.updates && selectedUpdatesRequest.updates.length > 0">
+        <div *ngFor="let update of selectedUpdatesRequest.updates" class="mb-2 p-3 rounded border border-pink-200 bg-white flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+          <div>
+            <span *ngIf="update.additionalPrice" class="text-pink-700 font-semibold mr-2">+${{ update.additionalPrice }}</span>
+            <span *ngIf="update.additionalQuantity" class="text-blue-700 font-semibold mr-2">+{{ update.additionalQuantity }}</span>
+            <span *ngIf="update.additionalTime" class="text-purple-700 font-semibold mr-2">{{ update.additionalTime }}</span>
+            <span *ngIf="update.additionalNote && update.additionalNote.trim() !== ''" class="block italic text-gray-700 bg-pink-50 rounded p-1 border-l-4 border-pink-300 mt-1">{{ update.additionalNote }}</span>
+          </div>
+          <div class="flex gap-2 items-center">
+            <span class="text-xs font-bold px-2 py-1 rounded-full"
+              [ngClass]="{
+                'bg-yellow-100 text-yellow-800': update.status === 'Pending',
+                'bg-green-100 text-green-800': update.status === 'Approved',
+                'bg-red-100 text-red-800': update.status === 'Rejected'
+              }">
+              {{ update.status }}
+            </span>
+            <button *ngIf="update.status === 'Pending'" pButton type="button" label="Accept" class="p-button-xs p-button-success" (click)="acceptUpdate(update)"></button>
+            <button *ngIf="update.status === 'Pending'" pButton type="button" label="Reject" class="p-button-xs p-button-danger" (click)="rejectUpdate(update)"></button>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="!selectedUpdatesRequest.updatesLoading && (!selectedUpdatesRequest.updates || selectedUpdatesRequest.updates.length === 0)" class="text-gray-400 italic">No updates for this request.</div>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button pButton type="button" label="Close" class="p-button-secondary" (click)="closeUpdatesModal()"></button>
+    </div>
+  </p-dialog>
+  <!-- Description Modal -->
+  <p-dialog [(visible)]="descriptionModalVisible" [modal]="true" [closable]="true" [style]="{width: '400px'}" (onHide)="closeDescriptionModal()">
+    <ng-template pTemplate="header">
+      <span>Request Description</span>
+    </ng-template>
+    <div *ngIf="selectedDescriptionRequest">
+      <div class="mb-2 text-gray-700 whitespace-pre-line">{{ selectedDescriptionRequest.requestDescription || 'No description provided.' }}</div>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button pButton type="button" label="Close" class="p-button-secondary" (click)="closeDescriptionModal()"></button>
     </div>
   </p-dialog>
 </div>
