@@ -8,6 +8,7 @@ import { AuthResponseDto, TokenDto } from '../models/auth-models/auth-response.d
 import { ExternalAuthDto } from '../models/auth-models/external-auth.dto';
 import { ForgotPasswordDto } from '../models/auth-models/forgot-password.dto';
 import { ResetPasswordDto } from '../models/auth-models/reset-password.dto';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -114,5 +115,18 @@ export class AuthService {
         error: (err) => observer.error(err)
       });
     });
+  }
+
+  getCurrentUserId(): string | null {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return null;
+    try {
+      const decoded: any = jwtDecode(token);
+      console.log('Decoded JWT:', decoded);
+      console.log('Current user ID:', decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']);
+      return decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] || null;
+    } catch {
+      return null;
+    }
   }
 }

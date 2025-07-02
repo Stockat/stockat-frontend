@@ -44,17 +44,17 @@ export class ChatService {
 
   sendImageMessage(dto: SendImageMessageDto): Observable<ChatMessageDto> {
     const formData = new FormData();
-    formData.append('conversationId', dto.conversationId.toString());
-    if (dto.messageText) formData.append('messageText', dto.messageText);
-    formData.append('image', dto.image);
+    formData.append('ConversationId', dto.conversationId.toString());
+    if (dto.messageText) formData.append('MessageText', dto.messageText);
+    formData.append('Image', dto.image);
     return this.http.post<ChatMessageDto>(`${this.baseUrl}/messages/image`, formData);
   }
 
   sendVoiceMessage(dto: SendVoiceMessageDto): Observable<ChatMessageDto> {
     const formData = new FormData();
-    formData.append('conversationId', dto.conversationId.toString());
-    if (dto.messageText) formData.append('messageText', dto.messageText);
-    formData.append('voice', dto.voice);
+    formData.append('ConversationId', dto.conversationId.toString());
+    if (dto.messageText) formData.append('MessageText', dto.messageText);
+    formData.append('Voice', dto.voice);
     return this.http.post<ChatMessageDto>(`${this.baseUrl}/messages/voice`, formData);
   }
 

@@ -1,6 +1,6 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, SimpleChanges, OnChanges, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChatMessageDto } from '../../../core/models/chatmodels/chat-models';
+import { ChatMessageDto, UserChatInfoDto } from '../../../core/models/chatmodels/chat-models';
 import { AvatarModule } from 'primeng/avatar';
 import { ButtonModule } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
@@ -12,10 +12,51 @@ import { BadgeModule } from 'primeng/badge';
   templateUrl: './chat-window.component.html',
   styleUrls: ['./chat-window.component.css']
 })
-export class ChatWindowComponent {
+export class ChatWindowComponent implements OnChanges, AfterViewInit {
   @Input() messages: ChatMessageDto[] = [];
+  @Input() currentUserId: string | null = null;
   @Output() sendMessage = new EventEmitter<string>();
   @Output() reactToMessage = new EventEmitter<{ messageId: number, reaction: string }>();
   @Output() replyToMessage = new EventEmitter<{ messageId: number, content: string }>();
   @Output() deleteMessage = new EventEmitter<number>();
+
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef;
+
+  quickEmojis = ['👍', '❤️', '😂'];
+  allEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏', '🎉', '🔥', '👏', '😡'];
+  showEmojiPickerFor: number | null = null;
+
+  ngAfterViewInit() {
+    this.scrollToBottom();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['currentUserId']) {
+      console.log('ChatWindowComponent currentUserId:', this.currentUserId);
+    }
+    if (changes['messages']) {
+      console.log('ChatWindowComponent messages:', this.messages);
+      this.scrollToBottom();
+    }
+  }
+
+  scrollToBottom() {
+    try {
+      if (this.scrollContainer && this.scrollContainer.nativeElement) {
+        this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
+      }
+    } catch {}
+  }
+
+  isOwnMessage(message: ChatMessageDto): boolean {
+    console.log('Message sender:', message.sender);
+    return message.sender?.userId === this.currentUserId;
+  }
+
+  openEmojiPicker(messageId: number) {
+    this.showEmojiPickerFor = messageId;
+  }
+  closeEmojiPicker() {
+    this.showEmojiPickerFor = null;
+  }
 }

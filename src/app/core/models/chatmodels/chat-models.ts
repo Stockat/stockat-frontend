@@ -2,7 +2,7 @@
 export interface UserChatInfoDto {
   userId: string;
   fullName: string;
-  profileImageUrl: string;
+  profileImageUrl?: string;
 }
 
 // SendMessageDto: Send a text message
@@ -59,15 +59,21 @@ export interface ChatConversationDto {
   conversationId: number;
   user1Id: string;
   user2Id: string;
-  user1FullName: string;
-  user2FullName: string;
-  user1ProfileImageUrl?: string;
-  user2ProfileImageUrl?: string;
   lastMessageAt?: string; // ISO string | null
   isActive: boolean;
   createdAt: string; // ISO string
   messages: ChatMessageDto[];
   lastMessage: ChatMessageDto;
+  // User info properties
+  user1FullName: string;
+  user2FullName: string;
+  user1ProfileImageUrl?: string;
+  user2ProfileImageUrl?: string;
+}
+
+// CreateConversationDto: DTO for creating a new conversation
+export interface CreateConversationDto {
+  user2Id: string;
 }
 
 // ChatReactionDto represents a reaction to a message

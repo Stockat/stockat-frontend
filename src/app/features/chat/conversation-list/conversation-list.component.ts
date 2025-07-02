@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatConversationDto, UserChatInfoDto, ChatMessageDto } from '../../../core/models/chatmodels/chat-models';
+import { ChatConversationDto, ChatMessageDto, UserChatInfoDto } from '../../../core/models/chatmodels/chat-models';
 import { ChatService } from '../../../core/services/chat.service';
 
 @Component({
@@ -14,13 +14,25 @@ import { ChatService } from '../../../core/services/chat.service';
 export class ConversationListComponent {
   @Input() conversations: ChatConversationDto[] = [];
   @Input() selectedConversationId: string | null = null;
+  @Input() currentUserId: string | null = null;
   @Output() selectConversation = new EventEmitter<ChatConversationDto>();
   @Output() startChat = new EventEmitter<UserChatInfoDto>();
 
   searchQuery = '';
   searchResults: UserChatInfoDto[] = [];
+  defaultProfileImageUrl = 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc';
 
   constructor(private chatService: ChatService) {}
+
+  get filteredConversations() {
+    return this.conversations
+      .filter(c => (c.messages && c.messages.length > 0) || c.lastMessage)
+      .sort((a, b) => {
+        const aTime = a.lastMessage?.sentAt || a.lastMessageAt || '';
+        const bTime = b.lastMessage?.sentAt || b.lastMessageAt || '';
+        return bTime.localeCompare(aTime);
+      });
+  }
 
   onSelect(conversation: ChatConversationDto) {
     this.selectConversation.emit(conversation);
@@ -43,11 +55,23 @@ export class ConversationListComponent {
   }
 
   getUnreadCount(conv: ChatConversationDto): number {
-    if (!conv.messages) return 0;
-    return conv.messages.filter((m: ChatMessageDto) => !m.isRead).length;
+    if (!conv.messages || !this.currentUserId) return 0;
+    return conv.messages.filter((m: ChatMessageDto) => !m.isRead && m.sender.userId !== this.currentUserId).length;
   }
 
   loadMore() {
     // TODO: Implement pagination logic for loading more conversations
+  }
+
+  getOtherUserName(conv: ChatConversationDto): string {
+    if (!this.currentUserId) return '';
+    if (conv.user1Id === conv.user2Id) return conv.user1FullName; // self-chat
+    return conv.user1Id === this.currentUserId ? conv.user2FullName : conv.user1FullName;
+  }
+
+  getOtherUserProfileImage(conv: ChatConversationDto): string | undefined {
+    if (!this.currentUserId) return this.defaultProfileImageUrl;
+    if (conv.user1Id === conv.user2Id) return conv.user1ProfileImageUrl || this.defaultProfileImageUrl; // self-chat
+    return conv.user1Id === this.currentUserId ? (conv.user2ProfileImageUrl || this.defaultProfileImageUrl) : (conv.user1ProfileImageUrl || this.defaultProfileImageUrl);
   }
 }

@@ -4,6 +4,7 @@
     <app-conversation-list
       [conversations]="conversations"
       [selectedConversationId]="selectedConversation ? selectedConversation.conversationId.toString() : null"
+      [currentUserId]="currentUserId"
       (selectConversation)="selectConversation($event)"
       (startChat)="startChatWithUser($event)">
     </app-conversation-list>
@@ -12,13 +13,15 @@
   <!-- Main Chat Area -->
   <main class="flex-1 flex flex-col">
     <header class="chat-header p-4 border-b border-gray-200 bg-white" *ngIf="selectedConversation">
-      <div class="chat-title text-lg font-semibold">
-        {{ selectedConversation?.user1FullName }} &amp; {{ selectedConversation?.user2FullName }}
+      <div class="chat-title flex items-center gap-3">
+        <p-avatar [image]="getReceiverImage(selectedConversation)" shape="circle" size="large"></p-avatar>
+        <div class="text-lg font-semibold">
+          {{ getReceiverName(selectedConversation) }}
+        </div>
       </div>
-      <div class="chat-members text-xs text-gray-500">2 members</div>
     </header>
     <section class="flex-1 overflow-y-auto bg-gray-50">
-      <app-chat-window [messages]="messages"></app-chat-window>
+      <app-chat-window [messages]="messages" [currentUserId]="currentUserId"></app-chat-window>
       <div *ngIf="isTyping" class="typing-indicator px-4 py-2 text-xs text-gray-400">Someone is typing...</div>
     </section>
     <footer class="chat-input p-4 bg-white border-t border-gray-200">
