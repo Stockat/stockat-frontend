@@ -72,7 +72,8 @@
         </ng-template>
 
         <ng-template #subtitle>
-          <span class="text-sm text-gray-500">Electronics • Noise Cancelling Fixed Category</span>
+          <span class="text-sm text-gray-500">{{product?.categoryName}}</span>
+          <span class="text-sm text-gray-500 block">Soldby : {{product?.sellerName}}</span>
         </ng-template>
 
         <p class="text-gray-700 mt-5">

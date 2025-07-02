@@ -12,6 +12,14 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { FileUploadModule } from 'primeng/fileupload';
 import { ProductService } from '../../../../core/services/product.service';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { SharedService } from '../../../../shared/utils/shared.service';
+import { CategoryService } from '../../../../core/services/category.service';
+import { CategoryDto } from '../../../../core/models/category-models/categoryDto';
+import { from } from 'rxjs';
+import { ProductDto } from '../../../../core/models/product-models/productDto';
+import { AddProductDto } from '../../../../core/models/product-models/addProductDto';
+import { TagService } from '../../../../core/services/tag.service';
+import { tagdto } from '../../../../core/models/tag-models/tagDto';
 @Component({
   selector: 'app-addproduct',
   imports: [GalleriaModule,CardModule,ButtonModule,FloatLabelModule,
@@ -25,8 +33,20 @@ export class AddproductComponent {
 
   productForm:FormGroup
   maxFeature=5;
+  productDto: AddProductDto = {
+    name: '',
+    description: '',
+    price: 0,
+    minQuantity: 0,
+    categoryId: 0,
+    sellerId: '',
+    location: '',
+    features: [],
+    productTags: []
+  };
 
-  constructor(private productServ:ProductService){
+  constructor(private productServ:ProductService,private sharedServ:SharedService,
+              private categoryServ:CategoryService,private tagServ:TagService){
     this.productForm = new FormGroup({
       title: new FormControl("", [Validators.required, Validators.minLength(3), Validators.maxLength(50)]),
       category: new FormControl("", [Validators.required]),
@@ -35,22 +55,39 @@ export class AddproductComponent {
       location: new FormControl("", [Validators.required]),
       features: new FormArray([],[Validators.required]),
       tags: new FormControl([],[Validators.required]),
-      images: new FormControl([],[Validators.required]),
+      images: new FormControl<File[]>([], Validators.required),
   })}
 
   value1: string = "";
   images: string[] = [];
+  extractedimages: File[] = [];
   cities:any = [];
+  categories:CategoryDto[] = [];
+  tags:tagdto[] = [];
   selectedCity: any;
   ngOnInit() {
 
-    this.cities = [
-      { name: 'New York', code: 'NY' },
-      { name: 'Rome', code: 'RM' },
-      { name: 'London', code: 'LDN' },
-      { name: 'Istanbul', code: 'IST' },
-      { name: 'Paris', code: 'PRS' }
-  ];
+    this.cities = this.sharedServ.governorates;
+
+    this.categoryServ.getAllCategories().subscribe({
+      next: (response) => {
+        console.log("Categories fetched successfully:", response.data);
+        this.categories = response.data;
+      },
+      error: (error) => {
+        console.error("Error fetching categories:", error);
+      }
+    })
+
+    this.tagServ.getAllTags().subscribe({
+      next: (response) => {
+        console.log("Tags fetched successfully:", response.data);
+        this.tags = response.data;
+      },
+      error: (error) => {
+        console.error("Error fetching tags:", error);
+      }
+    })
 
     this.images = ["../../../../assets/1.png",
       "../../../../assets/2.png",
@@ -62,7 +99,51 @@ export class AddproductComponent {
 
 
   addproduct(){
+    const formData = new FormData();
+
+// Add images
+//*
+const wrappedImages = this.productForm.get("images")?.value || [];
+const files: File[] = wrappedImages.map((img: any) => img.file); // ✅ This fixes the issue
+
+files.forEach((file) => {
+  formData.append('images', file);
+});
+
+console.log("Images added to formData:", formData.getAll('images'));
+//*
+
+
     console.log(this.productForm.value);
+    this.productDto.name = this.productForm.get("title")?.value
+    this.productDto.categoryId = this.productForm.get("category")?.value
+    this.productDto.price = this.productForm.get("price")?.value
+    this.productDto.minQuantity = this.productForm.get("minQuantity")?.value
+    this.productDto.location = this.productForm.get("location")?.value
+    this.productDto.sellerId ="64c5d9f7-690e-42d4-b035-1945ab3476db"
+    this.productDto.productTags = this.productForm.get("tags")?.value.map((tagId: number) => ({ tagId }));
+    this.productDto.features = this.productDto.features = this.productForm.get("features")?.value.map((feature: any) => ({
+      name: feature.key,
+      featureValues: feature.values.map((value: string) => ({ name: value }))
+    }));
+
+    formData.append('productJson', JSON.stringify(this.productDto));
+
+
+
+    this.productServ.addProduct(formData).subscribe({
+      next: (response) => {
+        console.log("Product added successfully:", response.data);
+        // Handle success response, e.g., navigate to product list or show a success message
+      },
+      error: (error) => {
+        console.error("Error adding product:", error);
+        // Handle error response, e.g., show an error message
+      }
+    })
+
+
+    console.log(this.productDto);
   }
 
 
@@ -97,7 +178,7 @@ addFeatureValue(featureIndex: number): void {
 
 
 //* img
-uploadedImages: { file: File, preview: string }[] = [];
+uploadedImages: { file: File }[] = [];
 
 onSelect(event: any) {
   for (let file of event.files) {
@@ -105,7 +186,6 @@ onSelect(event: any) {
     reader.onload = (e: any) => {
       const image = {
         file,
-        preview: e.target.result
       };
       this.uploadedImages.push(image);
 
@@ -128,7 +208,27 @@ onRemove(event: any) {
   this.productForm.patchValue({ images: this.uploadedImages });
 }
 
+// onUpload(){
+//   console.log("Uploaded Images: ");
+//   this.productServ.uploadImgages(this.uploadedImages.map(img => img.file)).subscribe({
+//     next: (response) => {
+//       console.log("Images uploaded successfully:", response);
 
+//      if(response.data.length > 0) {
+//       response.data.forEach((img) => {
+//         console.log(`Image URL: ${img.Url}, File ID: ${img.FileId}`);
+//       });
+//      }else{
+//         console.log("No images uploaded.");
+//      }
+
+//     },
+//     error: (error) => {
+//       console.error("Error uploading images:", error);
+//       // Handle error response
+//     }
+//   })
+// }
 
   //! End Of Component
 }

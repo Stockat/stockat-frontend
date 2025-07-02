@@ -10,12 +10,17 @@ import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 
 //* Angular Imports
 import { CurrencyPipe, DatePipe, TitleCasePipe } from '@angular/common';
+import { Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 
 //* Services & DTOs
 import { ProductService } from '../../../core/services/product.service';
 import { ProductFilters } from '../../../core/models/product-models/product-filters';
 import { ProductDto } from '../../../core/models/product-models/productDto';
 import { RouterOutlet } from '@angular/router';
+import { SharedService } from '../../../shared/utils/shared.service';
+import { CategoryService } from '../../../core/services/category.service';
+import { TagService } from '../../../core/services/tag.service';
 
 interface City {
   name: string;
@@ -33,7 +38,8 @@ interface City {
     InputNumberModule,
     PaginatorModule,
     CurrencyPipe,
-    RouterOutlet
+    RouterOutlet,
+    RouterModule
   ],
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.css',
@@ -42,10 +48,15 @@ export class ProductCardComponent {
 
   products:[ProductDto] | undefined ;
 
+  //* Filters Holders
+  categories:any = [];
+  tags:any = [];
+  cities:any = [];
+
+
   first: number = 0;
   rows: number = 4;
   totalRecords: number = 0;
-  cities: City[] | undefined;
 
   SelectedPrice: number = 1;
   SelectedMinQty: number = 1;
@@ -62,17 +73,33 @@ export class ProductCardComponent {
   }
 
 
-  constructor(private productService: ProductService) {}
+  constructor(private productService: ProductService,private sharedServ:SharedService,
+    private categoryServ:CategoryService,private tagServ:TagService) {}
 
   ngOnInit() {
-    this.cities = [
-      { name: 'New York', code: 'NY' },
-      { name: 'Rome', code: 'RM' },
-      { name: 'London', code: 'LDN' },
-      { name: 'Istanbul', code: 'IST' },
-      { name: 'Paris', code: 'PRS' },
-    ];
+    this.cities = this.sharedServ.governorates;
     this.getProducts();
+
+    this.categoryServ.getAllCategories().subscribe({
+      next: (response) => {
+        console.log("Categories fetched successfully:", response.data);
+        this.categories = response.data;
+      },
+      error: (error) => {
+        console.error("Error fetching categories:", error);
+      }
+    })
+
+    this.tagServ.getAllTags().subscribe({
+      next: (response) => {
+        console.log("Tags fetched successfully:", response.data);
+        this.tags = response.data;
+      },
+      error: (error) => {
+        console.error("Error fetching tags:", error);
+      }
+    })
+
   }
 
 
@@ -97,11 +124,18 @@ export class ProductCardComponent {
   }
 
   setFilters(){
+
+    console.log("Location", this.selectedCity);
+    console.log("category", this.selectedCategory);
+    console.log("Tags", this.selectedTags);
+
     this.filters.location = this.selectedCity ;
     this.filters.category = this.selectedCategory;
     this.filters.tags = this.selectedTags;
     this.filters.minQuantity = this.SelectedMinQty;
     this.filters.minPrice = this.SelectedPrice;
+
+    console.log("-*****-",this.filters);
 
     this.getProducts();
 
