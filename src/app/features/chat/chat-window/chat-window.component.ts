@@ -27,6 +27,7 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
   allEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏', '🎉', '🔥', '👏', '😡'];
   showEmojiPickerFor: number | null = null;
   private shouldScroll = false;
+  selectedMessageId: number | null = null;
 
   constructor(private cdr: ChangeDetectorRef) {}
 
@@ -70,5 +71,13 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
   }
   closeEmojiPicker() {
     this.showEmojiPickerFor = null;
+  }
+
+  onMessageClick(msg: ChatMessageDto) {
+    if (this.selectedMessageId === msg.messageId) {
+      this.selectedMessageId = null;
+    } else {
+      this.selectedMessageId = msg.messageId;
+    }
   }
 }

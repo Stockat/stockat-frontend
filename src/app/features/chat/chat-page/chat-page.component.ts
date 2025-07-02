@@ -126,11 +126,19 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
       // Update sidebar last message for this conversation
       const convIndex = this.conversations.findIndex(c => c.conversationId === msg.conversationId);
       if (convIndex !== -1) {
+        // Update lastMessage and lastMessageAt
         this.conversations[convIndex] = {
           ...this.conversations[convIndex],
           lastMessage: msg,
-          lastMessageAt: msg.sentAt
+          lastMessageAt: msg.sentAt,
+          // Also update messages array if present
+          messages: [
+            ...this.conversations[convIndex].messages.filter(m => m.messageId !== msg.messageId),
+            msg
+          ].sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime())
         };
+        // Replace array reference to trigger change detection
+        this.conversations = [...this.conversations];
       }
 
       // Patch sender if null to prevent runtime errors
@@ -247,29 +255,32 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   }
 
   selectConversation(conversation: ChatConversationDto) {
-    // Clear typing indicator when switching conversations
-    this.isTyping = false;
-    this.typingUserName = '';
-    
     this.selectedConversation = conversation;
-    
-    // Set current conversation context for typing events
-    this.chatService.setCurrentConversation(conversation.conversationId);
-    
-    this.chatService.getMessages(conversation.conversationId).subscribe((msgs: ChatMessageDto[]) => {
-      this.messages = msgs.sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
-      setTimeout(() => this.scrollToBottom(), 0);
-      // Mark all unread messages as read
-      for (const msg of this.messages) {
-        if (msg.sender.userId !== this.currentUserId && !msg.isRead) {
-          this.chatService.markMessageAsReadSignalR(msg.messageId);
+    this.messages = conversation.messages ? [...conversation.messages] : [];
+    // Mark all unread messages from the other user as read
+    if (this.currentUserId && conversation.messages) {
+      let updated = false;
+      const updatedMessages = conversation.messages.map(m => {
+        if (!m.isRead && m.sender.userId !== this.currentUserId) {
+          updated = true;
+          // Optionally, call backend to mark as read here
+          this.chatService.markMessageAsReadSignalR(m.messageId);
+          return { ...m, isRead: true };
+        }
+        return m;
+      });
+      if (updated) {
+        // Update the conversation's messages and replace array reference
+        const convIdx = this.conversations.findIndex(c => c.conversationId === conversation.conversationId);
+        if (convIdx !== -1) {
+          this.conversations[convIdx] = {
+            ...this.conversations[convIdx],
+            messages: updatedMessages
+          };
+          this.conversations = [...this.conversations];
         }
       }
-    });
-    if (conversation.lastMessage) {
-      this.chatService.markMessageAsReadSignalR(conversation.lastMessage.messageId);
     }
-    setTimeout(() => this.scrollToBottom(), 0);
   }
 
   scrollToBottom() {

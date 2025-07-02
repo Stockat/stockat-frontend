@@ -7,11 +7,12 @@
                 [image]="msg.sender?.profileImageUrl || 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc'" shape="circle" size="large" class="mr-2"></p-avatar>
       
       <!-- Message bubble -->
-      <div class="max-w-xs md:max-w-md p-3 rounded-lg shadow text-sm"
+      <div class="max-w-xs md:max-w-md p-3 rounded-lg shadow text-sm relative"
            [ngClass]="{
              'bg-blue-500 text-white': isOwnMessage(msg),
              'bg-gray-100 text-gray-800': !isOwnMessage(msg)
-           }">
+           }"
+           (click)="onMessageClick(msg)">
         <div class="flex items-center gap-2 mb-1" *ngIf="!isOwnMessage(msg)">
           <span class="font-semibold text-xs">{{ msg.sender?.fullName }}</span>
           <span class="text-xs" [ngClass]="{'text-gray-400': !isOwnMessage(msg), 'text-blue-100': isOwnMessage(msg)}">
@@ -25,6 +26,10 @@
           <span class="read-indicator" [ngClass]="{'read': msg.isRead}">
             <ng-container *ngIf="msg.isRead; else notRead">&#10003;&#10003;</ng-container>
             <ng-template #notRead>&#10003;</ng-template>
+          </span>
+          <!-- ReadAt beside check marks -->
+          <span *ngIf="selectedMessageId === msg.messageId && msg.readAt" class="ml-2 text-xs text-gray-500 bg-white px-2 py-1 rounded shadow border border-gray-200">
+            Read at: {{ msg.readAt | date:'shortTime' }}
           </span>
         </div>
         <div *ngIf="msg.messageText">{{ msg.messageText || '' }}</div>
