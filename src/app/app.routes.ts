@@ -6,6 +6,7 @@ import { SellerLayoutComponent } from './layouts/seller-layout/seller-layout.com
 import { sellerRoutes } from './features/seller/seller.routes';
 import { ProductCardComponent } from './features/Home/product-card/product-card.component';
 import { ProductDetailsComponent } from './features/ProductDetails/product-details/product-details.component';
+import { ServiceRequestDetailsComponent } from './features/profile/service-request-details.component';
 
 export const routes: Routes = [
   {
@@ -56,6 +57,9 @@ export const routes: Routes = [
       import('./features/profile/profile.component').then(
         (m) => m.ProfileComponent
       ),
+    children: [
+      { path: 'requests/:id', component: ServiceRequestDetailsComponent }
+    ]
   },
   // Admin
   {
