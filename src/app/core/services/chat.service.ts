@@ -15,7 +15,7 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private hubConnection: HubConnection | null = null;
+  public hubConnection: HubConnection | null = null;
   private baseUrl = 'http://localhost:5250/api/chat';
 
   // Observables for real-time updates
@@ -24,10 +24,18 @@ export class ChatService {
   private unreadCount$ = new BehaviorSubject<number>(0);
   private messageSubject = new BehaviorSubject<ChatMessageDto | null>(null);
   public message$ = this.messageSubject.asObservable();
-  private typingSubject = new BehaviorSubject<{ conversationId: string, userId: string } | null>(null);
+  private typingSubject = new BehaviorSubject<{ conversationId: number, userId: string } | null>(null);
   public typing$ = this.typingSubject.asObservable();
+  
+  // Track current conversation for typing events
+  private currentConversationId: number = 0;
 
   constructor(private http: HttpClient) {}
+
+  // Method to set current conversation context for typing events
+  setCurrentConversation(conversationId: number) {
+    this.currentConversationId = conversationId;
+  }
 
   // REST API methods
   getConversations(page = 1, pageSize = 20): Observable<ChatConversationDto[]> {
@@ -90,8 +98,23 @@ export class ChatService {
       .withUrl('http://localhost:5250/chathub', { accessTokenFactory: () => token })
       .withAutomaticReconnect()
       .build();
-    this.hubConnection.start().catch((err: any) => console.error('SignalR Connection Error:', err));
+    this.hubConnection.start()
+      .then(() => console.log('SignalR connected!'))
+      .catch((err: any) => console.error('SignalR Connection Error:', err));
     this.registerSignalREvents();
+    
+    // Handle connection state changes
+    this.hubConnection.onclose((error) => {
+      console.log('SignalR connection closed:', error);
+    });
+    
+    this.hubConnection.onreconnecting((error) => {
+      console.log('SignalR reconnecting:', error);
+    });
+    
+    this.hubConnection.onreconnected((connectionId) => {
+      console.log('SignalR reconnected:', connectionId);
+    });
   }
 
   stopConnection() {
@@ -100,7 +123,9 @@ export class ChatService {
   }
 
   joinConversation(conversationId: number) {
+    console.log('Joining SignalR group for conversation:', conversationId);
     this.hubConnection?.invoke('JoinConversation', conversationId)
+      .then(() => console.log('Joined group:', conversationId))
       .catch((err: any) => console.error('SignalR JoinConversation Error:', err));
   }
 
@@ -116,10 +141,14 @@ export class ChatService {
 
   sendImageMessageSignalR(dto: SendImageMessageDto, image: File) {
     // SignalR file upload requires special handling; usually use REST for files
+    this.hubConnection?.invoke('SendImageMessage', dto, image)
+      .catch((err: any) => console.error('SignalR SendImageMessage Error:', err));
   }
 
   sendVoiceMessageSignalR(dto: SendVoiceMessageDto, voice: File) {
     // SignalR file upload requires special handling; usually use REST for files
+    this.hubConnection?.invoke('SendVoiceMessage', dto, voice)
+      .catch((err: any) => console.error('SignalR SendVoiceMessage Error:', err));
   }
 
   reactToMessageSignalR(dto: ReactToMessageDto) {
@@ -142,15 +171,34 @@ export class ChatService {
       .catch((err: any) => console.error('SignalR DeleteMessage Error:', err));
   }
 
+  createConversationSignalR(user2Id: string) {
+    this.hubConnection?.invoke('CreateConversation', user2Id)
+      .catch((err: any) => console.error('SignalR CreateConversation Error:', err));
+  }
+
+  deleteConversationSignalR(conversationId: number) {
+    this.hubConnection?.invoke('DeleteConversation', conversationId)
+      .catch((err: any) => console.error('SignalR DeleteConversation Error:', err));
+  }
+
+  sendTypingNotification(conversationId: number) {
+    this.hubConnection?.invoke('Typing', conversationId)
+      .catch((err: any) => console.error('SignalR Typing Error:', err));
+  }
+
   // SignalR event handlers
   private registerSignalREvents() {
     if (!this.hubConnection) return;
+    
     this.hubConnection.on('ReceiveMessage', (message: ChatMessageDto) => {
+      console.log('Received real-time message:', message);
       this.messageSubject.next(message);
       const current = this.messages$.getValue();
       this.messages$.next([...current, message]);
     });
+
     this.hubConnection.on('ReceiveReaction', (reaction: MessageReactionDto) => {
+      console.log('Received real-time reaction:', reaction);
       const msgs = this.messages$.getValue().map(m => {
         if (m.messageId === reaction.messageId) {
           return { ...m, reactions: [...m.reactions, reaction] };
@@ -159,21 +207,60 @@ export class ChatService {
       });
       this.messages$.next(msgs);
     });
+
     this.hubConnection.on('MessageRead', (messageId: number, userId: string) => {
-      // handle message read
+      console.log('Received MessageRead event:', { messageId, userId });
+      const msgs = this.messages$.getValue().map(m => {
+        if (m.messageId === messageId) {
+          return { ...m, isRead: true };
+        }
+        return m;
+      });
+      this.messages$.next(msgs);
     });
+
     this.hubConnection.on('MessageEdited', (message: ChatMessageDto) => {
+      console.log('Received MessageEdited event:', message);
       const msgs = this.messages$.getValue().map(m => m.messageId === message.messageId ? message : m);
       this.messages$.next(msgs);
     });
+
     this.hubConnection.on('MessageDeleted', (messageId: number) => {
+      console.log('Received MessageDeleted event:', messageId);
       const msgs = this.messages$.getValue().filter(m => m.messageId !== messageId);
       this.messages$.next(msgs);
     });
+
     this.hubConnection.on('IncrementUnread', () => {
+      console.log('Received IncrementUnread event');
       this.unreadCount$.next(this.unreadCount$.getValue() + 1);
     });
-    // Add more event handlers as needed
+
+    this.hubConnection.on('Typing', (conversationId: number, userId: string) => {
+      console.log('Received Typing event:', { conversationId, userId });
+      this.typingSubject.next({ conversationId, userId });
+    });
+
+    this.hubConnection.on('ConversationCreated', (conversation: ChatConversationDto) => {
+      console.log('Received ConversationCreated event:', conversation);
+      const current = this.conversations$.getValue();
+      // Check if conversation already exists to avoid duplicates
+      const exists = current.some(c => c.conversationId === conversation.conversationId);
+      if (!exists) {
+        this.conversations$.next([conversation, ...current]);
+      }
+    });
+
+    this.hubConnection.on('ConversationDeleted', (conversationId: number) => {
+      console.log('Received ConversationDeleted event:', conversationId);
+      const current = this.conversations$.getValue();
+      this.conversations$.next(current.filter(c => c.conversationId !== conversationId));
+    });
+
+    this.hubConnection.on('Error', (error: string) => {
+      console.error('SignalR Error:', error);
+      // You can emit this to show error messages to the user
+    });
   }
 
   // Observables for components

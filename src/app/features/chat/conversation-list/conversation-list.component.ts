@@ -21,8 +21,17 @@ export class ConversationListComponent {
   searchQuery = '';
   searchResults: UserChatInfoDto[] = [];
   defaultProfileImageUrl = 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc';
+  typingConversations = new Set<string>(); // conversationId as string (could be GUID)
 
-  constructor(private chatService: ChatService) {}
+  constructor(private chatService: ChatService) {
+    // Subscribe to typing events
+    this.chatService.typing$.subscribe(typing => {
+      if (typing && typing.userId !== this.currentUserId && typing.conversationId) {
+        this.typingConversations.add(typing.conversationId.toString());
+        setTimeout(() => this.typingConversations.delete(typing.conversationId.toString()), 2000);
+      }
+    });
+  }
 
   get filteredConversations() {
     return this.conversations
@@ -73,5 +82,9 @@ export class ConversationListComponent {
     if (!this.currentUserId) return this.defaultProfileImageUrl;
     if (conv.user1Id === conv.user2Id) return conv.user1ProfileImageUrl || this.defaultProfileImageUrl; // self-chat
     return conv.user1Id === this.currentUserId ? (conv.user2ProfileImageUrl || this.defaultProfileImageUrl) : (conv.user1ProfileImageUrl || this.defaultProfileImageUrl);
+  }
+
+  isTyping(conv: ChatConversationDto): boolean {
+    return this.typingConversations.has(conv.conversationId.toString());
   }
 }

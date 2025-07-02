@@ -15,17 +15,27 @@
     <header class="chat-header p-4 border-b border-gray-200 bg-white" *ngIf="selectedConversation">
       <div class="chat-title flex items-center gap-3">
         <p-avatar [image]="getReceiverImage(selectedConversation)" shape="circle" size="large"></p-avatar>
-        <div class="text-lg font-semibold">
-          {{ getReceiverName(selectedConversation) }}
+        <div class="flex flex-col">
+          <div class="text-lg font-semibold">
+            {{ getReceiverName(selectedConversation) }}
+            <span *ngIf="isTyping" class="text-xs text-gray-500 italic align-middle ml-2">Typing...</span>
+          </div>
         </div>
       </div>
     </header>
     <section class="flex-1 overflow-y-auto bg-gray-50">
-      <app-chat-window [messages]="messages" [currentUserId]="currentUserId"></app-chat-window>
-      <div *ngIf="isTyping" class="typing-indicator px-4 py-2 text-xs text-gray-400">Someone is typing...</div>
+      <app-chat-window 
+        [messages]="messages" 
+        [currentUserId]="currentUserId"
+        (reactToMessage)="handleReaction($event)"
+        (deleteMessage)="handleDeleteMessage($event)"
+        (replyToMessage)="handleReplyToMessage($event)">
+      </app-chat-window>
     </section>
     <footer class="chat-input p-4 bg-white border-t border-gray-200">
-      <app-message-input (send)="sendMessage($event)"></app-message-input>
+      <app-message-input (send)="sendMessage($event)" (typing)="onTyping()"></app-message-input>
     </footer>
   </main>
 </div>
+
+<p-toast></p-toast>

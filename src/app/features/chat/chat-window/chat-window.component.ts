@@ -15,6 +15,7 @@ import { BadgeModule } from 'primeng/badge';
 export class ChatWindowComponent implements OnChanges, AfterViewInit {
   @Input() messages: ChatMessageDto[] = [];
   @Input() currentUserId: string | null = null;
+  @Input() isTyping: boolean = false;
   @Output() sendMessage = new EventEmitter<string>();
   @Output() reactToMessage = new EventEmitter<{ messageId: number, reaction: string }>();
   @Output() replyToMessage = new EventEmitter<{ messageId: number, content: string }>();
@@ -32,10 +33,10 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['currentUserId']) {
-      console.log('ChatWindowComponent currentUserId:', this.currentUserId);
+      // console.log('ChatWindowComponent currentUserId:', this.currentUserId);
     }
     if (changes['messages']) {
-      console.log('ChatWindowComponent messages:', this.messages);
+      // console.log('ChatWindowComponent messages:', this.messages);
       this.scrollToBottom();
     }
   }
@@ -49,7 +50,7 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit {
   }
 
   isOwnMessage(message: ChatMessageDto): boolean {
-    console.log('Message sender:', message.sender);
+    // console.log('Message sender:', message.sender);
     return message.sender?.userId === this.currentUserId;
   }
 

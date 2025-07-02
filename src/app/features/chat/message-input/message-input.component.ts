@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 export class MessageInputComponent {
   message: string = '';
   @Output() send = new EventEmitter<string>();
+  @Output() typing = new EventEmitter<void>();
   error: string | null = null;
 
   sendMessage() {
@@ -22,5 +23,9 @@ export class MessageInputComponent {
     this.error = null;
     this.send.emit(this.message);
     this.message = '';
+  }
+
+  onInput() {
+    this.typing.emit();
   }
 }
