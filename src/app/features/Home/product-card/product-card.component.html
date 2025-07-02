@@ -1,10 +1,10 @@
 <div class="bg-gray-200 h-20 mb-2">
 
-  <p-select  [options]="cities" [(ngModel)]="selectedCity" optionLabel="name" placeholder="Select a Location"
+  <p-select  [options]="cities" [(ngModel)]="selectedCity"  placeholder="Select a Location"
     class="w-full md:w-56 ml-3 mt-2" />
-  <p-select [options]="cities" [(ngModel)]="selectedCategory" optionLabel="name" placeholder="Select a Category"
+  <p-select [options]="categories" [(ngModel)]="selectedCategory" optionValue="id"  optionLabel="categoryName" placeholder="Select a Category"
     class="w-full md:w-56 ml-3 mt-2" />
-  <p-multiselect [options]="cities" [(ngModel)]="selectedTags" optionLabel="name" placeholder="Select Tags"
+  <p-multiselect [options]="tags" [(ngModel)]="selectedTags" optionLabel="name" optionValue="id" placeholder="Select Tags"
     [maxSelectedLabels]="5" styleClass="w-full md:w-80" />
   <label class="inline text-gray-700 mb-2" for="minmax">Price</label>
   <p-inputnumber [(ngModel)]="SelectedPrice" inputId="minmax" mode="decimal" [min]="1" />
@@ -18,7 +18,9 @@
 @for (product of products; track $index) {
 <p-card class="ml-9 text-center " [style]="{ width: '20%', overflow: 'hidden', display: 'inline-block' }">
   <ng-template #header>
-      <img alt="Card" class="w-full" src="{{product.images[0]}}"  />
+    <a [routerLink]="['/ProductDetails', product.id]">
+      <img alt="Card" class="w-full cursor-pointer" [src]="product.images[0]" />
+    </a>
   </ng-template>
   <ng-template #title> {{product.name}} </ng-template>
   <ng-template #subtitle> {{product.price| currency}} </ng-template>

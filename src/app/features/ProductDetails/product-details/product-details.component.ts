@@ -23,17 +23,12 @@ export class ProductDetailsComponent {
   constructor(private productServ:ProductService,private route: ActivatedRoute) { }
 
   ngOnInit() {
-    this.images = ["../../../../assets/1.png",
-      "../../../../assets/2.png",
-      "../../../../assets/3.png",
-      "../../../../assets/4.png",
-      "../../../../assets/5.png",
-    ];
+
     this.route.paramMap.subscribe(params => {
       this.selectedProductId = params.get('id');
     });
     this.getProductDetails();
-
+     // Initialize images with an empty array if product is null
     // console.log(items)
   }
 
@@ -42,6 +37,7 @@ export class ProductDetailsComponent {
     this.productServ.getProductsDetails(selectedId).subscribe({
       next: (response) => {
         this.product = response.data; // Assuming 'data' contains the product details
+        this.images =this.product!.imagesArr ;
         console.log('Product details fetched successfully:', response);
       },
       error: (error) => {

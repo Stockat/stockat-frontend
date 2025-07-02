@@ -21,16 +21,15 @@
       <p class="w-full">
         <label for="title" class="">Title</label>
         <input class="w-full" type="text" pInputText formControlName="title" />
+
         <p-fileUpload #imgref name="images" [multiple]="true" accept="image/*" mode="advanced" [auto]="false"
-          customUpload="true" (onSelect)="onSelect($event)" (onRemove)="onRemove($event)" [showUploadButton]="false"
-          [showCancelButton]="false" [maxFileSize]="5000000"></p-fileUpload>
-
-      </p>
+          customUpload="true"  (onSelect)="onSelect($event)" (onRemove)="onRemove($event)" [showUploadButton]="false"
+          [showCancelButton]="false"  [maxFileSize]="5000000"></p-fileUpload>
 
 
-      <p-select [options]="cities" formControlName="location" optionLabel="name" placeholder="Select a City"
+      <p-select [options]="cities" formControlName="location"  placeholder="Select a City"
         class="mt-3  w-full md:w-56 lg:w-1/2"  />
-      <p-select [options]="cities" formControlName="category" optionLabel="name" placeholder="Select a Category"
+      <p-select [options]="categories" formControlName="category" optionLabel="categoryName" optionValue="id" placeholder="Select a Category"
         class="w-full md:w-56 lg:w-1/2" />
 
       <p class="mt-3">
@@ -82,14 +81,14 @@
       <p-button label="➕ Add Feature" [rounded]="true" severity="success" (click)="addFeature()" [raised]="true" />
       <p class="w-full">
 
-        <p-multiselect [options]="cities" formControlName="tags" optionLabel="name" placeholder="Select Tags"
+        <p-multiselect [options]="tags" formControlName="tags" optionLabel="name" optionValue="id" placeholder="Select Tags"
           [maxSelectedLabels]="5" styleClass="w-full md:w-80 lg:w-full" />
       </p>
 
       <p class="mt-2 w-full text-center">
-        <p-button label="Add Product" [disabled]="productForm.invalid" [rounded]="true" severity="success" type="submit" [raised]="true" />
+        <p-button label="Add Product"  [rounded]="true" severity="success" type="submit" [raised]="true" />
       </p>
-
+      <!-- [disabled]="productForm.invalid" -->
     </div>
   </form>
 
