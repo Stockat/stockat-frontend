@@ -51,6 +51,7 @@ export interface ChatMessageDto {
   isEdited: boolean;
   isRead: boolean;
   sentAt: string; // ISO string
+  readAt?: string | null;
   reactions: MessageReactionDto[];
 }
 

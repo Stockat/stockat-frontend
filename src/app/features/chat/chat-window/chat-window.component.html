@@ -22,6 +22,10 @@
           <span class="text-xs text-blue-100">
             {{ msg.sentAt ? (msg.sentAt | date:'shortTime') : '' }}
           </span>
+          <span class="read-indicator" [ngClass]="{'read': msg.isRead}">
+            <ng-container *ngIf="msg.isRead; else notRead">&#10003;&#10003;</ng-container>
+            <ng-template #notRead>&#10003;</ng-template>
+          </span>
         </div>
         <div *ngIf="msg.messageText">{{ msg.messageText || '' }}</div>
         <img *ngIf="msg.imageUrl" [src]="msg.imageUrl || ''" class="rounded-lg max-h-40 my-2" />

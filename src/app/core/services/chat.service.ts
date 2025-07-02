@@ -208,11 +208,11 @@ export class ChatService {
       this.messages$.next(msgs);
     });
 
-    this.hubConnection.on('MessageRead', (messageId: number, userId: string) => {
-      console.log('Received MessageRead event:', { messageId, userId });
+    this.hubConnection.on('MessageRead', (messageId: number, userId: string, isRead: boolean, readAt: string | null) => {
+      console.log('Received MessageRead event:', { messageId, userId, isRead, readAt });
       const msgs = this.messages$.getValue().map(m => {
         if (m.messageId === messageId) {
-          return { ...m, isRead: true };
+          return { ...m, isRead, readAt };
         }
         return m;
       });

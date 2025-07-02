@@ -23,3 +23,11 @@
 .p-2 { padding: 0.5rem; }
 .border { border: 1px solid #e5e7eb; }
 .font-semibold { font-weight: 600; }
+.read-indicator {
+  font-size: 1em;
+  margin-left: 4px;
+  color: gray;
+}
+.read-indicator.read {
+  color: #4fc3f7; /* WhatsApp blue */
+}

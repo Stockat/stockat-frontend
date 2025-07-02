@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, SimpleChanges, OnChanges, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, SimpleChanges, OnChanges, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatMessageDto, UserChatInfoDto } from '../../../core/models/chatmodels/chat-models';
 import { AvatarModule } from 'primeng/avatar';
@@ -12,7 +12,7 @@ import { BadgeModule } from 'primeng/badge';
   templateUrl: './chat-window.component.html',
   styleUrls: ['./chat-window.component.css']
 })
-export class ChatWindowComponent implements OnChanges, AfterViewInit {
+export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewChecked {
   @Input() messages: ChatMessageDto[] = [];
   @Input() currentUserId: string | null = null;
   @Input() isTyping: boolean = false;
@@ -26,8 +26,12 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit {
   quickEmojis = ['👍', '❤️', '😂'];
   allEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏', '🎉', '🔥', '👏', '😡'];
   showEmojiPickerFor: number | null = null;
+  private shouldScroll = false;
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   ngAfterViewInit() {
+    this.shouldScroll = true;
     this.scrollToBottom();
   }
 
@@ -37,7 +41,14 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit {
     }
     if (changes['messages']) {
       // console.log('ChatWindowComponent messages:', this.messages);
+      this.shouldScroll = true;
+    }
+  }
+
+  ngAfterViewChecked() {
+    if (this.shouldScroll) {
       this.scrollToBottom();
+      this.shouldScroll = false;
     }
   }
 
