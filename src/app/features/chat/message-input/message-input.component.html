@@ -1,4 +1,13 @@
 <form #msgForm="ngForm" class="flex gap-2 items-center" (ngSubmit)="sendMessage()">
   <input type="text" class="flex-1 p-2 border rounded-lg" placeholder="Type a message..." [(ngModel)]="message" name="messageInput" required (input)="onInput()" />
+  <input type="file" accept="image/*" #imageInput hidden (change)="onImageSelected($event)" />
+  <button type="button" (click)="imageInput.click()" class="bg-gray-200 px-2 py-1 rounded">📷</button>
+  <input type="file" accept="audio/*" #voiceInput hidden (change)="onVoiceSelected($event)" />
+  <button type="button" (click)="voiceInput.click()" class="bg-gray-200 px-2 py-1 rounded">��</button>
+  <button type="button" (click)="toggleRecording()" class="bg-gray-200 px-2 py-1 rounded" [class.bg-red-200]="isRecording">
+    <span *ngIf="!isRecording">⏺️</span>
+    <span *ngIf="isRecording">⏹️</span>
+  </button>
+  <span *ngIf="isRecording" class="text-red-500 text-xs ml-2 animate-pulse">Recording...</span>
   <button class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold" type="submit">Send</button>
 </form>

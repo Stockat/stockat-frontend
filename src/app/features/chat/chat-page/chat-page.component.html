@@ -33,7 +33,7 @@
       </app-chat-window>
     </section>
     <footer class="chat-input p-4 bg-white border-t border-gray-200" *ngIf="selectedConversation || selectedUserForNewChat">
-      <app-message-input (send)="sendMessage($event)" (typing)="onTyping()"></app-message-input>
+      <app-message-input (send)="sendMessage($event)" (typing)="onTyping()" (sendImage)="sendImageMessage($event)" (sendVoice)="sendVoiceMessage($event)"></app-message-input>
     </footer>
   </main>
 </div>

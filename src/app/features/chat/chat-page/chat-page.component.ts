@@ -122,32 +122,27 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
     // Listen for new messages in real-time
     this.chatService.message$.subscribe(msg => {
       if (!msg) return;
-
+      // Patch sender if null to prevent runtime errors (for all message types)
+      if (!msg.sender) {
+        msg.sender = {
+          userId: this.currentUserId || 'unknown',
+          fullName: this.currentUser?.fullName || 'Unknown',
+          profileImageUrl: this.currentUser?.profileImageUrl || this.defaultAvatar
+        };
+      }
       // Update sidebar last message for this conversation
       const convIndex = this.conversations.findIndex(c => c.conversationId === msg.conversationId);
       if (convIndex !== -1) {
-        // Update lastMessage and lastMessageAt
         this.conversations[convIndex] = {
           ...this.conversations[convIndex],
           lastMessage: msg,
           lastMessageAt: msg.sentAt,
-          // Also update messages array if present
           messages: [
             ...this.conversations[convIndex].messages.filter(m => m.messageId !== msg.messageId),
             msg
           ].sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime())
         };
-        // Replace array reference to trigger change detection
         this.conversations = [...this.conversations];
-      }
-
-      // Patch sender if null to prevent runtime errors
-      if (!msg.sender) {
-        msg.sender = {
-          userId: 'unknown',
-          fullName: 'Unknown',
-          profileImageUrl: this.defaultAvatar
-        };
       }
       // Only show toast if the current user is NOT the sender
       if (msg.sender.userId !== this.currentUserId) {
@@ -256,31 +251,18 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
 
   selectConversation(conversation: ChatConversationDto) {
     this.selectedConversation = conversation;
-    this.messages = conversation.messages ? [...conversation.messages] : [];
-    // Mark all unread messages from the other user as read
-    if (this.currentUserId && conversation.messages) {
-      let updated = false;
-      const updatedMessages = conversation.messages.map(m => {
-        if (!m.isRead && m.sender.userId !== this.currentUserId) {
-          updated = true;
-          // Optionally, call backend to mark as read here
-          this.chatService.markMessageAsReadSignalR(m.messageId);
-          return { ...m, isRead: true };
-        }
-        return m;
-      });
-      if (updated) {
-        // Update the conversation's messages and replace array reference
-        const convIdx = this.conversations.findIndex(c => c.conversationId === conversation.conversationId);
-        if (convIdx !== -1) {
-          this.conversations[convIdx] = {
-            ...this.conversations[convIdx],
-            messages: updatedMessages
-          };
-          this.conversations = [...this.conversations];
-        }
+    this.chatService.getMessages(conversation.conversationId).subscribe((msgs: ChatMessageDto[]) => {
+      this.messages = msgs.sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
+      setTimeout(() => this.scrollToBottom(), 0);
+      // Mark all unread messages as read (for all types) when opening the chat
+      if (this.currentUserId) {
+        this.messages.forEach(m => {
+          if (!m.isRead && m.sender.userId !== this.currentUserId) {
+            this.chatService.markMessageAsReadSignalR(m.messageId);
+          }
+        });
       }
-    }
+    });
   }
 
   scrollToBottom() {
@@ -391,5 +373,23 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
     // For now, just send the reply as a regular message
     // You can enhance this to show the reply context in the UI
     this.sendMessage(event.content);
+  }
+
+  sendImageMessage(event: { file: File, messageText?: string }) {
+    if (!this.selectedConversation) return;
+    this.chatService.sendImageMessage({
+      conversationId: this.selectedConversation.conversationId,
+      messageText: event.messageText,
+      image: event.file
+    }).subscribe();
+  }
+
+  sendVoiceMessage(event: { file: File, messageText?: string }) {
+    if (!this.selectedConversation) return;
+    this.chatService.sendVoiceMessage({
+      conversationId: this.selectedConversation.conversationId,
+      messageText: event.messageText,
+      voice: event.file
+    }).subscribe();
   }
 }
