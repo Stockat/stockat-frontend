@@ -144,12 +144,9 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
         };
         this.conversations = [...this.conversations];
       }
-      // Only show toast if the current user is NOT the sender
-      if (msg.sender.userId !== this.currentUserId) {
-        this.showNewMessageNotification(msg);
-      }
       // Check if this message belongs to the currently selected conversation
-      if (this.selectedConversation && Number(msg.conversationId) === Number(this.selectedConversation.conversationId)) {
+      const isOpenChat = this.selectedConversation && Number(msg.conversationId) === Number(this.selectedConversation.conversationId);
+      if (isOpenChat) {
         // Only add if not duplicate
         if (!this.messages.some(m => m.messageId === msg.messageId)) {
           this.messages = [...this.messages, msg].sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
@@ -159,36 +156,27 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
         if (msg.sender.userId !== this.currentUserId && !msg.isRead) {
           this.chatService.markMessageAsReadSignalR(msg.messageId);
         }
-      } else {
-        // This message is for a different conversation
-        // Update the conversation in the sidebar with the new message
-        const convIndex = this.conversations.findIndex(c => c.conversationId === msg.conversationId);
-        if (convIndex !== -1) {
-          // Update existing conversation
-          this.conversations[convIndex] = {
-            ...this.conversations[convIndex],
-            lastMessage: msg,
-            lastMessageAt: msg.sentAt
-          };
+        // Do NOT show toast or increment unread counter for open chat
+        return;
+      }
+      // For closed chats, show toast and increment unread counter
+      if (msg.sender.userId !== this.currentUserId) {
+        if (msg.imageUrl) {
+          this.messageService.add({
+            severity: 'info',
+            summary: `New image message from ${msg.sender.fullName}`,
+            detail: 'Image received',
+            life: 4000
+          });
+        } else if (msg.voiceUrl) {
+          this.messageService.add({
+            severity: 'info',
+            summary: `New voice message from ${msg.sender.fullName}`,
+            detail: 'Voice message received',
+            life: 4000
+          });
         } else {
-          // This is a completely new conversation
-          const newConv: ChatConversationDto = {
-            conversationId: msg.conversationId,
-            user1Id: msg.sender.userId,
-            user2Id: this.currentUserId!,
-            lastMessageAt: msg.sentAt,
-            isActive: true,
-            createdAt: msg.sentAt,
-            messages: [msg],
-            lastMessage: msg,
-            user1FullName: msg.sender.fullName,
-            user2FullName: this.currentUser?.fullName || '',
-            user1ProfileImageUrl: msg.sender.profileImageUrl,
-            user2ProfileImageUrl: this.currentUser?.profileImageUrl || ''
-          };
-          this.conversations.unshift(newConv);
-          // Join the new conversation group
-          this.chatService.joinConversation(msg.conversationId);
+          this.showNewMessageNotification(msg);
         }
       }
     });
