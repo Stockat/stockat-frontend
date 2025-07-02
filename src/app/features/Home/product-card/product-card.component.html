@@ -4,7 +4,7 @@
     class="w-full md:w-56 ml-3 mt-2" />
   <p-select [options]="categories" [(ngModel)]="selectedCategory" optionValue="id"  optionLabel="categoryName" placeholder="Select a Category"
     class="w-full md:w-56 ml-3 mt-2" />
-  <p-multiselect [options]="tags" [(ngModel)]="selectedTags" optionLabel="name" placeholder="Select Tags"
+  <p-multiselect [options]="tags" [(ngModel)]="selectedTags" optionLabel="name" optionValue="id" placeholder="Select Tags"
     [maxSelectedLabels]="5" styleClass="w-full md:w-80" />
   <label class="inline text-gray-700 mb-2" for="minmax">Price</label>
   <p-inputnumber [(ngModel)]="SelectedPrice" inputId="minmax" mode="decimal" [min]="1" />
