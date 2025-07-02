@@ -201,11 +201,18 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
 
     // Subscribe to MessageRead events and patch the relevant message in this.messages
     this.chatService.hubConnection?.on('MessageRead', (messageId: number, userId: string, isRead: boolean, readAt: string | null) => {
-      // Only patch if the message is in the current conversation
+      // Update in chat window
       const idx = this.messages.findIndex(m => m.messageId === messageId);
       if (idx !== -1) {
         this.messages[idx] = { ...this.messages[idx], isRead, readAt };
       }
+      // Update in sidebar conversations
+      this.conversations = this.conversations.map(conv => ({
+        ...conv,
+        messages: conv.messages.map(m =>
+          m.messageId === messageId ? { ...m, isRead, readAt } : m
+        )
+      }));
     });
   }
 

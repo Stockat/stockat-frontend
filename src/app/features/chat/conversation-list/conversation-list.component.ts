@@ -65,7 +65,13 @@ export class ConversationListComponent {
 
   getUnreadCount(conv: ChatConversationDto): number {
     if (!conv.messages || !this.currentUserId) return 0;
-    return conv.messages.filter((m: ChatMessageDto) => !m.isRead && m.sender.userId !== this.currentUserId).length;
+    // Only show unread count if this conversation is NOT currently open
+    if (this.selectedConversationId && conv.conversationId.toString() === this.selectedConversationId) {
+      return 0;
+    }
+    return conv.messages.filter(
+      (m: ChatMessageDto) => !m.isRead && m.sender.userId !== this.currentUserId
+    ).length;
   }
 
   loadMore() {
