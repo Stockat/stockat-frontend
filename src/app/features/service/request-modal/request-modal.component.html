@@ -1,0 +1,46 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-white/20 to-black/20">
+  <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md relative animate-fade-in">
+    <button class="absolute top-3 right-3 text-gray-500 hover:text-gray-800" (click)="handleClose()">✕</button>
+
+    <div class="p-fluid">
+      <h2 class="text-2xl font-bold mb-4">Request This Service</h2>
+      <form *ngIf="requestForm" [formGroup]="requestForm" (ngSubmit)="submitRequest()">
+        <div class="mb-3">
+          <label for="quantity" class="block font-medium mb-1">Quantity</label>
+          <input
+            pInputText
+            id="quantity"
+            formControlName="requestedQuantity"
+            type="number"
+            [min]="minQuantity"
+            [ngClass]="{'p-invalid': requestForm.get('requestedQuantity')?.invalid && requestForm.get('requestedQuantity')?.touched}"
+          />
+          <div *ngIf="requestForm.get('requestedQuantity')?.invalid && requestForm.get('requestedQuantity')?.touched" class="p-error text-sm mt-1">
+            <span *ngIf="requestForm.get('requestedQuantity')?.errors?.['required']">Quantity is required</span>
+            <span *ngIf="requestForm.get('requestedQuantity')?.errors?.['min']">Quantity must be at least {{minQuantity}}</span>
+            <span *ngIf="requestForm.get('requestedQuantity')?.errors?.['pattern']">Please enter a valid number</span>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="desc" class="block font-medium mb-1">Description</label>
+          <textarea
+            pInputTextarea
+            id="desc"
+            formControlName="requestDescription"
+            rows="4"
+            [ngClass]="{'p-invalid': requestForm.get('requestDescription')?.invalid && requestForm.get('requestDescription')?.touched}"
+          ></textarea>
+          <div *ngIf="requestForm.get('requestDescription')?.invalid && requestForm.get('requestDescription')?.touched" class="p-error text-sm mt-1">
+            <span *ngIf="requestForm.get('requestDescription')?.errors?.['required']">Description is required</span>
+          </div>
+        </div>
+        <button
+          pButton
+          type="submit"
+          label="Send Request"
+          class="p-button-success w-full"
+        ></button>
+      </form>
+    </div>
+  </div>
+</div>

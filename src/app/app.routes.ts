@@ -68,4 +68,23 @@ export const routes: Routes = [
     component: SellerLayoutComponent,
     children: sellerRoutes,
   },
+    // Admin
+    {
+        path: 'admin',
+        component: AdminLayoutComponent
+    },
+    // Services
+    {
+      path: 'services',
+      loadChildren: () => import('./features/service/service.module').then(m => m.ServiceModule)
+    },
+    //Auction
+    {
+        path: 'auctions',
+        loadComponent: () => import('./features/Auction/auctions-list/auctions-list.component').then(m => m.AuctionsListComponent)
+    },
+    {
+        path: 'auction/:id',
+        loadComponent: () => import('./features/Auction/auction-details/auction-details.component').then(m => m.AuctionDetailsComponent)
+    }
 ];

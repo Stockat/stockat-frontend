@@ -1,0 +1,48 @@
+<div class="p-6 max-w-3xl mx-auto">
+  <img
+    [src]="service?.imageUrl || 'https://via.placeholder.com/600x300?text=No+Image'"
+    class="w-full h-64 object-cover rounded-lg mb-6"
+    alt="Service Image"
+  />
+
+  <h1 class="text-3xl font-bold mb-2">{{ service?.name }}</h1>
+  <p class="text-gray-700 mb-4">{{ service?.description }}</p>
+
+  <ul class="text-gray-600 space-y-1 mb-6">
+    <li><strong>Price per product:</strong> ${{ service?.pricePerProduct }}</li>
+    <li><strong>Minimum Quantity:</strong> {{ service?.minQuantity }}</li>
+    <li><strong>Estimated Time:</strong> {{ service?.estimatedTime }}</li>
+    <li><strong>Seller:</strong> <span class="text-primary underline cursor-not-allowed opacity-70" title="Seller profile coming soon"> {{ service?.sellerName }}</span></li>
+  </ul>
+
+  <button
+    pButton
+    type="button"
+    label="Request Service"
+    class="p-button-success px-5 py-2 rounded-lg shadow-md"
+    [disabled]="hasPendingRequest"
+    (click)="openRequestModal()"
+  ></button>
+  <span *ngIf="hasPendingRequest" class="text-xs text-gray-600 block mt-2">
+    You already have a pending request for this service.
+  </span>
+</div>
+
+<!-- Modal -->
+<p-dialog
+  header="Request Service"
+  [(visible)]="isModalOpen"
+  [modal]="true"
+  [style]="{width: '400px'}"
+  [closable]="true"
+  (onHide)="isModalOpen = false"
+>
+  <app-request-modal
+    *ngIf="service"
+    [serviceId]="service.id"
+    [minQuantity]="service.minQuantity"
+    (close)="isModalOpen = false"
+    (requestSubmitted)="onRequestSubmitted()"
+  ></app-request-modal>
+</p-dialog>
+
