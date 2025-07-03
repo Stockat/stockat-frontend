@@ -2,13 +2,14 @@
 <p>{{productForm.errors|json}}</p>
 <div class="flex flex-row gap-8 items-start w-full p-6">
 
+  <p-toast />
   <!-- Left: Image Gallery -->
   <div class="w-1/5 shadow-xl">
 
     <p-galleria [value]="images" [showIndicators]="true"    [showThumbnails]="false" [changeItemOnIndicatorHover]="true"
       [containerStyle]="{ 'max-width': '100%' }">
       <ng-template #item let-item>
-        <img [src]="item" class="w-50 rounded-xl  bg-none" />
+        <img [src]="item.imageUrl" class="w-50 rounded-xl  bg-none" />
       </ng-template>
     </p-galleria>
   </div>
@@ -44,7 +45,7 @@
 
         <div class="existing-images mb-3" *ngIf="images?.length">
           <div *ngFor="let img of images; let i = index" class="d-inline-block position-relative me-2">
-            <img [src]="img" class="rounded border" width="100" height="100" />
+            <img [src]="img.imageUrl" class="rounded border" width="100" height="100" />
 
             <!-- Optional: Remove button -->
             <button class="btn btn-danger btn-sm position-absolute top-0 end-0" type="button" (click)="removeExistingImage(i)">🗑</button>
@@ -78,6 +79,19 @@
         <p-inputNumber inputId="price" formControlName="minQuantity" [min]="1"  mode="decimal" class="sm:w-full md:w-2/5 mr-12">
         </p-inputNumber>
       </p>
+
+      <p>
+        <p-iftalabel>
+          <textarea class="w-full" pTextarea id="description" formControlName="description" rows="5" cols="30" style="resize: none" ></textarea>
+          <label for="description">Description</label>
+      </p-iftalabel>
+      @if (productForm.get('description')?.errors?.['required'] && productForm.get('description')?.touched) {
+        <p-message severity="error" variant="simple" size="small">
+          Description is required.
+        </p-message>
+      }
+      </p>
+
 
       <p>
         <span class="text-4xl text-emerald-900">

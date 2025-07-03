@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductService } from '../../../../core/services/product.service';
-import { UpdateProductDto } from '../../../../core/models/product-models/updateProductDto';
+import { updateImageDto, UpdateProductDto } from '../../../../core/models/product-models/updateProductDto';
 import { GalleriaModule } from 'primeng/galleria';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -24,12 +24,13 @@ import { tagdto } from '../../../../core/models/tag-models/tagDto';
 import { MessageModule } from 'primeng/message';
 import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
+import { TextareaModule } from 'primeng/textarea';
 @Component({
   selector: 'app-update-product',
   imports: [GalleriaModule,CardModule,ButtonModule,FloatLabelModule,
     FormsModule,Select,ReactiveFormsModule,InputTextModule,
     IftaLabelModule,MultiSelectModule,FileUploadModule,InputNumberModule,
-    MessageModule,Toast
+    MessageModule,Toast,TextareaModule
   ],
   templateUrl: './update-product.component.html',
   styleUrl: './update-product.component.css',
@@ -51,6 +52,7 @@ export class UpdateProductComponent implements OnInit {
       price: new FormControl("", [Validators.required, Validators.min(1)]),
       minQuantity: new FormControl("", [Validators.required, Validators.min(1)]),
       location: new FormControl("", [Validators.required]),
+      description: new FormControl("", [Validators.required]),
       features: new FormArray([],[this.featuresValidator()]),
       tags: new FormControl([],[Validators.required]),
       images: new FormControl<File[]>([], Validators.required),
@@ -64,8 +66,8 @@ productForm:FormGroup
 cities:any = [];
 categories:CategoryDto[] = [];
 tags:tagdto[] = [];
-images: string[] = [];
-removedimages: string[] = [];
+images: updateImageDto[] = [];
+removedimages: updateImageDto[] = [];
 updatedproductDto: UpdateProductDto = {
   id: 0,
   name: '',
@@ -90,83 +92,42 @@ updatedproductDto: UpdateProductDto = {
     });
 //*
 this.cities = this.sharedServ.governorates;
-
-this.categoryServ.getAllCategories().subscribe({
-  next: (response) => {
-    console.log("Categories fetched successfully:", response.data);
-    this.categories = response.data;
-  },
-  error: (error) => {
-    console.error("Error fetching categories:", error);
-  }
-})
-
-this.tagServ.getAllTags().subscribe({
-  next: (response) => {
-    console.log("Tags fetched successfully:", response.data);
-    this.tags = response.data;
-  },
-  error: (error) => {
-    console.error("Error fetching tags:", error);
-  }
-})
-
-this.images = ["../../../../assets/1.png",
-  "../../../../assets/2.png",
-  "../../../../assets/3.png",
-  "../../../../assets/4.png",
-  "../../../../assets/5.png",
-];
+this.getTags()
+this.getCategories()
+this.getproduct()
 //*
-
-    this.productServ.getProductForUpdate(this.selectedProductId).subscribe({
-      next: (res) => {
-      console.log('Product details fetched successfully:', res.data);
-      this.selectedProduct=res.data;
-      this.images= this.selectedProduct.images?.map(img => img.imageUrl) || [];
-      this.productForm.patchValue({
-        title: this.selectedProduct.name,
-        category: this.selectedProduct.categoryId,
-        price: this.selectedProduct.price,
-        minQuantity: this.selectedProduct.minQuantity,
-        location: this.capitalizeFirstLetter(this.selectedProduct.location),
-        tags: this.selectedProduct.productTags.map(tag => tag.tagId),
-        images: this.selectedProduct.images || []
-      });
-      this.populateFeaturesFromData(this.selectedProduct.features);
-      },
-      error: (err) => {
-        console.error('Error fetching product details:', err);
-      }
-    })
   }
 
 //* Update Product
 Updateproduct(){
-  alert("Update Product");
   this.updatedproductDto.id = this.selectedProduct!.id; // Ensure selectedProduct is not null
   this.updatedproductDto.name= this.productForm.get("title")?.value;
   this.updatedproductDto.categoryId = this.productForm.get("category")?.value;
   this.updatedproductDto.price = this.productForm.get("price")?.value;
   this.updatedproductDto.minQuantity = this.productForm.get("minQuantity")?.value;
   this.updatedproductDto.location = this.productForm.get("location")?.value;
+  this.updatedproductDto.description = this.productForm.get("description")?.value;
   this.updatedproductDto.sellerId = "64c5d9f7-690e-42d4-b035-1945ab3476db"; // Hardcoded for now
   this.updatedproductDto.productTags = this.productForm.get("tags")?.value.map((tagId: number) => ({ tagId }));
   this.updatedproductDto.features = this.productForm.get("features")?.value.map((feature: any) => ({
     name: feature.key,
     featureValues: feature.values.map((value: string) => ({ name: value }))
   }));
+
   this.updatedproductDto.images = this.selectedProduct!.images
-  ?.filter(img => this.images.includes(img.imageUrl))
+  ?.filter(img => this.images.includes(img))
   .map(img => ({
     id: img.id,
-    imageUrl: img.imageUrl
+    imageUrl: img.imageUrl,
+    fileId: img.fileId
   }));
 
+  console.log("Updated Product DTO:", this.updatedproductDto);
   const formData = new FormData();
 
   formData.append('productJson', JSON.stringify(this.updatedproductDto));
 
+  //* Preparing  New Images
   const wrappedImages = this.productForm.get("images")?.value || [];
 let files: File[] = wrappedImages.map((img: any) => img.file); // ✅ This fixes the issue
 files=files.filter((file: File) => file instanceof File); // Ensure only File objects are included
@@ -175,13 +136,13 @@ files.forEach((file) => {
   formData.append('images', file);
 });
 
-    console.log("Updated Product DTO:",formData.get('productJson'));
-    console.log("Updated Product DTO:",formData.getAll('images'));
+//* Preparing Removed Images
+formData.append('removedimages', JSON.stringify(this.removedimages));
 
     this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Wait a sec Updating Your Data' });
  this.productServ.updateProduct(this.selectedProductId, formData).subscribe({
     next: (response) => {
-      console.log("Product updated successfully:", response.data);
+      this.getproduct()
       this.messageService.add({ severity: 'success', summary: 'success', detail: 'Product Updated Successfully' });
     },
     error: (error) => {
@@ -276,11 +237,58 @@ capitalizeFirstLetter(value: string): string {
 //* Remove Existing Image From Array
 removeExistingImage(index: number) {
 
+
   this.removedimages.push(this.images[index]); // Store removed image URL
   this.images = this.images.filter((_, i) => i !== index);
 }
 
 //*
+//* get Selected Product For Update
+getproduct(){
+  this.productServ.getProductForUpdate(this.selectedProductId).subscribe({
+    next: (res) => {
+    this.selectedProduct=res.data;
+    this.images= this.selectedProduct.images || [];
+    this.productForm.patchValue({
+      title: this.selectedProduct.name,
+      category: this.selectedProduct.categoryId,
+      price: this.selectedProduct.price,
+      minQuantity: this.selectedProduct.minQuantity,
+      description: this.selectedProduct.description,
+      location: this.selectedProduct.location,
+      tags: this.selectedProduct.productTags.map(tag => tag.tagId),
+      images: this.selectedProduct.images || []
+    });
+    this.populateFeaturesFromData(this.selectedProduct.features);
+    },
+    error: (err) => {
+      console.error('Error fetching product details:', err);
+    }
+  })
+}
+getCategories() {
+  this.categoryServ.getAllCategories().subscribe({
+    next: (response) => {
+      console.log("Categories fetched successfully:", response.data);
+      this.categories = response.data;
+    },
+    error: (error) => {
+      console.error("Error fetching categories:", error);
+    }
+  })
+}
+getTags() {
+  this.tagServ.getAllTags().subscribe({
+    next: (response) => {
+      console.log("Tags fetched successfully:", response.data);
+      this.tags = response.data;
+    },
+    error: (error) => {
+      console.error("Error fetching tags:", error);
+    }
+  })
+}
+
 //* Custom Validation
 featuresValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {

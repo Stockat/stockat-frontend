@@ -30,4 +30,5 @@ export interface updateTagDto {
 export interface updateImageDto {
   id: number;
   imageUrl: string;
+  fileId: string|null;
 }

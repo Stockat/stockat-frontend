@@ -60,6 +60,17 @@
       </p>
 
       <p>
+        <p-iftalabel>
+          <textarea class="w-full" pTextarea id="description" formControlName="description" rows="5" cols="30" style="resize: none" ></textarea>
+          <label for="description">Description</label>
+      </p-iftalabel>
+      @if (productForm.get('description')?.errors?.['required'] && productForm.get('description')?.touched) {
+        <p-message severity="error" variant="simple" size="small">
+          Description is required.
+        </p-message>
+      }
+      </p>
+      <p>
         <span class="text-4xl text-emerald-900">
           Features
         </span>
@@ -119,9 +130,9 @@
       }
 
       <p class="mt-2 w-full text-center">
-        <p-button label="Add Product"  [disabled]="productForm.invalid" [rounded]="true" severity="success" type="submit" [raised]="true" />
+        <p-button label="Add Product"   [rounded]="true" severity="success" type="submit" [raised]="true" />
       </p>
-
+      <!-- [disabled]="productForm.invalid" -->
     </div>
   </form>
 
