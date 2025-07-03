@@ -31,6 +31,7 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
   private shouldScroll = false;
   selectedMessageId: number | null = null;
   isRecording = false;
+  private previousMessageCount = 0;
 
   constructor(private cdr: ChangeDetectorRef, private chatService: ChatService) {}
 
@@ -44,8 +45,12 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
       // console.log('ChatWindowComponent currentUserId:', this.currentUserId);
     }
     if (changes['messages']) {
-      // console.log('ChatWindowComponent messages:', this.messages);
-      this.shouldScroll = true;
+      // Only scroll if a new message is added (not just a reaction)
+      const newCount = this.messages.length;
+      if (newCount > this.previousMessageCount) {
+        this.shouldScroll = true;
+      }
+      this.previousMessageCount = newCount;
     }
   }
 
