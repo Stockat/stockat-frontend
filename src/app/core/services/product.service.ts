@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { ProductFilters } from '../models/product-models/product-filters';
-import { ProductDto } from '../models/product-models/productDto';
+import { ProductDto, ProductStatus } from '../models/product-models/productDto';
 import { Router } from '@angular/router';
 import { PaginationDto } from '../models/pagination-Dto';
 import { GenericRequestModel } from '../models/generic-request-Dto';
@@ -61,10 +61,29 @@ export class ProductService {
     return this.http.put<GenericRequestModel<UpdateProductDto>>(`${this.apiUrl}/${id}`, data);
   }
 
+  //* View Seller Products
   getAllSellerProducts(filters: ProductFilters): Observable<GenericRequestModel<PaginationDto<viewSellerProductDto>>> {
 
     const params = new HttpParams({ fromObject: filters as any });
     return this.http.get<GenericRequestModel<PaginationDto<viewSellerProductDto>>>(this.apiUrl+"/seller", { params });
+  }
+
+  //* Change product Status
+  changeProductStatus(id: number, chosenStatus: ProductStatus): Observable<GenericRequestModel<string>> {
+
+    const body = { id, chosenStatus };
+    return this.http.post<GenericRequestModel<string>>(`${this.apiUrl}/${id}`, body);
+  }
+
+  //* Delete Product
+  removeProduct(id: number): Observable<GenericRequestModel<string>> {
+
+    return this.http.post<GenericRequestModel<string>>(`${this.apiUrl}/seller/delete`,id);
+  }
+  //* Change can be requsted Column
+  changeProductCanBeRequsted(id: number): Observable<GenericRequestModel<string>> {
+
+    return this.http.post<GenericRequestModel<string>>(`${this.apiUrl}/seller/edit-canBeRequested`,id);
   }
 
 //! End Of Service

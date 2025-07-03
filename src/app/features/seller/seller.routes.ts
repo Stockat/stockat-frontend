@@ -21,7 +21,7 @@ export const sellerRoutes: Routes = [
         component: AddproductComponent
     },
     {
-        path: 'edit-product',
+        path: 'edit-product/:id',
         component: UpdateProductComponent
     },
     {

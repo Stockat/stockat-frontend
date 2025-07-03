@@ -21,18 +21,33 @@
       <p class="w-full">
         <label for="title" class="">Title</label>
         <input class="w-full" type="text" pInputText formControlName="title" />
+        <div class="text-danger" *ngIf="productForm.get('title')?.invalid && productForm.get('title')?.touched">
+          @if(productForm.get('title')?.errors?.['required']){
+            <p-message severity="error" variant="simple" size="small">Title is required.</p-message>
+          }
+          @if(productForm.get('title')?.errors?.['minlength']){
+            <p-message severity="error" variant="simple" size="small">Minimum 3 characters required.</p-message>
+          }
+          @if(productForm.get('title')?.errors?.['maxlength']){
+            <p-message severity="error" variant="simple" size="small">Maximum 50 characters allowed.</p-message>
+          }
+        </div>
+
 
         <p-fileUpload #imgref name="images" [multiple]="true" accept="image/*" mode="advanced" [auto]="false"
           customUpload="true"  (onSelect)="onSelect($event)" (onRemove)="onRemove($event)"  [showUploadButton]="false"
           [showCancelButton]="false"  [maxFileSize]="5000000">
         </p-fileUpload>
+        @if ( images?.length == 0 && imgref.files.length == 0) {
+          <p-message severity="error" variant="simple" size="small">At least one image is required.</p-message>
+        }
 
         <div class="existing-images mb-3" *ngIf="images?.length">
           <div *ngFor="let img of images; let i = index" class="d-inline-block position-relative me-2">
             <img [src]="img" class="rounded border" width="100" height="100" />
 
             <!-- Optional: Remove button -->
-            <button class="btn btn-danger btn-sm position-absolute top-0 end-0" (click)="removeExistingImage(i)">🗑</button>
+            <button class="btn btn-danger btn-sm position-absolute top-0 end-0" type="button" (click)="removeExistingImage(i)">🗑</button>
           </div>
         </div>
 
@@ -41,8 +56,16 @@
 
       <p-select [options]="cities" formControlName="location"  placeholder="Select a City"
         class="mt-3  w-full md:w-56 lg:w-1/2"  />
+        @if(productForm.get('location')?.errors?.['required']){
+          <p-message severity="error" variant="simple" size="small">Location is required.</p-message>
+        }
       <p-select [options]="categories" formControlName="category" optionLabel="categoryName" optionValue="id" placeholder="Select a Category"
         class="w-full md:w-56 lg:w-1/2" />
+        <div class="text-danger" *ngIf="productForm.get('category')?.invalid && productForm.get('category')?.touched">
+          @if(productForm.get('category')?.errors?.['required']){
+            <p-message severity="error" variant="simple" size="small">Category is required.</p-message>
+          }
+        </div>
 
       <p class="mt-3">
         <label for="title" class="">Price</label>
@@ -87,7 +110,21 @@
           <p-button label="🗑 Remove Feature" [rounded]="true" severity="danger" (click)="removeFeature(i)"
             [raised]="true" />
         </div>
+
+        @if (productForm.get('features')?.errors?.['required'] && productForm.get('features')?.touched) {
+          <p-message severity="error" variant="simple" size="small">
+            At least one feature is required.
+          </p-message>
+        }
+
+        @if (productForm.get('features')?.errors?.['invalidFormat'] && productForm.get('features')?.touched) {
+          <p-message severity="error" variant="simple" size="small">
+            Each feature must have a non-empty key and at least one non-empty value.
+          </p-message>
+        }
       </div>
+
+
 
       <!-- Add Feature Button -->
       <p-button label="➕ Add Feature" [rounded]="true" severity="success" (click)="addFeature()" [raised]="true" />
@@ -96,9 +133,14 @@
         <p-multiselect [options]="tags" formControlName="tags" optionLabel="name" optionValue="id" placeholder="Select Tags"
           [maxSelectedLabels]="5" styleClass="w-full md:w-80 lg:w-full" />
       </p>
+      @if (productForm.get('tags')?.errors?.['required'] && productForm.get('tags')?.touched) {
+        <p-message severity="error" variant="simple" size="small">
+          At least one Tag is required.
+        </p-message>
+      }
 
       <p class="mt-2 w-full text-center">
-        <p-button label="Update Product"  [rounded]="true" severity="success" type="submit" [raised]="true" />
+        <p-button label="Update Product" [disabled]="productForm.invalid"  [rounded]="true" severity="success" type="submit" [raised]="true" />
       </p>
       <!-- [disabled]="productForm.invalid" -->
     </div>

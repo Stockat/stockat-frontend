@@ -47,18 +47,26 @@
                 <p-tag [value]="product.productStatus" [severity]="getSeverity(product.productStatus)" />
               </td>
               <td>
-                <p-toggleswitch [(ngModel)]="product.canBeRequested"  />
+                <p-button
+                [label]="product.canBeRequested ? 'Activate' : 'Deactivate'"
+                variant="text"
+                [raised]="true"
+                [severity]="product.canBeRequested ? 'success' : 'danger'"
+                class="mr-1"
+                (onClick)="confirmCanBeRequsted($event,product.id,product.canBeRequested)"
+              />
               </td>
               <td>
-
+                  <p-toast />
+                  <p-confirmdialog />
                 @if (product.productStatus=="Deactivated") {
-                  <p-button label="Activate" variant="text" [raised]="true" severity="success" class="mr-1"/>
+                  <p-button label="Activate" (onClick)="confirmActivate($event,product.id)" variant="text" [raised]="true" severity="success" class="mr-1"/>
                 }@else{
-                  <p-button label="Deactivated" [disabled]="!(product.productStatus=='Approved')" variant="text" [raised]="true" severity="danger" class="mr-1" />
+                  <p-button label="Deactivated" (onClick)="confirmDeactivate($event,product.id)" [disabled]="!(product.productStatus=='Approved')" variant="text" [raised]="true" severity="danger" class="mr-1" />
                 }
                 <p-button label="AddStock" variant="text" [raised]="true" severity="success" class="mr-1"/>
                 <p-button icon="pi-pen-to-square" [rounded]="true" severity="success" [outlined]="true" class="mr-1" />
-                <p-button icon="pi pi-times" [rounded]="true" severity="danger" [outlined]="true" />
+                <p-button icon="pi pi-times" [rounded]="true" severity="danger" [outlined]="true" (onClick)="confirmDelete($event,product.id)" />
               </td>
           </tr>
       </ng-template>
