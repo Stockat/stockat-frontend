@@ -19,8 +19,6 @@ export interface AddFeatureDto {
   featureValues: AddFeatureValuesDto[];
 }
 
-
-
 export interface AddTagDto {
   tagId: number;
 }

@@ -7,6 +7,8 @@ export class SharedService {
 
   constructor() { }
 
+  fixedSellerId="64c5d9f7-690e-42d4-b035-1945ab3476db"
+
   governorates = [
     "Cairo",
     "Alexandria",

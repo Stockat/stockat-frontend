@@ -1,0 +1,75 @@
+<div class="bg-gray-200 h-20 mb-2">
+
+  <p-select  [options]="cities" [(ngModel)]="selectedCity"  placeholder="Select a Location"
+    class="w-full md:w-56 ml-3 mt-2" />
+  <p-select [options]="categories" [(ngModel)]="selectedCategory" optionValue="id"  optionLabel="categoryName" placeholder="Select a Category"
+    class="w-full md:w-56 ml-3 mt-2" />
+  <p-multiselect [options]="tags" [(ngModel)]="selectedTags" optionLabel="name" optionValue="id" placeholder="Select Tags"
+    [maxSelectedLabels]="5" styleClass="w-full md:w-80" />
+  <label class="inline text-gray-700 mb-2" for="minmax">Price</label>
+  <p-inputnumber [(ngModel)]="SelectedPrice" inputId="minmax" mode="decimal" [min]="1" />
+  <label class="inline text-gray-700 mb-2" for="minmax">Min Quantity</label>
+  <p-inputnumber [(ngModel)]="SelectedMinQty" inputId="minmax" mode="decimal" [min]="1" />
+  <p-button class="ml-3 " label="Apply" [raised]="true" severity="success" (onClick)="setFilters()" />
+  <p-button class="ml-3" label="Clear" [raised]="true" severity="danger"  (onClick)="resetFilters()"/>
+</div>
+
+<div class="card">
+  <p-table [value]="products" [tableStyle]="{ 'min-width': '60rem' }">
+      <ng-template #caption>
+          <div class="flex items-center justify-between">
+              <span class="text-xl font-bold">Products</span>
+          </div>
+      </ng-template>
+      <ng-template #header>
+          <tr class="text-center">
+              <th>Name</th>
+              <th>Image</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Can Be Requested</th>
+              <th>Actions</th>
+
+          </tr>
+      </ng-template>
+      <ng-template #body let-product>
+          <tr>
+              <td>{{ product.name }}</td>
+              <td>
+                  <img
+                      [src]="product.image[0]"
+                      [alt]="product.name"
+                      class="w-24 rounded"
+                  />
+              </td>
+              <td>{{ product.price | currency: 'USD' }}</td>
+              <td>
+                <p-tag [value]="product.productStatus" [severity]="getSeverity(product.productStatus)" />
+              </td>
+              <td>
+                <p-toggleswitch [(ngModel)]="product.canBeRequested"  />
+              </td>
+              <td>
+
+                @if (product.productStatus=="Deactivated") {
+                  <p-button label="Activate" variant="text" [raised]="true" severity="success" class="mr-1"/>
+                }@else{
+                  <p-button label="Deactivated" [disabled]="!(product.productStatus=='Approved')" variant="text" [raised]="true" severity="danger" class="mr-1" />
+                }
+                <p-button label="AddStock" variant="text" [raised]="true" severity="success" class="mr-1"/>
+                <p-button icon="pi-pen-to-square" [rounded]="true" severity="success" [outlined]="true" class="mr-1" />
+                <p-button icon="pi pi-times" [rounded]="true" severity="danger" [outlined]="true" />
+              </td>
+          </tr>
+      </ng-template>
+      <ng-template #footer>
+          <tr>
+              <td colspan="6">In total there are {{ products ? products.length : 0 }} products.</td>
+          </tr>
+      </ng-template>
+  </p-table>
+</div>
+
+<div class="card flex justify-center">
+  <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows" [totalRecords]="totalRecords" />
+</div>

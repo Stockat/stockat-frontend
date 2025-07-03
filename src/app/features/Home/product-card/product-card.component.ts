@@ -102,8 +102,6 @@ export class ProductCardComponent {
 
   }
 
-
-
   onPageChange(event: PaginatorState) {
     this.first = event.first ?? 0;
     this.rows = event.rows ?? 10;

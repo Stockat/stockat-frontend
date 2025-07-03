@@ -1,0 +1,108 @@
+<p>{{productForm.value|json}}</p>
+<p>{{productForm.errors|json}}</p>
+<div class="flex flex-row gap-8 items-start w-full p-6">
+
+  <!-- Left: Image Gallery -->
+  <div class="w-1/5 shadow-xl">
+
+    <p-galleria [value]="images" [showIndicators]="true"    [showThumbnails]="false" [changeItemOnIndicatorHover]="true"
+      [containerStyle]="{ 'max-width': '100%' }">
+      <ng-template #item let-item>
+        <img [src]="item" class="w-50 rounded-xl  bg-none" />
+      </ng-template>
+    </p-galleria>
+  </div>
+
+
+
+  <!-- Right: Product Info -->
+  <form class="w-4/5 shadow-xl h-full p-4" [formGroup]="productForm" (submit)="Updateproduct()">
+    <div>
+      <p class="w-full">
+        <label for="title" class="">Title</label>
+        <input class="w-full" type="text" pInputText formControlName="title" />
+
+        <p-fileUpload #imgref name="images" [multiple]="true" accept="image/*" mode="advanced" [auto]="false"
+          customUpload="true"  (onSelect)="onSelect($event)" (onRemove)="onRemove($event)"  [showUploadButton]="false"
+          [showCancelButton]="false"  [maxFileSize]="5000000">
+        </p-fileUpload>
+
+        <div class="existing-images mb-3" *ngIf="images?.length">
+          <div *ngFor="let img of images; let i = index" class="d-inline-block position-relative me-2">
+            <img [src]="img" class="rounded border" width="100" height="100" />
+
+            <!-- Optional: Remove button -->
+            <button class="btn btn-danger btn-sm position-absolute top-0 end-0" (click)="removeExistingImage(i)">🗑</button>
+          </div>
+        </div>
+
+        <!-- <p-button [raised]="true" [severity]='"danger"' (onClick)="removeImg()">Delete Image</p-button> -->
+
+
+      <p-select [options]="cities" formControlName="location"  placeholder="Select a City"
+        class="mt-3  w-full md:w-56 lg:w-1/2"  />
+      <p-select [options]="categories" formControlName="category" optionLabel="categoryName" optionValue="id" placeholder="Select a Category"
+        class="w-full md:w-56 lg:w-1/2" />
+
+      <p class="mt-3">
+        <label for="title" class="">Price</label>
+        <!-- <input type="text" pInputText [min]="1" formControlName="price" class="sm:w-full md:w-2/5 mr-15" /> -->
+        <p-inputNumber inputId="price" formControlName="price" [min]="1"  mode="decimal" class="sm:w-full md:w-2/5 mr-12">
+        </p-inputNumber>
+
+        <label for="title" class="">MinQty</label>
+        <!-- <input type="text" pInputText formControlName="minQuantity" class="sm:w-full md:w-2/5" /> -->
+        <p-inputNumber inputId="price" formControlName="minQuantity" [min]="1"  mode="decimal" class="sm:w-full md:w-2/5 mr-12">
+        </p-inputNumber>
+      </p>
+
+      <p>
+        <span class="text-4xl text-emerald-900">
+          Features
+        </span>
+      </p>
+
+      <div formArrayName="features">
+        <div *ngFor="let feature of features.controls; let i = index" [formGroupName]="i"
+          class="mb-4 p-3 border rounded">
+
+          <!-- Feature Key -->
+          <input type="text" class="form-control mb-2" formControlName="key" placeholder="Feature Key" />
+
+          <!-- Feature Values -->
+          <div formArrayName="values">
+            <div *ngFor="let value of featureValues(i).controls; let j = index" class="input-group mb-2">
+              <input [formControlName]="j" class="form-control" placeholder="Feature Value" />
+
+              <p-button label="🗑" [rounded]="true" severity="danger" (click)="removeFeatureValue(i, j)"
+                [raised]="true" />
+
+            </div>
+          </div>
+
+          <!-- Add Value Button -->
+          <p-button label=" ➕ Add Value" [rounded]="true" severity="success" (click)="addFeatureValue(i)"
+            [raised]="true" />
+          <!-- Remove Feature Button -->
+          <p-button label="🗑 Remove Feature" [rounded]="true" severity="danger" (click)="removeFeature(i)"
+            [raised]="true" />
+        </div>
+      </div>
+
+      <!-- Add Feature Button -->
+      <p-button label="➕ Add Feature" [rounded]="true" severity="success" (click)="addFeature()" [raised]="true" />
+      <p class="w-full">
+
+        <p-multiselect [options]="tags" formControlName="tags" optionLabel="name" optionValue="id" placeholder="Select Tags"
+          [maxSelectedLabels]="5" styleClass="w-full md:w-80 lg:w-full" />
+      </p>
+
+      <p class="mt-2 w-full text-center">
+        <p-button label="Update Product"  [rounded]="true" severity="success" type="submit" [raised]="true" />
+      </p>
+      <!-- [disabled]="productForm.invalid" -->
+    </div>
+  </form>
+
+
+</div>

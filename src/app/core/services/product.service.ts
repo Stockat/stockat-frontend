@@ -9,6 +9,8 @@ import { GenericRequestModel } from '../models/generic-request-Dto';
 import { ProductDetailsDto } from '../models/product-models/ProductDetails';
 import { imageUploadDto } from '../models/product-models/ImageUploadDto';
 import { AddProductDto } from '../models/product-models/addProductDto';
+import { UpdateProductDto } from '../models/product-models/updateProductDto';
+import { viewSellerProductDto } from '../models/product-models/viewSellerProductDto';
 @Injectable({
   providedIn: 'root',
 })
@@ -16,6 +18,8 @@ export class ProductService {
   private apiUrl = 'http://localhost:5250/api/Product';
   constructor(private http: HttpClient, private router: Router) {}
 
+
+  //* Home Page (Anonymous User) Services
   getAllProductsPaginated(filters: ProductFilters): Observable<GenericRequestModel<PaginationDto<ProductDto>>> {
 
     const params = new HttpParams({ fromObject: filters as any });
@@ -23,25 +27,45 @@ export class ProductService {
     return this.http.get<GenericRequestModel<PaginationDto<ProductDto>>>(this.apiUrl, { params });
   }
 
+  //* Peoduct Details  Page (Anonymous User) Services
   getProductsDetails(productId: number): Observable<GenericRequestModel<ProductDetailsDto>> {
 
     // const params = new HttpParams({ fromObject: productId as any });
     return this.http.get<GenericRequestModel<ProductDetailsDto>>(`${this.apiUrl}/${productId}`);
   }
 
-  uploadImgages(Images: File[]): Observable<GenericRequestModel<imageUploadDto[]>> {
-    const formData = new FormData();
-    Images.forEach((image) => {
-      formData.append('files', image, image.name);
-        });
-    return this.http.post<GenericRequestModel<imageUploadDto[]>>(`${this.apiUrl}/upload`, formData);
-  }
+  // uploadImgages(Images: File[]): Observable<GenericRequestModel<imageUploadDto[]>> {
+  //   const formData = new FormData();
+  //   Images.forEach((image) => {
+  //     formData.append('files', image, image.name);
+  //       });
+  //   return this.http.post<GenericRequestModel<imageUploadDto[]>>(`${this.apiUrl}/upload`, formData);
+  // }
 
+
+  //* Seller Services
+
+  //* Adding New Product
   addProduct(data: FormData): Observable<GenericRequestModel<AddProductDto>> {
 
     return this.http.post<GenericRequestModel<AddProductDto>>(`${this.apiUrl}`,data);
   }
 
+  //* Get Selected Product For Update
+  getProductForUpdate(productId: number): Observable<GenericRequestModel<UpdateProductDto>> {
+    return this.http.get<GenericRequestModel<UpdateProductDto>>(`${this.apiUrl}/seller/${productId}`);
+  }
+
+  //* Update Product
+  updateProduct(id: number, data: FormData): Observable<GenericRequestModel<UpdateProductDto>> {
+    return this.http.put<GenericRequestModel<UpdateProductDto>>(`${this.apiUrl}/${id}`, data);
+  }
+
+  getAllSellerProducts(filters: ProductFilters): Observable<GenericRequestModel<PaginationDto<viewSellerProductDto>>> {
+
+    const params = new HttpParams({ fromObject: filters as any });
+    return this.http.get<GenericRequestModel<PaginationDto<viewSellerProductDto>>>(this.apiUrl+"/seller", { params });
+  }
 
 //! End Of Service
 }
