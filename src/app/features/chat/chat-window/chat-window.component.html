@@ -35,7 +35,10 @@
         </div>
         <div *ngIf="msg.messageText">{{ msg.messageText || '' }}</div>
         <img *ngIf="msg.imageUrl" [src]="msg.imageUrl || ''" class="rounded-lg max-h-40 my-2" />
-        <audio *ngIf="msg.voiceUrl" [src]="msg.voiceUrl || ''" controls class="my-2"></audio>
+        <div *ngIf="msg.voiceUrl" class="flex items-center gap-3 bg-white/80 rounded-xl shadow px-4 py-2 my-2 border border-gray-200">
+          <i class="pi pi-microphone text-blue-500 text-2xl"></i>
+          <audio [src]="msg.voiceUrl || ''" controls class="w-full focus:outline-none" style="min-width: 180px; max-width: 320px;"></audio>
+        </div>
         <!-- Reactions row: always visible -->
         <div class="flex gap-2 mt-2 items-center">
           <ng-container *ngFor="let group of groupReactions(msg.reactions)">
