@@ -26,6 +26,8 @@ export class ChatService {
   public message$ = this.messageSubject.asObservable();
   private typingSubject = new BehaviorSubject<{ conversationId: number, userId: string } | null>(null);
   public typing$ = this.typingSubject.asObservable();
+  private recordingSubject = new BehaviorSubject<{ conversationId: number, userId: string } | null>(null);
+  public recording$ = this.recordingSubject.asObservable();
   
   // Track current conversation for typing events
   private currentConversationId: number = 0;
@@ -186,6 +188,20 @@ export class ChatService {
       .catch((err: any) => console.error('SignalR Typing Error:', err));
   }
 
+  sendRecordingNotification(conversationId: number) {
+    this.hubConnection?.invoke('Recording', conversationId)
+      .catch(err => console.error('SignalR Recording Error:', err));
+  }
+
+  sendRecordingStopNotification(conversationId: number) {
+    // For now, we'll use the same method but with a different parameter
+    // The backend can distinguish by checking if the user is still recording
+    this.hubConnection?.invoke('Recording', conversationId)
+      .catch(err => console.error('SignalR Recording Error:', err));
+  }
+
+
+
   // SignalR event handlers
   private registerSignalREvents() {
     if (!this.hubConnection) return;
@@ -240,6 +256,13 @@ export class ChatService {
       console.log('Received Typing event:', { conversationId, userId });
       this.typingSubject.next({ conversationId, userId });
     });
+
+    this.hubConnection.on('Recording', (conversationId: number, userId: string) => {
+      console.log('[SignalR] Received Recording event:', { conversationId, userId });
+      this.recordingSubject.next({ conversationId, userId });
+    });
+
+
 
     this.hubConnection.on('ConversationCreated', (conversation: ChatConversationDto) => {
       console.log('Received ConversationCreated:', conversation);

@@ -1,9 +1,10 @@
-import { Component, Input, Output, EventEmitter, SimpleChanges, OnChanges, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef, AfterViewChecked } from '@angular/core';
+import { Component, Input, Output, EventEmitter, SimpleChanges, OnChanges, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef, AfterViewChecked, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatMessageDto, UserChatInfoDto } from '../../../core/models/chatmodels/chat-models';
 import { AvatarModule } from 'primeng/avatar';
 import { ButtonModule } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
+import { ChatService } from '../../../core/services/chat.service';
 
 @Component({
   selector: 'app-chat-window',
@@ -12,7 +13,7 @@ import { BadgeModule } from 'primeng/badge';
   templateUrl: './chat-window.component.html',
   styleUrls: ['./chat-window.component.css']
 })
-export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewChecked {
+export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewChecked, OnInit {
   @Input() messages: ChatMessageDto[] = [];
   @Input() currentUserId: string | null = null;
   @Input() isTyping: boolean = false;
@@ -20,6 +21,7 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
   @Output() reactToMessage = new EventEmitter<{ messageId: number, reaction: string }>();
   @Output() replyToMessage = new EventEmitter<{ messageId: number, content: string }>();
   @Output() deleteMessage = new EventEmitter<number>();
+  @Input() conversationId: number | null = null;
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
 
@@ -28,8 +30,9 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
   showEmojiPickerFor: number | null = null;
   private shouldScroll = false;
   selectedMessageId: number | null = null;
+  isRecording = false;
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(private cdr: ChangeDetectorRef, private chatService: ChatService) {}
 
   ngAfterViewInit() {
     this.shouldScroll = true;
@@ -51,6 +54,20 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
       this.scrollToBottom();
       this.shouldScroll = false;
     }
+  }
+
+  ngOnInit() {
+    this.chatService.recording$.subscribe(event => {
+      if (
+        event &&
+        event.conversationId === this.conversationId &&
+        event.userId !== this.currentUserId
+      ) {
+        console.log('[ChatWindow] Set isRecording true for conversation', event.conversationId);
+        this.isRecording = true;
+        setTimeout(() => this.isRecording = false, 2000);
+      }
+    });
   }
 
   scrollToBottom() {

@@ -1,6 +1,7 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ChatService } from '../../../core/services/chat.service';
 
 @Component({
   selector: 'app-message-input',
@@ -9,7 +10,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './message-input.component.html',
   styleUrls: ['./message-input.component.css']
 })
-export class MessageInputComponent {
+export class MessageInputComponent implements OnChanges {
   message: string = '';
   @Output() send = new EventEmitter<string>();
   @Output() typing = new EventEmitter<void>();
@@ -19,6 +20,13 @@ export class MessageInputComponent {
   isRecording = false;
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
+  @Input() conversationId: number | null = null;
+
+  ngOnChanges() {
+    console.log('[MessageInput] conversationId changed to:', this.conversationId);
+  }
+
+  constructor(private chatService: ChatService) {}
 
   sendMessage() {
     if (!this.message.trim()) {
@@ -53,6 +61,7 @@ export class MessageInputComponent {
   }
 
   toggleRecording() {
+    console.log('[MessageInput] toggleRecording called, isRecording:', this.isRecording);
     if (this.isRecording) {
       this.stopRecording();
     } else {
@@ -61,10 +70,12 @@ export class MessageInputComponent {
   }
 
   startRecording() {
+    console.log('[MessageInput] startRecording called');
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       alert('Audio recording is not supported in this browser.');
       return;
     }
+    
     navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
       this.mediaRecorder = new MediaRecorder(stream);
       this.recordedChunks = [];
@@ -79,6 +90,12 @@ export class MessageInputComponent {
       };
       this.mediaRecorder.start();
       this.isRecording = true;
+      
+      // Send recording notification AFTER recording actually starts
+      if (this.conversationId) {
+        console.log('[MessageInput] Sending recording notification for conversation:', this.conversationId);
+        this.chatService.sendRecordingNotification(this.conversationId);
+      }
     }).catch(() => {
       alert('Could not access microphone.');
     });
@@ -88,6 +105,13 @@ export class MessageInputComponent {
     if (this.mediaRecorder && this.isRecording) {
       this.mediaRecorder.stop();
       this.isRecording = false;
+      
+      // Send recording stop notification
+      if (this.conversationId) {
+        console.log('[MessageInput] Stopping recording notification for conversation:', this.conversationId);
+        // Send the same event but with a flag to indicate stop
+        this.chatService.sendRecordingStopNotification(this.conversationId);
+      }
     }
   }
 }

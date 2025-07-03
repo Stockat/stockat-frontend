@@ -19,9 +19,12 @@
     <div class="flex-1">
       <div class="font-semibold text-gray-800">{{ getOtherUserName(conv) }}</div>
       <div class="text-xs text-gray-500 truncate">
-        <span *ngIf="isTyping(conv); else lastMsg">Typing...</span>
-        <ng-template #lastMsg>
-          {{ conv.lastMessage?.messageText }}
+        <span *ngIf="isRecording(conv); else typingOrLastMsg">Recording...</span>
+        <ng-template #typingOrLastMsg>
+          <span *ngIf="isTyping(conv); else lastMsg">Typing...</span>
+          <ng-template #lastMsg>
+            {{ conv.lastMessage?.messageText }}
+          </ng-template>
         </ng-template>
       </div>
     </div>

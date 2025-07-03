@@ -14,12 +14,13 @@
            }"
            (click)="onMessageClick(msg)">
         <div class="flex items-center gap-2 mb-1" *ngIf="!isOwnMessage(msg)">
-          <span class="font-semibold text-xs">{{ msg.sender?.fullName }}</span>
+          <span class="font-semibold text-xs">{{ msg.sender?.userId === currentUserId ? 'You' : msg.sender?.fullName }}</span>
           <span class="text-xs" [ngClass]="{'text-gray-400': !isOwnMessage(msg), 'text-blue-100': isOwnMessage(msg)}">
             {{ msg.sentAt ? (msg.sentAt | date:'shortTime') : '' }}
           </span>
         </div>
         <div class="flex items-center gap-2 mb-1" *ngIf="isOwnMessage(msg)">
+          <span class="font-semibold text-xs">You</span>
           <span class="text-xs text-blue-100">
             {{ msg.sentAt ? (msg.sentAt | date:'shortTime') : '' }}
           </span>

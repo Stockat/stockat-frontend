@@ -33,6 +33,7 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   currentUserProfileImageUrl: string = 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc';
   defaultAvatar = 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc';
   isCreatingConversation = false;
+  isRecording = false;
 
   constructor(
     private chatService: ChatService,
@@ -213,6 +214,24 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
           m.messageId === messageId ? { ...m, isRead, readAt } : m
         )
       }));
+    });
+
+    this.chatService.recording$.subscribe(event => {
+      if (
+        event &&
+        this.selectedConversation &&
+        event.conversationId === this.selectedConversation.conversationId &&
+        event.userId !== this.currentUserId
+      ) {
+        // Toggle recording indicator: if already recording, stop; if not recording, start
+        if (this.isRecording) {
+          console.log('[ChatPage] Stopping recording indicator');
+          this.isRecording = false;
+        } else {
+          console.log('[ChatPage] Starting recording indicator');
+          this.isRecording = true;
+        }
+      }
     });
   }
 

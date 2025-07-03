@@ -22,6 +22,7 @@ export class ConversationListComponent {
   searchResults: UserChatInfoDto[] = [];
   defaultProfileImageUrl = 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc';
   typingConversations = new Set<string>(); // conversationId as string (could be GUID)
+  recordingConversations = new Set<string>();
 
   constructor(private chatService: ChatService) {
     // Subscribe to typing events
@@ -29,6 +30,20 @@ export class ConversationListComponent {
       if (typing && typing.userId !== this.currentUserId && typing.conversationId) {
         this.typingConversations.add(typing.conversationId.toString());
         setTimeout(() => this.typingConversations.delete(typing.conversationId.toString()), 2000);
+      }
+    });
+    this.chatService.recording$.subscribe(recording => {
+      if (recording && recording.userId !== this.currentUserId && recording.conversationId) {
+        console.log('[Sidebar] Recording event for conversation', recording.conversationId);
+        // Simple toggle: if already recording, stop; if not recording, start
+        const convId = recording.conversationId.toString();
+        if (this.recordingConversations.has(convId)) {
+          console.log('[Sidebar] Stopping recording indicator for conversation', recording.conversationId);
+          this.recordingConversations.delete(convId);
+        } else {
+          console.log('[Sidebar] Starting recording indicator for conversation', recording.conversationId);
+          this.recordingConversations.add(convId);
+        }
       }
     });
   }
@@ -92,5 +107,9 @@ export class ConversationListComponent {
 
   isTyping(conv: ChatConversationDto): boolean {
     return this.typingConversations.has(conv.conversationId.toString());
+  }
+
+  isRecording(conv: ChatConversationDto): boolean {
+    return this.recordingConversations.has(conv.conversationId.toString());
   }
 }
