@@ -29,6 +29,7 @@ export interface SendVoiceMessageDto {
 export interface ReactToMessageDto {
   messageId: number;
   reactionType: string;
+  conversationId: number;
 }
 
 // MessageReactionDto: Represents a reaction to a message

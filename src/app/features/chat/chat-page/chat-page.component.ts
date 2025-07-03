@@ -36,7 +36,7 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   isRecording = false;
 
   constructor(
-    private chatService: ChatService,
+    public chatService: ChatService,
     private authService: AuthService,
     private userService: UserService,
     private messageService: MessageService
@@ -117,6 +117,13 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
             }
           }
         }
+      }
+    });
+
+    // Hybrid real-time sync: update local messages array on observable change
+    this.chatService.getMessages$().subscribe(msgs => {
+      if (this.selectedConversation && msgs) {
+        this.messages = msgs.filter(m => m.conversationId === this.selectedConversation!.conversationId);
       }
     });
 
@@ -267,6 +274,7 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
     this.selectedConversation = conversation;
     this.chatService.getMessages(conversation.conversationId).subscribe((msgs: ChatMessageDto[]) => {
       this.messages = msgs.sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
+      this.chatService['messages$'].next(this.messages); // update the observable for real-time
       setTimeout(() => this.scrollToBottom(), 0);
       // Mark all unread messages as read (for all types) when opening the chat
       if (this.currentUserId) {
@@ -411,7 +419,8 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   handleReaction(event: { messageId: number, reaction: string }) {
     this.chatService.reactToMessageSignalR({
       messageId: event.messageId,
-      reactionType: event.reaction
+      reactionType: event.reaction,
+      conversationId: this.selectedConversation!.conversationId
     });
   }
 

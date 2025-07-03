@@ -200,8 +200,6 @@ export class ChatService {
       .catch(err => console.error('SignalR Recording Error:', err));
   }
 
-
-
   // SignalR event handlers
   private registerSignalREvents() {
     if (!this.hubConnection) return;
@@ -262,7 +260,13 @@ export class ChatService {
       this.recordingSubject.next({ conversationId, userId });
     });
 
-
+    this.hubConnection.on('ReceiveMessageUpdate', (updatedMessage: ChatMessageDto) => {
+      console.log('[SignalR] ReceiveMessageUpdate fired for messageId:', updatedMessage.messageId, 'Reactions:', updatedMessage.reactions);
+      const msgs = this.messages$.getValue().map(m =>
+        m.messageId == updatedMessage.messageId ? updatedMessage : m
+      );
+      this.messages$.next([...msgs]);
+    });
 
     this.hubConnection.on('ConversationCreated', (conversation: ChatConversationDto) => {
       console.log('Received ConversationCreated:', conversation);

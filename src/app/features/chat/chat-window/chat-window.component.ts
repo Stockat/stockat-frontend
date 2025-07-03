@@ -97,4 +97,17 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
       this.selectedMessageId = msg.messageId;
     }
   }
+
+  groupReactions(reactions: any[] = []): { reactionType: string, count: number, hasCurrentUser: boolean }[] {
+    const map = new Map<string, { reactionType: string, count: number, hasCurrentUser: boolean }>();
+    for (const r of reactions) {
+      if (!map.has(r.reactionType)) {
+        map.set(r.reactionType, { reactionType: r.reactionType, count: 0, hasCurrentUser: false });
+      }
+      const group = map.get(r.reactionType)!;
+      group.count++;
+      if (r.userId === this.currentUserId) group.hasCurrentUser = true;
+    }
+    return Array.from(map.values());
+  }
 }
