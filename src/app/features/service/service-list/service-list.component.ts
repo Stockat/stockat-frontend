@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ServiceService } from '../../../core/services/service.service';
 import { ServiceRequestService } from '../../../core/services/service-request.service';
 import { CommonModule } from '@angular/common';
@@ -18,23 +18,37 @@ export class ServiceListComponent {
   searchTerm: string = '';
   sellerFilter: string = '';
   sellerNames: string[] = [];
+  @Input() sellerId?: string;
+
 
   constructor(
     private serviceService: ServiceService,
   ) {}
 
   ngOnInit() {
-    this.serviceService.getAllServices().subscribe({
+    if (this.sellerId) {
+    this.serviceService.getSellerServices(this.sellerId).subscribe({
       next: (data) => {
         this.services = data;
-        this.filteredServices = data;
-        this.sellerNames = Array.from(new Set(data.map((s: any) => s.sellerName)));
-        console.log('Services fetched successfully:', this.services);
       },
       error: (error) => {
         console.error('Error fetching services:', error);
       }
     });
+
+  } else {
+    this.serviceService.getAllServices().subscribe({
+      next: (data) => {
+        this.services = data;
+        this.filteredServices = data;
+        this.sellerNames = Array.from(new Set(data.map((s: any) => s.sellerName)));
+      },
+      error: (error) => {
+        console.error('Error fetching services:', error);
+      }
+    });
+  }
+
   }
 
   onSearchOrFilter() {

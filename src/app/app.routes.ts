@@ -7,6 +7,7 @@ import { sellerRoutes } from './features/seller/seller.routes';
 import { ProductCardComponent } from './features/Home/product-card/product-card.component';
 import { ProductDetailsComponent } from './features/ProductDetails/product-details/product-details.component';
 import { ServiceRequestDetailsComponent } from './features/profile/service-request-details.component';
+import { SellerProfileComponent } from './features/seller/seller-profile/seller-profile.component';
 
 export const routes: Routes = [
   {
@@ -71,6 +72,11 @@ export const routes: Routes = [
     path: 'seller',
     component: SellerLayoutComponent,
     children: sellerRoutes,
+  },
+  // Seller Profile
+  {
+    path: 'seller-profile/:id',
+    component: SellerProfileComponent
   },
     // Admin
     {

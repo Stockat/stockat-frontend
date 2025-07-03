@@ -1,0 +1,64 @@
+<div class="max-w-5xl mx-auto p-6">
+  <!-- Seller Info -->
+  <div *ngIf="seller" class="flex flex-col sm:flex-row items-center gap-6 mb-8 bg-white rounded-xl shadow p-6 border border-blue-100">
+    <img
+      [src]="seller.data.profileImageUrl || 'https://ui-avatars.com/api/?name=' + seller.data.firstName"
+      alt="Seller Avatar"
+      class="w-24 h-24 rounded-full border-2 border-blue-200 shadow"
+    />
+    <div>
+      <h2 class="text-3xl font-bold text-blue-700 mb-1">{{ seller?.data.firstName }} {{ seller?.data.lastName }}</h2>
+      <p class="text-gray-600 mb-2"><i class="pi pi-envelope mr-1"></i> {{ seller?.data.email }}</p>
+      <p class="text-gray-600 mb-2" *ngIf="seller?.data.address || seller?.data.city || seller?.data.country">
+        <i class="pi pi-map-marker mr-1"></i>
+        {{ seller?.data.address }}<span *ngIf="seller?.data.address && (seller?.data.city || seller?.data.country)">, </span>{{ seller?.data.city }}<span *ngIf="seller?.data.city && seller?.data.country">, </span>{{ seller?.data.country }}
+      </p>
+      <p class="text-gray-600 mb-2" *ngIf="seller?.data.postalCode"><i class="pi pi-inbox mr-1"></i> {{ seller?.data.postalCode }}</p>
+
+      <p class="text-gray-600 mb-2" *ngIf="seller?.data.isApproved"><i class="pi pi-check-circle text-green-600 mr-1"></i> Approved Seller</p>
+      <p class="text-gray-600 mb-2" *ngIf="seller?.data.needsVerification"><i class="pi pi-exclamation-triangle text-yellow-600 mr-1"></i> Needs Verification</p>
+      <p class="text-gray-600 mb-2" *ngIf="seller?.data.isDeleted"><i class="pi pi-times-circle text-red-600 mr-1"></i> Deleted Account</p>
+      <p class="text-gray-600 mt-2" *ngIf="seller?.data.aboutMe">{{ seller?.data.aboutMe }}</p>
+    </div>
+  </div>
+
+  <!-- Seller Services -->
+  <div class="mb-10 bg-blue-50/60 rounded-2xl p-8 shadow-inner">
+    <h3 class="text-2xl font-semibold text-blue-700 mb-6">Services by {{ seller?.data.firstName }}</h3>
+    <div *ngIf="sellerServices?.length; else noServices">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+        <div *ngFor="let service of sellerServices" class="h-full w-full">
+          <p-card [styleClass]="'flex flex-col h-full w-full min-h-[300px] max-h-[300px] border-l-8 border-blue-400/80 border border-blue-100 shadow-lg hover:shadow-2xl hover:scale-[1.025] transition-all duration-200 rounded-2xl bg-white group'">
+            <ng-template pTemplate="header">
+              <div class="flex items-center gap-3 pb-2 border-b border-blue-50 bg-gradient-to-r from-blue-50 to-blue-100 rounded-t-2xl px-3 pt-3">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 border border-blue-200 shadow-sm">
+                  <i class="pi pi-briefcase text-blue-500 text-xl"></i>
+                </div>
+                <span class="text-lg font-bold text-blue-800 truncate max-w-[60%]">{{ service.name }}</span>
+                <span class="p-tag p-tag-success ml-auto text-base font-semibold px-3 py-1">${{ service.pricePerProduct }}</span>
+              </div>
+            </ng-template>
+            <ng-template pTemplate="content">
+              <p class="text-gray-600 text-sm mb-3 line-clamp-3 min-h-[3.5em] flex-grow" style="display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">{{ service.description }}</p>
+              <div class="flex flex-wrap gap-2 mb-3">
+                <span class="p-tag p-tag-info">Min Qty: {{ service.minQuantity }}</span>
+              </div>
+            </ng-template>
+            <ng-template pTemplate="footer">
+              <button pButton type="button" label="View Details" class="p-button-lg p-button-primary w-full font-bold rounded-xl group-hover:scale-[1.04] transition-transform duration-200 shadow-md mt-2" [routerLink]="['/services', service.id]"></button>
+            </ng-template>
+          </p-card>
+        </div>
+      </div>
+    </div>
+    <ng-template #noServices>
+      <div class="text-gray-400 italic">This seller has no services yet.</div>
+    </ng-template>
+  </div>
+
+  <!-- Seller Products -->
+  <!-- <div class="mb-10 bg-blue-50/60 rounded-2xl p-8 shadow-inner">
+    <h3 class="text-2xl font-semibold text-blue-700 mb-4">Products by {{ seller?.data.firstName }}</h3>
+    <app-product-card [sellerId]="seller?.data.id"></app-product-card>
+  </div> -->
+</div>

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Service } from '../../../core/models/service-models/service.dto';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ServiceService } from '../../../core/services/service.service';
 import { CommonModule } from '@angular/common';
 import { RequestModalComponent } from '../request-modal/request-modal.component';
@@ -11,7 +11,7 @@ import { ButtonModule } from 'primeng/button';
 @Component({
   selector: 'app-service-details',
   templateUrl: './service-details.component.html',
-  imports: [CommonModule, RequestModalComponent, DialogModule, ButtonModule],
+  imports: [CommonModule, RequestModalComponent, DialogModule, ButtonModule, RouterLink],
 })
 
 export class ServiceDetailsComponent {
