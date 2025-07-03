@@ -265,15 +265,8 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
     if (el) el.scrollTop = el.scrollHeight;
   }
 
-  sendMessage(messageText: string) {
-    if (this.selectedConversation && this.currentUserId) {
-      // Existing conversation: send as usual
-      this.chatService.sendMessageSignalR({
-        conversationId: this.selectedConversation.conversationId,
-        messageText
-      });
-      this.chatService.sendTypingNotification(this.selectedConversation.conversationId);
-    } else if (this.selectedUserForNewChat && this.currentUserId && !this.isCreatingConversation) {
+  sendAnyMessage(event: { type: 'text' | 'image' | 'voice', content?: string, file?: File }) {
+    if (!this.selectedConversation && this.selectedUserForNewChat) {
       this.isCreatingConversation = true;
       this.chatService.createConversationSignalR(this.selectedUserForNewChat.userId);
       const sub = this.chatService.getConversations$().subscribe(convs => {
@@ -284,19 +277,62 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
         if (conv) {
           this.selectedConversation = conv;
           this.selectedUserForNewChat = null;
-          // Wait a tick to ensure joinConversation is called in the ConversationCreated handler
           setTimeout(() => {
-            this.chatService.sendMessageSignalR({
-              conversationId: conv.conversationId,
-              messageText
-            });
-            this.chatService.sendTypingNotification(conv.conversationId);
+            if (event.type === 'text') {
+              this.chatService.sendMessageSignalR({
+                conversationId: conv.conversationId,
+                messageText: event.content
+              });
+            } else if (event.type === 'image') {
+              this.chatService.sendImageMessage({
+                conversationId: conv.conversationId,
+                messageText: event.content,
+                image: event.file!
+              }).subscribe();
+            } else if (event.type === 'voice') {
+              this.chatService.sendVoiceMessage({
+                conversationId: conv.conversationId,
+                messageText: event.content,
+                voice: event.file!
+              }).subscribe();
+            }
             sub.unsubscribe();
             this.isCreatingConversation = false;
-          }, 200); // 200ms delay to ensure group join
+          }, 200);
         }
       });
+    } else if (this.selectedConversation) {
+      if (event.type === 'text') {
+        this.chatService.sendMessageSignalR({
+          conversationId: this.selectedConversation.conversationId,
+          messageText: event.content
+        });
+      } else if (event.type === 'image') {
+        this.chatService.sendImageMessage({
+          conversationId: this.selectedConversation.conversationId,
+          messageText: event.content,
+          image: event.file!
+        }).subscribe();
+      } else if (event.type === 'voice') {
+        this.chatService.sendVoiceMessage({
+          conversationId: this.selectedConversation.conversationId,
+          messageText: event.content,
+          voice: event.file!
+        }).subscribe();
+      }
     }
+  }
+
+  sendMessage(messageText: string) {
+    this.sendAnyMessage({ type: 'text', content: messageText });
+  }
+
+  sendImageMessage(event: { file: File, messageText?: string }) {
+    this.sendAnyMessage({ type: 'image', content: event.messageText, file: event.file });
+  }
+
+  sendVoiceMessage(event: { file: File, messageText?: string }) {
+    this.sendAnyMessage({ type: 'voice', content: event.messageText, file: event.file });
   }
 
   startChatWithUser(user: UserChatInfoDto) {
@@ -368,23 +404,5 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
     // For now, just send the reply as a regular message
     // You can enhance this to show the reply context in the UI
     this.sendMessage(event.content);
-  }
-
-  sendImageMessage(event: { file: File, messageText?: string }) {
-    if (!this.selectedConversation) return;
-    this.chatService.sendImageMessage({
-      conversationId: this.selectedConversation.conversationId,
-      messageText: event.messageText,
-      image: event.file
-    }).subscribe();
-  }
-
-  sendVoiceMessage(event: { file: File, messageText?: string }) {
-    if (!this.selectedConversation) return;
-    this.chatService.sendVoiceMessage({
-      conversationId: this.selectedConversation.conversationId,
-      messageText: event.messageText,
-      voice: event.file
-    }).subscribe();
   }
 }
