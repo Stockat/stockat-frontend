@@ -20,7 +20,16 @@
     <i *ngIf="isRecording" class="pi pi-stop-circle text-xl text-red-500"></i>
   </button>
   <span *ngIf="isRecording" class="text-red-500 text-xs ml-2 animate-pulse">Recording...</span>
-  <button class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold" type="submit">Send</button>
+  <button
+    *ngIf="message && message.trim()"
+    type="submit"
+    pButton
+    class="p-2 bg-white rounded-full hover:bg-gray-100 transition"
+    aria-label="Send message"
+    title="Send message"
+  >
+    <i class="pi pi-send text-xl text-gray-500"></i>
+  </button>
 </form>
 
 <p-dialog
