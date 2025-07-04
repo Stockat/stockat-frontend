@@ -10,7 +10,7 @@
     </div>
   </div>
 </div>
-<div class="flex flex-col gap-2 overflow-y-auto custom-scrollbar" style="max-height: calc(100vh - 120px);">
+<div class="flex flex-col gap-2 overflow-y-auto custom-scrollbar" style="max-height: calc(100vh - 120px);" (scroll)="onScroll($event)">
   <div *ngFor="let conv of filteredConversations"
        class="bg-white rounded-xl shadow p-2 cursor-pointer flex items-center gap-3"
        [ngClass]="{'selected': conv.conversationId.toString() === selectedConversationId}"
@@ -35,5 +35,4 @@
       </span>
     </div>
   </div>
-  <button class="mt-4 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 rounded" (click)="loadMore()">Load more</button>
 </div>

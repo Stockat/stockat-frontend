@@ -37,7 +37,7 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
 
   // Pagination state
   conversationPage = 1;
-  conversationPageSize = 8;
+  conversationPageSize = 10;
   hasMoreConversations = true;
 
   // Message pagination state

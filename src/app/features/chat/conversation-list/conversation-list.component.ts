@@ -15,6 +15,7 @@ export class ConversationListComponent {
   @Input() conversations: ChatConversationDto[] = [];
   @Input() selectedConversationId: string | null = null;
   @Input() currentUserId: string | null = null;
+  @Input() hasMoreConversations: boolean = true;
   @Output() selectConversation = new EventEmitter<ChatConversationDto>();
   @Output() startChat = new EventEmitter<UserChatInfoDto>();
   @Output() loadMoreConversations = new EventEmitter<void>();
@@ -112,5 +113,12 @@ export class ConversationListComponent {
 
   isRecording(conv: ChatConversationDto): boolean {
     return this.recordingConversations.has(conv.conversationId.toString());
+  }
+
+  onScroll(event: any) {
+    const element = event.target;
+    if (element.scrollTop + element.clientHeight >= element.scrollHeight - 5 && this.hasMoreConversations) {
+      this.loadMoreConversations.emit();
+    }
   }
 }
