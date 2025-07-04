@@ -94,6 +94,11 @@ export class ChatService {
     return this.http.get<number>(`${this.baseUrl}/notifications/unread-count`);
   }
 
+  // Fetch a conversation with a specific user (if exists)
+  getConversationWithUser(userId: string): Observable<ChatConversationDto | null> {
+    return this.http.get<ChatConversationDto | null>(`${this.baseUrl}/conversations/with/${userId}`);
+  }
+
   // SignalR real-time methods
   startConnection(token: string) {
     this.hubConnection = new HubConnectionBuilder()

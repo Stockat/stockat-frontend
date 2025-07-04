@@ -357,10 +357,56 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   }
 
   startChatWithUser(user: UserChatInfoDto) {
-    // Only set the user, do not create a conversation or add to sidebar
-    this.selectedUserForNewChat = user;
-    this.selectedConversation = null;
-    this.messages = [];
+    // Check if a conversation already exists with this user in the loaded list
+    const existingConv = this.conversations.find(c =>
+      (c.user1Id === this.currentUserId && c.user2Id === user.userId) ||
+      (c.user2Id === this.currentUserId && c.user1Id === user.userId)
+    );
+    if (existingConv) {
+      this.selectedConversation = existingConv;
+      this.selectedUserForNewChat = null;
+      this.chatService.getMessages(existingConv.conversationId).subscribe((msgs: ChatMessageDto[]) => {
+        this.messages = msgs.sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
+        this.chatService['messages$'].next(this.messages);
+        setTimeout(() => this.scrollToBottom(), 0);
+      });
+    } else {
+      // Try to fetch the conversation directly from the backend
+      this.chatService.getConversationWithUser(user.userId).subscribe({
+        next: conv => {
+          if (conv) {
+            this.selectedConversation = conv;
+            this.selectedUserForNewChat = null;
+            // Join SignalR for real-time updates
+            this.chatService.joinConversation(conv.conversationId);
+            // Add to sidebar if not already present
+            if (!this.conversations.some(c => c.conversationId === conv.conversationId)) {
+              this.conversations = [conv, ...this.conversations];
+            }
+            this.chatService.getMessages(conv.conversationId).subscribe((msgs: ChatMessageDto[]) => {
+              this.messages = msgs.sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
+              this.chatService['messages$'].next(this.messages);
+              setTimeout(() => this.scrollToBottom(), 0);
+            });
+          } else {
+            this.selectedUserForNewChat = user;
+            this.selectedConversation = null;
+            this.messages = [];
+          }
+        },
+        error: err => {
+          // If 404 Not Found, treat as no conversation
+          if (err.status === 404) {
+            this.selectedUserForNewChat = user;
+            this.selectedConversation = null;
+            this.messages = [];
+          } else {
+            // Optionally handle other errors (show a toast, etc.)
+            console.error('Error fetching conversation:', err);
+          }
+        }
+      });
+    }
   }
 
   getReceiverName(conv: ChatConversationDto | null): string {
