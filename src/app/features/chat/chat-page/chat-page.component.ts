@@ -122,10 +122,19 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
       }
     });
 
-    // Hybrid real-time sync: update local messages array on observable change
+    // Carefully merge real-time message updates (e.g., reactions) into the existing messages array
     this.chatService.getMessages$().subscribe(msgs => {
-      if (this.selectedConversation && msgs) {
-        this.messages = msgs.filter(m => m.conversationId === this.selectedConversation!.conversationId);
+      if (!msgs || !Array.isArray(msgs)) return;
+      let updated = false;
+      for (const updatedMsg of msgs) {
+        const idx = this.messages.findIndex(m => m.messageId === updatedMsg.messageId);
+        if (idx !== -1) {
+          this.messages[idx] = { ...this.messages[idx], ...updatedMsg };
+          updated = true;
+        }
+      }
+      if (updated) {
+        this.messages = [...this.messages];
       }
     });
 
@@ -157,11 +166,15 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
       // Check if this message belongs to the currently selected conversation
       const isOpenChat = this.selectedConversation && Number(msg.conversationId) === Number(this.selectedConversation.conversationId);
       if (isOpenChat) {
-        // Only add if not duplicate
-        if (!this.messages.some(m => m.messageId === msg.messageId)) {
-          this.messages = [...this.messages, msg].sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
-          setTimeout(() => this.scrollToBottom(), 0);
+        // Carefully update or add the message in the messages array
+        const idx = this.messages.findIndex(m => m.messageId === msg.messageId);
+        if (idx !== -1) {
+          this.messages[idx] = { ...this.messages[idx], ...msg };
+        } else {
+          this.messages = [...this.messages, msg];
         }
+        this.messages = [...this.messages].sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
+        setTimeout(() => this.scrollToBottom(), 0);
         // Mark as read if the message is not from the current user
         if (msg.sender.userId !== this.currentUserId && !msg.isRead) {
           this.chatService.markMessageAsReadSignalR(msg.messageId);
