@@ -23,6 +23,7 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
   @Output() deleteMessage = new EventEmitter<number>();
   @Input() conversationId: number | null = null;
   @Output() loadMoreMessages = new EventEmitter<void>();
+  @Input() hasMoreMessages: boolean = true;
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
 
@@ -37,7 +38,6 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
   // Pagination state
   currentPage = 1;
   pageSize = 20;
-  hasMoreMessages = true;
   isLoadingMessages = false;
 
   constructor(private cdr: ChangeDetectorRef, private chatService: ChatService) {}

@@ -29,6 +29,7 @@
       <app-chat-window 
         [messages]="messages" 
         [currentUserId]="currentUserId"
+        [hasMoreMessages]="hasMoreMessages"
         (reactToMessage)="handleReaction($event)"
         (deleteMessage)="handleDeleteMessage($event)"
         (replyToMessage)="handleReplyToMessage($event)"
