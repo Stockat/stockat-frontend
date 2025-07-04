@@ -46,6 +46,7 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   messagePageSize = 20;
   hasMoreMessages = true;
   isLoadingMessages = false;
+  focusTrigger = 0;
 
   constructor(
     public chatService: ChatService,
@@ -273,22 +274,15 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
 
   selectConversation(conversation: ChatConversationDto) {
     this.selectedConversation = conversation;
+    this.selectedUserForNewChat = null;
+    this.messages = [];
     this.messagePage = 1;
     this.hasMoreMessages = true;
-    this.isLoadingMessages = false;
-    this.chatService.getMessages(conversation.conversationId, this.messagePage, this.messagePageSize).subscribe((msgs: ChatMessageDto[]) => {
+    this.focusTrigger++; // Trigger input focus
+    this.chatService.getMessages(conversation.conversationId).subscribe((msgs: ChatMessageDto[]) => {
       this.messages = msgs.sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
-      if (msgs.length < this.messagePageSize) this.hasMoreMessages = false;
-      this.chatService['messages$'].next(this.messages); // update the observable for real-time
+      this.chatService['messages$'].next(this.messages);
       setTimeout(() => this.scrollToBottom(), 0);
-      // Mark all unread messages as read (for all types) when opening the chat
-      if (this.currentUserId) {
-        this.messages.forEach(m => {
-          if (!m.isRead && m.sender.userId !== this.currentUserId) {
-            this.chatService.markMessageAsReadSignalR(m.messageId);
-          }
-        });
-      }
     });
   }
 

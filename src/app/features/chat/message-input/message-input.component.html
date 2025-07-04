@@ -1,5 +1,5 @@
 <form #msgForm="ngForm" class="flex gap-2 items-center" (ngSubmit)="sendMessage()">
-  <input type="text" class="flex-1 px-1 rounded-lg" placeholder="Type a message..." [(ngModel)]="message" name="messageInput" required (input)="onInput()" />
+  <input type="text" #messageInput class="flex-1 px-1 rounded-lg" placeholder="Type a message..." [(ngModel)]="message" name="messageInput" required (input)="onInput()" />
   <input type="file" accept="image/*" #imageInput hidden (change)="onImageSelected($event)" />
   <button
     type="button"

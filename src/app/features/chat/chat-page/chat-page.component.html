@@ -41,6 +41,7 @@
     <footer class="chat-input p-4 bg-white border-t border-gray-200" *ngIf="selectedConversation || selectedUserForNewChat">
       <app-message-input 
         [conversationId]="selectedConversation?.conversationId || null"
+        [focusTrigger]="focusTrigger"
         (send)="sendMessage($event)" 
         (typing)="onTyping()" 
         (sendImage)="sendImageMessage($event)" 

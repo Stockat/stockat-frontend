@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, Input, OnChanges } from '@angular/core';
+import { Component, Output, EventEmitter, Input, OnChanges, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatService } from '../../../core/services/chat.service';
@@ -22,6 +22,8 @@ export class MessageInputComponent implements OnChanges {
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
   @Input() conversationId: number | null = null;
+  @Input() focusTrigger: number = 0;
+  @ViewChild('messageInput', { static: false }) messageInput!: ElementRef<HTMLInputElement>;
   showImageConfirm = false;
   imagePreviewUrl: string | null = null;
   imageFile: File | null = null;
@@ -33,9 +35,17 @@ export class MessageInputComponent implements OnChanges {
   ngOnChanges() {
     console.log('[MessageInput] conversationId changed to:', this.conversationId);
     this.message = '';
+    // Focus the input when conversation changes
+    setTimeout(() => this.focusInput(), 100);
   }
 
   constructor(private chatService: ChatService) {}
+
+  focusInput() {
+    if (this.messageInput) {
+      this.messageInput.nativeElement.focus();
+    }
+  }
 
   sendMessage() {
     if (!this.message.trim()) {
