@@ -537,6 +537,14 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
       if (msgs.length < this.messagePageSize) this.hasMoreMessages = false;
       // Prepend older messages
       this.messages = [...msgs.sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime()), ...this.messages];
+      // Mark all newly loaded unread messages as read (not sent by current user)
+      if (this.currentUserId) {
+        msgs.forEach(m => {
+          if (!m.isRead && m.sender.userId !== this.currentUserId) {
+            this.chatService.markMessageAsReadSignalR(m.messageId);
+          }
+        });
+      }
       this.isLoadingMessages = false;
       // Optionally, maintain scroll position here
     });
