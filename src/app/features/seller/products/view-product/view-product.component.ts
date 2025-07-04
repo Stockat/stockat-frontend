@@ -41,7 +41,7 @@ import { ProductStatus } from '../../../../core/models/product-models/productDto
 export class ViewProductComponent {
 
   //! Testing
-  checked: boolean = false;
+  nameAsc: boolean = false;
   //! end testing
   //* Filters Holders
   categories: any = [];
@@ -55,11 +55,14 @@ export class ViewProductComponent {
     tags: [],
     minQuantity: 1,
     minPrice: 1,
+    page: 1,
+    size: 8,
+    sortBy:null,
+    filterDirection: 'asc'
   }
 
   //* Pagination Params
   first: number = 0;
-  rows: number = 5;
   totalRecords: number = 0;
 
   //* Filters Params
@@ -156,6 +159,8 @@ setFilters(){
   this.filters.tags = this.selectedTags;
   this.filters.minQuantity = this.SelectedMinQty;
   this.filters.minPrice = this.SelectedPrice;
+  this.filters.page = this.first;
+  this.filters.size = 8;
 
   console.log("-*****-", this.filters);
 
@@ -182,8 +187,8 @@ resetFilters(){
 
 //* Pagination Method
 onPageChange(event: PaginatorState) {
-  this.first = event.first ?? 0;
-  this.rows = event.rows ?? 10;
+  this.first = event.page ?? 0;
+this.setFilters(); // Update filters with the new page number
 }
 //* Confirmation Dialog
 confirmDelete(event: Event, productId: number) {

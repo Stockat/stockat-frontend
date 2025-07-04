@@ -24,6 +24,10 @@ export class ProductService {
 
     const params = new HttpParams({ fromObject: filters as any });
 
+
+
+    console.log("params",params.toString());
+
     return this.http.get<GenericRequestModel<PaginationDto<ProductDto>>>(this.apiUrl, { params });
   }
 
