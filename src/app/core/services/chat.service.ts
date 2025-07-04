@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
   UserChatInfoDto,
   SendMessageDto,
@@ -28,6 +28,8 @@ export class ChatService {
   public typing$ = this.typingSubject.asObservable();
   private recordingSubject = new BehaviorSubject<{ conversationId: number, userId: string } | null>(null);
   public recording$ = this.recordingSubject.asObservable();
+  private messageUpdateSubject = new Subject<ChatMessageDto>();
+  public messageUpdate$ = this.messageUpdateSubject.asObservable();
   
   // Track current conversation for typing events
   private currentConversationId: number = 0;
@@ -266,7 +268,7 @@ export class ChatService {
     });
 
     this.hubConnection.on('ReceiveMessageUpdate', (updatedMessage: ChatMessageDto) => {
-      console.log('[SignalR] ReceiveMessageUpdate fired for messageId:', updatedMessage.messageId, 'Reactions:', updatedMessage.reactions);
+      this.messageUpdateSubject.next(updatedMessage);
       const msgs = this.messages$.getValue().map(m =>
         m.messageId == updatedMessage.messageId ? updatedMessage : m
       );

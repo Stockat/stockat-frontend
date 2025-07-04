@@ -122,18 +122,11 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
       }
     });
 
-    // Carefully merge real-time message updates (e.g., reactions) into the existing messages array
-    this.chatService.getMessages$().subscribe(msgs => {
-      if (!msgs || !Array.isArray(msgs)) return;
-      let updated = false;
-      for (const updatedMsg of msgs) {
-        const idx = this.messages.findIndex(m => m.messageId === updatedMsg.messageId);
-        if (idx !== -1) {
-          this.messages[idx] = { ...this.messages[idx], ...updatedMsg };
-          updated = true;
-        }
-      }
-      if (updated) {
+    // Listen for real-time message updates (e.g., reactions) and update the local messages array
+    this.chatService.messageUpdate$.subscribe(updatedMsg => {
+      const idx = this.messages.findIndex(m => m.messageId === updatedMsg.messageId);
+      if (idx !== -1) {
+        this.messages[idx] = { ...this.messages[idx], ...updatedMsg };
         this.messages = [...this.messages];
       }
     });
