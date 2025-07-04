@@ -89,7 +89,7 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
   }
 
   openEmojiPicker(messageId: number) {
-    this.showEmojiPickerFor = messageId;
+    this.showEmojiPickerFor = this.showEmojiPickerFor === messageId ? null : messageId;
   }
   closeEmojiPicker() {
     this.showEmojiPickerFor = null;
