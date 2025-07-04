@@ -11,3 +11,9 @@
 .px-4 { padding-left: 1rem; padding-right: 1rem; }
 .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
 .font-semibold { font-weight: 600; }
+
+input[type="text"]:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: #d1d5db; /* Tailwind gray-300 for subtle border */
+}

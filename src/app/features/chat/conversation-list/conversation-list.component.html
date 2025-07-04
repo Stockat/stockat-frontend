@@ -1,5 +1,5 @@
 <div class="conversation-search p-2">
-  <input type="text" class="w-full p-2 border rounded-lg" placeholder="Search users..." [(ngModel)]="searchQuery" (input)="onSearch()" />
+  <input type="text" class="w-full p-2 border rounded-lg focus:outline-none focus:shadow-none focus:border-gray-300" placeholder="Search users..." [(ngModel)]="searchQuery" (input)="onSearch()" />
   <div *ngIf="searchResults.length > 0" class="search-results bg-white shadow rounded-lg mt-2">
     <div *ngFor="let user of searchResults" class="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100" (click)="startChatWithUser(user)">
       <img [src]="user.profileImageUrl || defaultProfileImageUrl" class="w-8 h-8 rounded-full object-cover" alt="avatar" />
