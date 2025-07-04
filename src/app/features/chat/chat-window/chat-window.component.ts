@@ -40,6 +40,8 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
   pageSize = 20;
   isLoadingMessages = false;
 
+  audioStates: { [messageId: number]: { playing: boolean, currentTime: number, duration: number } } = {};
+
   constructor(private cdr: ChangeDetectorRef, private chatService: ChatService) {}
 
   ngAfterViewInit() {
@@ -162,5 +164,62 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
       this.hasMoreMessages = false;
     }
     // Optionally, maintain scroll position here
+  }
+
+  toggleAudioPlayback(audio: HTMLAudioElement, messageId: number) {
+    if (!this.audioStates[messageId]) {
+      this.audioStates[messageId] = { playing: false, currentTime: 0, duration: 0 };
+    }
+    if (audio.paused) {
+      audio.play();
+      this.audioStates[messageId].playing = true;
+    } else {
+      audio.pause();
+      this.audioStates[messageId].playing = false;
+    }
+  }
+
+  isAudioPlaying(messageId: number): boolean {
+    return !!this.audioStates[messageId]?.playing;
+  }
+
+  onAudioTimeUpdate(audio: HTMLAudioElement, messageId: number) {
+    if (!this.audioStates[messageId]) {
+      this.audioStates[messageId] = { playing: !audio.paused, currentTime: 0, duration: 0 };
+    }
+    this.audioStates[messageId].currentTime = audio.currentTime;
+    this.audioStates[messageId].duration = audio.duration;
+  }
+
+  onAudioEnded(messageId: number) {
+    if (this.audioStates[messageId]) {
+      this.audioStates[messageId].playing = false;
+      this.audioStates[messageId].currentTime = 0;
+    }
+  }
+
+  getAudioProgress(messageId: number): number {
+    const state = this.audioStates[messageId];
+    if (!state || !state.duration) return 0;
+    return (state.currentTime / state.duration) * 100;
+  }
+
+  seekAudio(event: MouseEvent, audio: HTMLAudioElement) {
+    const target = event.target as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const width = rect.width;
+    const percent = x / width;
+    if (audio.duration) {
+      audio.currentTime = percent * audio.duration;
+    }
+  }
+
+  getAudioTimeDisplay(messageId: number): string {
+    const state = this.audioStates[messageId];
+    if (!state) return '0:00';
+    const cur = Math.floor(state.currentTime || 0);
+    const dur = Math.floor(state.duration || 0);
+    return `${Math.floor(cur / 60)}:${('0' + (cur % 60)).slice(-2)} / ${Math.floor(dur / 60)}:${('0' + (dur % 60)).slice(-2)}`;
   }
 }
