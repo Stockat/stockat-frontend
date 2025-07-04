@@ -32,6 +32,7 @@ export class MessageInputComponent implements OnChanges {
 
   ngOnChanges() {
     console.log('[MessageInput] conversationId changed to:', this.conversationId);
+    this.message = '';
   }
 
   constructor(private chatService: ChatService) {}

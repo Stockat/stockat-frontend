@@ -40,11 +40,11 @@ export class ChatService {
   }
 
   // REST API methods
-  getConversations(page = 1, pageSize = 20): Observable<ChatConversationDto[]> {
+  getConversations(page = 1, pageSize = 10): Observable<ChatConversationDto[]> {
     return this.http.get<ChatConversationDto[]>(`${this.baseUrl}/conversations?page=${page}&pageSize=${pageSize}`);
   }
 
-  getMessages(conversationId: number, page = 1, pageSize = 30): Observable<ChatMessageDto[]> {
+  getMessages(conversationId: number, page = 1, pageSize = 20): Observable<ChatMessageDto[]> {
     return this.http.get<ChatMessageDto[]>(`${this.baseUrl}/conversations/${conversationId}/messages?page=${page}&pageSize=${pageSize}`);
   }
 

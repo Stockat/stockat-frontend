@@ -35,6 +35,11 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   isCreatingConversation = false;
   isRecording = false;
 
+  // Pagination state
+  conversationPage = 1;
+  conversationPageSize = 8;
+  hasMoreConversations = true;
+
   constructor(
     public chatService: ChatService,
     private authService: AuthService,
@@ -57,18 +62,7 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
       }
     });
     
-    // Load initial conversations
-    this.chatService.getConversations().subscribe(convs => {
-      this.conversations = convs;
-      // Join all conversation groups for real-time updates
-      for (const conv of convs) {
-        this.chatService.joinConversation(conv.conversationId);
-        console.log('Joined conversation:', conv.conversationId);
-      }
-      if (this.conversations.length > 0) {
-        this.selectConversation(this.conversations[0]);
-      }
-    });
+    this.loadInitialConversations();
 
     // Listen for new conversations created via SignalR
     this.chatService.getConversations$().subscribe(conversations => {
@@ -432,5 +426,39 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
     // For now, just send the reply as a regular message
     // You can enhance this to show the reply context in the UI
     this.sendMessage(event.content);
+  }
+
+  loadInitialConversations() {
+    this.conversationPage = 1;
+    this.hasMoreConversations = true;
+    this.chatService.getConversations(this.conversationPage, this.conversationPageSize).subscribe(convs => {
+      this.conversations = convs;
+      for (const conv of convs) {
+        this.chatService.joinConversation(conv.conversationId);
+      }
+      if (this.conversations.length > 0) {
+        this.selectConversation(this.conversations[0]);
+      }
+      if (convs.length < this.conversationPageSize) {
+        this.hasMoreConversations = false;
+      }
+    });
+  }
+
+  loadMoreConversations() {
+    if (!this.hasMoreConversations) return;
+    this.conversationPage++;
+    this.chatService.getConversations(this.conversationPage, this.conversationPageSize).subscribe(convs => {
+      for (const conv of convs) {
+        // Only join if not already present
+        if (!this.conversations.some(c => c.conversationId === conv.conversationId)) {
+          this.chatService.joinConversation(conv.conversationId);
+        }
+      }
+      this.conversations = [...this.conversations, ...convs];
+      if (convs.length < this.conversationPageSize) {
+        this.hasMoreConversations = false;
+      }
+    });
   }
 }

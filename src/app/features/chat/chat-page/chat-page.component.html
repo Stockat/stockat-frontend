@@ -6,7 +6,8 @@
       [selectedConversationId]="selectedConversation ? selectedConversation.conversationId.toString() : null"
       [currentUserId]="currentUserId"
       (selectConversation)="selectConversation($event)"
-      (startChat)="startChatWithUser($event)">
+      (startChat)="startChatWithUser($event)"
+      (loadMoreConversations)="loadMoreConversations()">
     </app-conversation-list>
   </aside>
 

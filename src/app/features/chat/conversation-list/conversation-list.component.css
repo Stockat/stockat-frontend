@@ -22,3 +22,19 @@ input[type="text"]:focus, input[type="text"]:active, input[type="text"]:focus-vi
   outline: none !important;
   box-shadow: none !important;
 }
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f3f4f6;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 8px;
+}

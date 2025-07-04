@@ -17,6 +17,7 @@ export class ConversationListComponent {
   @Input() currentUserId: string | null = null;
   @Output() selectConversation = new EventEmitter<ChatConversationDto>();
   @Output() startChat = new EventEmitter<UserChatInfoDto>();
+  @Output() loadMoreConversations = new EventEmitter<void>();
 
   searchQuery = '';
   searchResults: UserChatInfoDto[] = [];
@@ -90,7 +91,7 @@ export class ConversationListComponent {
   }
 
   loadMore() {
-    // TODO: Implement pagination logic for loading more conversations
+    this.loadMoreConversations.emit();
   }
 
   getOtherUserName(conv: ChatConversationDto): string {
