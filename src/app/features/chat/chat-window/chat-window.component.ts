@@ -5,11 +5,27 @@ import { AvatarModule } from 'primeng/avatar';
 import { ButtonModule } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
 import { ChatService } from '../../../core/services/chat.service';
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({ name: 'chatDaySeparator', standalone: true })
+export class ChatDaySeparatorPipe implements PipeTransform {
+  transform(dateStr: string): string {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+    const isToday = date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth() && date.getDate() === today.getDate();
+    const isYesterday = date.getFullYear() === yesterday.getFullYear() && date.getMonth() === yesterday.getMonth() && date.getDate() === yesterday.getDate();
+    if (isToday) return 'Today';
+    if (isYesterday) return 'Yesterday';
+    return date.toLocaleDateString();
+  }
+}
 
 @Component({
   selector: 'app-chat-window',
   standalone: true,
-  imports: [CommonModule, AvatarModule, ButtonModule, BadgeModule],
+  imports: [CommonModule, AvatarModule, ButtonModule, BadgeModule, ChatDaySeparatorPipe],
   templateUrl: './chat-window.component.html',
   styleUrls: ['./chat-window.component.css']
 })
@@ -221,5 +237,23 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
     const cur = Math.floor(state.currentTime || 0);
     const dur = Math.floor(state.duration || 0);
     return `${Math.floor(cur / 60)}:${('0' + (cur % 60)).slice(-2)} / ${Math.floor(dur / 60)}:${('0' + (dur % 60)).slice(-2)}`;
+  }
+
+  getMessagesGroupedByDay() {
+    if (!this.messages || this.messages.length === 0) return [];
+    const groups: { date: string, messages: ChatMessageDto[] }[] = [];
+    let lastDate = '';
+    for (const msg of this.messages) {
+      const dateObj = new Date(msg.sentAt);
+      // Format as yyyy-MM-dd for grouping
+      const dateStr = dateObj.getFullYear() + '-' + (dateObj.getMonth() + 1).toString().padStart(2, '0') + '-' + dateObj.getDate().toString().padStart(2, '0');
+      if (dateStr !== lastDate) {
+        groups.push({ date: dateStr, messages: [msg] });
+        lastDate = dateStr;
+      } else {
+        groups[groups.length - 1].messages.push(msg);
+      }
+    }
+    return groups;
   }
 }
