@@ -2,3 +2,7 @@
 @import "tailwindcss";
 @plugin "tailwindcss-primeui";
 @import "primeicons/primeicons.css";
+
+html {
+  font-size: 14px; /* or 13px, depending on how small you want it */
+}

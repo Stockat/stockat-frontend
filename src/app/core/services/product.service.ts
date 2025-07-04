@@ -7,6 +7,10 @@ import { Router } from '@angular/router';
 import { PaginationDto } from '../models/pagination-Dto';
 import { GenericRequestModel } from '../models/generic-request-Dto';
 import { ProductDetailsDto } from '../models/product-models/ProductDetails';
+import { ProductWithFeatures } from '../models/product-models/product-with-features';
+
+
+
 @Injectable({
   providedIn: 'root',
 })
@@ -31,6 +35,10 @@ export class ProductService {
     // const params = new HttpParams({ fromObject: productId as any });
 
     return this.http.get<GenericRequestModel<ProductDetailsDto>>(`${this.apiUrl}/${productId}`);
+  }
+
+  getProductWithFeatures(id: number): Observable<GenericRequestModel<ProductWithFeatures>> {
+    return this.http.get<GenericRequestModel<ProductWithFeatures>>(`${this.apiUrl}/with-features/${id}`);
   }
 
 
