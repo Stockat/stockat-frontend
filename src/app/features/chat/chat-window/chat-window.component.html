@@ -11,13 +11,13 @@
       <!-- Message bubble -->
       <div class="max-w-xs md:max-w-md p-3 rounded-lg shadow text-sm relative"
            [ngClass]="{
-             'bg-blue-500 text-white': isOwnMessage(msg),
+             'bg-blue-100 text-blue-900': isOwnMessage(msg),
              'bg-gray-100 text-gray-800': !isOwnMessage(msg)
            }"
            (click)="onMessageClick(msg)">
         <div class="flex items-center gap-2 mb-1">
           <span class="font-semibold text-xs">{{ isOwnMessage(msg) ? 'You' : msg.sender?.userId === currentUserId ? 'You' : msg.sender?.fullName }}</span>
-          <span class="text-xs" [ngClass]="isOwnMessage(msg) ? 'text-blue-100' : 'text-gray-400'">
+          <span class="text-xs" [ngClass]="isOwnMessage(msg) ? 'text-blue-400' : 'text-gray-400'">
             {{ msg.sentAt ? (msg.sentAt | date:'shortTime') : '' }}
           </span>
           <span class="align-middle cursor-pointer select-none" style="font-size: 1.3em;" (click)="openEmojiPicker(msg.messageId)">&#9786;</span>
