@@ -8,6 +8,7 @@ import { GoogleLoginProvider } from '@abacritt/angularx-social-login';
 
 import { AppComponent } from './app.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { ServiceModule } from './features/service/service.module';
 
 @NgModule({
   imports: [
@@ -15,7 +16,8 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
     CommonModule,
     HttpClientModule,
     ReactiveFormsModule,
-    SocialLoginModule
+    SocialLoginModule,
+    ServiceModule
     // import your AuthModule or feature modules here if needed
   ],
   providers: [
@@ -38,6 +40,7 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
         ]
       } as SocialAuthServiceConfig,
     },
+
   ]
 })
 export class AppModule { }

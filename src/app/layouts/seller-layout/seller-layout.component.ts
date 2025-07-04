@@ -82,9 +82,12 @@ export class SellerLayoutComponent {
         icon: 'ti ti-settings-bolt',
         items: [
           {
-            label: 'Settings',
+            label: 'All Services',
             icon: 'pi pi-cog',
-            shortcut: '⌘+O'
+            shortcut: '⌘+O',
+            route: '/seller/services',
+            routerLink: '/seller/services',
+            routerLinkActiveOptions: { endWith: '/seller/services' }
           },
           {
             label: 'Privacy',

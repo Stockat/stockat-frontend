@@ -4,6 +4,7 @@ export interface ProductDetailsDto {
   id: number;
   name: string;
   description: string;
+  categoryName: string;
   productStatus: ProductStatus;
   price: number;
   sellerId: string;

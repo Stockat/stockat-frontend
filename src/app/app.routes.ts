@@ -6,6 +6,7 @@ import { SellerLayoutComponent } from './layouts/seller-layout/seller-layout.com
 import { sellerRoutes } from './features/seller/seller.routes';
 import { ProductCardComponent } from './features/Home/product-card/product-card.component';
 import { ProductDetailsComponent } from './features/ProductDetails/product-details/product-details.component';
+import { ServiceRequestDetailsComponent } from './features/profile/service-request-details.component';
 
 export const routes: Routes = [
   {
@@ -56,6 +57,9 @@ export const routes: Routes = [
       import('./features/profile/profile.component').then(
         (m) => m.ProfileComponent
       ),
+    children: [
+      { path: 'requests/:id', component: ServiceRequestDetailsComponent }
+    ]
   },
   // Admin
   {
@@ -68,4 +72,23 @@ export const routes: Routes = [
     component: SellerLayoutComponent,
     children: sellerRoutes,
   },
+    // Admin
+    {
+        path: 'admin',
+        component: AdminLayoutComponent
+    },
+    // Services
+    {
+      path: 'services',
+      loadChildren: () => import('./features/service/service.module').then(m => m.ServiceModule)
+    },
+    //Auction
+    {
+        path: 'auctions',
+        loadComponent: () => import('./features/Auction/auctions-list/auctions-list.component').then(m => m.AuctionsListComponent)
+    },
+    {
+        path: 'auction/:id',
+        loadComponent: () => import('./features/Auction/auction-details/auction-details.component').then(m => m.AuctionDetailsComponent)
+    }
 ];

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
@@ -14,16 +14,21 @@ import { UserVerificationCreateDto } from '../../core/models/user-models/user-ve
 import { UserVerificationReadDto } from '../../core/models/user-models/user-verification-read.dto';
 import { UserVerificationUpdateDto } from '../../core/models/user-models/user-verification-update.dto';
 import { AuthService } from '../../core/services/auth.service';
+import { ServiceRequestService } from '../../core/services/service-request.service';
+import { RouterModule, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { ServiceRequestDetailsComponent } from './service-request-details.component';
+import { FormsModule } from '@angular/forms';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ButtonModule, InputTextModule, ReactiveFormsModule, ToastModule, ConfirmDialogModule],
+  imports: [CommonModule, ButtonModule, InputTextModule, ReactiveFormsModule, ToastModule, ConfirmDialogModule, RouterModule, ServiceRequestDetailsComponent, FormsModule],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css'],
   providers: [MessageService, ConfirmationService]
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
   activeTab: string = 'about';
   user: UserReadDto | null = null;
   loading = false;
@@ -38,13 +43,24 @@ export class ProfileComponent implements OnInit {
   verifyForm: FormGroup;
   changePasswordLoading = false;
   submitted = false;
+  buyerRequests: any[] = [];
+  buyerRequestsLoading = false;
+  isDetailsRoute = false;
+  buyerRequestDetailsId: number = 0;
+  searchTerm: string = '';
+  statusFilter: string = '';
+  filteredRequests: any[] = [];
+  private navigationSubscription: any;
 
   constructor(
     private userService: UserService,
     private fb: FormBuilder,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private serviceRequestService: ServiceRequestService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.editForm = this.fb.group({
       firstName: ['', Validators.required],
@@ -67,21 +83,43 @@ export class ProfileComponent implements OnInit {
       image: [null],
       imagePreview: ['']
     });
+    this.router.events.subscribe(() => {
+      this.isDetailsRoute = !!this.route.firstChild;
+    });
+    // Listen for navigation events to refresh requests list
+    this.navigationSubscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        if (this.activeTab === 'requests') {
+          this.fetchBuyerRequests();
+        }
+      });
   }
 
   ngOnInit() {
     this.fetchUser();
     this.fetchUserVerification();
+    this.filterRequests();
+  }
+
+  ngOnDestroy() {
+    if (this.navigationSubscription) {
+      this.navigationSubscription.unsubscribe();
+    }
   }
 
   switchTab(tab: string) {
     this.activeTab = tab;
+    this.buyerRequestDetailsId = 0;
     if (tab !== 'edit') {
       this.editMode = false;
       this.editForm.disable();
     }
     if (tab === 'verify') {
       this.fetchUserVerification();
+    }
+    if (tab === 'requests') {
+      this.fetchBuyerRequests();
     }
   }
 
@@ -439,6 +477,26 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  fetchBuyerRequests() {
+    this.buyerRequestsLoading = true;
+    this.serviceRequestService.getBuyerRequests().subscribe({
+      next: (res) => {
+        this.buyerRequests = res;
+        this.filterRequests();
+        this.buyerRequestsLoading = false;
+      },
+      error: (err) => {
+        this.buyerRequests = [];
+        this.filterRequests();
+        this.buyerRequestsLoading = false;
+      }
+    });
+  }
+
+  showRequestDetails(id: number) {
+    this.buyerRequestDetailsId = id;
+  }
+
   onVerifyImageSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -449,5 +507,15 @@ export class ProfileComponent implements OnInit {
       };
       reader.readAsDataURL(file);
     }
+  }
+
+  filterRequests() {
+    this.filteredRequests = this.buyerRequests.filter(req => {
+      const matchesSearch = !this.searchTerm ||
+        (req.serviceTitle && req.serviceTitle.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
+        (req.sellerName && req.sellerName.toLowerCase().includes(this.searchTerm.toLowerCase()));
+      const matchesStatus = !this.statusFilter || req.serviceStatus === this.statusFilter;
+      return matchesSearch && matchesStatus;
+    });
   }
 }

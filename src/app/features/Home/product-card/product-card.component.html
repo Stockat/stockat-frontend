@@ -1,39 +1,84 @@
-<div class="bg-gray-200 h-20 mb-2">
-
-  <p-select  [options]="cities" [(ngModel)]="selectedCity" optionLabel="name" placeholder="Select a Location"
-    class="w-full md:w-56 ml-3 mt-2" />
-  <p-select [options]="cities" [(ngModel)]="selectedCategory" optionLabel="name" placeholder="Select a Category"
-    class="w-full md:w-56 ml-3 mt-2" />
-  <p-multiselect [options]="cities" [(ngModel)]="selectedTags" optionLabel="name" placeholder="Select Tags"
-    [maxSelectedLabels]="5" styleClass="w-full md:w-80" />
-  <label class="inline text-gray-700 mb-2" for="minmax">Price</label>
-  <p-inputnumber [(ngModel)]="SelectedPrice" inputId="minmax" mode="decimal" [min]="1" />
-  <label class="inline text-gray-700 mb-2" for="minmax">Min Quantity</label>
-  <p-inputnumber [(ngModel)]="SelectedMinQty" inputId="minmax" mode="decimal" [min]="1" />
-  <p-button class="ml-3 " label="Apply" [raised]="true" severity="success" (onClick)="setFilters()" />
-  <p-button class="ml-3" label="Clear" [raised]="true" severity="danger"  (onClick)="resetFilters()"/>
-</div>
-
-
-@for (product of products; track $index) {
-<p-card class="ml-9 text-center " [style]="{ width: '20%', overflow: 'hidden', display: 'inline-block' }">
-  <ng-template #header>
-      <img alt="Card" class="w-full" src="{{product.images[0]}}"  />
-  </ng-template>
-  <ng-template #title> {{product.name}} </ng-template>
-  <ng-template #subtitle> {{product.price| currency}} </ng-template>
-  <p> {{product.description}} </p>
-  <ng-template #footer>
-    <div class="flex gap-4 mt-1">
-      <p-button label="Order Now" class="w-full" styleClass="w-full" />
+<!-- Filter Section -->
+<div class="bg-gray-100 p-4 mb-6 rounded-lg shadow-sm">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+    <!-- Location Select -->
+    <div class="flex flex-col">
+      <p-select [options]="cities" [(ngModel)]="selectedCity" placeholder="Select a Location" class="w-full"
+        styleClass="w-full" />
     </div>
-  </ng-template>
-</p-card>
-}
 
+    <!-- Category Select -->
+    <div class="flex flex-col">
+      <p-select [options]="categories" [(ngModel)]="selectedCategory" optionValue="id" optionLabel="categoryName"
+        placeholder="Select a Category" class="w-full" styleClass="w-full" />
+    </div>
 
+    <!-- Tags MultiSelect -->
+    <div class="flex flex-col">
+      <p-multiselect [options]="tags" [(ngModel)]="selectedTags" optionLabel="name" optionValue="id"
+        placeholder="Select Tags" [maxSelectedLabels]="3" class="w-full" styleClass="w-full" />
+    </div>
 
-<div class="card flex justify-center">
-  <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows" [totalRecords]="totalRecords" />
+    <!-- Price Input -->
+    <div class="flex flex-col">
+      <label class="text-sm font-medium text-gray-700 mb-1" for="price">Price</label>
+      <p-inputnumber [(ngModel)]="SelectedPrice" inputId="price" mode="decimal" [min]="1" class="w-full"
+        styleClass="w-full" />
+    </div>
+
+    <!-- Min Quantity Input -->
+    <div class="flex flex-col">
+      <label class="text-sm font-medium text-gray-700 mb-1" for="minQty">Min Quantity</label>
+      <p-inputnumber [(ngModel)]="SelectedMinQty" inputId="minQty" mode="decimal" [min]="1" class="w-full"
+        styleClass="w-full" />
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex gap-2">
+      <p-button label="Apply" [raised]="true" severity="success" (onClick)="setFilters()" class="flex-1 h-12 px-6"
+        styleClass="flex-1 h-12 px-6" />
+      <p-button label="Clear" [raised]="true" severity="danger" (onClick)="resetFilters()" class="flex-1 h-12 px-6"
+        styleClass="flex-1 h-12 px-6" />
+    </div>
+  </div>
 </div>
 
+<!-- Products Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4">
+  @for (product of products; track $index) {
+  <p-card class="h-full flex flex-col hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-200"
+    [style]="{ overflow: 'hidden' }">
+    <ng-template #header>
+      <a [routerLink]="['/ProductDetails', product.id]" class="block">
+        <img alt="Card"
+          class="w-full h-48 object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
+          [src]="product.images[0]" />
+      </a>
+    </ng-template>
+
+    <ng-template #title>
+      <h3 class="text-lg font-semibold text-gray-800 truncate">{{product.name}}</h3>
+    </ng-template>
+
+    <ng-template #subtitle>
+      <p class="text-xl font-bold text-green-600">{{product.price| currency}}</p>
+    </ng-template>
+
+    <p class="text-gray-600 text-sm flex-grow overflow-hidden"
+      [style]="{'display': '-webkit-box', '-webkit-line-clamp': '3', '-webkit-box-orient': 'vertical'}">
+      {{product.description}}</p>
+
+    <ng-template #footer>
+      <div class="w-full">
+        <p-button label="Order Now" class="w-full" styleClass="w-full" />
+      </div>
+    </ng-template>
+  </p-card>
+  }
+</div>
+
+<!-- Pagination -->
+<div class="flex justify-center mt-8 px-4">
+  <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="8" [totalRecords]="totalRecords"
+    class="w-full max-w-md" />
+</div>
