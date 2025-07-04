@@ -190,6 +190,12 @@ onPageChange(event: PaginatorState) {
   this.first = event.page ?? 0;
 this.setFilters(); // Update filters with the new page number
 }
+
+//* Image Error Handling
+onImageError(event: any) {
+  // Set a default image when the original image fails to load
+  event.target.src = 'https://ik.imagekit.io/woiv2eo8w/back_OCcpj-NRl.png?updatedAt=1736699927368';
+}
 //* Confirmation Dialog
 confirmDelete(event: Event, productId: number) {
     this.confirmationService.confirm({
