@@ -6,6 +6,7 @@
       [selectedConversationId]="selectedConversation ? selectedConversation.conversationId.toString() : null"
       [currentUserId]="currentUserId"
       [hasMoreConversations]="hasMoreConversations"
+      [isLoadingConversations]="isLoadingConversations"
       (selectConversation)="selectConversation($event)"
       (startChat)="startChatWithUser($event)"
       (loadMoreConversations)="loadMoreConversations()">

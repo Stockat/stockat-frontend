@@ -16,6 +16,7 @@ export class ConversationListComponent {
   @Input() selectedConversationId: string | null = null;
   @Input() currentUserId: string | null = null;
   @Input() hasMoreConversations: boolean = true;
+  @Input() isLoadingConversations: boolean = false;
   @Output() selectConversation = new EventEmitter<ChatConversationDto>();
   @Output() startChat = new EventEmitter<UserChatInfoDto>();
   @Output() loadMoreConversations = new EventEmitter<void>();
@@ -117,7 +118,7 @@ export class ConversationListComponent {
 
   onScroll(event: any) {
     const element = event.target;
-    if (element.scrollTop + element.clientHeight >= element.scrollHeight - 5 && this.hasMoreConversations) {
+    if (element.scrollTop + element.clientHeight >= element.scrollHeight - 5 && this.hasMoreConversations && !this.isLoadingConversations) {
       this.loadMoreConversations.emit();
     }
   }

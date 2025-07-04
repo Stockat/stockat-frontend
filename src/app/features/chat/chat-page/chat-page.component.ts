@@ -39,6 +39,7 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   conversationPage = 1;
   conversationPageSize = 10;
   hasMoreConversations = true;
+  isLoadingConversations = false;
 
   // Message pagination state
   messagePage = 1;
@@ -502,7 +503,8 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   }
 
   loadMoreConversations() {
-    if (!this.hasMoreConversations) return;
+    if (!this.hasMoreConversations || this.isLoadingConversations) return;
+    this.isLoadingConversations = true;
     this.conversationPage++;
     this.chatService.getConversations(this.conversationPage, this.conversationPageSize).subscribe(convs => {
       for (const conv of convs) {
@@ -515,6 +517,7 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
       if (convs.length < this.conversationPageSize) {
         this.hasMoreConversations = false;
       }
+      this.isLoadingConversations = false;
     });
   }
 
