@@ -288,6 +288,14 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
     this.chatService.getMessages(conversation.conversationId).subscribe((msgs: ChatMessageDto[]) => {
       this.messages = msgs.sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
       this.chatService['messages$'].next(this.messages);
+      // Mark all unread messages as read (not sent by current user)
+      if (this.currentUserId) {
+        this.messages.forEach(m => {
+          if (!m.isRead && m.sender.userId !== this.currentUserId) {
+            this.chatService.markMessageAsReadSignalR(m.messageId);
+          }
+        });
+      }
       setTimeout(() => this.scrollToBottom(), 0);
     });
   }
