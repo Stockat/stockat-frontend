@@ -40,6 +40,12 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   conversationPageSize = 8;
   hasMoreConversations = true;
 
+  // Message pagination state
+  messagePage = 1;
+  messagePageSize = 20;
+  hasMoreMessages = true;
+  isLoadingMessages = false;
+
   constructor(
     public chatService: ChatService,
     private authService: AuthService,
@@ -266,8 +272,12 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
 
   selectConversation(conversation: ChatConversationDto) {
     this.selectedConversation = conversation;
-    this.chatService.getMessages(conversation.conversationId).subscribe((msgs: ChatMessageDto[]) => {
+    this.messagePage = 1;
+    this.hasMoreMessages = true;
+    this.isLoadingMessages = false;
+    this.chatService.getMessages(conversation.conversationId, this.messagePage, this.messagePageSize).subscribe((msgs: ChatMessageDto[]) => {
       this.messages = msgs.sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
+      if (msgs.length < this.messagePageSize) this.hasMoreMessages = false;
       this.chatService['messages$'].next(this.messages); // update the observable for real-time
       setTimeout(() => this.scrollToBottom(), 0);
       // Mark all unread messages as read (for all types) when opening the chat
@@ -505,6 +515,19 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
       if (convs.length < this.conversationPageSize) {
         this.hasMoreConversations = false;
       }
+    });
+  }
+
+  onLoadMoreMessages() {
+    if (!this.selectedConversation || !this.hasMoreMessages || this.isLoadingMessages) return;
+    this.isLoadingMessages = true;
+    this.messagePage++;
+    this.chatService.getMessages(this.selectedConversation.conversationId, this.messagePage, this.messagePageSize).subscribe((msgs: ChatMessageDto[]) => {
+      if (msgs.length < this.messagePageSize) this.hasMoreMessages = false;
+      // Prepend older messages
+      this.messages = [...msgs.sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime()), ...this.messages];
+      this.isLoadingMessages = false;
+      // Optionally, maintain scroll position here
     });
   }
 }

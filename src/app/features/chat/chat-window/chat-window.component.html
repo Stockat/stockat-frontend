@@ -1,4 +1,10 @@
 <div class="flex flex-col h-full bg-white rounded-xl shadow p-4">
+  <div *ngIf="hasMoreMessages && messages.length >= pageSize" class="flex justify-center my-2">
+    <div class="text-xs text-gray-500 cursor-pointer hover:underline" (click)="onLoadMoreMessagesWithScrollLock()" *ngIf="!isLoadingMessages">
+      Load more messages
+    </div>
+    <div *ngIf="isLoadingMessages" class="flex items-center gap-2 text-xs text-gray-400"><i class="pi pi-spin pi-spinner"></i> Loading...</div>
+  </div>
   <div #scrollContainer class="flex-1 overflow-y-auto mb-4">
     <div *ngFor="let msg of messages" class="mb-2 flex items-end gap-2 group relative" 
          [ngClass]="{'justify-end': isOwnMessage(msg), 'justify-start': !isOwnMessage(msg)}">

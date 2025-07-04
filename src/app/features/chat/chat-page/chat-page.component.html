@@ -31,7 +31,8 @@
         [currentUserId]="currentUserId"
         (reactToMessage)="handleReaction($event)"
         (deleteMessage)="handleDeleteMessage($event)"
-        (replyToMessage)="handleReplyToMessage($event)">
+        (replyToMessage)="handleReplyToMessage($event)"
+        (loadMoreMessages)="onLoadMoreMessages()">
       </app-chat-window>
     </section>
     <footer class="chat-input p-4 bg-white border-t border-gray-200" *ngIf="selectedConversation || selectedUserForNewChat">

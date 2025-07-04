@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, SimpleChanges, OnChanges, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef, AfterViewChecked, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, SimpleChanges, OnChanges, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef, AfterViewChecked, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatMessageDto, UserChatInfoDto } from '../../../core/models/chatmodels/chat-models';
 import { AvatarModule } from 'primeng/avatar';
@@ -13,7 +13,7 @@ import { ChatService } from '../../../core/services/chat.service';
   templateUrl: './chat-window.component.html',
   styleUrls: ['./chat-window.component.css']
 })
-export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewChecked, OnInit {
+export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewChecked, OnInit, OnDestroy {
   @Input() messages: ChatMessageDto[] = [];
   @Input() currentUserId: string | null = null;
   @Input() isTyping: boolean = false;
@@ -22,6 +22,7 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
   @Output() replyToMessage = new EventEmitter<{ messageId: number, content: string }>();
   @Output() deleteMessage = new EventEmitter<number>();
   @Input() conversationId: number | null = null;
+  @Output() loadMoreMessages = new EventEmitter<void>();
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
 
@@ -33,11 +34,26 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
   isRecording = false;
   private previousMessageCount = 0;
 
+  // Pagination state
+  currentPage = 1;
+  pageSize = 20;
+  hasMoreMessages = true;
+  isLoadingMessages = false;
+
   constructor(private cdr: ChangeDetectorRef, private chatService: ChatService) {}
 
   ngAfterViewInit() {
     this.shouldScroll = true;
     this.scrollToBottom();
+    if (this.scrollContainer && this.scrollContainer.nativeElement) {
+      this.scrollContainer.nativeElement.addEventListener('scroll', this.onScroll.bind(this));
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.scrollContainer && this.scrollContainer.nativeElement) {
+      this.scrollContainer.nativeElement.removeEventListener('scroll', this.onScroll.bind(this));
+    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -114,5 +130,37 @@ export class ChatWindowComponent implements OnChanges, AfterViewInit, AfterViewC
       if (r.userId === this.currentUserId) group.hasCurrentUser = true;
     }
     return Array.from(map.values());
+  }
+
+  onScroll() {
+    if (!this.hasMoreMessages || this.isLoadingMessages) return;
+    const el = this.scrollContainer.nativeElement;
+    if (el.scrollTop === 0) {
+      this.onLoadMoreMessagesWithScrollLock();
+    }
+  }
+
+  // Load more and maintain scroll position
+  onLoadMoreMessagesWithScrollLock() {
+    if (!this.hasMoreMessages || this.isLoadingMessages) return;
+    const el = this.scrollContainer.nativeElement;
+    const prevHeight = el.scrollHeight;
+    this.isLoadingMessages = true;
+    this.loadMoreMessages.emit();
+    // Wait for parent to update messages, then adjust scroll
+    setTimeout(() => {
+      const newHeight = el.scrollHeight;
+      el.scrollTop = newHeight - prevHeight;
+      this.isLoadingMessages = false;
+    }, 300); // Adjust timeout as needed for data load
+  }
+
+  // Call this from parent when new messages are prepended
+  onMessagesPrepended(newMessages: ChatMessageDto[]) {
+    this.isLoadingMessages = false;
+    if (newMessages.length < this.pageSize) {
+      this.hasMoreMessages = false;
+    }
+    // Optionally, maintain scroll position here
   }
 }
