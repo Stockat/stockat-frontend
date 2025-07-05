@@ -62,6 +62,9 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   requestDetailsModalVisible = false;
   selectedRequestDetails: any = null;
 
+  // Description display state
+  showFullDescription = false;
+
   // Search and filter state
   searchText: string = '';
   statusFilter: string | null = null;
@@ -355,6 +358,10 @@ export class SellerServiceDetailsPageComponent implements OnInit {
 
   openDescriptionModal(request: any) {
     this.selectedDescriptionRequest = request;
+    this.descriptionModalVisible = true;
+  }
+
+  openServiceDescriptionModal() {
     this.descriptionModalVisible = true;
   }
 

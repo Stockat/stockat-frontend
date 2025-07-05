@@ -26,7 +26,7 @@ export class ServiceAddModalComponent {
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
       name: ['', Validators.required],
-      description: ['', Validators.required],
+      description: ['', [Validators.required, Validators.maxLength(1000)]],
       pricePerProduct: [0.01, [Validators.required, Validators.min(0.01)]],
       minQuantity: [1, [Validators.required, Validators.min(1)]],
       estimatedTime: ['', Validators.required],
@@ -38,13 +38,48 @@ export class ServiceAddModalComponent {
     this.form.reset({ pricePerProduct: 0, minQuantity: 1 });
   }
 
-  onFileSelected(event: Event) {
+    onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
+      const file = input.files[0];
+
+      // Validate file
+      if (this.isValidImageFile(file)) {
+        this.selectedFile = file;
+        this.feedbackMessage = '';
+      } else {
+        this.selectedFile = null;
+        this.clearFileInput();
+      }
     } else {
       this.selectedFile = null;
     }
+  }
+
+    // Method to validate image file extension and size
+  private isValidImageFile(file: File): boolean {
+    const allowedExtensions = ['.png', '.jpg', '.jpeg', '.gif'];
+    const fileName = file.name.toLowerCase();
+    const maxSizeInMB = 10;
+    const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+
+    // Check file extension
+    const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+
+    // Check file size
+    const hasValidSize = file.size <= maxSizeInBytes;
+
+    if (!hasValidExtension) {
+      this.feedbackMessage = 'Please select a valid image file (PNG, JPG, JPEG, GIF)';
+      return false;
+    }
+
+    if (!hasValidSize) {
+      this.feedbackMessage = `File size must be less than ${maxSizeInMB}MB`;
+      return false;
+    }
+
+    return true;
   }
 
   submit() {
@@ -90,5 +125,15 @@ export class ServiceAddModalComponent {
   removeSelectedFile() {
     this.selectedFile = null;
     this.clearFileInput();
+  }
+
+  // Getter for description character count
+  get descriptionCharCount(): number {
+    return this.form.get('description')?.value?.length || 0;
+  }
+
+  // Getter for description max length
+  get descriptionMaxLength(): number {
+    return 1000;
   }
 }
