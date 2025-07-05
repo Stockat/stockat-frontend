@@ -14,4 +14,5 @@ export interface ServiceRequestDto {
   sellerName?: string;
   imageUrl?: string;
   sellerOfferAttempts:number;
+  createdAt: Date;
 }

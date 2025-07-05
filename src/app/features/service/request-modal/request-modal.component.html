@@ -1,46 +1,77 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-white/20 to-black/20">
-  <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md relative animate-fade-in">
-    <button class="absolute top-3 right-3 text-gray-500 hover:text-gray-800" (click)="handleClose()">✕</button>
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-white/40 to-blue-100/40 backdrop-blur-sm">
+  <div class="relative bg-white/80 backdrop-blur-xl border border-blue-100 shadow-2xl rounded-3xl w-full max-w-lg p-0 overflow-hidden animate-fade-in">
+    <!-- Close Button -->
+    <button class="absolute top-4 right-4 text-gray-400 hover:text-blue-600 text-2xl z-10" (click)="handleClose()" aria-label="Close">
+      <i class="pi pi-times"></i>
+    </button>
 
-    <div class="p-fluid">
-      <h2 class="text-2xl font-bold mb-4">Request This Service</h2>
-      <form *ngIf="requestForm" [formGroup]="requestForm" (ngSubmit)="submitRequest()">
-        <div class="mb-3">
-          <label for="quantity" class="block font-medium mb-1">Quantity</label>
-          <input
-            pInputText
-            id="quantity"
-            formControlName="requestedQuantity"
-            type="number"
-            [min]="minQuantity"
-            [ngClass]="{'p-invalid': requestForm.get('requestedQuantity')?.invalid && requestForm.get('requestedQuantity')?.touched}"
-          />
-          <div *ngIf="requestForm.get('requestedQuantity')?.invalid && requestForm.get('requestedQuantity')?.touched" class="p-error text-sm mt-1">
-            <span *ngIf="requestForm.get('requestedQuantity')?.errors?.['required']">Quantity is required</span>
-            <span *ngIf="requestForm.get('requestedQuantity')?.errors?.['min']">Quantity must be at least {{minQuantity}}</span>
-            <span *ngIf="requestForm.get('requestedQuantity')?.errors?.['pattern']">Please enter a valid number</span>
-          </div>
-        </div>
-        <div class="mb-3">
-          <label for="desc" class="block font-medium mb-1">Description</label>
-          <textarea
-            pInputTextarea
-            id="desc"
-            formControlName="requestDescription"
-            rows="4"
-            [ngClass]="{'p-invalid': requestForm.get('requestDescription')?.invalid && requestForm.get('requestDescription')?.touched}"
-          ></textarea>
-          <div *ngIf="requestForm.get('requestDescription')?.invalid && requestForm.get('requestDescription')?.touched" class="p-error text-sm mt-1">
-            <span *ngIf="requestForm.get('requestDescription')?.errors?.['required']">Description is required</span>
-          </div>
-        </div>
-        <button
-          pButton
-          type="submit"
-          label="Send Request"
-          class="p-button-success w-full"
-        ></button>
-      </form>
+    <!-- Header -->
+    <div class="flex items-center gap-3 px-8 pt-8 pb-4 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-white">
+      <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+        <i class="pi pi-briefcase text-white text-2xl"></i>
+      </div>
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800 leading-tight">Request This Service</h2>
+        <p class="text-gray-500 text-sm">Fill in your request details below</p>
+      </div>
     </div>
+
+    <!-- Service Summary -->
+    <div class="px-8 pt-4 pb-2 flex flex-col sm:flex-row gap-4 items-center border-b border-blue-100">
+      <div class="flex-1">
+        <div class="font-semibold text-blue-700 text-lg">{{ service?.name }}</div>
+        <div class="flex gap-4 mt-1 text-sm">
+          <span class="flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-1 rounded-lg"><i class="pi pi-dollar"></i> ${{ service?.pricePerProduct }}</span>
+          <span class="flex items-center gap-1 bg-purple-100 text-purple-700 px-2 py-1 rounded-lg"><i class="pi pi-box"></i> Min: {{ minQuantity }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form *ngIf="requestForm" [formGroup]="requestForm" (ngSubmit)="submitRequest()" class="px-8 py-6 space-y-6">
+      <div>
+        <label for="quantity" class="block font-medium mb-1 text-gray-700">Quantity</label>
+        <input
+          pInputText
+          id="quantity"
+          formControlName="requestedQuantity"
+          type="number"
+          [min]="minQuantity"
+          [ngClass]="{'p-invalid': requestForm.get('requestedQuantity')?.invalid && requestForm.get('requestedQuantity')?.touched}"
+          class="w-full rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+        />
+        <div *ngIf="requestForm.get('requestedQuantity')?.invalid && requestForm.get('requestedQuantity')?.touched" class="p-error text-sm mt-1">
+          <span *ngIf="requestForm.get('requestedQuantity')?.errors?.['required']">Quantity is required</span>
+          <span *ngIf="requestForm.get('requestedQuantity')?.errors?.['min']">Quantity must be at least {{minQuantity}}</span>
+          <span *ngIf="requestForm.get('requestedQuantity')?.errors?.['pattern']">Please enter a valid number</span>
+        </div>
+      </div>
+      <div>
+        <label for="desc" class="block font-medium mb-1 text-gray-700">Description</label>
+        <textarea
+          pInputTextarea
+          id="desc"
+          formControlName="requestDescription"
+          rows="4"
+          [ngClass]="{'p-invalid': requestForm.get('requestDescription')?.invalid && requestForm.get('requestDescription')?.touched}"
+          class="w-full rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+        ></textarea>
+        <div *ngIf="requestForm.get('requestDescription')?.invalid && requestForm.get('requestDescription')?.touched" class="p-error text-sm mt-1">
+          <span *ngIf="requestForm.get('requestDescription')?.errors?.['required']">Description is required</span>
+        </div>
+      </div>
+      <button
+        pButton
+        type="submit"
+        [disabled]="isSubmitting"
+        class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 text-lg flex items-center justify-center gap-2 mt-2"
+      >
+        <i *ngIf="isSubmitting" class="pi pi-spin pi-spinner"></i>
+        <span>{{ isSubmitting ? 'Sending Request...' : 'Send Request' }}</span>
+      </button>
+    </form>
+
+    <!-- Toast Component -->
+    <p-toast></p-toast>
   </div>
 </div>

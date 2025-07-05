@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { Service } from '../models/service-models/service.dto';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { GenericRequestModel } from '../models/generic-request-Dto';
+import { PaginationDto } from '../models/pagination-Dto';
 
 @Injectable({
   providedIn: 'root'
@@ -13,20 +15,32 @@ export class ServiceService {
 
   constructor(private http:HttpClient) { }
 
-  getAllServices(): Observable<Service[]> {
-    return this.http.get<Service[]>(`${this.baseUrl}`);
+  getAllServices(page: number = 1, size: number = 10, searchTerm?: string, sellerName?: string): Observable<GenericRequestModel<PaginationDto<Service>>> {
+    let url = `${this.baseUrl}?page=${page}&size=${size}`;
+    if (searchTerm) {
+      url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
+    }
+    if (sellerName) {
+      url += `&sellerName=${encodeURIComponent(sellerName)}`;
+    }
+    return this.http.get<GenericRequestModel<PaginationDto<Service>>>(url);
   }
 
   getServiceById(id: number): Observable<Service> {
     return this.http.get<Service>(`${this.baseUrl}/${id}`);
   }
 
-  getSellerServices(sellerId: string | null): Observable<Service[]> {
-    return this.http.get<Service[]>(`${this.baseUrl}/seller/${sellerId}`);
+  getSellerServices(sellerId: string, page: number = 1, size: number = 10, searchTerm?: string): Observable<GenericRequestModel<PaginationDto<Service>>> {
+    let url = `${this.baseUrl}/seller/${sellerId}?page=${page}&size=${size}`;
+    if (searchTerm) {
+      url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
+    }
+    return this.http.get<GenericRequestModel<PaginationDto<Service>>>(url);
   }
 
-  getMyServices(): Observable<Service[]> {
-    return this.http.get<Service[]>(`${this.baseUrl}/mine`);
+
+  getMyServices(page: number = 1, size: number = 10): Observable<GenericRequestModel<PaginationDto<Service>>>  {
+    return this.http.get<GenericRequestModel<PaginationDto<Service>>>(`${this.baseUrl}/mine?page=${page}&size=${size}`);
   }
 
   addService(service: Service): Observable<Service> {
