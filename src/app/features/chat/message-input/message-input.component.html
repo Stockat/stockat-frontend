@@ -38,15 +38,12 @@
   [closable]="false"
   [style]="{width: '400px'}"
   contentStyleClass="custom-confirm-dialog"
-  header="Send Image"
 >
-  <div class="custom-confirm-dialog">
-    <div class="custom-confirm-title">Are you sure you want to send this image?</div>
-    <img *ngIf="imagePreviewUrl" [src]="imagePreviewUrl" />
-    <div class="custom-confirm-actions">
-      <button pButton class="custom-confirm-btn" (click)="cancelSendImage()">No, Cancel</button>
-      <button pButton class="custom-confirm-btn confirm" (click)="confirmSendImage()">Yes, Send</button>
-    </div>
+  <div class="custom-confirm-title">Are you sure you want to send this image?</div>
+  <img *ngIf="imagePreviewUrl" [src]="imagePreviewUrl" class="confirm-dialog-image" />
+  <div class="custom-confirm-actions">
+    <button pButton class="custom-confirm-btn" (click)="cancelSendImage()">No, Cancel</button>
+    <button pButton class="custom-confirm-btn confirm" (click)="confirmSendImage()">Yes, Send</button>
   </div>
 </p-dialog>
 
@@ -56,14 +53,11 @@
   [closable]="false"
   [style]="{width: '400px'}"
   contentStyleClass="custom-confirm-dialog"
-  header="Send Voice Message"
 >
-  <div class="custom-confirm-dialog">
-    <div class="custom-confirm-title">Are you sure you want to send this voice message?</div>
-    <audio *ngIf="voicePreviewUrl" [src]="voicePreviewUrl" controls class="w-full rounded-lg bg-gray-100"></audio>
-    <div class="custom-confirm-actions">
-      <button pButton class="custom-confirm-btn" (click)="cancelSendVoice()">No, Cancel</button>
-      <button pButton class="custom-confirm-btn confirm" (click)="confirmSendVoice()">Yes, Send</button>
-    </div>
+  <div class="custom-confirm-title">Are you sure you want to send this voice message?</div>
+  <audio *ngIf="voicePreviewUrl" [src]="voicePreviewUrl" controls class="w-full rounded-lg bg-gray-100"></audio>
+  <div class="custom-confirm-actions">
+    <button pButton class="custom-confirm-btn" (click)="cancelSendVoice()">No, Cancel</button>
+    <button pButton class="custom-confirm-btn confirm" (click)="confirmSendVoice()">Yes, Send</button>
   </div>
 </p-dialog>
