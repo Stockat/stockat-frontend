@@ -38,3 +38,8 @@ input[type="text"]:focus, input[type="text"]:active, input[type="text"]:focus-vi
   background: #f3f4f6;
   border-radius: 8px;
 }
+
+.bg-white.rounded-xl.shadow.p-2.cursor-pointer.flex.items-center.gap-3 {
+  margin-left: 8px;
+  margin-right: 8px;
+}
