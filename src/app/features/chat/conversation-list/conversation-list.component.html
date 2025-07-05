@@ -25,7 +25,10 @@
          (click)="onSelect(conv)">
       <img [src]="getOtherUserProfileImage(conv)" class="w-10 h-10 rounded-full object-cover" alt="avatar" />
       <div class="flex-1">
-        <div class="font-semibold text-gray-800">{{ getOtherUserName(conv) }}</div>
+        <div class="font-semibold text-gray-800 flex items-center gap-1">
+          {{ getOtherUserName(conv) }}
+          <span *ngIf="$any(conv).pinned" title="Pinned" style="font-size:1.1em;vertical-align:middle;">📌</span>
+        </div>
         <div class="text-xs text-gray-500 truncate">
           <span *ngIf="isRecording(conv); else typingOrLastMsg">Recording...</span>
           <ng-template #typingOrLastMsg>

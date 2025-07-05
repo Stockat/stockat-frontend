@@ -52,13 +52,30 @@ export class ConversationListComponent {
   }
 
   get filteredConversations() {
-    return this.conversations
+    const ADMIN_ID = '1a44c91f-138e-4cf2-a5ef-915e5c882673';
+    // Usual filter and sort
+    let sorted = this.conversations
       .filter(c => (c.messages && c.messages.length > 0) || c.lastMessage)
       .sort((a, b) => {
         const aTime = a.lastMessage?.sentAt || a.lastMessageAt || '';
         const bTime = b.lastMessage?.sentAt || b.lastMessageAt || '';
         return bTime.localeCompare(aTime);
       });
+
+    // Only pin for non-admins
+    if (this.currentUserId && this.currentUserId !== ADMIN_ID) {
+      const adminIdx = sorted.findIndex(c =>
+        (c.user1Id === ADMIN_ID || c.user2Id === ADMIN_ID)
+      );
+      if (adminIdx > -1) {
+        // Mark as pinned for template
+        sorted[adminIdx] = { ...(sorted[adminIdx] as any), pinned: true };
+        // Move to top
+        const [adminConv] = sorted.splice(adminIdx, 1);
+        sorted = [adminConv, ...sorted];
+      }
+    }
+    return sorted;
   }
 
   onSelect(conversation: ChatConversationDto) {
