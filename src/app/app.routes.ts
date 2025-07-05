@@ -96,5 +96,12 @@ export const routes: Routes = [
     {
         path: 'auction/:id',
         loadComponent: () => import('./features/Auction/auction-details/auction-details.component').then(m => m.AuctionDetailsComponent)
-    }
+    },
+  {
+    path: 'chat',
+    loadComponent: () =>
+      import('./features/chat/chat-page/chat-page.component').then(
+        (m) => m.ChatPageComponent
+      ),
+  },
 ];
