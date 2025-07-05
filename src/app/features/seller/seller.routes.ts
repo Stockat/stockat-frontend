@@ -45,6 +45,9 @@ export const sellerRoutes: Routes = [
     {
       path: 'services/:id',
       component: SellerServiceDetailsPageComponent
+    },
+    {
+      path: 'orders',
+      loadComponent: () => import('./orders/orders.component').then(m => m.OrdersComponent)
     }
-
 ];

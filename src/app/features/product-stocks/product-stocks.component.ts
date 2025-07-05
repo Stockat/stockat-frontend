@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ProductService } from '../../core/services/product.service';
 import { ProductDetailsDto } from '../../core/models/product-models/ProductDetails';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { StockModel } from '../../core/models/stock-models/stock';
 import { StockService } from '../../core/services/stock.service';
 import { CardModule } from 'primeng/card';
@@ -9,6 +9,9 @@ import { GalleriaModule } from 'primeng/galleria';
 import { DividerModule } from 'primeng/divider';
 import { DataView, DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
+import { AuthService } from '../../core/services/auth.service';
+import { OrderRequest } from '../../core/models/order-request.model';
+import { OrderStateService } from '../../core/services/order-state.service';
 
 @Component({
   selector: 'app-product-stocks',
@@ -26,7 +29,10 @@ export class ProductStocksComponent {
   constructor(
     private productServ: ProductService,
     private stockService: StockService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router,
+    private authService: AuthService,
+    private orderStateService: OrderStateService
   ) {}
 
   ngOnInit() {
@@ -70,10 +76,26 @@ export class ProductStocksComponent {
   }
 
   buyStock(stock: StockModel) {
-    console.log('Buy stock clicked:', stock);
-    // Here you would implement the actual buy functionality
-    // For example, navigate to a checkout page or add to cart
-    alert(`Added ${stock.productName} with selected features to cart!`);
+    if (!this.product) return;
+    const buyerId = this.authService.getCurrentUserId();
+    if (!buyerId) {
+      alert('You must be logged in to place an order.');
+      return;
+    }
+    const order: OrderRequest = {
+      quantity: stock.quantity,
+      price: this.product.price,
+      orderType: 'Order',
+      status: 'Pending',
+      productId: stock.productId,
+      stockId: stock.id,
+      sellerId: this.product.sellerId,
+      buyerId: buyerId,
+      paymentId: '',
+      paymentStatus: ''
+    };
+    this.orderStateService.setOrder(order, this.product, stock);
+    this.router.navigate(['/order-process']);
   }
 
   //! End Of Component

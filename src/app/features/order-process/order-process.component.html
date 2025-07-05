@@ -1,0 +1,49 @@
+<p-toast></p-toast>
+<div class="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+  <p-card *ngIf="order && product && stock" header="Order Summary" styleClass="w-full md:w-2/3 lg:w-1/2">
+    <div class="flex flex-col md:flex-row gap-6">
+      <!-- Product Image -->
+      <div class="flex-shrink-0">
+        <img [src]="product.imagesArr[0]" alt="Product Image" class="rounded-xl shadow-md w-48 h-48 object-cover" />
+      </div>
+      <!-- Product & Stock Info -->
+      <div class="flex-1">
+        <h2 class="text-2xl font-bold mb-2 flex items-center">
+          <i class="pi pi-box text-blue-600 mr-2"></i> {{product.name}}
+        </h2>
+        <div class="mb-2 text-gray-700">{{product.description}}</div>
+        <div class="mb-2">
+          <span class="font-semibold text-green-700">Price:</span>
+          <span class="text-lg font-bold">{{product.price | currency}}</span>
+        </div>
+        <div class="mb-2">
+          <span class="font-semibold">Seller:</span> {{product.sellerName}}
+        </div>
+        <div class="mb-2">
+          <span class="font-semibold">Stock Features:</span>
+          <ng-container *ngFor="let feature of stock.stockFeatures">
+            <span *ngIf="feature.name && feature.value" class="p-badge p-badge-secondary mx-1">
+              <i class="pi pi-check-circle mr-1"></i>{{feature.name}}: {{feature.value}}
+            </span>
+          </ng-container>
+        </div>
+        <div class="mb-2">
+          <span class="font-semibold">Available Quantity:</span>
+          <span class="p-badge p-badge-info">{{stock.quantity}}</span>
+        </div>
+        <p-divider></p-divider>
+        <div class="mb-2">
+          <span class="font-semibold">Order Quantity:</span>
+          <span class="p-badge p-badge-success">{{order.quantity}}</span>
+        </div>
+        <div class="mb-2">
+          <span class="font-semibold">Total Price:</span>
+          <span class="text-lg font-bold text-green-700">{{order.price * order.quantity | currency}}</span>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-end mt-6">
+      <p-button label="Confirm Order" icon="pi pi-check" [loading]="loading" (onClick)="placeOrder()" styleClass="p-button-success" />
+    </div>
+  </p-card>
+</div> 

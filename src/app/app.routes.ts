@@ -107,4 +107,8 @@ export const routes: Routes = [
         (m) => m.ChatPageComponent
       ),
   },
+  {
+    path: 'order-process',
+    loadComponent: () => import('./features/order-process/order-process.component').then(m => m.OrderProcessComponent)
+  },
 ];

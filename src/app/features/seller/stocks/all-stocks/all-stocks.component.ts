@@ -14,19 +14,23 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast'; 
 import { PopoverModule } from 'primeng/popover'; 
 import { ChipModule } from 'primeng/chip'; 
+import { NgClass } from '@angular/common';
+import { DropdownModule } from 'primeng/dropdown';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-all-stocks',
-  imports: [ChipModule,ButtonModule,TableModule,IconFieldModule,InputIconModule,CardModule,DividerModule, ConfirmDialogModule, ToastModule, PopoverModule], // Add ConfirmDialogModule and ToastModule
+  imports: [NgClass, ChipModule,ButtonModule,TableModule,IconFieldModule,InputIconModule,CardModule,DividerModule, ConfirmDialogModule, ToastModule, PopoverModule, DropdownModule, FormsModule],
   templateUrl: './all-stocks.component.html',
   styleUrl: './all-stocks.component.css',
-  providers: [MessageService, ConfirmationService] // Add these providers
+  providers: [MessageService, ConfirmationService]
 })
 export class AllStocksComponent {
   stockList: StockModel[] = [];
 
   loading: boolean = true;
   searchValue: string | undefined;
+  stockStatusFilter: string = '';
 
 
   constructor(private stockService: StockService, private router: Router, private messageService: MessageService, private confirmationService: ConfirmationService) {
