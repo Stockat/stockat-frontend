@@ -1,0 +1,92 @@
+<div class="flex flex-col h-full bg-white shadow p-4">
+  <div #scrollContainer class="flex-1 overflow-y-auto mb-4">
+    <div *ngIf="isLoadingMessages" class="flex justify-center my-2 text-xs text-gray-400"><i class="pi pi-spin pi-spinner"></i> Loading...</div>
+    <div *ngIf="!isLoadingMessages && !hasMoreMessages" class="flex justify-center my-2 text-xs text-gray-400">Start of conversation</div>
+    <div *ngFor="let group of getMessagesGroupedByDay()">
+      <div class="flex justify-center my-4">
+        <span class="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full select-none">
+          {{ group.date | chatDaySeparator }}
+        </span>
+      </div>
+      <div *ngFor="let msg of group.messages" class="mb-2 flex items-end gap-2 group relative"
+           [ngClass]="{'justify-end': isOwnMessage(msg), 'justify-start': !isOwnMessage(msg)}">
+        <!-- Avatar for other users' messages -->
+        <p-avatar *ngIf="!isOwnMessage(msg)" 
+                  [image]="msg.sender?.profileImageUrl || 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc'" shape="circle" size="large" class="mr-2"></p-avatar>
+        
+        <!-- Message bubble -->
+        <div class="max-w-xs md:max-w-md p-3 rounded-lg shadow text-sm relative"
+             [ngClass]="{
+               'bg-blue-100 text-blue-900': isOwnMessage(msg),
+               'bg-gray-100 text-gray-800': !isOwnMessage(msg)
+             }"
+             (click)="onMessageClick(msg)">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="font-semibold text-xs">{{ isOwnMessage(msg) ? 'You' : msg.sender?.userId === currentUserId ? 'You' : msg.sender?.fullName }}</span>
+            <span class="text-xs" [ngClass]="isOwnMessage(msg) ? 'text-blue-400' : 'text-gray-400'">
+              {{ msg.sentAt ? (msg.sentAt | date:'shortTime') : '' }}
+            </span>
+            <span class="align-middle cursor-pointer select-none" style="font-size: 1.3em;" (click)="$event.stopPropagation(); openEmojiPicker(msg.messageId)">&#9786;</span>
+            <span *ngIf="isOwnMessage(msg)" class="read-indicator" [ngClass]="{'read': msg.isRead}">
+              <ng-container *ngIf="msg.isRead; else notRead">&#10003;&#10003;</ng-container>
+              <ng-template #notRead>&#10003;</ng-template>
+            </span>
+            <!-- ReadAt beside check marks -->
+            <span *ngIf="isOwnMessage(msg) && selectedMessageId === msg.messageId && msg.readAt" class="ml-2 text-xs text-gray-500 bg-white px-2 py-1 rounded shadow border border-gray-200">
+              Read at: {{ msg.readAt | date:'shortTime' }}
+            </span>
+          </div>
+          <div *ngIf="msg.messageText">{{ msg.messageText || '' }}</div>
+          <img *ngIf="msg.imageUrl" [src]="msg.imageUrl || ''" class="rounded-lg max-h-40 my-2" />
+          <div *ngIf="msg.voiceUrl"
+            class="flex items-center gap-3 rounded-xl px-4 py-2 my-2"
+            [ngClass]="{
+              'bg-blue-100 text-blue-900': isOwnMessage(msg),
+              'bg-gray-100 text-gray-800': !isOwnMessage(msg)
+            }">
+            <i class="pi pi-microphone text-blue-500 text-2xl"></i>
+            <div class="flex flex-col flex-1">
+              <audio #audioRef [src]="msg.voiceUrl || ''" (timeupdate)="onAudioTimeUpdate(audioRef, msg.messageId)" (ended)="onAudioEnded(msg.messageId)" class="hidden"></audio>
+              <div class="flex items-center gap-2">
+                <button type="button" (click)="toggleAudioPlayback(audioRef, msg.messageId)" class="focus:outline-none">
+                  <span *ngIf="!isAudioPlaying(msg.messageId)"><i class="pi pi-play text-lg"></i></span>
+                  <span *ngIf="isAudioPlaying(msg.messageId)"><i class="pi pi-pause text-lg"></i></span>
+                </button>
+                <div class="flex-1 h-2 bg-gray-300 rounded-full cursor-pointer relative mx-2" (click)="seekAudio($event, audioRef)">
+                  <div class="h-2 bg-blue-400 rounded-full" [style.width.%]="getAudioProgress(msg.messageId)"></div>
+                </div>
+                <span class="text-xs text-gray-500 min-w-[48px]">{{ getAudioTimeDisplay(msg.messageId) }}</span>
+              </div>
+            </div>
+          </div>
+          <!-- Reactions row: always visible, plus button inside the message bubble -->
+          <div class="flex gap-2 mt-2 items-center justify-start">
+            <ng-container *ngFor="let group of groupReactions(msg.reactions)">
+              <span class="flex items-center mr-2 px-2 py-1 rounded-full text-xs"
+                    [ngClass]="group.hasCurrentUser ? 'bg-blue-500 text-white' : 'bg-pink-500 text-white'">
+                {{ group.reactionType }} {{ group.count }}
+                <span *ngIf="group.hasCurrentUser" class="ml-1">(You)</span>
+              </span>
+            </ng-container>
+            <!-- Emoji picker popover -->
+            <div *ngIf="showEmojiPickerFor === msg.messageId"
+                 class="absolute z-10 bg-white border rounded shadow p-2 flex flex-wrap gap-1 top-8 left-0"
+                 (mouseleave)="closeEmojiPicker()">
+              <button *ngFor="let emoji of allEmojis"
+                pButton type="button" [label]="emoji" class="p-button-text p-0 text-xs"
+                (click)="$event.stopPropagation(); reactToMessage.emit({ messageId: msg.messageId, reaction: emoji }); closeEmojiPicker()"></button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Avatar for own messages -->
+        <p-avatar *ngIf="isOwnMessage(msg)" 
+                  [image]="msg.sender?.profileImageUrl || 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc'" shape="circle" size="large" class="ml-2"></p-avatar>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="isTyping" class="flex items-center gap-2 p-2 text-gray-500 text-sm animate-pulse bg-gray-100 rounded-lg w-fit mb-2">
+    <span>Typing</span>
+    <span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+  </div>
+</div>

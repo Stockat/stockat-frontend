@@ -8,6 +8,7 @@ import { ProductCardComponent } from './features/Home/product-card/product-card.
 import { ProductDetailsComponent } from './features/ProductDetails/product-details/product-details.component';
 import { ServiceRequestDetailsComponent } from './features/profile/service-request-details.component';
 import { ProductStocksComponent } from './features/product-stocks/product-stocks.component';
+import { SellerProfileComponent } from './features/seller/seller-profile/seller-profile.component';
 
 export const routes: Routes = [
   {
@@ -69,11 +70,6 @@ export const routes: Routes = [
       { path: 'requests/:id', component: ServiceRequestDetailsComponent }
     ]
   },
-  // Admin
-  {
-    path: 'admin',
-    component: AdminLayoutComponent,
-  },
   // Seller
   {
     path: 'seller',
@@ -98,5 +94,17 @@ export const routes: Routes = [
   {
     path: 'auction/:id',
     loadComponent: () => import('./features/Auction/auction-details/auction-details.component').then(m => m.AuctionDetailsComponent)
-  }
+  },
+  // Seller Profile
+  {
+    path: 'seller-profile/:id',
+    component: SellerProfileComponent
+  },
+  {
+    path: 'chat',
+    loadComponent: () =>
+      import('./features/chat/chat-page/chat-page.component').then(
+        (m) => m.ChatPageComponent
+      ),
+  },
 ];
