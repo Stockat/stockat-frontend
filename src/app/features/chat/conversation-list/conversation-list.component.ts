@@ -69,7 +69,7 @@ export class ConversationListComponent {
       );
       if (adminIdx > -1) {
         // Mark as pinned for template
-        sorted[adminIdx] = { ...(sorted[adminIdx] as any), pinned: true };
+        (sorted[adminIdx] as any).pinned = true;
         // Move to top
         const [adminConv] = sorted.splice(adminIdx, 1);
         sorted = [adminConv, ...sorted];
