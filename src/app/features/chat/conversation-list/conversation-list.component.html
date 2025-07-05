@@ -52,7 +52,7 @@
         </div>
       </div>
       <div class="flex flex-col items-end">
-        <span class="text-xs text-gray-400" *ngIf="conv.lastMessage?.sentAt">{{ conv.lastMessage.sentAt | date:'shortTime' }}</span>
+        <span class="text-xs text-gray-400" *ngIf="conv.lastMessage?.sentAt">{{ conv.lastMessage.sentAt | whatsappDate }}</span>
         <span *ngIf="getUnreadCount(conv) > 0" class="bg-pink-600 text-white rounded-full px-2 py-0.5 text-xs mt-1">
           {{ getUnreadCount(conv) }}
         </span>

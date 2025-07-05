@@ -33,7 +33,7 @@
             </span>
             <!-- ReadAt beside check marks -->
             <span *ngIf="isOwnMessage(msg) && selectedMessageId === msg.messageId && msg.readAt" class="ml-2 text-xs text-gray-500 bg-white px-2 py-1 rounded shadow border border-gray-200">
-              Read at: {{ msg.readAt | date:'shortTime' }}
+              Read at: {{ msg.readAt | whatsappDate:true }}
             </span>
           </div>
           <div *ngIf="msg.messageText">{{ msg.messageText || '' }}</div>

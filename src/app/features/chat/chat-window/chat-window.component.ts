@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
 import { ChatService } from '../../../core/services/chat.service';
 import { Pipe, PipeTransform } from '@angular/core';
+import { WhatsappDatePipe } from '../../shared/pipes/whatsapp-date.pipe';
 
 @Pipe({ name: 'chatDaySeparator', standalone: true })
 export class ChatDaySeparatorPipe implements PipeTransform {
@@ -25,7 +26,7 @@ export class ChatDaySeparatorPipe implements PipeTransform {
 @Component({
   selector: 'app-chat-window',
   standalone: true,
-  imports: [CommonModule, AvatarModule, ButtonModule, BadgeModule, ChatDaySeparatorPipe],
+  imports: [CommonModule, AvatarModule, ButtonModule, BadgeModule, ChatDaySeparatorPipe, WhatsappDatePipe],
   templateUrl: './chat-window.component.html',
   styleUrls: ['./chat-window.component.css']
 })

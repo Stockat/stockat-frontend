@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatConversationDto, ChatMessageDto, UserChatInfoDto } from '../../../core/models/chatmodels/chat-models';
 import { ChatService } from '../../../core/services/chat.service';
+import { WhatsappDatePipe } from '../../shared/pipes/whatsapp-date.pipe';
 
 @Component({
   selector: 'app-conversation-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, WhatsappDatePipe],
   templateUrl: './conversation-list.component.html',
   styleUrls: ['./conversation-list.component.css']
 })
