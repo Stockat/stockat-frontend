@@ -1,0 +1,217 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [style]="{width: '90vw', maxWidth: '600px'}"
+  (onHide)="onClose()"
+  styleClass="modern-dialog">
+
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+        <i class="pi pi-plus text-white text-lg"></i>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold text-gray-900">Add New Service</h3>
+        <p class="text-gray-600 text-sm">Create a new service to showcase your offerings</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <div class="relative">
+    <!-- Loading Overlay -->
+    <div *ngIf="isAddingService" class="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center z-50">
+      <div class="text-center">
+        <p-progressSpinner
+          styleClass="w-12 h-12"
+          strokeWidth="4"
+          fill="var(--surface-ground)"
+          animationDuration=".5s">
+        </p-progressSpinner>
+        <p class="text-gray-600 font-semibold mt-4">Creating your service...</p>
+        <p class="text-gray-500 text-sm">Please wait while we upload and save</p>
+      </div>
+    </div>
+
+    <form *ngIf="form" [formGroup]="form" (ngSubmit)="submit()" class="space-y-6">
+      <!-- Service Name -->
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-gray-700">
+          Service Name <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <input
+            pInputText
+            formControlName="name"
+            placeholder="Enter service name"
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
+            [class.border-red-300]="submitted && form.get('name')?.invalid"
+            [disabled]="isAddingService" />
+        </div>
+        <div *ngIf="submitted && form.get('name')?.invalid" class="text-red-500 text-xs">
+          Service name is required
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-gray-700">
+          Description <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <textarea
+            pInputTextarea
+            formControlName="description"
+            placeholder="Describe your service in detail..."
+            rows="4"
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all resize-none"
+            [class.border-red-300]="submitted && form.get('description')?.invalid"
+            [disabled]="isAddingService"></textarea>
+        </div>
+        <div *ngIf="submitted && form.get('description')?.invalid" class="text-red-500 text-xs">
+          Description is required
+        </div>
+      </div>
+
+      <!-- Price and Min Quantity -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-gray-700">
+            Price per Product <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <input
+              pInputText
+              type="number"
+              formControlName="pricePerProduct"
+              placeholder="0.00"
+              step="0.01"
+              min="0.01"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
+              [class.border-red-300]="submitted && form.get('pricePerProduct')?.invalid"
+              [disabled]="isAddingService" />
+          </div>
+          <div *ngIf="submitted && form.get('pricePerProduct')?.invalid" class="text-red-500 text-xs">
+            Valid price is required (minimum $0.01)
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-gray-700">
+            Minimum Quantity <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <input
+              pInputText
+              type="number"
+              formControlName="minQuantity"
+              placeholder="1"
+              min="1"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
+              [class.border-red-300]="submitted && form.get('minQuantity')?.invalid"
+              [disabled]="isAddingService" />
+          </div>
+          <div *ngIf="submitted && form.get('minQuantity')?.invalid" class="text-red-500 text-xs">
+            Minimum quantity is required (minimum 1)
+          </div>
+        </div>
+      </div>
+
+      <!-- Estimated Time -->
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-gray-700">
+          Estimated Time <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <input
+            pInputText
+            formControlName="estimatedTime"
+            placeholder="e.g., 3 days, 1 week"
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
+            [class.border-red-300]="submitted && form.get('estimatedTime')?.invalid"
+            [disabled]="isAddingService" />
+        </div>
+        <div *ngIf="submitted && form.get('estimatedTime')?.invalid" class="text-red-500 text-xs">
+          Estimated time is required
+        </div>
+      </div>
+
+      <!-- Image Upload -->
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-gray-700">
+          Service Image <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
+               (click)="triggerFileInput()"
+               [class.border-red-300]="submitted && !selectedFile">
+            <div class="flex flex-col items-center gap-3">
+              <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                <i class="pi pi-image text-gray-400 text-xl"></i>
+              </div>
+              <div class="text-center">
+                <p class="text-sm font-medium text-gray-700">
+                  <span class="text-blue-600 hover:text-blue-700">Click to upload</span> or drag and drop
+                </p>
+                <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 10MB</p>
+              </div>
+            </div>
+            <input
+              #fileInput
+              type="file"
+              accept="image/*"
+              (change)="onFileSelected($event)"
+              class="hidden"
+              [disabled]="isAddingService"
+              required />
+          </div>
+
+          <!-- Selected File Preview -->
+          <div *ngIf="selectedFile" class="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex items-center gap-2">
+              <i class="pi pi-check-circle text-green-600"></i>
+              <span class="text-sm text-green-700">{{ selectedFile.name }}</span>
+              <button
+                type="button"
+                class="ml-auto text-red-500 hover:text-red-700"
+                (click)="removeSelectedFile()">
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="submitted && !selectedFile" class="text-red-500 text-xs">
+          Service image is required
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="feedbackMessage" class="p-3 bg-red-50 border border-red-200 rounded-lg">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-exclamation-triangle text-red-600"></i>
+          <span class="text-sm text-red-700">{{ feedbackMessage }}</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 pt-4">
+        <button
+          pButton
+          type="button"
+          label="Cancel"
+          class="flex-1 bg-gray-100 text-gray-700 border-0 hover:bg-gray-200 transition-colors"
+          (click)="onClose()"
+          [disabled]="isAddingService">
+        </button>
+        <button
+          pButton
+          type="submit"
+          label="Create Service"
+          icon="pi pi-plus"
+          class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+          [disabled]="form.invalid || isAddingService || !selectedFile">
+        </button>
+      </div>
+    </form>
+  </div>
+</p-dialog>

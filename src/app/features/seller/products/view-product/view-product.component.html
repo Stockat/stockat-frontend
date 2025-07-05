@@ -1,0 +1,192 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">My Products</h1>
+      <p class="text-gray-600">Manage and view all your products</p>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold text-gray-800">Filter Products</h2>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+        <!-- Location Select -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            Location
+          </label>
+          <p-select [options]="cities" [(ngModel)]="selectedCity" placeholder="Select a Location" class="w-full"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-blue-400" />
+        </div>
+
+        <!-- Category Select -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+              </path>
+            </svg>
+            Category
+          </label>
+          <p-select [options]="categories" [(ngModel)]="selectedCategory" optionValue="id" optionLabel="categoryName"
+            placeholder="Select a Category" class="w-full"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:border-green-400" />
+        </div>
+
+        <!-- Tags MultiSelect -->
+        <div class="flex flex-col space-y-2 sm:col-span-2 lg:col-span-1">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
+              </path>
+            </svg>
+            Tags
+          </label>
+          <p-multiselect [options]="tags" [(ngModel)]="selectedTags" optionLabel="name" optionValue="id"
+            placeholder="Select Tags" [maxSelectedLabels]="3" class="w-full"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 hover:border-purple-400" />
+        </div>
+
+        <!-- Price Input -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center" for="price">
+            <svg class="w-4 h-4 mr-1 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
+              </path>
+            </svg>
+            Min Price
+          </label>
+          <p-inputnumber [(ngModel)]="SelectedPrice" inputId="price" mode="decimal" [min]="1" class="w-full"
+            styleClass="w-full p-3 rounded-lg transition-all duration-200" />
+        </div>
+
+        <!-- Min Quantity Input -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center" for="minQty">
+            <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+            Min Quantity
+          </label>
+          <p-inputnumber [(ngModel)]="SelectedMinQty" inputId="minQty" mode="decimal" [min]="1" class="w-full"
+            styleClass="w-full p-3 rounded-lg transition-all duration-200" />
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-gray-200">
+        <div class="flex-1">
+          <p-button label="Apply Filters" icon="pi pi-filter" [raised]="true" severity="success"
+            (onClick)="setFilters()" class="w-full h-12 font-semibold"
+            styleClass="w-full h-12 font-semibold bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-0 shadow-lg transition-all duration-200" />
+        </div>
+        <div class="flex-1">
+          <p-button label="Clear All" icon="pi pi-times" [raised]="true" severity="danger" (onClick)="resetFilters()"
+            class="w-full h-12 font-semibold"
+            styleClass="w-full h-12 font-semibold bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-0 shadow-lg transition-all duration-200" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <p-table [value]="products" [tableStyle]="{ 'min-width': '60rem' }" class="w-full" styleClass="w-full">
+          <ng-template #caption>
+            <div class="flex items-center justify-between p-6">
+              <span class="text-2xl font-bold text-gray-900">Products List</span>
+              <span class="text-sm text-gray-600">Total: {{ products ? products.length : 0 }} out of
+                {{totalRecords}}</span>
+            </div>
+          </ng-template>
+
+          <ng-template #header>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="p-4 text-left font-semibold text-gray-700">Name</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Image</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Price</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Status</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Can Be Requested</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Actions</th>
+            </tr>
+          </ng-template>
+
+          <ng-template #body let-product>
+            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="p-4">
+                <div class="font-medium text-gray-900">{{ product.name }}</div>
+              </td>
+              <td class="p-4">
+                <img [src]="product.image[0]" [alt]="product.name"
+                  class="w-16 h-16 object-cover rounded-lg border border-gray-200" (error)="onImageError($event)"
+                  onerror="this.src='https://ik.imagekit.io/woiv2eo8w/back_OCcpj-NRl.png?updatedAt=1736699927368'" />
+              </td>
+              <td class="p-4">
+                <span class="font-semibold text-green-600">{{ product.price | currency: 'USD' }}</span>
+              </td>
+              <td class="p-4">
+                <p-tag [value]="product.productStatus" [severity]="getSeverity(product.productStatus)"
+                  class="text-xs" />
+              </td>
+              <td class="p-4">
+                <p-button [label]="product.canBeRequested ? 'Activate' : 'Deactivate'" variant="text" [raised]="true"
+                  [severity]="product.canBeRequested ? 'success' : 'danger'" class="text-xs"
+                  (onClick)="confirmCanBeRequsted($event,product.id,product.canBeRequested)" />
+              </td>
+              <td class="p-4">
+                <div class="flex flex-wrap gap-2">
+                  <p-toast />
+                  <p-confirmdialog />
+
+                  @if (product.productStatus=="Deactivated") {
+                  <p-button label="Activate" (onClick)="confirmActivate($event,product.id)" variant="text"
+                    [raised]="true" severity="success" class="text-xs" />
+                  }@else{
+                  <p-button label="Deactivate" (onClick)="confirmDeactivate($event,product.id)"
+                    [disabled]="!(product.productStatus=='Approved')" variant="text" [raised]="true" severity="danger"
+                    class="text-xs" />
+                  }
+
+                  <p-button label="Add Stock" variant="text" [raised]="true" severity="info" class="text-xs" />
+                  <p-button icon="pi pi-pen-to-square" [rounded]="true" severity="success" [outlined]="true"
+                    class="text-xs" />
+                  <p-button icon="pi pi-times" [rounded]="true" severity="danger" [outlined]="true"
+                    (onClick)="confirmDelete($event,product.id)" class="text-xs" />
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template #footer>
+            <tr class="bg-gray-50">
+              <td colspan="6" class="p-4 text-center text-gray-600">
+                Showing {{ products ? products.length : 0 }} products out of {{totalRecords}} total
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-center mt-8">
+      <div class="bg-white rounded-xl shadow-lg p-4">
+        <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="8" [totalRecords]="totalRecords"
+          class="w-full max-w-md" />
+      </div>
+    </div>
+  </div>
+</div>

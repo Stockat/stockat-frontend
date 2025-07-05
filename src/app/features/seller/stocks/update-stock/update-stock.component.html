@@ -1,0 +1,103 @@
+<div class="mx-5 my-4">
+    <p-toast></p-toast>
+    <p-card header="Update Stock">
+        <p-divider />
+        <div *ngIf="dataLoaded; else skeletonLoading">
+            <!-- Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <!-- Gallery Section -->
+                <div>
+                    <p-galleria [value]="images" thumbnailsPosition="bottom" [containerStyle]="{ 'max-width': '400px' }"
+                        [numVisible]="5" [showThumbnails]="true">
+                        <ng-template pTemplate="item" let-item>
+                            <img [src]="item.itemImageSrc" style="width: 100%; display: block;" [alt]="item.alt" />
+                        </ng-template>
+                        <ng-template pTemplate="thumbnail" let-item>
+                            <img [src]="item.itemImageSrc" style="width: 80px; display: block;" [alt]="item.alt" />
+                        </ng-template>
+                    </p-galleria>
+                </div>
+
+                <!-- Product Details Section -->
+                <div class="col-span-2">
+                    <div class="mb-4">
+                        <h2 class="text-xl font-bold">{{ product?.name }}</h2>
+                        <p class="text-gray-600">{{ product?.description }}</p>
+                        <p class="text-lg font-semibold mt-2">Price: ${{ product?.price }}</p>
+                    </div>
+
+                    <!-- Features Selection -->
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold mb-2">Features</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div *ngFor="let feature of product?.features">
+                                <p-select 
+                                    [options]="feature.values" 
+                                    [(ngModel)]="selectedFeatures[feature.id]"
+                                    (onChange)="onFeatureChange(feature.id, $event.value)"
+                                    optionLabel="value"
+                                    [placeholder]="'Select ' + feature.name"
+                                    class="w-full">
+                                </p-select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quantity Input -->
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold mb-2">Quantity</h3>
+                        <p-inputNumber 
+                            [(ngModel)]="stockData.quantity" 
+                            [showButtons]="true" 
+                            [min]="1"
+                            buttonLayout="horizontal" 
+                            spinnerMode="horizontal" 
+                            inputId="horizontal" 
+                            decrementButtonClass="p-button-secondary" 
+                            incrementButtonClass="p-button-secondary" 
+                            incrementButtonIcon="pi pi-plus" 
+                            decrementButtonIcon="pi pi-minus">
+                        </p-inputNumber>
+                    </div>
+
+                    <!-- Update Button -->
+                    <div class="mt-4">
+                        <p-button 
+                            label="Update Stock" 
+                            (onClick)="updateStock()" 
+                            [loading]="loading"
+                            [disabled]="!areAllFeaturesSelected()">
+                        </p-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <ng-template #skeletonLoading>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div>
+                    <p-skeleton width="100%" height="250px" class="mb-4"></p-skeleton>
+                </div>
+                <div class="col-span-2">
+                    <div class="mb-2">
+                    <p-skeleton width="70%" height="2rem" class="mb-2"></p-skeleton>
+                    </div>
+                    <div class="mb-2">
+                    <p-skeleton width="90%" height="1rem" class="mb-2"></p-skeleton>
+                    </div>
+                    <div class="mb-2">
+                    <p-skeleton width="40%" height="1.5rem" class="mb-4"></p-skeleton>
+                    </div>
+                    <div class="mb-2">
+                    <p-skeleton width="100%" height="100px" class="mb-2"></p-skeleton>
+                    </div>
+                    <div class="mb-2">
+                    <p-skeleton width="100%" height="50px" class="mb-4"></p-skeleton>
+                    </div>  
+                    <div class="mb-2">
+                    <p-skeleton width="150px" height="3rem"></p-skeleton>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+    </p-card>
+</div>

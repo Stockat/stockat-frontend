@@ -1,0 +1,846 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+  <!-- Hero Section -->
+  <div class="bg-white/70 backdrop-blur-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex items-center gap-4">
+        <button
+          pButton
+          icon="pi pi-arrow-left"
+          class="p-button-rounded p-button-outlined p-button-secondary"
+          (click)="goBack()">
+        </button>
+        <div class="flex-1">
+          <h1 class="text-3xl lg:text-4xl font-bold text-gray-900">Service Details</h1>
+          <p class="text-gray-600 text-lg">Manage buyer requests and offers</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="text-center py-16">
+      <p-progressSpinner
+        styleClass="w-16 h-16"
+        strokeWidth="4"
+        fill="var(--surface-ground)"
+        animationDuration=".5s">
+      </p-progressSpinner>
+      <p class="text-gray-600 font-semibold mt-4">Loading service details...</p>
+    </div>
+
+    <!-- Service Details -->
+    <div *ngIf="service && !loading" class="space-y-8">
+      <!-- Service Info Card -->
+      <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+        <div class="flex flex-col lg:flex-row">
+          <!-- Service Image -->
+          <div class="lg:w-1/3 p-8 bg-gradient-to-br from-blue-50 to-purple-50">
+            <div class="flex flex-col items-center text-center">
+              <div *ngIf="service.imageUrl" class="w-48 h-48 rounded-2xl overflow-hidden shadow-lg mb-6">
+                <img [src]="service.imageUrl" alt="Service Image" class="w-full h-full object-cover" />
+              </div>
+              <div *ngIf="!service.imageUrl" class="w-48 h-48 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mb-6">
+                <i class="pi pi-image text-4xl text-gray-400"></i>
+              </div>
+              <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ service.name }}</h2>
+              <p class="text-gray-600 text-sm">{{ service.description }}</p>
+            </div>
+          </div>
+
+          <!-- Service Details -->
+          <div class="lg:w-2/3 p-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200">
+                <div class="flex items-center gap-3 mb-2">
+                  <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                    <i class="pi pi-dollar text-green-600 text-lg"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">Price per Product</p>
+                    <p class="text-2xl font-bold text-gray-900">${{ service.pricePerProduct }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
+                <div class="flex items-center gap-3 mb-2">
+                  <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <i class="pi pi-sort-numeric-up text-blue-600 text-lg"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">Minimum Quantity</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ service.minQuantity }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200">
+                <div class="flex items-center gap-3 mb-2">
+                  <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <i class="pi pi-clock text-purple-600 text-lg"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">Estimated Time</p>
+                    <p class="text-lg font-bold text-gray-900">{{ service.estimatedTime }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div class="text-center">
+                <p class="text-2xl font-bold text-gray-900">{{ requests.length }}</p>
+                <p class="text-sm text-gray-500">Total Requests</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-yellow-600">{{ getPendingRequestsCount() }}</p>
+                <p class="text-sm text-gray-500">Pending</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-green-600">{{ getApprovedRequestsCount() }}</p>
+                <p class="text-sm text-gray-500">Approved</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-blue-600">{{ getOffersMadeCount() }}</p>
+                <p class="text-sm text-gray-500">Offers Made</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buyer Requests Section -->
+      <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+        <div class="p-8 border-b border-gray-100">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div>
+              <h3 class="text-2xl font-bold text-gray-900 mb-2">Buyer Requests</h3>
+              <p class="text-gray-600">Manage and respond to buyer requests</p>
+            </div>
+
+            <!-- Search and Filters -->
+            <div class="flex flex-col md:flex-row gap-4">
+              <div class="relative">
+                <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input
+                  pInputText
+                  type="text"
+                  [(ngModel)]="searchText"
+                  placeholder="Search by buyer name..."
+                  class="pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all" />
+              </div>
+
+              <div class="flex gap-2">
+                <p-dropdown
+                  [options]="statusFilterOptions"
+                  [(ngModel)]="statusFilter"
+                  placeholder="Status"
+                  [showClear]="true"
+                  class="w-32"
+                  [appendTo]="'body'">
+                </p-dropdown>
+                <p-dropdown
+                  [options]="approvalFilterOptions"
+                  [(ngModel)]="approvalFilter"
+                  placeholder="Approval"
+                  [showClear]="true"
+                  class="w-32"
+                  [appendTo]="'body'">
+                </p-dropdown>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Requests Table -->
+        <div class="overflow-x-auto">
+          <p-table
+            [value]="filteredRequests()"
+            [paginator]="true"
+            [rows]="10"
+            *ngIf="!loading && filteredRequests().length > 0"
+            class="modern-table">
+            <ng-template pTemplate="header">
+              <tr class="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                <th class="px-6 py-4 text-left font-semibold text-sm">Buyer</th>
+                <th class="px-6 py-4 text-left font-semibold text-sm">Quantity</th>
+                <th class="px-6 py-4 text-left font-semibold text-sm">Status</th>
+                <th class="px-6 py-4 text-left font-semibold text-sm">Buyer Approval</th>
+                <th class="px-6 py-4 text-center font-semibold text-sm flex items-center justify-center">Actions</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-request>
+              <tr class="border-b border-gray-100 hover:bg-blue-50/50 transition-all duration-200">
+                <td class="px-6 py-4">
+                  <div class="font-semibold text-gray-900">{{ request.buyerName }}</div>
+                </td>
+                <td class="px-6 py-4 text-gray-700">{{ request.requestedQuantity }}</td>
+                <td class="px-6 py-4">
+                  <p-tag
+                    [value]="request.serviceStatus"
+                    [severity]="getStatusSeverity(request.serviceStatus)"
+                    styleClass="text-xs">
+                  </p-tag>
+                </td>
+                <td class="px-6 py-4">
+                  <p-tag
+                    [value]="request.buyerApprovalStatus || 'N/A'"
+                    [severity]="getApprovalSeverity(request.buyerApprovalStatus)"
+                    styleClass="text-xs">
+                  </p-tag>
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <div class="flex items-center justify-center gap-2 h-full">
+                    <button
+                      pButton
+                      label="Set Offer"
+                      icon="pi pi-dollar"
+                      class="p-button-sm p-button-success shadow-sm hover:shadow-md transition-all"
+                      (click)="openOfferModal(request)"
+                      [disabled]="!canSetOffer(request)"
+                      [pTooltip]="getSetOfferTooltip(request)">
+                    </button>
+
+                    <button
+                      pButton
+                      label="Details"
+                      icon="pi pi-eye"
+                      class="p-button-sm p-button-outlined p-button-secondary shadow-sm hover:shadow-md transition-all"
+                      (click)="openRequestDetailsModal(request)">
+                    </button>
+
+                    <div class="relative">
+                      <button
+                        pButton
+                        label="Updates"
+                        icon="pi pi-sync"
+                        class="p-button-sm p-button-info shadow-sm hover:shadow-md transition-all"
+                        (click)="openUpdatesModal(request)"
+                        [disabled]="request.buyerApprovalStatus !== 'Approved'"
+                        [pTooltip]="getViewUpdatesTooltip(request)">
+                      </button>
+                      <span *ngIf="request && getPendingUpdatesCount(request) > 0"
+                        class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 border-2 border-white shadow-lg font-bold min-w-[20px] flex items-center justify-center">
+                        {{ getPendingUpdatesCount(request) }}
+                      </span>
+                    </div>
+
+                    <div class="flex items-center gap-1">
+                      <p-dropdown
+                        [options]="requestStatusOptions"
+                        [(ngModel)]="request._newStatus"
+                        [style]="{width: '120px'}"
+                        [autoDisplayFirst]="false"
+                        [showClear]="false"
+                        [disabled]="request.buyerApprovalStatus !== 'Approved'"
+                        [appendTo]="'body'"
+                        placeholder="Status">
+                      </p-dropdown>
+                      <button
+                        pButton
+                        icon="pi pi-check"
+                        class="p-button-sm p-button-rounded p-button-primary shadow-sm hover:shadow-md transition-all"
+                        (click)="changeRequestStatus(request)"
+                        [disabled]="request._newStatus === request.serviceStatus || request.buyerApprovalStatus !== 'Approved'"
+                        pTooltip="Save Status">
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!loading && (!requests || requests.length === 0)" class="text-center py-16">
+          <div class="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="pi pi-users text-white text-3xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">No Buyer Requests</h3>
+          <p class="text-gray-600">No buyer requests for this service yet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Offer Modal -->
+  <p-dialog
+    [(visible)]="offerModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{width: '90vw', maxWidth: '500px'}"
+    (onHide)="closeOfferModal()"
+    styleClass="modern-dialog">
+
+    <ng-template pTemplate="header">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+          <i class="pi pi-dollar text-white text-lg"></i>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-gray-900">Make Offer</h3>
+          <p class="text-gray-600 text-sm">Set your offer for the buyer</p>
+        </div>
+      </div>
+    </ng-template>
+
+    <div *ngIf="selectedRequest" class="space-y-6">
+      <div class="bg-blue-50 rounded-xl p-4 border border-blue-200">
+        <div class="flex items-center gap-3 mb-2">
+          <i class="pi pi-user text-blue-600"></i>
+          <span class="font-semibold text-blue-900">{{ selectedRequest.buyerName }}</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <i class="pi pi-sort-numeric-up text-blue-600"></i>
+          <span class="text-blue-700">Quantity: {{ selectedRequest.requestedQuantity }}</span>
+        </div>
+      </div>
+
+      <form [formGroup]="offerForm" (ngSubmit)="submitOffer()" class="space-y-4">
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-gray-700">
+            Price per Product <span class="text-red-500">*</span>
+          </label>
+          <input
+            pInputText
+            type="number"
+            min="1"
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
+            formControlName="pricePerProduct"
+            placeholder="Enter price"
+            [disabled]="offerLoading" />
+          <div *ngIf="offerForm.get('pricePerProduct')?.invalid && offerForm.get('pricePerProduct')?.touched" class="text-red-500 text-xs">
+            Required and must be positive.
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-gray-700">
+            Estimated Time <span class="text-red-500">*</span>
+          </label>
+          <input
+            pInputText
+            type="text"
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
+            formControlName="estimatedTime"
+            placeholder="e.g. 3 days"
+            [disabled]="offerLoading" />
+          <div *ngIf="offerForm.get('estimatedTime')?.invalid && offerForm.get('estimatedTime')?.touched" class="text-red-500 text-xs">
+            Required.
+          </div>
+        </div>
+
+        <div *ngIf="offerError" class="p-3 bg-red-50 border border-red-200 rounded-lg">
+          <div class="flex items-center gap-2">
+            <i class="pi pi-exclamation-triangle text-red-600"></i>
+            <span class="text-sm text-red-700">{{ offerError }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="offerSuccess" class="p-3 bg-green-50 border border-green-200 rounded-lg">
+          <div class="flex items-center gap-2">
+            <i class="pi pi-check-circle text-green-600"></i>
+            <span class="text-sm text-green-700">{{ offerSuccess }}</span>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3 pt-4">
+      <button
+        pButton
+        type="button"
+        label="Cancel"
+        class="flex-1 bg-gray-100 text-gray-700 border-0 hover:bg-gray-200 transition-colors"
+        (click)="closeOfferModal()"
+        [disabled]="offerLoading">
+      </button>
+      <button
+        pButton
+        type="submit"
+        label="Send Offer"
+        icon="pi pi-send"
+        class="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+        (click)="submitOffer()"
+        [disabled]="offerForm.invalid || offerLoading">
+      </button>
+    </div>
+  </p-dialog>
+
+  <!-- Updates Modal -->
+  <p-dialog
+    [(visible)]="updatesModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{width: '90vw', maxWidth: '700px'}"
+    (onHide)="closeUpdatesModal()"
+    styleClass="modern-dialog">
+
+    <ng-template pTemplate="header">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+          <i class="pi pi-sync text-white text-lg"></i>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-gray-900">Request Updates</h3>
+          <p class="text-gray-600 text-sm">Review and manage update requests</p>
+        </div>
+      </div>
+    </ng-template>
+
+    <div *ngIf="selectedUpdatesRequest" class="space-y-6">
+      <div class="bg-purple-50 rounded-xl p-4 border border-purple-200">
+        <div class="flex items-center gap-3">
+          <i class="pi pi-user text-purple-600"></i>
+          <span class="font-semibold text-purple-900">Updates for {{ selectedUpdatesRequest.buyerName }}</span>
+          <i *ngIf="selectedUpdatesRequest.updatesLoading" class="pi pi-spin pi-spinner text-purple-700"></i>
+        </div>
+      </div>
+
+      <div *ngIf="selectedUpdatesRequest.updatesLoading" class="text-center py-8">
+        <p-progressSpinner styleClass="w-12 h-12"></p-progressSpinner>
+        <p class="text-purple-700 mt-4">Loading updates...</p>
+      </div>
+
+      <div *ngIf="!selectedUpdatesRequest.updatesLoading && selectedUpdatesRequest.updates && selectedUpdatesRequest.updates.length > 0" class="space-y-6">
+        <!-- Updates Summary -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <i class="pi pi-sync text-blue-600"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-blue-900">Update Summary</h4>
+                <p class="text-blue-600 text-sm">{{ selectedUpdatesRequest.updates.length }} total update(s)</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                {{ getApprovedUpdatesCount(selectedUpdatesRequest) }} Approved
+              </span>
+              <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">
+                {{ getPendingUpdatesCount(selectedUpdatesRequest) }} Pending
+              </span>
+              <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">
+                {{ getRejectedUpdatesCount(selectedUpdatesRequest) }} Rejected
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Updates List -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div *ngFor="let update of selectedUpdatesRequest.updates; let i = index"
+               class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+
+            <!-- Update Header -->
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-b border-gray-200">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">
+                    {{ i + 1 }}
+                  </div>
+                  <div>
+                    <h5 class="font-semibold text-gray-900 text-sm">Update #{{ i + 1 }}</h5>
+                    <p class="text-gray-600 text-xs">
+                      <i class="pi pi-calendar text-gray-400 mr-1"></i>
+                      {{ update.createdAt | date:'MMM dd, yyyy' }}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <p-tag
+                    [value]="update.status"
+                    [severity]="getUpdateStatusSeverity(update.status)"
+                    styleClass="text-xs font-semibold">
+                  </p-tag>
+                </div>
+              </div>
+            </div>
+
+            <!-- Update Content -->
+            <div class="p-4">
+              <div class="space-y-3">
+
+                <!-- Changes Section -->
+                <div class="space-y-2">
+                  <h6 class="font-semibold text-gray-900 text-sm flex items-center gap-1">
+                    <i class="pi pi-pencil text-blue-600"></i>
+                    Changes
+                  </h6>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <!-- Price Change -->
+                    <div *ngIf="update.additionalPrice" class="bg-green-50 rounded-lg p-3 border border-green-200">
+                      <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center">
+                          <i class="pi pi-dollar text-green-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                          <p class="font-semibold text-green-900 text-sm">Price</p>
+                          <p class="text-green-700 font-bold">+${{ update.additionalPrice }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Quantity Change -->
+                    <div *ngIf="update.additionalQuantity" class="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                      <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <i class="pi pi-sort-numeric-up text-blue-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                          <p class="font-semibold text-blue-900 text-sm">Quantity</p>
+                          <p class="text-blue-700 font-bold">+{{ update.additionalQuantity }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Time Change -->
+                    <div *ngIf="update.additionalTime" class="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                      <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <i class="pi pi-clock text-purple-600 text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                          <p class="font-semibold text-purple-900 text-sm">Time</p>
+                          <p class="text-purple-700 font-bold">{{ update.additionalTime }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Notes Section -->
+                    <div *ngIf="update.additionalNote && update.additionalNote.trim() !== ''"
+                         class="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                      <div class="flex items-start gap-2">
+                        <div class="w-6 h-6 bg-orange-100 rounded-lg flex items-center justify-center mt-1">
+                          <i class="pi pi-file-edit text-orange-600 text-sm"></i>
+                        </div>
+                                                <div class="flex-1">
+                          <p class="text-orange-900 text-sm font-medium mb-1">Message</p>
+                          <p class="text-orange-800 italic text-xs leading-relaxed line-clamp-3 cursor-help"
+                             [title]="update.additionalNote.length > 150 ? update.additionalNote : ''">
+                            {{ update.additionalNote }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- No Notes Placeholder -->
+                    <div *ngIf="!update.additionalNote || update.additionalNote.trim() === ''"
+                         class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                      <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <i class="pi pi-info-circle text-gray-400 text-sm"></i>
+                        </div>
+                        <div>
+                          <p class="text-gray-500 italic text-xs">No notes</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div *ngIf="update.status === 'Pending'" class="mt-4 pt-3 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1">
+                    <i class="pi pi-exclamation-triangle text-yellow-600 text-sm"></i>
+                    <span class="text-xs text-gray-600">Requires approval</span>
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      pButton
+                      type="button"
+                      label="Accept"
+                      icon="pi pi-check"
+                      class="p-button-sm p-button-success"
+                      (click)="acceptUpdate(update)">
+                    </button>
+                    <button
+                      pButton
+                      type="button"
+                      label="Reject"
+                      icon="pi pi-times"
+                      class="p-button-sm p-button-danger"
+                      (click)="rejectUpdate(update)">
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!selectedUpdatesRequest.updatesLoading && (!selectedUpdatesRequest.updates || selectedUpdatesRequest.updates.length === 0)" class="text-center py-8">
+        <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="pi pi-sync text-white text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">No Updates</h3>
+        <p class="text-gray-600">No updates for this request.</p>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-3 pt-4">
+      <button
+        pButton
+        type="button"
+        label="Close"
+        class="bg-gray-100 text-gray-700 border-0 hover:bg-gray-200 transition-colors"
+        (click)="closeUpdatesModal()">
+      </button>
+    </div>
+  </p-dialog>
+
+  <!-- Request Details Modal -->
+  <p-dialog
+    [(visible)]="requestDetailsModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{width: '90vw', maxWidth: '600px'}"
+    (onHide)="closeRequestDetailsModal()"
+    styleClass="modern-dialog">
+
+    <ng-template pTemplate="header">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+          <i class="pi pi-eye text-white text-lg"></i>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-gray-900">Request Details</h3>
+          <p class="text-gray-600 text-sm">View complete request information</p>
+        </div>
+      </div>
+    </ng-template>
+
+    <div *ngIf="selectedRequestDetails" class="space-y-6">
+      <!-- Buyer Info -->
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+        <div class="flex items-center gap-3 mb-4">
+          <i class="pi pi-user text-blue-600 text-xl"></i>
+          <div>
+            <h4 class="text-lg font-bold text-blue-900">{{ selectedRequestDetails.buyerName }}</h4>
+            <p class="text-blue-700">Buyer Information</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-white rounded-lg p-4 border border-blue-100">
+            <div class="flex items-center gap-2 mb-2">
+              <i class="pi pi-sort-numeric-up text-blue-600"></i>
+              <span class="font-semibold text-blue-900">Quantity Requested</span>
+            </div>
+            <p class="text-2xl font-bold text-blue-700">{{ selectedRequestDetails.requestedQuantity }}</p>
+          </div>
+          <div class="bg-white rounded-lg p-4 border border-blue-100">
+            <div class="flex items-center gap-2 mb-2">
+              <i class="pi pi-calendar text-blue-600"></i>
+              <span class="font-semibold text-blue-900">Request Date</span>
+            </div>
+            <p class="text-lg text-blue-700">{{ selectedRequestDetails.createdAt | date:'MMM dd, yyyy' }}</p>
+          </div>
+        </div>
+      </div>
+
+            <!-- Offer Information -->
+      <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+        <div class="flex items-center gap-3 mb-6">
+          <i class="pi pi-dollar text-green-600 text-xl"></i>
+          <div>
+            <h4 class="text-lg font-bold text-green-900">Offer Information</h4>
+            <p class="text-green-700">Your offer details</p>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Price per Product -->
+          <div class="bg-white rounded-xl p-6 border border-green-100 shadow-sm">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <i class="pi pi-dollar text-green-600 text-lg"></i>
+              </div>
+              <div>
+                <h5 class="font-semibold text-green-900 text-lg">Price per Product</h5>
+                <p class="text-green-600 text-sm">Your offered price for each item</p>
+              </div>
+            </div>
+            <div *ngIf="selectedRequestDetails.pricePerProduct != null && selectedRequestDetails.pricePerProduct !== 0; else notSetPrice" class="mt-4">
+              <div class="flex items-baseline gap-2">
+                <span class="text-3xl font-bold text-green-700">${{ selectedRequestDetails.pricePerProduct }}</span>
+                <span class="text-green-600 text-sm">per item</span>
+              </div>
+            </div>
+            <ng-template #notSetPrice>
+              <div class="mt-4">
+                <p class="text-gray-400 italic text-lg">No price set yet</p>
+                <p class="text-gray-500 text-sm">Click "Set Offer" to add pricing</p>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- Total Price and Estimated Time Row -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white rounded-xl p-6 border border-green-100 shadow-sm">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <i class="pi pi-calculator text-green-600 text-lg"></i>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-green-900 text-lg">Total Price</h5>
+                  <p class="text-green-600 text-sm">Total for all items</p>
+                </div>
+              </div>
+              <div *ngIf="selectedRequestDetails.pricePerProduct != null && selectedRequestDetails.pricePerProduct !== 0 && selectedRequestDetails.requestedQuantity != null && selectedRequestDetails.requestedQuantity !== 0; else notSetTotal" class="mt-4">
+                <div class="flex items-baseline gap-2">
+                  <span class="text-3xl font-bold text-green-700">${{ (selectedRequestDetails.pricePerProduct * selectedRequestDetails.requestedQuantity) | number:'1.2-2' }}</span>
+                  <span class="text-green-600 text-sm">total</span>
+                </div>
+                <p class="text-green-600 text-sm mt-1">
+                  {{ selectedRequestDetails.requestedQuantity }} items × ${{ selectedRequestDetails.pricePerProduct }}
+                </p>
+              </div>
+              <ng-template #notSetTotal>
+                <div class="mt-4">
+                  <p class="text-gray-400 italic text-lg">Not calculated</p>
+                  <p class="text-gray-500 text-sm">Set price to see total</p>
+                </div>
+              </ng-template>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 border border-green-100 shadow-sm">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <i class="pi pi-clock text-green-600 text-lg"></i>
+                </div>
+                <div>
+                  <h5 class="font-semibold text-green-900 text-lg">Estimated Time</h5>
+                  <p class="text-green-600 text-sm">Delivery timeline</p>
+                </div>
+              </div>
+              <div *ngIf="selectedRequestDetails.estimatedTime; else notSetTime" class="mt-4">
+                <p class="text-2xl font-bold text-green-700">{{ selectedRequestDetails.estimatedTime }}</p>
+              </div>
+              <ng-template #notSetTime>
+                <div class="mt-4">
+                  <p class="text-gray-400 italic text-lg">Not set</p>
+                  <p class="text-gray-500 text-sm">Add delivery time</p>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Information -->
+      <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+        <div class="flex items-center gap-3 mb-4">
+          <i class="pi pi-info-circle text-purple-600 text-xl"></i>
+          <div>
+            <h4 class="text-lg font-bold text-purple-900">Status Information</h4>
+            <p class="text-purple-700">Current request status</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-white rounded-lg p-4 border border-purple-100">
+            <div class="flex items-center gap-2 mb-2">
+              <i class="pi pi-tag text-purple-600"></i>
+              <span class="font-semibold text-purple-900">Service Status</span>
+            </div>
+            <p-tag
+              [value]="selectedRequestDetails.serviceStatus"
+              [severity]="getStatusSeverity(selectedRequestDetails.serviceStatus)"
+              styleClass="text-sm">
+            </p-tag>
+          </div>
+
+          <div class="bg-white rounded-lg p-4 border border-purple-100">
+            <div class="flex items-center gap-2 mb-2">
+              <i class="pi pi-check-circle text-purple-600"></i>
+              <span class="font-semibold text-purple-900">Buyer Approval</span>
+            </div>
+            <p-tag
+              [value]="selectedRequestDetails.buyerApprovalStatus || 'N/A'"
+              [severity]="getApprovalSeverity(selectedRequestDetails.buyerApprovalStatus)"
+              styleClass="text-sm">
+            </p-tag>
+          </div>
+        </div>
+      </div>
+
+      <!-- Request Description -->
+      <div *ngIf="selectedRequestDetails.requestDescription" class="bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl p-6 border border-gray-200">
+        <div class="flex items-center gap-3 mb-4">
+          <i class="pi pi-file-edit text-gray-600 text-xl"></i>
+          <div>
+            <h4 class="text-lg font-bold text-gray-900">Request Description</h4>
+            <p class="text-gray-700">Buyer's request details</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg p-4 border border-gray-100">
+          <p class="text-gray-700 whitespace-pre-line">{{ selectedRequestDetails.requestDescription }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-3 pt-4">
+      <button
+        pButton
+        type="button"
+        label="Close"
+        class="bg-gray-100 text-gray-700 border-0 hover:bg-gray-200 transition-colors"
+        (click)="closeRequestDetailsModal()">
+      </button>
+    </div>
+  </p-dialog>
+
+  <!-- Description Modal -->
+  <p-dialog
+    [(visible)]="descriptionModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{width: '90vw', maxWidth: '500px'}"
+    (onHide)="closeDescriptionModal()"
+    styleClass="modern-dialog">
+
+    <ng-template pTemplate="header">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+          <i class="pi pi-file-edit text-white text-lg"></i>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-gray-900">Request Description</h3>
+          <p class="text-gray-600 text-sm">View buyer's request details</p>
+        </div>
+      </div>
+    </ng-template>
+
+    <div *ngIf="selectedDescriptionRequest" class="space-y-4">
+      <div class="bg-blue-50 rounded-xl p-4 border border-blue-200">
+        <div class="flex items-center gap-3 mb-3">
+          <i class="pi pi-user text-blue-600"></i>
+          <span class="font-semibold text-blue-900">{{ selectedDescriptionRequest.buyerName }}</span>
+        </div>
+        <div class="text-gray-700 whitespace-pre-line">
+          {{ selectedDescriptionRequest.requestDescription || 'No description provided.' }}
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-3 pt-4">
+      <button
+        pButton
+        type="button"
+        label="Close"
+        class="bg-gray-100 text-gray-700 border-0 hover:bg-gray-200 transition-colors"
+        (click)="closeDescriptionModal()">
+      </button>
+    </div>
+  </p-dialog>
+</div>
