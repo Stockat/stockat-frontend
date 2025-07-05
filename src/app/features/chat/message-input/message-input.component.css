@@ -17,3 +17,13 @@ input[type="text"]:focus {
   box-shadow: none;
   border-color: #d1d5db; /* Tailwind gray-300 for subtle border */
 }
+
+.input-container {
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  min-height: 36px;
+}
+
+.message-input-form {
+  margin-bottom: 0 !important;
+}

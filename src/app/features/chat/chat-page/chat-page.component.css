@@ -44,3 +44,17 @@
     flex-direction: column;
   }
 }
+
+.chat-header {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  min-height: 44px;
+}
+
+.chat-input {
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  min-height: 44px;
+}
+
+/* If you use p-4 or similar, override it for .chat-header and .chat-input */

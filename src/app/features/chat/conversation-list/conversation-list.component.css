@@ -43,3 +43,98 @@ input[type="text"]:focus, input[type="text"]:active, input[type="text"]:focus-vi
   margin-left: 8px;
   margin-right: 8px;
 }
+
+.sidebar-whatsapp-header {
+  background: #fff;
+  /* box-shadow: 0 2px 8px rgba(0,0,0,0.07); */
+  box-shadow: none;
+  padding: 16px 20px 10px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sidebar-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #075e54;
+  letter-spacing: 0.5px;
+  position: relative;
+  padding-left: 8px;
+}
+.sidebar-title:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 70%;
+  background: #25d366;
+  border-radius: 2px;
+}
+
+.sidebar-title.plain {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #222;
+  letter-spacing: 0.5px;
+  padding-left: 0;
+  margin-bottom: 0;
+  position: static;
+}
+
+.sidebar-title.plain:before {
+  display: none;
+}
+
+.sidebar-search-container {
+  background: #fff;
+  padding: 0 20px 10px 20px;
+  position: sticky;
+  top: 60px;
+  z-index: 9;
+}
+
+.sidebar-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-search-input {
+  width: 100%;
+  padding: 10px 12px 10px 38px;
+  border-radius: 24px;
+  border: none;
+  background: #f0f2f5;
+  font-size: 1rem;
+  color: #222;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  transition: box-shadow 0.2s;
+}
+.sidebar-search-input:focus {
+  outline: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.sidebar-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  font-size: 1.1rem;
+  pointer-events: none;
+}
+
+.sidebar-search-margin {
+  height: 8px;
+}
+
+.sidebar-bottom-padding {
+  padding-bottom: 18px !important;
+}
