@@ -1,24 +1,24 @@
-<div class="sidebar-whatsapp-header">
-  <span class="sidebar-title plain">Chat</span>
-</div>
-<div class="sidebar-search-container">
-  <div class="sidebar-search-margin"></div>
-  <div class="sidebar-search-wrapper">
-    <i class="pi pi-search sidebar-search-icon"></i>
-    <input type="text" class="sidebar-search-input" placeholder="Search or start new chat..." [(ngModel)]="searchQuery" (input)="onSearch()" />
+<div class="sidebar-outer-padding">
+  <div class="sidebar-whatsapp-header">
+    <span class="sidebar-title plain">Chat</span>
   </div>
-  <div *ngIf="searchResults.length > 0" class="search-results absolute top-12 left-0 right-0 bg-white shadow-lg rounded-lg mt-1 z-10 max-h-60 overflow-y-auto">
-    <div *ngFor="let user of searchResults" class="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100" (click)="startChatWithUser(user)">
-      <img [src]="user.profileImageUrl || defaultProfileImageUrl" class="w-8 h-8 rounded-full object-cover" alt="avatar" />
-      <div>
-        <div class="font-semibold">{{ user.fullName }}</div>
-        <!-- <div class="text-xs text-gray-500">{{ user.userId }}</div> -->
+  <div class="sidebar-search-container">
+    <div class="sidebar-search-margin"></div>
+    <div class="sidebar-search-wrapper">
+      <i class="pi pi-search sidebar-search-icon"></i>
+      <input type="text" class="sidebar-search-input" placeholder="Search or start new chat..." [(ngModel)]="searchQuery" (input)="onSearch()" />
+    </div>
+    <div *ngIf="searchResults.length > 0" class="search-results absolute top-12 left-0 right-0 bg-white shadow-lg rounded-lg mt-1 z-10 max-h-60 overflow-y-auto">
+      <div *ngFor="let user of searchResults" class="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100" (click)="startChatWithUser(user)">
+        <img [src]="user.profileImageUrl || defaultProfileImageUrl" class="w-8 h-8 rounded-full object-cover" alt="avatar" />
+        <div>
+          <div class="font-semibold">{{ user.fullName }}</div>
+          <!-- <div class="text-xs text-gray-500">{{ user.userId }}</div> -->
+        </div>
       </div>
     </div>
   </div>
-</div>
-<div class="sidebar-bottom-padding">
-  <div class="flex flex-col gap-2 overflow-y-auto custom-scrollbar" style="max-height: calc(100vh - 120px);" (scroll)="onScroll($event)">
+  <div class="flex flex-col gap-2 overflow-y-auto custom-scrollbar sidebar-bottom-padding" style="max-height: calc(100vh - 120px);" (scroll)="onScroll($event)">
     <div *ngFor="let conv of filteredConversations"
          class="bg-white rounded-xl shadow p-2 cursor-pointer flex items-center gap-3"
          [ngClass]="{'selected': conv.conversationId.toString() === selectedConversationId}"
@@ -56,4 +56,5 @@
       </div>
     </div>
   </div>
+  <div class="sidebar-fixed-footer"></div>
 </div>

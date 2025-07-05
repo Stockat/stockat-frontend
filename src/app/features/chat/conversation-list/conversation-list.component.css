@@ -136,10 +136,38 @@ input[type="text"]:focus, input[type="text"]:active, input[type="text"]:focus-vi
 }
 
 .sidebar-bottom-padding {
-  padding-bottom: 18px !important;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.sidebar-outer-padding {
+  padding-bottom: 20px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar-bottom-padding > .flex.flex-col.gap-2.overflow-y-auto.custom-scrollbar {
   padding-top: 14px;
   padding-bottom: 18px;
+}
+
+.flex.flex-col.gap-2.overflow-y-auto.custom-scrollbar.sidebar-bottom-padding {
+  height: calc(100vh - 54px - 18px);
+  flex: 1 1 auto;
+}
+
+/* Remove sidebar-footer styles if present */
+.sidebar-footer, .sidebar-footer-text { display: none !important; }
+
+.sidebar-fixed-footer {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border-top: 1px solid #ececec;
+  min-height: 18px;
+  padding: 4px 0;
+  z-index: 20;
 }
