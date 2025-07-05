@@ -1,15 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { GalleriaModule } from 'primeng/galleria';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-import { FormArray, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Select } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
-import { IftaLabelModule } from 'primeng/iftalabel';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { FileUploadModule } from 'primeng/fileupload';
+import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 import { ProductService } from '../../../../core/services/product.service';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SharedService } from '../../../../shared/utils/shared.service';
@@ -20,14 +19,21 @@ import { ProductDto } from '../../../../core/models/product-models/productDto';
 import { AddProductDto } from '../../../../core/models/product-models/addProductDto';
 import { TagService } from '../../../../core/services/tag.service';
 import { tagdto } from '../../../../core/models/tag-models/tagDto';
+import { MessageModule } from 'primeng/message';
+import { MessageService } from 'primeng/api';
+import { Toast } from 'primeng/toast';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { TextareaModule } from 'primeng/textarea';
 @Component({
   selector: 'app-addproduct',
   imports: [GalleriaModule,CardModule,ButtonModule,FloatLabelModule,
             FormsModule,Select,ReactiveFormsModule,InputTextModule,
-            IftaLabelModule,MultiSelectModule,FileUploadModule,InputNumberModule,
+            IftaLabelModule,MultiSelectModule,FileUploadModule,InputNumberModule,MessageModule,
+            Toast,TextareaModule
           ],
   templateUrl: './addproduct.component.html',
-  styleUrl: './addproduct.component.css'
+  styleUrl: './addproduct.component.css',
+  providers: [MessageService]
 })
 export class AddproductComponent {
 
@@ -44,16 +50,20 @@ export class AddproductComponent {
     features: [],
     productTags: []
   };
+  @ViewChild('imgref') imgref!: FileUpload;
 
   constructor(private productServ:ProductService,private sharedServ:SharedService,
-              private categoryServ:CategoryService,private tagServ:TagService){
+              private categoryServ:CategoryService,private tagServ:TagService,
+              private messageService: MessageService
+            ){
     this.productForm = new FormGroup({
       title: new FormControl("", [Validators.required, Validators.minLength(3), Validators.maxLength(50)]),
       category: new FormControl("", [Validators.required]),
       price: new FormControl("", [Validators.required, Validators.min(1)]),
       minQuantity: new FormControl("", [Validators.required, Validators.min(1)]),
+      description: new FormControl("", [Validators.required]),
       location: new FormControl("", [Validators.required]),
-      features: new FormArray([],[Validators.required]),
+      features: new FormArray([],[this.featuresValidator()]),
       tags: new FormControl([],[Validators.required]),
       images: new FormControl<File[]>([], Validators.required),
   })}
@@ -89,12 +99,6 @@ export class AddproductComponent {
       }
     })
 
-    this.images = ["../../../../assets/1.png",
-      "../../../../assets/2.png",
-      "../../../../assets/3.png",
-      "../../../../assets/4.png",
-      "../../../../assets/5.png",
-    ];
   }
 
 
@@ -111,6 +115,7 @@ files.forEach((file) => {
 });
 
 console.log("Images added to formData:", formData.getAll('images'));
+console.log("Images added to formData:", this.productForm.get("images")?.value);
 //*
 
 
@@ -120,6 +125,7 @@ console.log("Images added to formData:", formData.getAll('images'));
     this.productDto.price = this.productForm.get("price")?.value
     this.productDto.minQuantity = this.productForm.get("minQuantity")?.value
     this.productDto.location = this.productForm.get("location")?.value
+    this.productDto.description = this.productForm.get("description")?.value
     this.productDto.sellerId ="64c5d9f7-690e-42d4-b035-1945ab3476db"
     this.productDto.productTags = this.productForm.get("tags")?.value.map((tagId: number) => ({ tagId }));
     this.productDto.features = this.productDto.features = this.productForm.get("features")?.value.map((feature: any) => ({
@@ -129,15 +135,23 @@ console.log("Images added to formData:", formData.getAll('images'));
 
     formData.append('productJson', JSON.stringify(this.productDto));
 
-
+    this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Wait a sec Inserting Your Data' });
 
     this.productServ.addProduct(formData).subscribe({
       next: (response) => {
         console.log("Product added successfully:", response.data);
+        this.messageService.add({ severity: 'success', summary: 'success', detail: 'Product Added Successfully' });
+        //* Reset Form
+        this.productForm.reset();
+        //* Remove Features Rows
+        this.features.clear();
+        //* Remove Selected Images
+        this.imgref.clear();
         // Handle success response, e.g., navigate to product list or show a success message
       },
       error: (error) => {
         console.error("Error adding product:", error);
+        this.messageService.add({ severity: 'danger', summary: 'danger', detail: 'Something Went Wrong Please Try Again Later' });
         // Handle error response, e.g., show an error message
       }
     })
@@ -195,9 +209,8 @@ onSelect(event: any) {
     };
     reader.readAsDataURL(file);
   }
-
-  // this.images = this.uploadedImages.map(img => img.preview);
   console.log(this.uploadedImages);
+  this.productForm.get('images')?.markAsTouched();
 }
 
 onRemove(event: any) {
@@ -229,6 +242,25 @@ onRemove(event: any) {
 //     }
 //   })
 // }
+//* Custom Validation
+featuresValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const features = control.value;
+    if (!features || features.length === 0) {
+      return { required: true };
+    }
 
+    const isValid = features.every((feature: any) =>
+      feature &&
+      typeof feature.key === 'string' &&
+      feature.key.trim() !== '' &&
+      Array.isArray(feature.values) &&
+      feature.values.length > 0 &&
+      feature.values.every((v: string) => typeof v === 'string' && v.trim() !== '')
+    );
+
+    return isValid ? null : { invalidFormat: true };
+  };
+}
   //! End Of Component
 }

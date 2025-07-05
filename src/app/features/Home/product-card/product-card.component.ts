@@ -7,7 +7,6 @@ import { FormsModule } from '@angular/forms';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
-
 //* Angular Imports
 import { CurrencyPipe, DatePipe, TitleCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
@@ -38,7 +37,6 @@ interface City {
     InputNumberModule,
     PaginatorModule,
     CurrencyPipe,
-    RouterOutlet,
     RouterModule
   ],
   templateUrl: './product-card.component.html',
@@ -55,7 +53,6 @@ export class ProductCardComponent {
 
 
   first: number = 0;
-  rows: number = 4;
   totalRecords: number = 0;
 
   SelectedPrice: number = 1;
@@ -70,11 +67,17 @@ export class ProductCardComponent {
     tags: [],
     minQuantity: 1,
     minPrice: 1,
+    page: 0,
+    size: 8,
+    sortBy:null,
+    filterDirection: 'asc' // Default sorting direction
   }
 
 
   constructor(private productService: ProductService,private sharedServ:SharedService,
-    private categoryServ:CategoryService,private tagServ:TagService) {}
+    private categoryServ:CategoryService,private tagServ:TagService) {
+
+    }
 
   ngOnInit() {
     this.cities = this.sharedServ.governorates;
@@ -103,11 +106,15 @@ export class ProductCardComponent {
   }
 
   onPageChange(event: PaginatorState) {
-    this.first = event.first ?? 0;
-    this.rows = event.rows ?? 10;
+    console.log("Paginator Event:", event);
+    this.first = event.page ?? 0;
+    console.log("PageNum", this.first);
+    this.setFilters()
   }
 
   getProducts(){
+
+    console.log("Filters before setting:", this.filters);
     this.productService.getAllProductsPaginated(this.filters).subscribe({
       next: (res) => {
         console.log(res);
@@ -126,12 +133,16 @@ export class ProductCardComponent {
     console.log("Location", this.selectedCity);
     console.log("category", this.selectedCategory);
     console.log("Tags", this.selectedTags);
+    console.log("page", this.filters.page);
+    console.log("first", this.first);
 
     this.filters.location = this.selectedCity ;
     this.filters.category = this.selectedCategory;
     this.filters.tags = this.selectedTags;
     this.filters.minQuantity = this.SelectedMinQty;
     this.filters.minPrice = this.SelectedPrice;
+    this.filters.page = this.first;
+    this.filters.size = 8;
 
     console.log("-*****-",this.filters);
 

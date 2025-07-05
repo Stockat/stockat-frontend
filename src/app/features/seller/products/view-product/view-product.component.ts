@@ -12,6 +12,11 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { ToggleSwitch } from 'primeng/toggleswitch';
+import { ConfirmDialog } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+
 //* Services
 import { CategoryService } from '../../../../core/services/category.service';
 import { TagService } from '../../../../core/services/tag.service';
@@ -21,19 +26,22 @@ import { ProductService } from '../../../../core/services/product.service';
 
 //* DTOs
 import { ProductFilters } from '../../../../core/models/product-models/product-filters';
+import { ProductStatus } from '../../../../core/models/product-models/productDto';
 
 @Component({
   selector: 'app-view-product',
   imports: [TableModule, TagModule, CommonModule, ButtonModule, CardModule, SelectModule,
-    FormsModule, MultiSelectModule, InputNumberModule, PaginatorModule, RatingModule,ToggleSwitch
+    FormsModule, MultiSelectModule, InputNumberModule, PaginatorModule, RatingModule,ToggleSwitch,
+    ConfirmDialog, ToastModule
   ],
   templateUrl: './view-product.component.html',
-  styleUrl: './view-product.component.css'
+  styleUrl: './view-product.component.css',
+  providers: [ConfirmationService, MessageService]
 })
 export class ViewProductComponent {
 
   //! Testing
-  checked: boolean = false;
+  nameAsc: boolean = false;
   //! end testing
   //* Filters Holders
   categories: any = [];
@@ -47,11 +55,14 @@ export class ViewProductComponent {
     tags: [],
     minQuantity: 1,
     minPrice: 1,
+    page: 1,
+    size: 8,
+    sortBy:null,
+    filterDirection: 'asc'
   }
 
   //* Pagination Params
   first: number = 0;
-  rows: number = 5;
   totalRecords: number = 0;
 
   //* Filters Params
@@ -64,8 +75,9 @@ export class ViewProductComponent {
 
 
   constructor(private productServ: ProductService, private categoryServ: CategoryService,
-    private tagServ: TagService, private sharedServ: SharedService) {
-  }
+    private tagServ: TagService, private sharedServ: SharedService,
+    private confirmationService: ConfirmationService, private messageService: MessageService
+              ) {}
 
   ngOnInit(): void {
     this.cities = this.sharedServ.governorates;
@@ -147,6 +159,8 @@ setFilters(){
   this.filters.tags = this.selectedTags;
   this.filters.minQuantity = this.SelectedMinQty;
   this.filters.minPrice = this.SelectedPrice;
+  this.filters.page = this.first;
+  this.filters.size = 8;
 
   console.log("-*****-", this.filters);
 
@@ -173,8 +187,175 @@ resetFilters(){
 
 //* Pagination Method
 onPageChange(event: PaginatorState) {
-  this.first = event.first ?? 0;
-  this.rows = event.rows ?? 10;
+  this.first = event.page ?? 0;
+this.setFilters(); // Update filters with the new page number
 }
 
+//* Image Error Handling
+onImageError(event: any) {
+  // Set a default image when the original image fails to load
+  event.target.src = 'https://ik.imagekit.io/woiv2eo8w/back_OCcpj-NRl.png?updatedAt=1736699927368';
 }
+//* Confirmation Dialog
+confirmDelete(event: Event, productId: number) {
+    this.confirmationService.confirm({
+        target: event.target as EventTarget,
+        message: 'Do you want to delete this record?',
+        header: 'Danger Zone',
+        icon: 'pi pi-info-circle',
+        rejectLabel: 'Cancel',
+        rejectButtonProps: {
+            label: 'Cancel',
+            severity: 'secondary',
+            outlined: true,
+        },
+        acceptButtonProps: {
+            label: 'Delete',
+            severity: 'danger',
+        },
+
+        accept: () => {
+          this.confirmationService.close();
+
+          this.productServ.removeProduct(productId).subscribe({
+            next: (response) => {
+                console.log('Product Removed successfully:', response);
+                this.getProducts(); // Refresh the product list after Remove
+                this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: response.message,life: 3000 });
+
+            },
+            error: (error) => {
+                console.error('Error deactivating product:', error);
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to deactivate product',life: 3000 });
+            }
+          })
+
+        },
+        reject: () => {
+            this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
+            this.confirmationService.close();
+        },
+    });
+}
+confirmDeactivate(event: Event, productId: number) {
+    this.confirmationService.confirm({
+        target: event.target as EventTarget,
+        message: 'Do you want to Deactivate  this Product ?',
+        header: 'Deactivate Product',
+        icon: 'pi pi-info-circle',
+        rejectLabel: 'Cancel',
+        rejectButtonProps: {
+            label: 'Cancel',
+            severity: 'secondary',
+            outlined: true,
+        },
+        acceptButtonProps: {
+            label: 'Deactivate',
+            severity: 'danger',
+        },
+
+        accept: () => {
+          this.confirmationService.close(); // Close the confirmation dialog
+
+          this.productServ.changeProductStatus(productId, ProductStatus.Deactivated).subscribe({
+            next: (response) => {
+                console.log('Product deactivated successfully:', response);
+                this.getProducts(); // Refresh the product list after deactivation
+                this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: response.message,life: 3000 });
+
+            },
+            error: (error) => {
+                console.error('Error deactivating product:', error);
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to deactivate product',life: 3000 });
+            }
+          })
+
+        },
+        reject: () => {
+            this.confirmationService.close(); // Close the confirmation dialog
+        },
+    });
+}
+confirmActivate(event: Event, productId: number) {
+  this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: 'Do you want to Activate  this Product ?',
+      header: 'Activate Product',
+      icon: 'pi pi-info-circle',
+      rejectLabel: 'Cancel',
+      rejectButtonProps: {
+          label: 'Cancel',
+          severity: 'secondary',
+          outlined: true,
+      },
+      acceptButtonProps: {
+          label: 'Activate',
+          severity: 'success',
+      },
+
+      accept: () => {
+        this.confirmationService.close(); // Close the confirmation dialog
+
+        this.productServ.changeProductStatus(productId, ProductStatus.Pending).subscribe({
+          next: (response) => {
+              console.log('Product Activated successfully:', response);
+              this.getProducts(); // Refresh the product list after deactivation
+              this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: response.message,life: 3000 });
+
+          },
+          error: (error) => {
+              console.error('Error Activating product:', error);
+              this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to Activate product',life: 3000 });
+          }
+        })
+
+      },
+      reject: () => {
+          this.confirmationService.close(); // Close the confirmation dialog
+      },
+  });
+}
+confirmCanBeRequsted(event: Event, productId: number,canbeRequsted:boolean) {
+  this.confirmationService.confirm({
+    target: event.target as EventTarget,
+    message: canbeRequsted==true ? 'Do you want to Activate Requestable for this Product ?': 'Do you want to Deactivate Requestable for this Product ?',
+    header: 'Danger Zone',
+    icon: 'pi pi-info-circle',
+    rejectLabel: 'Cancel',
+    rejectButtonProps: {
+        label: 'Cancel',
+        severity: 'secondary',
+        outlined: true,
+    },
+    acceptButtonProps: {
+        label: canbeRequsted==true ?'Activate Can Be Requsted':'Deactivate Can be Requsted',
+        severity:canbeRequsted==true?'success' :'danger',
+    },
+
+    accept: () => {
+      this.confirmationService.close();
+
+      this.productServ.changeProductCanBeRequsted(productId).subscribe({
+        next: (response) => {
+            console.log('canBeRequsted Field Updated successfully:', response);
+            this.getProducts(); // Refresh the product list after Remove
+            this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: response.message,life: 3000 });
+
+        },
+        error: (error) => {
+            console.error('Error deactivating product:', error);
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to Update product',life: 3000 });
+        }
+      })
+
+    },
+    reject: () => {
+        this.confirmationService.close();
+    },
+});
+}
+
+
+
+}
+

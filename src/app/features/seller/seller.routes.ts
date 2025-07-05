@@ -6,6 +6,8 @@ import { SellerServiceListComponent } from "./services/seller-service-list/selle
 import { SellerServiceDetailsPageComponent } from './services/seller-service-details-page/seller-service-details-page.component';
 import { UpdateProductComponent } from "./products/update-product/update-product.component";
 import { ViewProductComponent } from "./products/view-product/view-product.component";
+import { AddStockComponent } from "./stocks/add-stock/add-stock.component";
+import { UpdateStockComponent } from "./stocks/update-stock/update-stock.component";
 
 export const sellerRoutes: Routes = [
     {
@@ -17,11 +19,19 @@ export const sellerRoutes: Routes = [
         component: AllStocksComponent
     },
     {
+        path: 'stocks/add/:id',
+        component: AddStockComponent
+    },
+    {
+        path: 'stocks/update/:id',
+        component: UpdateStockComponent
+    },
+    {
         path: 'add-product',
         component: AddproductComponent
     },
     {
-        path: 'edit-product',
+        path: 'edit-product/:id',
         component: UpdateProductComponent
     },
     {

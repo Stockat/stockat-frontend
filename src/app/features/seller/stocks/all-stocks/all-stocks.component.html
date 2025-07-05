@@ -1,1 +1,71 @@
-<p>all-stocks works!</p>
+<div class="mx-5 my-4">
+    <p-toast></p-toast> <!-- Add this line -->
+    <p-confirmDialog></p-confirmDialog> <!-- Add this line -->
+    <p-card header="All Stocks">
+        <p-divider />
+        <p-table #dt1 [value]="stockList" dataKey="id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]"
+            [loading]="loading" [paginator]="true" [globalFilterFields]="['prodcutName', 'quantity']" >
+            <ng-template #header>
+                <tr>
+                    <th pSortableColumn="productName" style="min-width:15rem">
+                        <div class="flex items-center justify-between">
+                            Product Name
+                            <p-sortIcon field="productName" />
+                        </div>
+                    </th>
+                    <th style="min-width:5rem">
+                        <div class="flex items-center justify-between">
+                            Quantity
+                        </div>
+                    </th>
+                    <th style="min-width:10rem">
+                        <div class="flex items-center justify-between">
+                            Features
+                        </div>
+                    </th>
+                    <th style="min-width:10rem">
+                        <div class="flex items-center justify-between">
+                            Actions
+                        </div>
+                    </th>
+
+                </tr>
+            </ng-template>
+            <ng-template #body let-stock>
+                <tr>
+                    <td>
+                        {{ stock.productName }}
+                    </td>
+                    <td>
+                        {{ stock.quantity }}
+                    </td>
+                    <td>
+                        <p-button (click)="op.toggle($event)" icon="ti ti-stars" variant="text" raised="true" rounded="true" label="Features" />
+                        <p-popover #op>
+                            
+                                <span class="font-medium text-surface-900 dark:text-surface-0 block mb-2">Features</span>
+                                @for (item of stock.stockFeatures; track $index) {
+                                    <p class="flex items-center justify-between">
+                                        <p-chip label="{{item.name}} : {{item.value}}" icon="ti ti-star" class="mb-2" />
+                                    </p>
+                                }
+                        </p-popover>
+                    </td>
+                    <td>
+                        <p-button class="me-2" label="Edit" icon="ti ti-edit" (click)="navigateToUpdateStock(stock.id)"
+                            variant="text" [raised]="true" [rounded]="true" severity="help" />
+                        <p-button icon="ti ti-trash" (click)="deleteStock(stock.id)" variant="text" [raised]="true"
+                            [rounded]="true" severity="danger" />
+
+                    </td>
+
+                </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="7">No customers found.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-card>
+</div>
