@@ -1,6 +1,7 @@
 <div class="flex h-screen bg-gray-100">
   <!-- Sidebar: Conversation List -->
-  <aside class="w-80 bg-white border-r border-gray-200 flex flex-col">
+  <aside class="w-80 bg-white border-r border-gray-200 flex flex-col"
+         [class.hidden]="isMobile && !showChatListOnMobile">
     <app-conversation-list
       [conversations]="conversations"
       [selectedConversationId]="selectedConversation ? selectedConversation.conversationId.toString() : null"
@@ -14,16 +15,20 @@
   </aside>
 
   <!-- Main Chat Area -->
-  <main class="flex-1 flex flex-col">
-    <header class="chat-header p-4 border-b border-gray-200 bg-white" *ngIf="selectedConversation || selectedUserForNewChat">
-      <div class="chat-title flex items-center gap-3">
-        <p-avatar [image]="selectedConversation ? getReceiverImage(selectedConversation) : (selectedUserForNewChat?.profileImageUrl || defaultAvatar)" shape="circle" size="large"></p-avatar>
-        <div class="flex flex-col">
-          <div class="text-lg font-semibold">
-            {{ selectedConversation ? getReceiverName(selectedConversation) : selectedUserForNewChat?.fullName }}
-            <span *ngIf="isRecording" class="text-xs text-red-500 italic align-middle ml-2">Recording...</span>
-            <span *ngIf="!isRecording && isTyping" class="text-xs text-gray-500 italic align-middle ml-2">Typing...</span>
-          </div>
+  <main class="flex-1 flex flex-col"
+        [class.hidden]="isMobile && showChatListOnMobile">
+    <header class="chat-header p-4 border-b border-gray-200 bg-white flex items-center gap-3"
+            *ngIf="selectedConversation || selectedUserForNewChat">
+      <!-- Back button on mobile -->
+      <button *ngIf="isMobile" class="mr-3 p-2 text-gray-500 hover:bg-gray-200 rounded-lg" (click)="showChatList()">
+        <i class="pi pi-arrow-left text-lg"></i>
+      </button>
+      <p-avatar [image]="selectedConversation ? getReceiverImage(selectedConversation) : (selectedUserForNewChat?.profileImageUrl || defaultAvatar)" shape="circle" size="large"></p-avatar>
+      <div class="flex flex-col">
+        <div class="text-lg font-semibold">
+          {{ selectedConversation ? getReceiverName(selectedConversation) : selectedUserForNewChat?.fullName }}
+          <span *ngIf="isRecording" class="text-xs text-red-500 italic align-middle ml-2">Recording...</span>
+          <span *ngIf="!isRecording && isTyping" class="text-xs text-gray-500 italic align-middle ml-2">Typing...</span>
         </div>
       </div>
     </header>
@@ -42,9 +47,9 @@
       <app-message-input 
         [conversationId]="selectedConversation?.conversationId || null"
         [focusTrigger]="focusTrigger"
-        (send)="sendMessage($event)" 
-        (typing)="onTyping()" 
-        (sendImage)="sendImageMessage($event)" 
+        (send)="sendMessage($event)"
+        (typing)="onTyping()"
+        (sendImage)="sendImageMessage($event)"
         (sendVoice)="sendVoiceMessage($event)">
       </app-message-input>
     </footer>

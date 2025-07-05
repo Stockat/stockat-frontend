@@ -23,7 +23,19 @@
         <ng-template #typingOrLastMsg>
           <span *ngIf="isTyping(conv); else lastMsg">Typing...</span>
           <ng-template #lastMsg>
-            {{ conv.lastMessage?.messageText }}
+            <ng-container *ngIf="conv.lastMessage">
+              <ng-container *ngIf="conv.lastMessage.voiceUrl; else notVoice">
+                Voice message
+              </ng-container>
+              <ng-template #notVoice>
+                <ng-container *ngIf="conv.lastMessage.imageUrl; else notImage">
+                  Image message
+                </ng-container>
+                <ng-template #notImage>
+                  {{ conv.lastMessage.messageText }}
+                </ng-template>
+              </ng-template>
+            </ng-container>
           </ng-template>
         </ng-template>
       </div>

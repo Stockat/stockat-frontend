@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatService } from '../../../core/services/chat.service';
 import { ChatConversationDto, ChatMessageDto, UserChatInfoDto } from '../../../core/models/chatmodels/chat-models';
@@ -21,7 +21,7 @@ import { ToastModule } from 'primeng/toast';
   styleUrls: ['./chat-page.component.css'],
   providers: [MessageService]
 })
-export class ChatPageComponent implements OnInit, AfterViewInit {
+export class ChatPageComponent implements OnInit, AfterViewInit, OnDestroy {
   conversations: ChatConversationDto[] = [];
   selectedConversation: ChatConversationDto | null = null;
   selectedUserForNewChat: UserChatInfoDto | null = null;
@@ -47,6 +47,10 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
   hasMoreMessages = true;
   isLoadingMessages = false;
   focusTrigger = 0;
+
+  // Responsive mobile state
+  isMobile = false;
+  showChatListOnMobile = true;
 
   constructor(
     public chatService: ChatService,
@@ -248,6 +252,21 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
         }
       }
     });
+
+    this.updateIsMobile();
+    window.addEventListener('resize', this.updateIsMobile.bind(this));
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('resize', this.updateIsMobile.bind(this));
+  }
+
+  updateIsMobile() {
+    this.isMobile = window.innerWidth <= 768;
+    // If switching to desktop, always show both
+    if (!this.isMobile) {
+      this.showChatListOnMobile = true;
+    }
   }
 
   private typingTimeout: any;
@@ -298,6 +317,9 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
       }
       setTimeout(() => this.scrollToBottom(), 0);
     });
+    if (this.isMobile) {
+      this.showChatListOnMobile = false;
+    }
   }
 
   scrollToBottom() {
@@ -426,6 +448,9 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
         }
       });
     }
+    if (this.isMobile) {
+      this.showChatListOnMobile = false;
+    }
   }
 
   getReceiverName(conv: ChatConversationDto | null): string {
@@ -548,5 +573,13 @@ export class ChatPageComponent implements OnInit, AfterViewInit {
       this.isLoadingMessages = false;
       // Optionally, maintain scroll position here
     });
+  }
+
+  // Back button on mobile
+  showChatList() {
+    this.showChatListOnMobile = true;
+    this.selectedConversation = null;
+    this.selectedUserForNewChat = null;
+    this.messages = [];
   }
 }
