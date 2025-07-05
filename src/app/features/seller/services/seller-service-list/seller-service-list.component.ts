@@ -1,21 +1,27 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ServiceService } from '../../../../core/services/service.service';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
+import { PaginatorModule } from 'primeng/paginator';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TooltipModule } from 'primeng/tooltip';
 import { ServiceEditModalComponent } from "../service-edit-modal/service-edit-modal.component";
 import { getLoggedInUserId } from '../../../../shared/utils/get-user-id.util';
 import { ServiceAddModalComponent } from '../service-add-modal/service-add-modal.component';
 import { ServiceRequestService } from '../../../../core/services/service-request.service';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import Swal from 'sweetalert2';
+import { RouterModule, Router } from '@angular/router';
+import { MessageService, ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-service-list',
-  imports: [TableModule, ButtonModule, ServiceEditModalComponent, ServiceAddModalComponent, CommonModule, RouterModule],
+  imports: [TableModule, ButtonModule, PaginatorModule, ToastModule, ConfirmDialogModule, ProgressSpinnerModule, TooltipModule, ServiceEditModalComponent, ServiceAddModalComponent, CommonModule, RouterModule],
   templateUrl: './seller-service-list.component.html',
+  providers: [MessageService, ConfirmationService]
 })
-export class SellerServiceListComponent {
+export class SellerServiceListComponent implements OnInit {
   services: any[] = [];
   editModalVisible = false;
   addModalVisible = false;
@@ -24,43 +30,98 @@ export class SellerServiceListComponent {
   isAddingService = false;
   serviceDetailsModalVisible = false;
   selectedServiceRequests: any[] = [];
+  totalCount: number = 0;
+  page: number = 0; // PrimeNG pages are 0-based
+  size: number = 10; // Default page size - match first option in rowsPerPageOptions
+  loading: boolean = false;
+
+
+
+  // Computed property for table first position
+  get first(): number {
+    return this.page * this.size;
+  }
+
+  // Calculate average price of services
+  getAveragePrice(): string {
+    if (!this.services || this.services.length === 0) {
+      return '0';
+    }
+    const total = this.services.reduce((sum, service) => sum + (service.pricePerProduct || 0), 0);
+    const average = total / this.services.length;
+    return average.toFixed(2);
+  }
 
   constructor(
     private serviceService: ServiceService,
-    private serviceRequestService: ServiceRequestService
+    private serviceRequestService: ServiceRequestService,
+    private cdr: ChangeDetectorRef,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService,
+    private router: Router
   ) {}
 
   ngOnInit() {
     this.sellerId = getLoggedInUserId();
-    this.serviceService.getSellerServices(this.sellerId).subscribe({
-      next: (data) => {
-        this.services = data;
-        console.log('Services fetched successfully:', this.services);
+    this.loadSellerServices();
+  }
+
+  loadSellerServices() {
+    if (!this.sellerId) return;
+    this.loading = true;
+    const apiPage = this.page;
+
+    this.serviceService.getSellerServices(this.sellerId, apiPage, this.size).subscribe({
+      next: (response) => {
+        if (response && response.data && response.data.paginatedData) {
+          this.services = response.data.paginatedData;
+          this.totalCount = response.data.count || 0;
+        } else {
+          this.services = [];
+          this.totalCount = 0;
+        }
+        this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('Error fetching services:', error.error);
+        console.error('Error fetching services:', error);
+        this.services = [];
+        this.totalCount = 0;
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
+onPageChange(event: any) {
+  this.page = event.page;
+  this.size = event.rows;
+  this.loadSellerServices();
+  this.cdr.detectChanges();
+}
+
+
   deleteService(service: any) {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: 'This will permanently delete the service.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-      if (result.isConfirmed) {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to delete this service?',
+      header: 'Delete Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
         this.serviceService.deleteService(service.id).subscribe({
           next: () => {
             this.services = this.services.filter(s => s.id !== service.id);
-            Swal.fire('Deleted!', 'Service has been deleted.', 'success');
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: 'Service has been deleted successfully'
+            });
           },
           error: (error) => {
-            Swal.fire('Error', 'Failed to delete service.', 'error');
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to delete service'
+            });
             console.error('Error deleting service:', error);
           }
         });
@@ -83,9 +144,18 @@ export class SellerServiceListComponent {
       next: (data) => {
         this.services = this.services.map(s => s.id === data.id ? data : s);
         this.handleEditModalClose();
-        console.log('Service updated successfully:', data);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Service updated successfully'
+        });
       },
       error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to update service'
+        });
         console.error('Error updating service:', error);
       }
     });
@@ -112,32 +182,59 @@ export class SellerServiceListComponent {
           console.log('Image uploaded successfully:', imgRes);
           this.serviceService.addService(serviceWithImage).subscribe({
             next: (data) => {
-              this.services.push(data);
+              // Always reload the current page to get fresh data from server
+              this.totalCount++; // Update total count
+              this.loadSellerServices();
               this.handleAddModalClose();
               this.isAddingService = false;
-              console.log('Service with image added successfully:', data);
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Service added successfully'
+              });
             },
             error: (error) => {
               this.isAddingService = false;
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to add service'
+              });
               console.error('Error adding service:', error);
             }
           });
         },
         error: (error) => {
           this.isAddingService = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to upload image'
+          });
           console.error('Error uploading image:', error);
         }
       });
     } else {
       this.serviceService.addService(payload.service).subscribe({
         next: (data) => {
-          this.services.push(data);
+          // Always reload the current page to get fresh data from server
+          this.totalCount++; // Update total count
+          this.loadSellerServices();
           this.handleAddModalClose();
           this.isAddingService = false;
-          console.log('Service added successfully:', data);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Service added successfully'
+          });
         },
         error: (error) => {
           this.isAddingService = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to add service'
+          });
           console.error('Error adding service:', error);
         }
       });
@@ -145,18 +242,7 @@ export class SellerServiceListComponent {
   }
 
   viewServiceDetails(service: any) {
-    this.selectedService = service;
-    this.serviceDetailsModalVisible = true;
-    // Fetch buyer requests for this service
-    this.serviceRequestService.getSellerRequestsByServiceId(service.id).subscribe({
-      next: (requests: any[]) => {
-        this.selectedServiceRequests = requests;
-      },
-      error: (error: any) => {
-        this.selectedServiceRequests = [];
-        console.error('Error fetching buyer requests:', error);
-      }
-    });
+    this.router.navigate(['/seller/services', service.id]);
   }
 
   handleServiceDetailsModalClose() {
@@ -164,4 +250,6 @@ export class SellerServiceListComponent {
     this.selectedService = null;
     this.selectedServiceRequests = [];
   }
+
+
 }

@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { Service } from '../models/service-models/service.dto';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { ServiceRequestDto } from '../models/service-models/service-request.dto';
+import { PaginationDto } from '../models/pagination-Dto';
+import { GenericRequestModel } from '../models/generic-request-Dto';
 
 @Injectable({
   providedIn: 'root'
@@ -16,12 +19,12 @@ export class ServiceRequestService {
     return this.http.post(`${this.baseUrl}`, body);
   }
 
-  getSellerRequestsByServiceId(serviceId: number): Observable<any[]> { // for seller
-    return this.http.get<any[]>(`${this.baseUrl}/${serviceId}/incoming`);
+  getSellerRequestsByServiceId(serviceId: number, page: number = 1, size: number = 10): Observable<GenericRequestModel<PaginationDto<ServiceRequestDto>>> { // for seller
+    return this.http.get<GenericRequestModel<PaginationDto<ServiceRequestDto>>>(`${this.baseUrl}/${serviceId}/incoming?page=${page}&size=${size}`);
   }
 
-  getBuyerRequests(): Observable<any[]> { // for buyer
-    return this.http.get<any[]>(`${this.baseUrl}/mine`);
+  getBuyerRequests(page: number = 1, size: number = 10): Observable<GenericRequestModel<PaginationDto<ServiceRequestDto>>> { // for buyer
+    return this.http.get<GenericRequestModel<PaginationDto<ServiceRequestDto>>>(`${this.baseUrl}/mine?page=${page}&size=${size}`);
   }
 
   getRequestById(requestId: number): Observable<any> {

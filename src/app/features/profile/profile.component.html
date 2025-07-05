@@ -284,74 +284,264 @@
       </div>
       <div *ngIf="activeTab === 'requests'">
         <ng-container *ngIf="!buyerRequestDetailsId; else detailsView">
-          <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-4 text-pink-700">My Service Requests</h2>
-            <!-- Search and Filter Controls -->
-            <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-              <input pInputText type="text" [(ngModel)]="searchTerm" placeholder="Search by service or seller..." class="w-full md:w-64 border-pink-200" (ngModelChange)="filterRequests()" />
-              <select [(ngModel)]="statusFilter" (change)="filterRequests()" class="w-full md:w-48 border-pink-200 rounded px-2 py-2">
-                <option value="">All Statuses</option>
-                <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-              </select>
+          <!-- Header Section -->
+          <div class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 mb-8 relative overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 bg-gradient-to-br from-pink-50/50 to-purple-50/50"></div>
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-400/20 to-purple-400/20 rounded-full -translate-y-16 translate-x-8"></div>
+
+            <div class="relative z-10">
+              <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <i class="pi pi-list text-white text-xl"></i>
+                </div>
+                <div>
+                  <h2 class="text-3xl font-bold text-gray-800">My Service Requests</h2>
+                  <p class="text-gray-600">Track and manage your service requests</p>
+                </div>
+              </div>
+
+              <!-- Stats Cards -->
+              <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-white/20">
+                  <div class="flex items-center gap-2 md:gap-3">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                      <i class="pi pi-clock text-yellow-600 text-sm md:text-base"></i>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Pending</p>
+                      <p class="font-bold text-gray-800 text-sm md:text-base">{{ pendingRequestsCount }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-white/20">
+                  <div class="flex items-center gap-2 md:gap-3">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                      <i class="pi pi-check-circle text-green-600 text-sm md:text-base"></i>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Approved</p>
+                      <p class="font-bold text-gray-800 text-sm md:text-base">{{ approvedRequestsCount }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-white/20">
+                  <div class="flex items-center gap-2 md:gap-3">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                      <i class="pi pi-times-circle text-red-600 text-sm md:text-base"></i>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Rejected</p>
+                      <p class="font-bold text-gray-800 text-sm md:text-base">{{ rejectedRequestsCount }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-white/20">
+                  <div class="flex items-center gap-2 md:gap-3">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                      <i class="pi pi-dollar text-indigo-600 text-sm md:text-base"></i>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Total</p>
+                      <p class="font-bold text-gray-800 text-sm md:text-base">{{ totalRequestsCount }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Search and Filter Controls -->
+              <div class="flex flex-col md:flex-row md:items-center gap-4">
+                <div class="relative flex-1">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="pi pi-search text-gray-400"></i>
+                  </div>
+                  <input
+                    type="text"
+                    [(ngModel)]="searchTerm"
+                    placeholder="Search by service or seller..."
+                    class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-400 focus:border-pink-400 transition bg-white"
+                    (ngModelChange)="filterRequests()"
+                  />
+                </div>
+                <p-dropdown
+                  [(ngModel)]="statusFilter"
+                  [options]="[
+                    {label: 'All Statuses', value: ''},
+                    {label: 'Pending', value: 'Pending'},
+                    {label: 'Approved', value: 'Approved'},
+                    {label: 'Rejected', value: 'Rejected'}
+                  ]"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Filter by status"
+                  (onChange)="filterRequests()"
+                  class="w-full md:w-48"
+                  [appendTo]="'body'">
+                </p-dropdown>
+              </div>
             </div>
-            <div *ngIf="buyerRequestsLoading" class="text-center py-8">
-              <i class="pi pi-spin pi-spinner text-2xl"></i> Loading...
+          </div>
+
+          <!-- Requests Table Section -->
+          <div class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8">
+            <!-- Loading State -->
+            <div *ngIf="buyerRequestsLoading" class="text-center py-12">
+              <p-progressSpinner
+                styleClass="w-16 h-16"
+                strokeWidth="4"
+                fill="var(--surface-ground)"
+                animationDuration=".5s">
+              </p-progressSpinner>
+              <p class="text-gray-600 font-semibold mt-4">Loading your requests...</p>
             </div>
-            <div *ngIf="!buyerRequestsLoading && buyerRequests.length === 0" class="text-center text-gray-500 py-8">
-              No service requests found.
+
+            <!-- Empty State -->
+            <div *ngIf="!buyerRequestsLoading && (!buyerRequests || buyerRequests.length === 0)" class="text-center py-12">
+              <div class="w-20 h-20 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="pi pi-list text-white text-2xl"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-800 mb-2">No Service Requests</h3>
+              <p class="text-gray-600">You haven't made any service requests yet.</p>
             </div>
-            <div *ngIf="!buyerRequestsLoading && buyerRequests.length > 0" class="overflow-x-auto rounded-2xl border border-pink-100 shadow-lg w-full bg-gradient-to-br from-pink-50 to-white">
-              <table class="bg-white rounded-xl overflow-hidden text-xs md:text-sm min-w-[500px] md:min-w-0 w-full">
-                <thead class="bg-pink-100 text-pink-700 sticky top-0 z-10">
-                  <tr>
-                    <th class="px-2 py-3 text-left font-bold whitespace-nowrap tracking-wide">Service</th>
-                    <th class="px-2 py-3 text-left font-bold whitespace-nowrap tracking-wide">Quantity</th>
-                    <th class="px-2 py-3 text-left font-bold whitespace-nowrap tracking-wide">Seller Offer</th>
-                    <th class="px-2 py-3 text-left font-bold whitespace-nowrap tracking-wide">Estimated Time</th>
-                    <th class="px-2 py-3 text-left font-bold whitespace-nowrap tracking-wide">Total Price</th>
-                    <th class="px-2 py-3 text-left font-bold whitespace-nowrap tracking-wide">Status</th>
-                    <th class="px-2 py-3 text-left font-bold whitespace-nowrap tracking-wide">Buyer Status</th>
-                    <th class="px-2 py-3 text-left font-bold whitespace-nowrap tracking-wide">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let req of filteredRequests" class="border-b last:border-b-0 hover:bg-pink-50/80 transition group">
-                    <td class="px-2 py-2 font-semibold max-w-[100px] truncate text-pink-800 group-hover:text-pink-900" title="{{ req.serviceTitle }}">{{ req.serviceTitle }}</td>
-                    <td class="px-2 py-2 text-gray-700">{{ req.requestedQuantity }}</td>
-                    <td class="px-2 py-2">
-                      <span *ngIf="req.pricePerProduct != null && req.pricePerProduct !== 0; else noOffer" class="text-green-700 font-semibold">${{ req.pricePerProduct }}</span>
-                      <ng-template #noOffer><span class="text-gray-400 italic">Not set</span></ng-template>
-                    </td>
-                    <td class="px-2 py-2 text-gray-700">
-                      <span *ngIf="req.estimatedTime; else noTime">{{ req.estimatedTime }}</span>
-                      <ng-template #noTime><span class="text-gray-400 italic">Not set</span></ng-template>
-                    </td>
-                    <td class="px-2 py-2">
-                      <span *ngIf="req.totalPrice; else noTotal" class="text-pink-700 font-semibold">{{ req.totalPrice }}$</span>
-                      <ng-template #noTotal><span class="text-gray-400 italic">Not set</span></ng-template>
-                    </td>
-                    <td class="px-2 py-2">
-                      <span [ngClass]="{
-                        'bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-bold': req.serviceStatus === 'Pending',
-                        'bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold': req.serviceStatus === 'Approved',
-                        'bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold': req.serviceStatus === 'Rejected'
-                      }">{{ req.serviceStatus }}</span>
-                    </td>
-                    <td class="px-2 py-2">
-                      <span [ngClass]="{
-                        'bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-bold': req.buyerApprovalStatus === 'Pending',
-                        'bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold': req.buyerApprovalStatus === 'Approved',
-                        'bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold': req.buyerApprovalStatus === 'Rejected'
-                      }">{{ req.buyerApprovalStatus || 'Pending' }}</span>
-                    </td>
-                    <td class="px-2 py-2">
-                      <button pButton label="View Details" class="p-button-sm bg-pink-600 text-white px-3 py-1 rounded-lg font-semibold shadow-md hover:bg-pink-700 border-none transition" (click)="showRequestDetails(req.id)"></button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+
+            <!-- Requests Table -->
+            <div *ngIf="!buyerRequestsLoading && buyerRequests && buyerRequests.length > 0" class="rounded-2xl border border-white/20 shadow-lg">
+              <!-- Mobile Cards View -->
+              <div class="block lg:hidden">
+                <div *ngFor="let req of filteredRequests" class="bg-white/80 backdrop-blur-sm rounded-xl p-4 mb-3 border border-white/20">
+                  <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-gray-800 text-sm mb-1" [pTooltip]="req.serviceTitle">
+                        {{ req.serviceTitle }}
+                      </h4>
+                      <p class="text-gray-600 text-xs mb-2">{{ req.sellerName || 'Unknown Seller' }}</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                      <p-tag
+                        [value]="req.serviceStatus"
+                        [severity]="getStatusSeverity(req.serviceStatus)"
+                        styleClass="text-xs">
+                      </p-tag>
+                      <p-tag
+                        [value]="req.buyerApprovalStatus || 'Pending'"
+                        [severity]="getBuyerStatusSeverity(req.buyerApprovalStatus)"
+                        styleClass="text-xs">
+                      </p-tag>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="text-center">
+                      <p class="text-xs text-gray-500">Quantity</p>
+                      <p class="font-semibold text-gray-800">{{ req.requestedQuantity }}</p>
+                    </div>
+                    <div class="text-center">
+                      <p class="text-xs text-gray-500">Seller Offer</p>
+                      <p-tag
+                        [value]="hasSellerOffer(req) ? 'Made' : 'Not Made'"
+                        [severity]="hasSellerOffer(req) ? 'success' : 'warning'"
+                        styleClass="text-xs">
+                      </p-tag>
+                    </div>
+                  </div>
+
+                  <div class="flex justify-center">
+                    <p-button
+                      label="Details"
+                      icon="pi pi-eye"
+                      styleClass="p-button-raised p-button-sm"
+                      class="bg-gradient-to-r from-pink-500 to-purple-600 border-0"
+                      (onClick)="showRequestDetails(req.id)">
+                    </p-button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Desktop Table View -->
+              <div class="hidden lg:block overflow-x-auto">
+                <p-table
+                  [value]="filteredRequests"
+                  [paginator]="false"
+                  [showCurrentPageReport]="false"
+                  styleClass="p-datatable-sm"
+                  class="modern-table w-full">
+                  <ng-template pTemplate="header">
+                    <tr class="bg-gradient-to-r from-pink-500 to-purple-600 text-white">
+                      <th class="px-3 py-3 text-left font-semibold text-sm w-1/4">Service</th>
+                      <th class="px-3 py-3 text-left font-semibold text-sm w-1/6">Seller</th>
+                      <th class="px-3 py-3 text-left font-semibold text-sm w-1/12">Qty</th>
+                      <th class="px-3 py-3 text-left font-semibold text-sm w-1/8">Offer</th>
+                      <th class="px-3 py-3 text-left font-semibold text-sm w-1/8">Status</th>
+                      <th class="px-3 py-3 text-left font-semibold text-sm w-1/8">Buyer Status</th>
+                      <th class="px-3 py-3 text-left font-semibold text-sm w-1/6">Actions</th>
+                    </tr>
+                  </ng-template>
+                  <ng-template pTemplate="body" let-req>
+                    <tr class="border-b border-gray-100 hover:bg-pink-50/50 transition-all duration-200">
+                      <td class="px-3 py-3">
+                        <div class="font-semibold text-gray-800 truncate" [pTooltip]="req.serviceTitle">
+                          {{ req.serviceTitle }}
+                        </div>
+                      </td>
+                      <td class="px-3 py-3">
+                        <div class="text-gray-700 truncate" [pTooltip]="req.sellerName || 'Unknown Seller'">
+                          {{ req.sellerName || 'Unknown Seller' }}
+                        </div>
+                      </td>
+                      <td class="px-3 py-3 text-gray-700 text-sm">{{ req.requestedQuantity }}</td>
+                      <td class="px-3 py-3">
+                        <p-tag
+                          [value]="hasSellerOffer(req) ? 'Made' : 'Not Made'"
+                          [severity]="hasSellerOffer(req) ? 'success' : 'warning'"
+                          styleClass="text-xs">
+                        </p-tag>
+                      </td>
+                      <td class="px-3 py-3">
+                        <p-tag
+                          [value]="req.serviceStatus"
+                          [severity]="getStatusSeverity(req.serviceStatus)"
+                          styleClass="text-xs">
+                        </p-tag>
+                      </td>
+                      <td class="px-3 py-3">
+                        <p-tag
+                          [value]="req.buyerApprovalStatus || 'Pending'"
+                          [severity]="getBuyerStatusSeverity(req.buyerApprovalStatus)"
+                          styleClass="text-xs">
+                        </p-tag>
+                      </td>
+                      <td class="px-3 py-3">
+                        <p-button
+                          label="Details"
+                          icon="pi pi-eye"
+                          styleClass="p-button-raised p-button-sm"
+                          class="bg-gradient-to-r from-pink-500 to-purple-600 border-0"
+                          (onClick)="showRequestDetails(req.id)">
+                        </p-button>
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+              </div>
+            </div>
+
+            <!-- Paginator -->
+            <div *ngIf="buyerRequests && buyerRequests.length > 0" class="mt-8">
+              <div class="bg-white/50 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+                <p-paginator
+                  [rows]="requestsSize"
+                  [totalRecords]="totalRequests"
+                  [first]="requestsPage * requestsSize"
+                  (onPageChange)="onRequestsPageChange($event)"
+                  [showCurrentPageReport]="true"
+                  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} requests"
+                  [rowsPerPageOptions]="[5, 10, 20]"
+                  styleClass="!bg-transparent !border-none !p-0">
+                </p-paginator>
+              </div>
             </div>
           </div>
         </ng-container>

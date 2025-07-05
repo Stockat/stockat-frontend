@@ -2,3 +2,38 @@
 @import "tailwindcss";
 @plugin "tailwindcss-primeui";
 @import "primeicons/primeicons.css";
+
+/* Custom paginator styles for Tailwind compatibility */
+.p-paginator {
+  @apply bg-transparent border-none p-0;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page {
+  @apply rounded-lg border border-gray-300 bg-white text-gray-700 font-medium transition-all duration-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:-translate-y-0.5;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+  @apply bg-blue-600 text-white border-blue-600 shadow-md;
+}
+
+.p-paginator .p-paginator-first,
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-next,
+.p-paginator .p-paginator-last {
+  @apply rounded-lg border border-gray-300 bg-white text-gray-700 transition-all duration-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:-translate-y-0.5;
+}
+
+.p-paginator .p-paginator-first:disabled,
+.p-paginator .p-paginator-prev:disabled,
+.p-paginator .p-paginator-next:disabled,
+.p-paginator .p-paginator-last:disabled {
+  @apply bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed hover:bg-gray-100 hover:text-gray-400 hover:border-gray-200 hover:translate-y-0;
+}
+
+.p-paginator .p-dropdown {
+  @apply rounded-lg border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100;
+}
+
+.p-paginator .p-paginator-current {
+  @apply text-gray-700 font-medium;
+}
