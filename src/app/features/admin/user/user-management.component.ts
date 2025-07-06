@@ -235,20 +235,33 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
   submitPunishment() {
     if (this.punishmentForm.valid && this.selectedUser) {
+      const type = this.punishmentForm.value.type;
       const punishmentData = {
         userId: this.selectedUser.id,
-        type: this.punishmentForm.value.type,
+        type: type,
         reason: this.punishmentForm.value.reason,
-        endDate: this.punishmentForm.value.endDate
+        endDate: type === 'TemporaryBan' ? this.punishmentForm.value.endDate : null
       };
 
-      // This would call the punishment service
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Punishment applied successfully'
+      this.userService.createPunishment(punishmentData).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Punishment applied successfully'
+          });
+          this.showPunishmentDialog = false;
+          this.loadUsers();
+        },
+        error: (error) => {
+          console.error('Punishment error:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: error?.error?.message || error?.error || 'Failed to apply punishment'
+          });
+        }
       });
-      this.showPunishmentDialog = false;
     }
   }
 
