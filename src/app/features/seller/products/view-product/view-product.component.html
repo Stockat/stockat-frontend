@@ -2,8 +2,15 @@
   <div class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="text-center mb-8">
+      @if (isLoading) {
+      <div class="space-y-4">
+        <div class="h-10 bg-gray-200 rounded-lg w-64 mx-auto animate-pulse"></div>
+        <div class="h-6 bg-gray-200 rounded w-48 mx-auto animate-pulse"></div>
+      </div>
+      } @else {
       <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">My Products</h1>
       <p class="text-gray-600">Manage and view all your products</p>
+      }
     </div>
 
     <!-- Filter Section -->
@@ -12,6 +19,27 @@
         <h2 class="text-xl font-semibold text-gray-800">Filter Products</h2>
       </div>
 
+      @if (isLoading) {
+      <!-- Filter Skeleton -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+        @for (item of [1,2,3,4,5,6]; track item) {
+        <div class="flex flex-col space-y-2">
+          <div class="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+          <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+        </div>
+        }
+      </div>
+
+      <!-- Action Buttons Skeleton -->
+      <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-gray-200">
+        <div class="flex-1">
+          <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+        </div>
+        <div class="flex-1">
+          <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+        </div>
+      </div>
+      } @else {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
         <!-- Location Select -->
         <div class="flex flex-col space-y-2">
@@ -88,22 +116,71 @@
 
       <!-- Action Buttons -->
       <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-gray-200">
-        <div class="flex-1">
-          <p-button label="Apply Filters" icon="pi pi-filter" [raised]="true" severity="success"
-            (onClick)="setFilters()" class="w-full h-12 font-semibold"
-            styleClass="w-full h-12 font-semibold bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-0 shadow-lg transition-all duration-200" />
+        <div class="w-1/2">
+          <p-button label="Apply Filters" icon="pi pi-filter" variant="text" [raised]="true" severity="success"
+            (onClick)="setFilters()" class="w-full h-12 font-semibold" />
         </div>
-        <div class="flex-1">
-          <p-button label="Clear All" icon="pi pi-times" [raised]="true" severity="danger" (onClick)="resetFilters()"
-            class="w-full h-12 font-semibold"
-            styleClass="w-full h-12 font-semibold bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-0 shadow-lg transition-all duration-200" />
+        <div class="w-1/2">
+          <p-button label="Clear All" icon="pi pi-times" variant="text" [raised]="true" severity="danger"
+            (onClick)="resetFilters()" class="w-full h-12 font-semibold" />
         </div>
       </div>
+      }
     </div>
 
     <!-- Products Table -->
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
       <div class="overflow-x-auto">
+        <!-- Loading Skeleton -->
+        @if (isLoading) {
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <div class="h-8 bg-gray-200 rounded-lg w-48 animate-pulse"></div>
+            <div class="h-6 bg-gray-200 rounded w-32 animate-pulse"></div>
+          </div>
+
+          <!-- Table Header Skeleton -->
+          <div class="bg-gray-50 border-b border-gray-200">
+            <div class="grid grid-cols-6 gap-4 p-4">
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-24 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-20 animate-pulse"></div>
+            </div>
+          </div>
+
+          <!-- Table Rows Skeleton -->
+          @for (item of [1,2,3,4,5,6,7,8]; track item) {
+          <div class="border-b border-gray-100 p-4">
+            <div class="grid grid-cols-6 gap-4 items-center">
+              <!-- Name -->
+              <div class="h-5 bg-gray-200 rounded w-32 animate-pulse"></div>
+              <!-- Image -->
+              <div class="w-16 h-16 bg-gray-200 rounded-lg animate-pulse"></div>
+              <!-- Price -->
+              <div class="h-5 bg-gray-200 rounded w-20 animate-pulse"></div>
+              <!-- Status -->
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <!-- Can Be Requested -->
+              <div class="h-8 bg-gray-200 rounded w-20 animate-pulse"></div>
+              <!-- Actions -->
+              <div class="flex gap-2">
+                <div class="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
+                <div class="h-8 w-8 bg-gray-200 rounded-full animate-pulse"></div>
+                <div class="h-8 w-8 bg-gray-200 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+          }
+
+          <!-- Footer Skeleton -->
+          <div class="bg-gray-50 p-4 text-center">
+            <div class="h-5 bg-gray-200 rounded w-48 mx-auto animate-pulse"></div>
+          </div>
+        </div>
+        } @else {
         <p-table [value]="products" [tableStyle]="{ 'min-width': '60rem' }" class="w-full" styleClass="w-full">
           <ng-template #caption>
             <div class="flex items-center justify-between p-6">
@@ -178,15 +255,28 @@
             </tr>
           </ng-template>
         </p-table>
+        }
       </div>
     </div>
 
     <!-- Pagination -->
     <div class="flex justify-center mt-8">
+      @if (isLoading) {
+      <div class="bg-white rounded-xl shadow-lg p-4">
+        <div class="flex items-center gap-4">
+          <div class="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
+          <div class="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
+          <div class="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
+          <div class="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
+          <div class="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+      </div>
+      } @else {
       <div class="bg-white rounded-xl shadow-lg p-4">
         <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="8" [totalRecords]="totalRecords"
           class="w-full max-w-md" />
       </div>
+      }
     </div>
   </div>
 </div>

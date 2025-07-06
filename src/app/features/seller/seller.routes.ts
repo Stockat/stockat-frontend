@@ -28,6 +28,7 @@ export const sellerRoutes: Routes = [
         path: 'view-product',
         component: ViewProductComponent
     },
+
     {
       path: 'services',
       component: SellerServiceListComponent

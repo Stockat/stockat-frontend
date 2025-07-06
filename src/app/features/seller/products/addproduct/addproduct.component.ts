@@ -103,11 +103,13 @@ export class AddproductComponent {
 
 
   addproduct(){
+
     const formData = new FormData();
 
 // Add images
 //*
 const wrappedImages = this.productForm.get("images")?.value || [];
+console.log("Wrapped Images:", wrappedImages);
 const files: File[] = wrappedImages.map((img: any) => img.file); // ✅ This fixes the issue
 
 files.forEach((file) => {
