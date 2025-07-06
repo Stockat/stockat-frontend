@@ -1,0 +1,51 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <p class="text-gray-600 mt-1">User Management & Administration</p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="bg-blue-50 rounded-lg p-3">
+            <div class="flex items-center">
+              <i class="pi pi-shield text-blue-600 text-xl mr-2"></i>
+              <span class="text-sm font-medium text-blue-900">Admin Panel</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <p-tabView 
+      [(activeIndex)]="activeTabIndex"
+      (onChange)="onTabChange($event)"
+      styleClass="custom-tabview"
+    >
+      <!-- User Management Tab -->
+      <p-tabPanel header="User Management" leftIcon="pi pi-users">
+        <div class="tab-content">
+          <app-user-management></app-user-management>
+        </div>
+      </p-tabPanel>
+
+      <!-- User Verification Tab -->
+      <p-tabPanel header="Verification Requests" leftIcon="pi pi-file-edit">
+        <div class="tab-content">
+          <app-user-verification></app-user-verification>
+        </div>
+      </p-tabPanel>
+
+      <!-- User Punishment Tab -->
+      <p-tabPanel header="Punishments" leftIcon="pi pi-shield">
+        <div class="tab-content">
+          <app-user-punishment></app-user-punishment>
+        </div>
+      </p-tabPanel>
+    </p-tabView>
+  </div>
+</div> 

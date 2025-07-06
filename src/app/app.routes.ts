@@ -81,6 +81,12 @@ export const routes: Routes = [
     path: 'admin',
     component: AdminLayoutComponent
   },
+
+  {
+    path: 'admin/users',
+    loadComponent: () => import('./features/admin/user/admin-user-management.component').then(m => m.AdminUserManagementComponent),
+    // Optionally add canActivate: [AdminGuard] if you have admin route protection
+  },
   // Services
   {
     path: 'services',

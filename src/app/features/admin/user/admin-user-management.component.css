@@ -1,0 +1,249 @@
+/* Custom styles for Admin User Management Component */
+
+/* TabView styling */
+::ng-deep .custom-tabview .p-tabview-nav {
+  background: white;
+  border-bottom: 2px solid #e5e7eb;
+  border-radius: 0.75rem 0.75rem 0 0;
+  padding: 0 1rem;
+}
+
+::ng-deep .custom-tabview .p-tabview-nav li {
+  margin-right: 0.5rem;
+}
+
+::ng-deep .custom-tabview .p-tabview-nav .p-tabview-nav-link {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0.5rem 0.5rem 0 0;
+  padding: 1rem 1.5rem;
+  font-weight: 500;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+::ng-deep .custom-tabview .p-tabview-nav .p-tabview-nav-link:hover {
+  background: #f3f4f6;
+  color: #374151;
+  border-bottom-color: #d1d5db;
+}
+
+::ng-deep .custom-tabview .p-tabview-nav .p-tabview-nav-link.p-highlight {
+  background: #3b82f6;
+  color: white;
+  border-bottom-color: #1d4ed8;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06);
+}
+
+::ng-deep .custom-tabview .p-tabview-nav .p-tabview-nav-link.p-highlight:hover {
+  background: #2563eb;
+  color: white;
+}
+
+::ng-deep .custom-tabview .p-tabview-nav .p-tabview-nav-link i {
+  font-size: 1rem;
+}
+
+::ng-deep .custom-tabview .p-tabview-panels {
+  background: white;
+  border: none;
+  border-radius: 0 0 0.75rem 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 0;
+}
+
+::ng-deep .custom-tabview .p-tabview-panel {
+  padding: 0;
+}
+
+/* Tab content styling */
+.tab-content {
+  min-height: 600px;
+}
+
+/* Header styling */
+.admin-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+}
+
+.admin-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.admin-header p {
+  font-size: 1.125rem;
+  opacity: 0.9;
+}
+
+/* Admin badge styling */
+.admin-badge {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  ::ng-deep .custom-tabview .p-tabview-nav {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  ::ng-deep .custom-tabview .p-tabview-nav li {
+    margin-right: 0;
+    width: 100%;
+  }
+
+  ::ng-deep .custom-tabview .p-tabview-nav .p-tabview-nav-link {
+    justify-content: center;
+    border-radius: 0.5rem;
+    border-bottom: none;
+    border-left: 3px solid transparent;
+  }
+
+  ::ng-deep .custom-tabview .p-tabview-nav .p-tabview-nav-link.p-highlight {
+    border-left-color: #1d4ed8;
+  }
+
+  .admin-header h1 {
+    font-size: 2rem;
+  }
+
+  .admin-header p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-header {
+    padding: 1.5rem 0;
+  }
+
+  .admin-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .admin-badge {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Animation for tab transitions */
+::ng-deep .custom-tabview .p-tabview-panel {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading state for tabs */
+.tab-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  background: #f9fafb;
+  border-radius: 0.75rem;
+}
+
+.tab-loading .p-progress-spinner {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Empty state for tabs */
+.tab-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #6b7280;
+}
+
+.tab-empty i {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.3;
+}
+
+.tab-empty h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.tab-empty p {
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+/* Custom scrollbar for tab content */
+.tab-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tab-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.tab-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.tab-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Hover effects for admin header */
+.admin-header:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  transition: background 0.3s ease;
+}
+
+/* Focus states for accessibility */
+::ng-deep .custom-tabview .p-tabview-nav .p-tabview-nav-link:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  ::ng-deep .custom-tabview .p-tabview-nav {
+    display: none;
+  }
+
+  ::ng-deep .custom-tabview .p-tabview-panels {
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+  }
+
+  .admin-header {
+    background: white !important;
+    color: black !important;
+  }
+} 
