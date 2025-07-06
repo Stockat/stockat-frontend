@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { SellerOrder } from '../../../core/models/order-models/seller-order.model';
-import { OrderService } from '../../../core/services/order.service';
+import { SellerOrder } from '../../../../../core/models/order-models/seller-order.model';
+import { OrderService } from '../../../../../core/services/order.service';
 import { Table, TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
@@ -23,16 +23,26 @@ const SELLER_STATUSES = [
   { label: 'Cancelled', value: 'Cancelled' },
   { label: 'Delivered', value: 'Delivered', readonly: true },
 ];
-
 @Component({
-  selector: 'app-orders',
+  selector: 'app-request-order',
   standalone: true,
-  imports: [TableModule, ButtonModule, DropdownModule, ToastModule, CardModule, BadgeModule, FormsModule, CommonModule, Tooltip, InputTextModule, TagModule],
-  templateUrl: './orders.component.html',
-  styleUrl: './orders.component.css',
-  providers: [MessageService]
+  imports: [
+    TableModule,
+    ButtonModule,
+    DropdownModule,
+    ToastModule,
+    CardModule,
+    BadgeModule,
+    FormsModule,
+    CommonModule,
+    Tooltip,
+    InputTextModule,
+    TagModule,
+  ],
+  templateUrl: './request-order.component.html',
+  providers: [MessageService],
 })
-export class OrdersComponent implements OnInit {
+export class RequestOrderComponent {
   @ViewChild('dt') dt!: Table;
   orders: SellerOrder[] = [];
   loading = false;
@@ -41,7 +51,10 @@ export class OrdersComponent implements OnInit {
 
   searchValue: string | undefined;
 
-  constructor(private orderService: OrderService, private messageService: MessageService) {}
+  constructor(
+    private orderService: OrderService,
+    private messageService: MessageService
+  ) {}
 
   ngOnInit(): void {
     this.fetchOrders();
@@ -49,35 +62,39 @@ export class OrdersComponent implements OnInit {
 
   clear(table: Table) {
     table.clear();
-    this.searchValue = ''
+    this.searchValue = '';
   }
 
   fetchOrders() {
     this.loading = true;
-    this.orderService.getSellerOrders().subscribe({
+    this.orderService.getSellerRequestOrders().subscribe({
       next: (res) => {
         this.orders = res.data;
         this.loading = false;
         console.log(res);
       },
       error: () => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch orders.' });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to fetch orders.',
+        });
         this.loading = false;
-      }
+      },
     });
   }
 
   canConfirm(order: SellerOrder) {
-    return order.status === 'Pending';
+    return order.status === 'PendingSeller';
   }
   canReject(order: SellerOrder) {
-    return order.status === 'Pending';
+    return order.status === 'PendingSeller' ;
   }
   canSetReady(order: SellerOrder) {
     return order.status === 'Processing';
   }
   canCancel(order: SellerOrder) {
-    return order.status === 'Processing';
+    return order.status === 'Processing' || order.status === 'PendingBuyer';
   }
   isReadOnly(order: SellerOrder) {
     return ['Shipped', 'Completed', 'Delivered'].includes(order.status);
@@ -87,13 +104,21 @@ export class OrdersComponent implements OnInit {
     this.loading = true;
     this.orderService.updateOrderStatus(order.id, newStatus).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Order status updated.' });
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Order status updated.',
+        });
         this.fetchOrders();
       },
       error: () => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update status.' });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to update status.',
+        });
         this.loading = false;
-      }
+      },
     });
   }
 

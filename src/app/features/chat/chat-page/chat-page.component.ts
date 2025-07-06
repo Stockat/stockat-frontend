@@ -73,47 +73,47 @@ export class ChatPageComponent implements OnInit, AfterViewInit, OnDestroy {
         this.currentUserProfileImageUrl = res.data.profileImageUrl;
       }
     });
-    
+
     this.loadInitialConversations();
 
     // Listen for new conversations created via SignalR
     this.chatService.getConversations$().subscribe(conversations => {
       // Only update if we have new conversations (avoid overwriting existing ones)
-      const newConversations = conversations.filter(conv => 
+      const newConversations = conversations.filter(conv =>
         !this.conversations.some(existing => existing.conversationId === conv.conversationId)
       );
-      
+
       if (newConversations.length > 0) {
         // Replace temporary conversations with real ones
         this.conversations = this.conversations.map(conv => {
-          const matchingNew = newConversations.find(newConv => 
+          const matchingNew = newConversations.find(newConv =>
             (newConv.user1Id === conv.user1Id && newConv.user2Id === conv.user2Id) ||
             (newConv.user1Id === conv.user2Id && newConv.user2Id === conv.user1Id)
           );
           return matchingNew || conv;
         });
-        
+
         // Add any completely new conversations
-        const completelyNew = newConversations.filter(newConv => 
-          !this.conversations.some(existing => 
+        const completelyNew = newConversations.filter(newConv =>
+          !this.conversations.some(existing =>
             (existing.user1Id === newConv.user1Id && existing.user2Id === newConv.user2Id) ||
             (existing.user1Id === newConv.user2Id && existing.user2Id === newConv.user1Id)
           )
         );
-        
+
         if (completelyNew.length > 0) {
           this.conversations = [...completelyNew, ...this.conversations];
         }
-        
+
         // Select the real conversation if we have a temporary one selected
         if (this.selectedConversation && this.selectedConversation.conversationId === 0) {
-          const realConversation = this.conversations.find(conv => 
+          const realConversation = this.conversations.find(conv =>
             (conv.user1Id === this.selectedConversation!.user1Id && conv.user2Id === this.selectedConversation!.user2Id) ||
             (conv.user1Id === this.selectedConversation!.user2Id && conv.user2Id === this.selectedConversation!.user1Id)
           );
           if (realConversation) {
             this.selectConversation(realConversation);
-            
+
             // Send pending message if there is one
             if (this.pendingMessage) {
               setTimeout(() => {
@@ -200,7 +200,7 @@ export class ChatPageComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     });
-    
+
     // Listen for typing notifications
     this.chatService.typing$.subscribe(typing => {
       if (
@@ -279,10 +279,10 @@ export class ChatPageComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.typingTimeout) {
         clearTimeout(this.typingTimeout);
       }
-      
+
       // Send typing notification
       this.chatService.sendTypingNotification(this.selectedConversation.conversationId);
-      
+
       // Set timeout to prevent spam
       this.typingTimeout = setTimeout(() => {
         this.typingTimeout = null;
@@ -455,12 +455,12 @@ export class ChatPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getReceiverName(conv: ChatConversationDto | null): string {
     if (!conv || !this.currentUserId) return '';
-    
+
     // Handle self-chat
     if (conv.user1Id === this.currentUserId && conv.user2Id === this.currentUserId) {
       return 'You';
     }
-    
+
     // Get the other user's name
     if (conv.user1Id === this.currentUserId) {
       return conv.user2FullName || 'Unknown User';
@@ -471,12 +471,12 @@ export class ChatPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getReceiverImage(conv: ChatConversationDto | null): string {
     if (!conv || !this.currentUserId) return this.defaultAvatar;
-    
+
     // Handle self-chat
     if (conv.user1Id === this.currentUserId && conv.user2Id === this.currentUserId) {
       return conv.user1ProfileImageUrl || this.defaultAvatar;
     }
-    
+
     // Get the other user's image
     if (conv.user1Id === this.currentUserId) {
       return conv.user2ProfileImageUrl || this.defaultAvatar;

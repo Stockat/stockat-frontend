@@ -38,6 +38,7 @@ export const sellerRoutes: Routes = [
         path: 'view-product',
         component: ViewProductComponent
     },
+
     {
       path: 'services',
       component: SellerServiceListComponent
@@ -49,5 +50,12 @@ export const sellerRoutes: Routes = [
     {
       path: 'orders',
       loadComponent: () => import('./orders/orders.component').then(m => m.OrdersComponent)
-    }
+    },
+    {
+      path: 'orders/requests',
+    loadComponent: () =>
+      import('./orders/Requests/request-order/request-order.component').then(
+        (m) => m.RequestOrderComponent
+      ),
+  },
 ];

@@ -1,131 +1,167 @@
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
-  <div class="max-w-7xl mx-auto">
-    <!-- Breadcrumb -->
-    <nav class="mb-8">
-      <ol class="flex items-center space-x-2 text-sm text-gray-600">
-        <li><a href="#" class="hover:text-blue-600 transition-colors">Home</a></li>
-        <li class="flex items-center">
-          <svg class="w-4 h-4 mx-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd"
-              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-              clip-rule="evenodd"></path>
-          </svg>
-          <a href="#" class="hover:text-blue-600 transition-colors">Products</a>
-        </li>
-        <li class="flex items-center">
-          <svg class="w-4 h-4 mx-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd"
-              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-              clip-rule="evenodd"></path>
-          </svg>
-          <span class="text-gray-900 font-medium">{{product?.name}}</span>
-        </li>
-      </ol>
-    </nav>
-
-    <!-- Main Product Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-
-      <!-- Left: Image Gallery -->
-      <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
-        <p-galleria [value]="images" [showIndicators]="true" [showThumbnails]="false"
-          [changeItemOnIndicatorHover]="true" [containerStyle]="{ 'max-width': '100%' }" class="w-full">
-          <ng-template #item let-item>
-            <div class="relative group">
-              <img [src]="item" [alt]="product?.name + ' image'" class="w-full h-96 object-cover"
-                (error)="onImageError($event)" onerror="this.src='assets/img/faces/default-image.png'" />
-              <div class="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300">
-              </div>
+  <!-- Skeleton Loader -->
+  <div *ngIf="isLoading" class="animate-pulse">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <!-- Image Skeleton -->
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden h-96 w-full mb-8"></div>
+        <!-- Info Skeleton -->
+        <div class="space-y-6">
+          <div class="bg-white rounded-2xl shadow-xl p-8">
+            <div class="h-10 bg-gray-200 rounded w-2/3 mb-6"></div>
+            <div class="flex space-x-4 mb-6">
+              <div class="h-6 bg-gray-200 rounded w-1/4"></div>
+              <div class="h-6 bg-gray-200 rounded w-1/4"></div>
             </div>
-          </ng-template>
-        </p-galleria>
-      </div>
-
-      <!-- Right: Product Info -->
-      <div class="space-y-6">
-        <!-- Product Header -->
-        <div class="bg-white rounded-2xl shadow-xl p-8">
-          <div class="mb-6">
-            <h1 class="text-4xl font-bold text-gray-900 mb-3">{{product?.name}}</h1>
-            <div class="flex items-center space-x-4 text-sm text-gray-600">
-              <span class="flex items-center">
-                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                  </path>
-                </svg>
-                Category: {{product?.categoryName}}
-              </span>
-              <span class="flex items-center">
-                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd">
-                  </path>
-                </svg>
-                Seller: {{product?.sellerName}}
-              </span>
+            <div class="grid grid-cols-2 gap-6 mb-6">
+              <div class="h-16 bg-green-100 rounded-xl"></div>
+              <div class="h-16 bg-blue-100 rounded-xl"></div>
+            </div>
+            <div class="h-24 bg-gray-100 rounded-xl mb-6"></div>
+            <div class="flex gap-4">
+              <div class="h-14 bg-blue-200 rounded-xl flex-1"></div>
+              <div class="h-14 bg-green-200 rounded-xl flex-1"></div>
             </div>
           </div>
-
-          <!-- Price and Quantity -->
-          <div class="grid grid-cols-2 gap-6 mb-6">
-            <div class="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
-              <label class="block text-sm font-semibold text-green-800 mb-2">Price</label>
-              <div class="text-3xl font-bold text-green-600">{{product?.price|currency}}</div>
-            </div>
-            <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
-              <label class="block text-sm font-semibold text-blue-800 mb-2">Minimum Quantity</label>
-              <div class="text-3xl font-bold text-blue-600">{{product?.minQuantity}}</div>
-            </div>
-          </div>
-
-          <!-- Description -->
-          <div class="mb-6">
-            <label class="block text-sm font-semibold text-gray-700 mb-3">Description</label>
-            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 min-h-24">
-              <p class="text-gray-700 leading-relaxed">{{product?.description}}</p>
-            </div>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="flex flex-col sm:flex-row gap-4">
-            <p-button label="View Stocks" (click)="viewStocks()" [raised]="true" severity="info" class="flex-1 h-14 font-semibold text-lg"
-              styleClass="flex-1 h-14 font-semibold text-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 border-0 shadow-lg rounded-xl" />
-            <p-button label="Make Request" [raised]="true" severity="success" class="flex-1 h-14 font-semibold text-lg"
-              styleClass="flex-1 h-14 font-semibold text-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-0 shadow-lg rounded-xl" />
-          </div>
-        </div>
-
-        <!-- Additional Info Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Shipping Info -->
-          <div class="bg-white rounded-xl shadow-lg p-6">
-            <div class="flex items-center mb-4">
-              <div class="bg-blue-100 p-2 rounded-lg mr-3">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                </svg>
-              </div>
-              <h3 class="text-lg font-semibold text-gray-900">Fast Shipping</h3>
-            </div>
-            <p class="text-gray-600 text-sm">Free shipping on orders over $50</p>
-          </div>
-
-          <!-- Return Policy -->
-          <div class="bg-white rounded-xl shadow-lg p-6">
-            <div class="flex items-center mb-4">
-              <div class="bg-green-100 p-2 rounded-lg mr-3">
-                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-              <h3 class="text-lg font-semibold text-gray-900">Easy Returns</h3>
-            </div>
-            <p class="text-gray-600 text-sm">30-day return policy</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="h-32 bg-blue-100 rounded-xl"></div>
+            <div class="h-32 bg-green-100 rounded-xl"></div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+
+  <div *ngIf="!isLoading">
+    <div class="max-w-7xl mx-auto">
+      <!-- Breadcrumb -->
+      <nav class="mb-8">
+        <ol class="flex items-center space-x-2 text-sm text-gray-600">
+          <li><a href="#" class="hover:text-blue-600 transition-colors">Home</a></li>
+          <li class="flex items-center">
+            <svg class="w-4 h-4 mx-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clip-rule="evenodd"></path>
+            </svg>
+            <a href="#" class="hover:text-blue-600 transition-colors">Products</a>
+          </li>
+          <li class="flex items-center">
+            <svg class="w-4 h-4 mx-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-gray-900 font-medium">{{product?.name}}</span>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Main Product Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+
+        <!-- Left: Image Gallery -->
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <p-galleria [value]="images" [showIndicators]="true" [showThumbnails]="false"
+            [changeItemOnIndicatorHover]="true" [containerStyle]="{ 'max-width': '100%' }" class="w-full">
+            <ng-template #item let-item>
+              <div class="relative group">
+                <img [src]="item" [alt]="product?.name + ' image'" class="w-full h-96 object-cover"
+                  (error)="onImageError($event)" onerror="this.src='assets/img/faces/default-image.png'" />
+                <div class="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300">
+                </div>
+              </div>
+            </ng-template>
+          </p-galleria>
+        </div>
+
+        <!-- Right: Product Info -->
+        <div class="space-y-6">
+          <!-- Product Header -->
+          <div class="bg-white rounded-2xl shadow-xl p-8">
+            <div class="mb-6">
+              <h1 class="text-4xl font-bold text-gray-900 mb-3">{{product?.name}}</h1>
+              <div class="flex items-center space-x-4 text-sm text-gray-600">
+                <span class="flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                    </path>
+                  </svg>
+                  Category: {{product?.categoryName}}
+                </span>
+                <span class="flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clip-rule="evenodd">
+                    </path>
+                  </svg>
+                  Seller: {{product?.sellerName}}
+                </span>
+              </div>
+            </div>
+
+            <!-- Price and Quantity -->
+            <div class="grid grid-cols-2 gap-6 mb-6">
+              <div class="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
+                <label class="block text-sm font-semibold text-green-800 mb-2">Price</label>
+                <div class="text-3xl font-bold text-green-600">{{product?.price|currency}}</div>
+              </div>
+              <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
+                <label class="block text-sm font-semibold text-blue-800 mb-2">Minimum Quantity</label>
+                <div class="text-3xl font-bold text-blue-600">{{product?.minQuantity}}</div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-6">
+              <label class="block text-sm font-semibold text-gray-700 mb-3">Description</label>
+              <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 min-h-24">
+                <p class="text-gray-700 leading-relaxed">{{product?.description}}</p>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4">
+              <p-button label="View Stocks" (click)="viewStocks()" [raised]="true" severity="info" class="flex-1 h-14 font-semibold text-lg"
+                styleClass="flex-1 h-14 font-semibold text-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 border-0 shadow-lg rounded-xl" />
+              <p-button label="Make Request" [raised]="true" severity="success"
+                class="flex-1 h-14 font-semibold text-lg"
+                styleClass="flex-1 h-14 font-semibold text-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-0 shadow-lg rounded-xl" />
+            </div>
+          </div>
+
+          <!-- Additional Info Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Shipping Info -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+              <div class="flex items-center mb-4">
+                <div class="bg-blue-100 p-2 rounded-lg mr-3">
+                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                  </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Fast Shipping</h3>
+              </div>
+              <p class="text-gray-600 text-sm">Free shipping on orders over $50</p>
+            </div>
+
+            <!-- Return Policy -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+              <div class="flex items-center mb-4">
+                <div class="bg-green-100 p-2 rounded-lg mr-3">
+                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Easy Returns</h3>
+              </div>
+              <p class="text-gray-600 text-sm">30-day return policy</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
