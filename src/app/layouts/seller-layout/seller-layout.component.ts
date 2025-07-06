@@ -71,9 +71,12 @@ export class SellerLayoutComponent {
             routerLinkActiveOptions: { endWith: '/seller/stocks' }
           },
           {
-            label: 'Products',
-            icon: 'pi pi-list',
-            badge: '6'
+            label: 'Orders',
+            icon: 'ti ti-list',
+            badge: '6',
+            route: '/seller/orders',
+            routerLink: '/seller/orders',
+            routerLinkActiveOptions: { endWith: '/seller/orders' }
           }
         ]
       },

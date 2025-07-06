@@ -9,7 +9,7 @@ import { ButtonModule } from 'primeng/button';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { ProductService } from '../../../core/services/product.service';
 import { ProductDetailsDto } from '../../../core/models/product-models/ProductDetails';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-product-details',
@@ -24,7 +24,8 @@ export class ProductDetailsComponent {
 
   constructor(
     private productServ: ProductService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -48,6 +49,12 @@ export class ProductDetailsComponent {
         console.error('Error fetching product details:', error);
       },
     });
+  }
+
+  //! View Stocks
+  viewStocks() {
+    // Navigate to the product-stocks component with the product ID
+    this.router.navigate(['/product-stocks', this.product?.id]);
   }
 
   onImageError(event: any) {

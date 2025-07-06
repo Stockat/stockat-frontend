@@ -28,6 +28,11 @@ export class StockService {
     return this.http.get<GenericRequestModel<any>>(this.apiUrl+'/all');
   }
 
+  // Get All Stocks For Specific Product
+  getProductStocks(productId: number): Observable<GenericRequestModel<any>> {
+    return this.http.get<GenericRequestModel<any>>(this.apiUrl+'/for-product/'+productId);
+  }
+
   // Update Stock By Its ID
   updateStock(id: number, stockData: AddStock): Observable<GenericRequestModel<any>> {
     return this.http.put<GenericRequestModel<any>>(`${this.apiUrl}/${id}`, stockData);

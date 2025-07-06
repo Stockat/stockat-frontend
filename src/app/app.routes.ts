@@ -7,6 +7,7 @@ import { sellerRoutes } from './features/seller/seller.routes';
 import { ProductCardComponent } from './features/Home/product-card/product-card.component';
 import { ProductDetailsComponent } from './features/ProductDetails/product-details/product-details.component';
 import { ServiceRequestDetailsComponent } from './features/profile/service-request-details.component';
+import { ProductStocksComponent } from './features/product-stocks/product-stocks.component';
 import { SellerProfileComponent } from './features/seller/seller-profile/seller-profile.component';
 
 export const routes: Routes = [
@@ -15,7 +16,14 @@ export const routes: Routes = [
     component: ProductCardComponent,
     children: [],
   },
-  { path: 'ProductDetails/:id', component: ProductDetailsComponent },
+  { 
+    path: 'ProductDetails/:id',
+    component: ProductDetailsComponent
+  },
+  {
+    path: 'product-stocks/:id',
+    component: ProductStocksComponent
+  },
   // Auth
   {
     path: 'login',
@@ -62,46 +70,45 @@ export const routes: Routes = [
       { path: 'requests/:id', component: ServiceRequestDetailsComponent }
     ]
   },
-  // Admin
-  {
-    path: 'admin',
-    component: AdminLayoutComponent,
-  },
   // Seller
   {
     path: 'seller',
     component: SellerLayoutComponent,
     children: sellerRoutes,
   },
+  // Admin
+  {
+    path: 'admin',
+    component: AdminLayoutComponent
+  },
+  // Services
+  {
+    path: 'services',
+    loadChildren: () => import('./features/service/service.module').then(m => m.ServiceModule)
+  },
+  //Auction
+  {
+    path: 'auctions',
+    loadComponent: () => import('./features/Auction/auctions-list/auctions-list.component').then(m => m.AuctionsListComponent)
+  },
+  {
+    path: 'auction/:id',
+    loadComponent: () => import('./features/Auction/auction-details/auction-details.component').then(m => m.AuctionDetailsComponent)
+  },
   // Seller Profile
   {
     path: 'seller-profile/:id',
     component: SellerProfileComponent
   },
-    // Admin
-    {
-        path: 'admin',
-        component: AdminLayoutComponent
-    },
-    // Services
-    {
-      path: 'services',
-      loadChildren: () => import('./features/service/service.module').then(m => m.ServiceModule)
-    },
-    //Auction
-    {
-        path: 'auctions',
-        loadComponent: () => import('./features/Auction/auctions-list/auctions-list.component').then(m => m.AuctionsListComponent)
-    },
-    {
-        path: 'auction/:id',
-        loadComponent: () => import('./features/Auction/auction-details/auction-details.component').then(m => m.AuctionDetailsComponent)
-    },
   {
     path: 'chat',
     loadComponent: () =>
       import('./features/chat/chat-page/chat-page.component').then(
         (m) => m.ChatPageComponent
       ),
+  },
+  {
+    path: 'order-process',
+    loadComponent: () => import('./features/order-process/order-process.component').then(m => m.OrderProcessComponent)
   },
 ];
