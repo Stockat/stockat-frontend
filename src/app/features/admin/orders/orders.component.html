@@ -1,0 +1,166 @@
+<p-toast></p-toast>
+<p-card header="Admin Orders Management" styleClass="shadow-2xl">
+  <!-- Summary Section -->
+  <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+      <div class="flex items-center">
+        <i class="pi pi-clock text-blue-600 text-2xl mr-3"></i>
+        <div>
+          <div class="text-sm text-blue-600 font-medium">Pending</div>
+          <div class="text-xl font-bold text-blue-800">{{ pendingCount }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+      <div class="flex items-center">
+        <i class="pi pi-cog text-yellow-600 text-2xl mr-3"></i>
+        <div>
+          <div class="text-sm text-yellow-600 font-medium">Processing</div>
+          <div class="text-xl font-bold text-yellow-800">{{ processingCount }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+      <div class="flex items-center">
+        <i class="pi pi-check-circle text-green-600 text-2xl mr-3"></i>
+        <div>
+          <div class="text-sm text-green-600 font-medium">Ready</div>
+          <div class="text-xl font-bold text-green-800">{{ readyCount }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+      <div class="flex items-center">
+        <i class="pi pi-send text-purple-600 text-2xl mr-3"></i>
+        <div>
+          <div class="text-sm text-purple-600 font-medium">Shipped</div>
+          <div class="text-xl font-bold text-purple-800">{{ shippedCount }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="mb-3 flex flex-col md:flex-row md:items-center gap-4">
+    <div class="flex items-center gap-4">
+      <label for="statusFilter" class="font-semibold">Filter by Status:</label>
+      <p-dropdown
+        inputId="statusFilter"
+        [options]="[
+          {label: 'All', value: ''},
+          {label: 'Pending', value: 'Pending'},
+          {label: 'Processing', value: 'Processing'},
+          {label: 'Ready', value: 'Ready'},
+          {label: 'Shipped', value: 'Shipped'},
+          {label: 'Completed', value: 'Completed'},
+          {label: 'Cancelled', value: 'Cancelled'},
+          {label: 'Delivered', value: 'Delivered'}
+        ]"
+        [(ngModel)]="statusFilter"
+        placeholder="Select Status"
+        (onChange)="dt.filter(statusFilter, 'status', 'equals')"
+        styleClass="w-40"
+      ></p-dropdown>
+    </div>
+    <span class="ml-auto">
+      <input pInputText type="text" [(ngModel)]="globalFilter" (ngModelChange)="dt.filterGlobal($event, 'contains')" placeholder="Search orders, buyers, sellers..." class="p-inputtext-sm w-64" />
+    </span>
+  </div>
+
+  <!-- Table -->
+  <p-table #dt [value]="orders" [loading]="loading" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]"
+    [globalFilterFields]="['buyerFirstName', 'buyerLastName', 'sellerFirstName', 'sellerLastName', 'status', 'orderType', 'productId', 'stockId']"
+    [filters]="{ status: { value: statusFilter, matchMode: 'equals' } }"
+    class="shadow-lg rounded-xl">
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="id">Order #<p-sortIcon field="id" /></th>
+        <th pSortableColumn="craetedAt">Date<p-sortIcon field="craetedAt" /></th>
+        <th>Type</th>
+        <th>Product</th>
+        <th>Stock</th>
+        <th>Buyer</th>
+        <th>Seller</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-order>
+      <tr>
+        <td>{{ order.id }}</td>
+        <td>{{ order.craetedAt | date:'short' }}</td>
+        <td>
+          <span class="p-badge" [ngClass]="{
+            'p-badge-info': order.orderType === 'Request',
+            'p-badge-success': order.orderType === 'Order'
+          }">
+            {{ order.orderType }}
+          </span>
+        </td>
+        <td>
+          <span class="flex items-center gap-2">
+            <i class="pi pi-box text-blue-500"></i>
+            <span class="font-semibold">#{{ order.productId }}</span>
+          </span>
+        </td>
+        <td>
+          <span class="flex items-center gap-2">
+            <i class="pi pi-tag text-green-500"></i>
+            <span class="font-semibold">#{{ order.stockId }}</span>
+          </span>
+        </td>
+        <td>
+          <span class="flex items-center gap-2">
+            <span class="inline-block w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-600 font-bold">
+              {{ order.buyerFirstName[0] }}{{ order.buyerLastName[0] }}
+            </span>
+            <span>{{ order.buyerFirstName }} {{ order.buyerLastName }}</span>
+          </span>
+        </td>
+        <td>
+          <span class="flex items-center gap-2">
+            <span class="inline-block w-8 h-8 rounded-full bg-green-200 flex items-center justify-center text-green-600 font-bold">
+              {{ order.sellerFirstName[0] }}{{ order.sellerLastName[0] }}
+            </span>
+            <span>{{ order.sellerFirstName }} {{ order.sellerLastName }}</span>
+          </span>
+        </td>
+        <td>{{ order.quantity }}</td>
+        <td>{{ order.price | currency }}</td>
+        <td>
+          <span class="p-badge px-3 py-2 text-base" [ngClass]="{
+            'p-badge-info': order.status === 'Pending',
+            'p-badge-warning': order.status === 'Processing',
+            'p-badge-success': order.status === 'Ready',
+            'p-badge-danger': order.status === 'Cancelled',
+            'p-badge-secondary': ['Shipped','Completed','Delivered'].includes(order.status)
+          }" pTooltip="Order is {{order.status}}">
+            {{ order.status }}
+          </span>
+        </td>
+        <td>
+          <div class="flex flex-wrap gap-2">
+            <ng-container *ngIf="canChangeStatus(order)">
+              <p-button label="Ship" icon="pi pi-send" size="small" styleClass="p-button-info" (onClick)="updateStatus(order, 'Shipped')" pTooltip="Mark as shipped"></p-button>
+              <p-button label="Deliver" icon="pi pi-check-circle" size="small" styleClass="p-button-success" (onClick)="updateStatus(order, 'Delivered')" pTooltip="Mark as delivered"></p-button>
+              <p-button label="Complete" icon="pi pi-check" size="small" styleClass="p-button-success" (onClick)="updateStatus(order, 'Completed')" pTooltip="Mark as completed"></p-button>
+            </ng-container>
+            <ng-container *ngIf="canCancel(order)">
+              <p-button label="Cancel" icon="pi pi-ban" size="small" styleClass="p-button-danger" (onClick)="updateStatus(order, 'Cancelled')" pTooltip="Cancel order"></p-button>
+            </ng-container>
+            <ng-container *ngIf="!canChangeStatus(order) && !canCancel(order)">
+              <span class="text-gray-400">No Actions</span>
+            </ng-container>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="11">No orders found.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-card> 
