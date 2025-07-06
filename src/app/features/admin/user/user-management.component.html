@@ -121,7 +121,7 @@
 
   <!-- Users Table -->
   <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-    <div class="p-6 border-b border-gray-200">
+    <div class="p-6 border-b border-gray-200 flex justify-center">
       <h3 class="text-lg font-medium text-gray-900">Users List</h3>
     </div>
 
@@ -198,10 +198,10 @@
 
             <!-- Verification -->
             <td class="p-4">
-              <ng-container *ngIf="user.UserVerification; else notSubmitted">
+              <ng-container *ngIf="user.userVerification; else notSubmitted">
                 <p-tag 
-                  [value]="user.UserVerification.status"
-                  [severity]="getVerificationSeverity(user.UserVerification.status)"
+                  [value]="user.userVerification.status"
+                  [severity]="getVerificationSeverity(user.userVerification.status)"
                   class="text-xs"
                 ></p-tag>
               </ng-container>

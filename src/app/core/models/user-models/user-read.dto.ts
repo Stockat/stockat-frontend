@@ -25,5 +25,5 @@ export interface UserReadDto {
   currentPunishment?: PunishmentInfoDto;
   punishmentHistory?: PunishmentHistoryDto[];
   statistics?: UserStatisticsDto;
-  UserVerification?: UserVerificationReadDto;
+  userVerification?: UserVerificationReadDto;
 } 
