@@ -7,5 +7,6 @@ export interface Service {
   estimatedTime: string;
   imageUrl: string;
   imageId: string;
+  sellerId: string;
   sellerName: string;
 }

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ServiceService } from '../../../../core/services/service.service';
 import { ServiceRequestService } from '../../../../core/services/service-request.service';
 import { ServiceRequestUpdateService } from '../../../../core/services/service-request-update.service';
@@ -11,12 +11,25 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { FormsModule } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
 import { TooltipModule } from 'primeng/tooltip';
+import { TagModule } from 'primeng/tag';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
   selector: 'app-seller-service-details-page',
   templateUrl: './seller-service-details-page.component.html',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, DialogModule, ReactiveFormsModule, FormsModule, DropdownModule, TooltipModule]
+  imports: [
+    CommonModule,
+    TableModule,
+    ButtonModule,
+    DialogModule,
+    ReactiveFormsModule,
+    FormsModule,
+    DropdownModule,
+    TooltipModule,
+    TagModule,
+    ProgressSpinnerModule
+  ]
 })
 export class SellerServiceDetailsPageComponent implements OnInit {
   service: any = null;
@@ -45,6 +58,13 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   descriptionModalVisible = false;
   selectedDescriptionRequest: any = null;
 
+  // Request Details modal state
+  requestDetailsModalVisible = false;
+  selectedRequestDetails: any = null;
+
+  // Description display state
+  showFullDescription = false;
+
   // Search and filter state
   searchText: string = '';
   statusFilter: string | null = null;
@@ -65,6 +85,7 @@ export class SellerServiceDetailsPageComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private serviceService: ServiceService,
     private serviceRequestService: ServiceRequestService,
     private serviceRequestUpdateService: ServiceRequestUpdateService,
@@ -92,36 +113,112 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   }
 
   fetchRequestsWithUpdates(serviceId: number) {
+    console.log('Fetching requests for service:', serviceId);
     this.serviceRequestService.getSellerRequestsByServiceId(serviceId).subscribe({
       next: (requests) => {
-        this.requests = requests.map((req: any) => ({ ...req, _newStatus: req.serviceStatus }));
-        let pending = 0;
-        this.requests.forEach((req: any, idx: number) => {
-          if (req.buyerApprovalStatus === 'Approved') {
-            pending++;
+        console.log('Received requests:', requests);
+        if (requests && requests.data && requests.data.paginatedData) {
+          this.requests = requests.data.paginatedData.map((req: any) => ({ ...req, _newStatus: req.serviceStatus }));
+          console.log('Processed requests:', this.requests);
+
+          // Initialize updates for all requests
+          this.requests.forEach((req: any) => {
+            req.updates = [];
+            req._newStatus = req.serviceStatus; // Ensure status is initialized
+          });
+
+          // Load updates for approved requests
+          const approvedRequests = this.requests.filter(req => req.buyerApprovalStatus === 'Approved');
+          if (approvedRequests.length === 0) {
+            this.loading = false;
+            return;
+          }
+
+          let pendingUpdates = approvedRequests.length;
+          approvedRequests.forEach((req: any) => {
             this.serviceRequestUpdateService.getUpdatesByRequestId(req.id).subscribe({
               next: (updates: any) => {
-                req.updates = updates;
-                pending--;
-                if (pending === 0) this.loading = false;
+                console.log('Updates for request', req.id, ':', updates);
+                // Handle different response formats
+                if (updates && updates.data && updates.data.paginatedData) {
+                  req.updates = updates.data.paginatedData;
+                } else if (Array.isArray(updates)) {
+                  req.updates = updates;
+                } else {
+                  req.updates = [];
+                }
+                console.log('Processed updates for request', req.id, ':', req.updates);
+                pendingUpdates--;
+                if (pendingUpdates === 0) {
+                  this.loading = false;
+                  console.log('All updates loaded, loading complete');
+                }
               },
-              error: () => {
+              error: (error) => {
+                console.error('Error loading updates for request:', req.id, error);
                 req.updates = [];
-                pending--;
-                if (pending === 0) this.loading = false;
+                pendingUpdates--;
+                if (pendingUpdates === 0) {
+                  this.loading = false;
+                  console.log('All updates loaded (with errors), loading complete');
+                }
               }
             });
-          } else {
-            req.updates = [];
-          }
-        });
-        if (pending === 0) this.loading = false;
+          });
+        } else {
+          console.log('No requests data found');
+          this.requests = [];
+          this.loading = false;
+        }
       },
-      error: () => {
+      error: (error) => {
+        console.error('Error fetching requests:', error);
         this.requests = [];
         this.loading = false;
       }
     });
+  }
+
+  // Helper methods for UI stats
+  getPendingRequestsCount(): number {
+    return this.requests.filter(req => req.serviceStatus === 'Pending').length;
+  }
+
+  getApprovedRequestsCount(): number {
+    return this.requests.filter(req => req.buyerApprovalStatus === 'Approved').length;
+  }
+
+  getOffersMadeCount(): number {
+    return this.requests.filter(req => req.pricePerProduct != null && req.pricePerProduct !== 0).length;
+  }
+
+  // Status severity methods for PrimeNG tags
+  getStatusSeverity(status: string): string {
+    switch (status) {
+      case 'Pending': return 'warning';
+      case 'InProgress': return 'info';
+      case 'Delivered': return 'success';
+      case 'Cancelled': return 'danger';
+      default: return 'secondary';
+    }
+  }
+
+  getApprovalSeverity(status: string): string {
+    switch (status) {
+      case 'Pending': return 'warning';
+      case 'Approved': return 'success';
+      case 'Rejected': return 'danger';
+      default: return 'secondary';
+    }
+  }
+
+  getUpdateStatusSeverity(status: string): string {
+    switch (status) {
+      case 'Pending': return 'warning';
+      case 'Approved': return 'success';
+      case 'Rejected': return 'danger';
+      default: return 'secondary';
+    }
   }
 
   openOfferModal(request: any) {
@@ -149,7 +246,7 @@ export class SellerServiceDetailsPageComponent implements OnInit {
         // Refresh requests to show updated offer immediately
         this.serviceRequestService.getSellerRequestsByServiceId(this.service.id).subscribe({
           next: (requests) => {
-            this.requests = requests;
+            this.requests = requests.data.paginatedData;
             this.offerLoading = false;
             setTimeout(() => {
               this.closeOfferModal();
@@ -174,6 +271,15 @@ export class SellerServiceDetailsPageComponent implements OnInit {
     this.serviceRequestUpdateService.approveUpdate(update.id, true).subscribe({
       next: () => {
         update.status = 'Approved';
+        // Refresh the updates list to update pending count
+        if (this.selectedUpdatesRequest) {
+          this.serviceRequestUpdateService.getUpdatesByRequestId(this.selectedUpdatesRequest.id).subscribe({
+            next: (updates: any) => {
+              console.log('Updates response after accept:', updates);
+              this.selectedUpdatesRequest.updates = updates?.data?.paginatedData || [];
+            }
+          });
+        }
       },
       error: () => {
         // Optionally show error
@@ -185,6 +291,15 @@ export class SellerServiceDetailsPageComponent implements OnInit {
     this.serviceRequestUpdateService.approveUpdate(update.id, false).subscribe({
       next: () => {
         update.status = 'Rejected';
+        // Refresh the updates list to update pending count
+        if (this.selectedUpdatesRequest) {
+          this.serviceRequestUpdateService.getUpdatesByRequestId(this.selectedUpdatesRequest.id).subscribe({
+            next: (updates: any) => {
+              console.log('Updates response after reject:', updates);
+              this.selectedUpdatesRequest.updates = updates?.data?.paginatedData || [];
+            }
+          });
+        }
       },
       error: () => {
         // Optionally show error
@@ -195,17 +310,58 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   openUpdatesModal(request: any) {
     this.selectedUpdatesRequest = request;
     this.updatesModalVisible = true;
-    // Optionally, re-fetch updates here if you want to always show latest
-    // this.fetchUpdatesForRequest(request);
+
+    // Set loading state and fetch updates
+    this.selectedUpdatesRequest.updatesLoading = true;
+    this.serviceRequestUpdateService.getUpdatesByRequestId(request.id).subscribe({
+      next: (updates: any) => {
+        console.log('Updates response in modal:', updates);
+        this.selectedUpdatesRequest.updates = updates?.data?.paginatedData || [];
+        this.selectedUpdatesRequest.updatesLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading updates for request:', request.id, error);
+        this.selectedUpdatesRequest.updates = [];
+        this.selectedUpdatesRequest.updatesLoading = false;
+      }
+    });
   }
 
   closeUpdatesModal() {
     this.updatesModalVisible = false;
     this.selectedUpdatesRequest = null;
+    // Refresh the updates for all requests to update badges
+    this.refreshAllUpdates();
+  }
+
+  refreshAllUpdates() {
+    // Refresh updates for all approved requests to update badges
+    const approvedRequests = this.requests.filter(req => req.buyerApprovalStatus === 'Approved');
+    approvedRequests.forEach((req: any) => {
+      this.serviceRequestUpdateService.getUpdatesByRequestId(req.id).subscribe({
+        next: (updates: any) => {
+          if (updates && updates.data && updates.data.paginatedData) {
+            req.updates = updates.data.paginatedData;
+          } else if (Array.isArray(updates)) {
+            req.updates = updates;
+          } else {
+            req.updates = [];
+          }
+        },
+        error: (error) => {
+          console.error('Error refreshing updates for request:', req.id, error);
+          req.updates = [];
+        }
+      });
+    });
   }
 
   openDescriptionModal(request: any) {
     this.selectedDescriptionRequest = request;
+    this.descriptionModalVisible = true;
+  }
+
+  openServiceDescriptionModal() {
     this.descriptionModalVisible = true;
   }
 
@@ -214,91 +370,130 @@ export class SellerServiceDetailsPageComponent implements OnInit {
     this.selectedDescriptionRequest = null;
   }
 
+  openRequestDetailsModal(request: any) {
+    this.selectedRequestDetails = request;
+    this.requestDetailsModalVisible = true;
+  }
+
+  closeRequestDetailsModal() {
+    this.requestDetailsModalVisible = false;
+    this.selectedRequestDetails = null;
+  }
+
   getPendingUpdatesCount(request: any): number {
-    if (!request.updates || !Array.isArray(request.updates)) return 0;
-    return request.updates.filter((u: any) => u.status === 'Pending').length;
+    console.log('Getting pending updates count for request:', request.id);
+    console.log('Request updates:', request.updates);
+    if (!request || !request.updates || !Array.isArray(request.updates)) {
+      console.log('No updates array found, returning 0');
+      return 0;
+    }
+    const pendingCount = request.updates.filter((update: any) => update.status === 'Pending').length;
+    console.log('Pending updates count:', pendingCount);
+    return pendingCount;
+  }
+
+  getApprovedUpdatesCount(request: any): number {
+    if (!request || !request.updates || !Array.isArray(request.updates)) {
+      return 0;
+    }
+    return request.updates.filter((update: any) => update.status === 'Approved').length;
+  }
+
+  getRejectedUpdatesCount(request: any): number {
+    if (!request || !request.updates || !Array.isArray(request.updates)) {
+      return 0;
+    }
+    return request.updates.filter((update: any) => update.status === 'Rejected').length;
   }
 
   changeRequestStatus(request: any) {
     if (!request._newStatus || request._newStatus === request.serviceStatus) return;
+
     this.serviceRequestService.updateRequestStatus(request.id, request._newStatus).subscribe({
       next: () => {
         request.serviceStatus = request._newStatus;
+        // Optionally show success message
       },
       error: () => {
-        // Optionally show error
-        request._newStatus = request.serviceStatus;
+        // Optionally show error message
+        request._newStatus = request.serviceStatus; // Reset to original
       }
     });
   }
 
   getOfferAttemptsLeft(request: any): number {
-    return 3 - (typeof request.sellerOfferAttempts === 'number' ? request.sellerOfferAttempts : 0);
+    return Math.max(0, 3 - (request.offerAttempts || 0));
   }
 
   canSetOffer(request: any): boolean {
-    if (!request) return false;
-    const attempts = typeof request.sellerOfferAttempts === 'number' ? request.sellerOfferAttempts : 0;
-    if (request.serviceStatus === 'Cancelled') return false;
-    if (attempts >= 3) return false;
-    // Allow if buyer rejected and attempts left
-    if (request.buyerApprovalStatus === 'Rejected' && attempts < 3) return true;
-    // Allow if no offer yet and attempts left
-    if ((!request.pricePerProduct || !request.estimatedTime) && attempts < 3) return true;
-    // Allow if buyer has not yet responded and attempts left
-    if (request.buyerApprovalStatus === 'Pending' && attempts < 3) return true;
-    // Disallow if already approved
-    if (request.serviceStatus === 'Approved') return false;
-    return false;
+    // Can set offer if:
+    // 1. No offer has been made yet (pricePerProduct is null or 0)
+    // 2. Buyer approval status is not 'Rejected'
+    // 3. Service status is not 'Cancelled'
+    return (
+      (request.pricePerProduct == null || request.pricePerProduct === 0) &&
+      request.buyerApprovalStatus !== 'Rejected' &&
+      request.serviceStatus !== 'Cancelled'
+    );
   }
 
   getSetOfferTooltip(request: any): string {
-    const attempts = typeof request.sellerOfferAttempts === 'number' ? request.sellerOfferAttempts : 0;
-    if (request.serviceStatus !== 'Pending') {
-      return 'Cannot set offer: Service is not pending.';
-    }
-    if (attempts >= 3) {
-      return 'No more offer attempts allowed (max 3 reached).';
-    }
-    if (request.buyerApprovalStatus === 'Approved') {
-      return 'Buyer has approved your offer.';
-    }
     if (request.buyerApprovalStatus === 'Rejected') {
-      return `Buyer rejected your last offer. Attempts left: ${3 - attempts}`;
+      return 'Cannot set offer for rejected requests';
     }
-    if (request.buyerApprovalStatus === 'Pending') {
-      return `Waiting for buyer response. Attempts left: ${3 - attempts}`;
+    if (request.serviceStatus === 'Cancelled') {
+      return 'Cannot set offer for cancelled services';
     }
-    return `You can set an offer up to 3 times. Attempts left: ${3 - attempts}`;
+    if (request.pricePerProduct != null && request.pricePerProduct !== 0) {
+      return 'Offer already set for this request';
+    }
+    return 'Set your offer for this request';
   }
 
   getViewUpdatesTooltip(request: any): string {
-    if (!request.pricePerProduct || !request.estimatedTime) {
-      return 'Set an offer and wait for buyer approval before updates are available.';
+    if (!request) {
+      return 'View request updates';
     }
     if (request.buyerApprovalStatus !== 'Approved') {
-      return 'Updates are only available after buyer approves your offer.';
+      return 'Updates only available for approved requests';
     }
-    if (!request.updates || request.updates.length === 0) {
-      return 'No updates for this request yet.';
+    const pendingCount = this.getPendingUpdatesCount(request);
+    if (pendingCount > 0) {
+      return `${pendingCount} pending update(s)`;
     }
-    return 'View updates for this request.';
+    return 'View request updates';
   }
 
-  filteredRequests(): any[] {
-    let filtered = this.requests;
-    if (this.searchText && this.searchText.trim() !== '') {
-      const search = this.searchText.trim().toLowerCase();
-      filtered = filtered.filter(req =>
-        req.buyerName && req.buyerName.toLowerCase().includes(search)
+    filteredRequests(): any[] {
+    console.log('Filtering requests. Total:', this.requests?.length || 0);
+    let filtered = this.requests || [];
+
+    // Apply search filter
+    if (this.searchText.trim()) {
+      const searchLower = this.searchText.toLowerCase();
+      filtered = filtered.filter(request =>
+        request.buyerName && request.buyerName.toLowerCase().includes(searchLower)
       );
+      console.log('After search filter:', filtered.length);
     }
+
+    // Apply status filter
     if (this.statusFilter) {
-      filtered = filtered.filter(req => req.serviceStatus === this.statusFilter);
+      filtered = filtered.filter(request => request.serviceStatus === this.statusFilter);
+      console.log('After status filter:', filtered.length);
     }
+
+    // Apply approval filter
     if (this.approvalFilter) {
-      filtered = filtered.filter(req => req.buyerApprovalStatus === this.approvalFilter);
+      filtered = filtered.filter(request => request.buyerApprovalStatus === this.approvalFilter);
+      console.log('After approval filter:', filtered.length);
     }
+
+    console.log('Final filtered count:', filtered.length);
     return filtered;
+  }
+
+  goBack() {
+    this.router.navigate(['/seller/services']);
   }
 }

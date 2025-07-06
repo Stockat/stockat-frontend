@@ -1,112 +1,367 @@
-<div *ngIf="loading" class="text-center py-8">
-  <i class="pi pi-spin pi-spinner text-2xl"></i> Loading...
-</div>
-<div *ngIf="!loading && request">
-  <div class="flex flex-col md:flex-row gap-8 items-start mb-8 bg-white rounded-2xl shadow-xl p-6 border border-pink-100 overflow-x-auto md:overflow-x-visible">
-    <div *ngIf="request.imageUrl" class="flex-shrink-0 flex justify-center w-full md:w-auto">
-      <img [src]="request.imageUrl" alt="Service Image" class="w-48 h-48 object-cover rounded-2xl shadow-lg border-4 border-pink-100" />
+<!-- Modern Service Request Details Component -->
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-pink-50 to-purple-50">
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex items-center justify-center min-h-screen">
+    <div class="text-center">
+      <div class="w-16 h-16 border-4 border-pink-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+      <p class="text-gray-600 font-semibold">Loading request details...</p>
     </div>
-    <div class="flex-1 w-full min-w-0">
-      <h2 class="text-3xl font-bold mb-2 text-pink-700">
-        <a *ngIf="request.serviceId" [routerLink]="['/services', request.serviceId]" class="hover:underline hover:text-pink-900 transition-colors">
-          {{ request.serviceTitle }}
-        </a>
-        <span *ngIf="!request.serviceId">{{ request.serviceTitle }}</span>
-      </h2>
-      <div class="text-gray-600 mb-4 italic">{{ request.requestDescription }}</div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2">
-        <div class="mb-2"><b>Quantity:</b> {{ request.requestedQuantity }}</div>
-        <div class="mb-2"><b>Status:</b> <span class="font-semibold" [ngClass]="{
-          'text-yellow-700': request.serviceStatus === 'Pending',
-          'text-blue-700': request.serviceStatus === 'InProgress',
-          'text-green-700': request.serviceStatus === 'Delivered',
-          'text-red-700': request.serviceStatus === 'Cancelled',
-          'text-gray-700': !['Pending','InProgress','Delivered','Cancelled'].includes(request.serviceStatus)
-        }"> {{ request.serviceStatus }}</span></div>
-        <div class="mb-2"><b>Seller:</b> <span class="font-semibold text-pink-700">
-          <a *ngIf="request.sellerId" [routerLink]="['/profile', request.sellerId]" class="hover:underline hover:text-pink-900 transition-colors">
-            {{ request.sellerName || 'N/A' }}
-          </a>
-          <span *ngIf="!request.sellerId">{{ request.sellerName || 'N/A' }}</span>
-        </span></div>
-        <div class="mb-2"><b>Seller Offer:</b> <span *ngIf="request.pricePerProduct != null && request.pricePerProduct !== 0; else noOffer"> ${{ request.pricePerProduct }}</span><ng-template #noOffer><span class="text-gray-400 italic"> Not set yet</span></ng-template></div>
-        <div class="mb-2"><b>Estimated Time:</b> <span *ngIf="request.estimatedTime; else noTime"> {{ request.estimatedTime }}</span><ng-template #noTime><span class="text-gray-400 italic"> Not set yet</span></ng-template></div>
-        <div class="mb-2"><b>Total Price:</b> <span *ngIf="request.totalPrice; else noTotal"> {{ request.totalPrice }}$</span><ng-template #noTotal><span class="text-gray-400 italic"> Not set yet</span></ng-template></div>
-        <div class="mb-2"><b>Buyer Status:</b> <span class="font-semibold" [ngClass]="{
-          'text-yellow-700': request.buyerApprovalStatus === 'Pending',
-          'text-green-700': request.buyerApprovalStatus === 'Approved',
-          'text-red-700': request.buyerApprovalStatus === 'Rejected'
-        }"> {{ request.buyerApprovalStatus || 'Pending' }}</span></div>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading && request" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+    <!-- Header with Back Button -->
+    <div class="flex items-center justify-between mb-8">
+      <button
+        pButton
+        type="button"
+        icon="pi pi-arrow-left"
+        label="Back to Requests"
+        class="p-button-raised text-gray-800 border-0 bg-white/95 backdrop-blur-sm rounded-xl shadow-xl hover:bg-white hover:shadow-2xl transition-all duration-300 font-semibold px-6 py-3"
+        (click)="goBack()">
+      </button>
+
+      <!-- Service Status Badge -->
+      <div class="flex items-center gap-2">
+        <span class="text-sm text-gray-500">Status:</span>
+        <span class="font-bold px-3 py-1 rounded-full text-sm"
+          [ngClass]="{
+            'bg-yellow-100 text-yellow-800': request.serviceStatus === 'Pending',
+            'bg-blue-100 text-blue-800': request.serviceStatus === 'InProgress',
+            'bg-green-100 text-green-800': request.serviceStatus === 'Delivered',
+            'bg-red-100 text-red-800': request.serviceStatus === 'Cancelled',
+            'bg-gray-100 text-gray-800': !['Pending','InProgress','Delivered','Cancelled'].includes(request.serviceStatus)
+          }">
+          {{ request.serviceStatus }}
+        </span>
       </div>
-      <div *ngIf="request.buyerApprovalStatus === 'Approved' && !hasPendingUpdate && request.serviceStatus === 'Pending'" class="mt-8">
-        <div class="flex justify-end mb-2">
-          <button pButton label="Request Update" class="p-button mb-2 bg-pink-600 border-pink-600 hover:bg-pink-700 hover:border-pink-700 text-white" (click)="openUpdateModal()"></button>
+    </div>
+
+    <!-- Request Header Card -->
+    <div class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 mb-8 relative overflow-hidden">
+      <!-- Background Pattern -->
+      <div class="absolute inset-0 bg-gradient-to-br from-pink-50/50 to-purple-50/50"></div>
+      <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-400/20 to-purple-400/20 rounded-full -translate-y-16 translate-x-16"></div>
+
+      <div class="relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+
+          <!-- Service Image -->
+          <div class="relative group" *ngIf="request.imageUrl">
+            <div class="relative overflow-hidden rounded-2xl shadow-2xl">
+              <img
+                [src]="request.imageUrl"
+                alt="Service Image"
+                class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+            </div>
+          </div>
+
+          <!-- Request Info -->
+          <div class="lg:col-span-2 space-y-6">
+            <!-- Service Title -->
+            <div>
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <i class="pi pi-briefcase text-white text-xl"></i>
+                </div>
+                <div>
+                  <h1 class="text-3xl font-bold text-gray-800">
+                    <a *ngIf="request.serviceId" [routerLink]="['/services', request.serviceId]" class="hover:text-pink-600 transition-colors">
+                      {{ request.serviceTitle }}
+                    </a>
+                    <span *ngIf="!request.serviceId">{{ request.serviceTitle }}</span>
+                  </h1>
+                  <p class="text-gray-600 mt-2">{{ request.requestDescription }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Request Details Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <i class="pi pi-box text-blue-600"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">Quantity</p>
+                  <p class="font-bold text-gray-800">{{ request.requestedQuantity }}</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                <div class="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+                  <i class="pi pi-user text-pink-600"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">Seller</p>
+                  <a *ngIf="request.sellerId" [routerLink]="['/profile', request.sellerId]" class="font-bold text-pink-600 hover:text-pink-800 transition-colors">
+                    {{ request.sellerName || 'N/A' }}
+                  </a>
+                  <span *ngIf="!request.sellerId" class="font-bold text-gray-600">{{ request.sellerName || 'N/A' }}</span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <i class="pi pi-dollar text-green-600"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">Seller Offer</p>
+                  <p class="font-bold text-gray-800">
+                    <span *ngIf="request.pricePerProduct != null && request.pricePerProduct !== 0">${{ request.pricePerProduct }}</span>
+                    <span *ngIf="!request.pricePerProduct || request.pricePerProduct === 0" class="text-gray-400 italic">Not set yet</span>
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <i class="pi pi-clock text-purple-600"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">Estimated Time</p>
+                  <p class="font-bold text-gray-800">
+                    <span *ngIf="request.estimatedTime">{{ request.estimatedTime }}</span>
+                    <span *ngIf="!request.estimatedTime" class="text-gray-400 italic">Not set yet</span>
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <i class="pi pi-dollar text-orange-600"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">Total Price</p>
+                  <p class="font-bold text-gray-800">
+                    <span *ngIf="request.totalPrice">${{ request.totalPrice }}</span>
+                    <span *ngIf="!request.totalPrice" class="text-gray-400 italic">Not set yet</span>
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                  <i class="pi pi-check-circle text-yellow-600"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">Buyer Status</p>
+                  <span class="font-bold px-2 py-1 rounded-full text-xs"
+                    [ngClass]="{
+                      'bg-yellow-100 text-yellow-800': request.buyerApprovalStatus === 'Pending',
+                      'bg-green-100 text-green-800': request.buyerApprovalStatus === 'Approved',
+                      'bg-red-100 text-red-800': request.buyerApprovalStatus === 'Rejected'
+                    }">
+                    {{ request.buyerApprovalStatus || 'Pending' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Service Status -->
+            <div class="flex items-center gap-3 p-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl border border-pink-100">
+              <div class="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+                <i class="pi pi-info-circle text-pink-600"></i>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">Service Status</p>
+                <span class="font-bold px-3 py-1 rounded-full text-sm"
+                  [ngClass]="{
+                    'bg-yellow-100 text-yellow-800': request.serviceStatus === 'Pending',
+                    'bg-blue-100 text-blue-800': request.serviceStatus === 'InProgress',
+                    'bg-green-100 text-green-800': request.serviceStatus === 'Delivered',
+                    'bg-red-100 text-red-800': request.serviceStatus === 'Cancelled',
+                    'bg-gray-100 text-gray-800': !['Pending','InProgress','Delivered','Cancelled'].includes(request.serviceStatus)
+                  }">
+                  {{ request.serviceStatus }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons Section -->
+    <div class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 mb-8">
+      <div class="space-y-6">
+
+        <!-- Request Update Button -->
+        <div *ngIf="request.buyerApprovalStatus === 'Approved' && !hasPendingUpdate && request.serviceStatus === 'Pending'" class="text-center">
+          <button
+            pButton
+            type="button"
+            label="Request Update"
+            class="p-button-raised bg-gradient-to-r from-pink-500 to-purple-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-pink-600 hover:to-purple-700 transition-all duration-300"
+            (click)="openUpdateModal()">
+          </button>
         </div>
 
-        <!-- Modal for update creation -->
-        <p-dialog header="Create Update Request" [(visible)]="updateModalVisible" [modal]="true" [closable]="true" [dismissableMask]="true" [style]="{width: '400px'}">
-          <form [formGroup]="updateForm" (ngSubmit)="submitUpdate()" class="space-y-4">
-            <div>
-              <label class="block mb-1">Additional Price</label>
-              <input pInputText type="number" formControlName="additionalPrice" class="w-full" />
-            </div>
-            <div>
-              <label class="block mb-1">Additional Quantity</label>
-              <input pInputText type="number" formControlName="additionalQuantity" class="w-full" />
-            </div>
-            <div>
-              <label class="block mb-1">Additional Time</label>
-              <input pInputText type="text" formControlName="additionalTime" class="w-full" />
-            </div>
-            <div>
-              <label class="block mb-1">Additional Note</label>
-              <textarea pInputTextarea formControlName="additionalNote" class="w-full" rows="2"></textarea>
-            </div>
-            <div *ngIf="updateError" class="text-red-500 text-sm">{{ updateError }}</div>
-            <div *ngIf="updateSuccess" class="text-green-600 text-sm">{{ updateSuccess }}</div>
-            <button pButton type="submit" label="Send Update Request" class="p-button-info w-full" [disabled]="updateLoading"></button>
-          </form>
-        </p-dialog>
-      </div>
-      <div *ngIf="request.pricePerProduct && request.estimatedTime && request.buyerApprovalStatus === 'Pending'" class="mt-8">
-        <div class="flex gap-4 justify-end">
-          <button pButton label="Accept Offer" class="p-button-success bg-green-600 border-green-600 hover:bg-green-700 hover:border-green-700 text-white" (click)="acceptSellerOffer(request)"></button>
-          <button pButton label="Reject Offer" class="p-button-danger bg-red-600 border-red-600 hover:bg-red-700 hover:border-red-700 text-white" (click)="rejectSellerOffer(request)"></button>
+        <!-- Cancel Request Button -->
+        <div *ngIf="request.serviceStatus === 'Pending' && (!request.pricePerProduct || !request.estimatedTime)" class="text-center">
+          <button
+            pButton
+            type="button"
+            label="Cancel Request"
+            class="p-button-raised bg-gradient-to-r from-red-500 to-red-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-red-600 hover:to-red-700 transition-all duration-300"
+            [disabled]="updateLoading"
+            (click)="cancelRequest()">
+          </button>
+        </div>
+
+        <!-- Accept/Reject Offer Buttons -->
+        <div *ngIf="request.pricePerProduct && request.estimatedTime && request.buyerApprovalStatus === 'Pending' && request.serviceStatus !== 'Cancelled'" class="flex gap-4 justify-center">
+          <button
+            pButton
+            type="button"
+            label="Accept Offer"
+            class="p-button-raised bg-gradient-to-r from-green-500 to-green-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-green-600 hover:to-green-700 transition-all duration-300"
+            (click)="acceptSellerOffer(request)">
+          </button>
+          <button
+            pButton
+            type="button"
+            label="Reject Offer"
+            class="p-button-raised bg-gradient-to-r from-red-500 to-red-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-red-600 hover:to-red-700 transition-all duration-300"
+            (click)="rejectSellerOffer(request)">
+          </button>
+        </div>
+
+        <!-- Negotiation Closed Message -->
+        <div *ngIf="isNegotiationClosed()" class="text-center p-4 bg-red-50 rounded-2xl border border-red-200">
+          <i class="pi pi-exclamation-triangle text-red-600 text-xl mb-2"></i>
+          <p class="text-red-700 font-semibold">Negotiation closed. You rejected 3 offers from this seller.</p>
         </div>
       </div>
-      <div *ngIf="isNegotiationClosed()" class="mt-4 p-4 bg-red-50 border border-red-200 rounded text-red-700 font-semibold text-center">
-        Negotiation closed. You rejected 3 offers from this seller.
+    </div>
+
+    <!-- Update History Section -->
+    <div *ngIf="updates.length > 0" class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
+          <i class="pi pi-history text-white text-xl"></i>
+        </div>
+        <div>
+          <h3 class="text-3xl font-bold text-gray-800">Update History</h3>
+          <p class="text-gray-600">Track all updates to your request</p>
+        </div>
+      </div>
+
+      <!-- Loading indicator for updates -->
+      <div *ngIf="updatesLoading" class="text-center py-8">
+        <div class="w-8 h-8 border-2 border-pink-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-gray-600">Loading updates...</p>
+      </div>
+
+      <!-- Updates Grid -->
+      <div *ngIf="!updatesLoading" class="space-y-6">
+        <div *ngFor="let update of updates" class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-pink-100 p-6 hover:shadow-xl transition-all duration-300">
+          <div class="flex flex-wrap gap-4 items-center mb-4">
+            <div *ngIf="update.additionalPrice" class="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1 rounded-full">
+              <i class="pi pi-dollar"></i>
+              <span class="font-semibold">+${{ update.additionalPrice }}</span>
+            </div>
+            <div *ngIf="update.additionalQuantity" class="flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+              <i class="pi pi-box"></i>
+              <span class="font-semibold">+{{ update.additionalQuantity }}</span>
+            </div>
+            <div *ngIf="update.additionalTime" class="flex items-center gap-2 bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
+              <i class="pi pi-clock"></i>
+              <span class="font-semibold">{{ update.additionalTime }}</span>
+            </div>
+          </div>
+
+                    <div *ngIf="update.additionalNote" class="bg-pink-50 rounded-xl p-4 border-l-4 border-pink-300 mb-4">
+            <div class="flex items-start gap-2">
+              <i class="pi pi-comment text-pink-600 mt-1"></i>
+              <p class="text-gray-700 italic">{{ update.additionalNote }}</p>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-500 flex items-center gap-1">
+              <i class="pi pi-calendar"></i>
+              {{ update.createdAt | date:'medium' }}
+            </span>
+            <span class="font-bold px-3 py-1 rounded-full text-sm"
+              [ngClass]="{
+                'bg-yellow-100 text-yellow-800': update.status === 'Pending',
+                'bg-blue-100 text-blue-800': update.status === 'InProgress',
+                'bg-green-100 text-green-800': update.status === 'Delivered',
+                'bg-red-100 text-red-800': update.status === 'Cancelled',
+                'bg-gray-100 text-gray-800': !['Pending','InProgress','Delivered','Cancelled'].includes(update.status)
+              }">
+              {{ update.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paginator for updates -->
+      <div *ngIf="updates.length > 0" class="mt-8">
+        <div class="bg-white/50 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+          <p-paginator
+            [rows]="updatesSize"
+            [totalRecords]="totalUpdates"
+            [first]="updatesPage * updatesSize"
+            (onPageChange)="onUpdatesPageChange($event)"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} updates"
+            [rowsPerPageOptions]="[3, 5, 10]"
+            styleClass="!bg-transparent !border-none !p-0">
+          </p-paginator>
+        </div>
       </div>
     </div>
   </div>
-  <button pButton label="Back to Requests" class="p-button-secondary mb-6" (click)="goBack()"></button>
-
-  <div *ngIf="updates.length > 0" class="mt-12 w-full">
-    <h3 class="text-2xl font-bold mb-6 text-pink-700 flex items-center gap-2">
-      <i class="pi pi-history text-xl"></i> Update History
-    </h3>
-    <div class="grid gap-6">
-      <div *ngFor="let update of updates" class="bg-white border-l-8 border-pink-400 rounded-xl shadow-md p-6 flex flex-col gap-3 hover:shadow-xl transition-shadow max-w-3xl ml-0 mr-auto">
-        <div class="flex flex-wrap gap-6 items-center mb-2">
-          <div *ngIf="update.additionalPrice" class="text-pink-700 font-semibold"><i class="pi pi-dollar mr-1"></i>+{{ update.additionalPrice }}$</div>
-          <div *ngIf="update.additionalQuantity" class="text-blue-700 font-semibold"><i class="pi pi-box mr-1"></i>+{{ update.additionalQuantity }}</div>
-          <div *ngIf="update.additionalTime" class="text-purple-700 font-semibold"><i class="pi pi-clock mr-1"></i>{{ update.additionalTime }}</div>
-        </div>
-        <div *ngIf="update.additionalNote" class="italic text-gray-700 bg-pink-50 rounded p-2 border-l-4 border-pink-300"><i class="pi pi-comment mr-1"></i>{{ update.additionalNote }}</div>
-        <div class="flex justify-between items-center mt-2">
-          <span class="text-xs text-gray-500"><i class="pi pi-calendar mr-1"></i>Created: {{ update.createdAt | date:'medium' }}</span>
-          <span class="text-xs font-bold mx-2 px-3 py-1 rounded-full"
-            [ngClass]="{
-              'bg-yellow-100 text-yellow-800': update.status === 'Pending',
-              'bg-blue-100 text-blue-800': update.status === 'InProgress',
-              'bg-green-100 text-green-800': update.status === 'Delivered',
-              'bg-red-100 text-red-800': update.status === 'Cancelled',
-              'bg-gray-100 text-gray-800': !['Pending','InProgress','Delivered','Cancelled'].includes(update.status)
-            }">
-            {{ update.status }}
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
+
+<!-- Update Modal -->
+<p-dialog
+  header="Create Update Request"
+  [(visible)]="updateModalVisible"
+  [modal]="true"
+  [closable]="true"
+  [dismissableMask]="true"
+  [style]="{width: '500px'}"
+  styleClass="modern-dialog">
+  <form [formGroup]="updateForm" (ngSubmit)="submitUpdate()" class="space-y-6">
+    <div>
+      <label class="block font-medium mb-2 text-gray-700">Additional Price</label>
+      <input pInputText type="number" formControlName="additionalPrice" class="w-full rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-400 focus:border-pink-400 transition" />
+    </div>
+    <div>
+      <label class="block font-medium mb-2 text-gray-700">Additional Quantity</label>
+      <input pInputText type="number" formControlName="additionalQuantity" class="w-full rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-400 focus:border-pink-400 transition" />
+    </div>
+    <div>
+      <label class="block font-medium mb-2 text-gray-700">Additional Time</label>
+      <input pInputText type="text" formControlName="additionalTime" class="w-full rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-400 focus:border-pink-400 transition" />
+    </div>
+    <div>
+      <label class="block font-medium mb-2 text-gray-700">Additional Note</label>
+      <textarea pInputTextarea formControlName="additionalNote" class="w-full rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-400 focus:border-pink-400 transition" rows="3"></textarea>
+    </div>
+    <div *ngIf="updateError" class="p-4 bg-red-50 rounded-xl border border-red-200 text-red-700">
+      {{ updateError }}
+    </div>
+    <div *ngIf="updateSuccess" class="p-4 bg-green-50 rounded-xl border border-green-200 text-green-700">
+      {{ updateSuccess }}
+    </div>
+    <button
+      pButton
+      type="submit"
+      label="Send Update Request"
+      class="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-3 rounded-xl shadow-lg hover:from-pink-600 hover:to-purple-700 transition-all duration-200 text-lg"
+      [disabled]="updateLoading">
+    </button>
+  </form>
+</p-dialog>
+
+<!-- Toast for notifications -->
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>

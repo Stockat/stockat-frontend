@@ -6,7 +6,7 @@ export function getLoggedInUserId(): string | null {
   if (!token) return null;
   try {
     const decoded: any = jwtDecode(token);
-    // Adjust the property name as per your backend's JWT payload
+
     console.log('Decoded JWT:', decoded);
     return decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]|| null;
   } catch {

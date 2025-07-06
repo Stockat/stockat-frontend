@@ -123,7 +123,7 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-4">
-              <p-button label="View Stocks" [raised]="true" severity="info" class="flex-1 h-14 font-semibold text-lg"
+              <p-button label="View Stocks" (click)="viewStocks()" [raised]="true" severity="info" class="flex-1 h-14 font-semibold text-lg"
                 styleClass="flex-1 h-14 font-semibold text-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 border-0 shadow-lg rounded-xl" />
               <p-button label="Make Request" [raised]="true" severity="success"
                 class="flex-1 h-14 font-semibold text-lg"

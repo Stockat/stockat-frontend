@@ -11,6 +11,10 @@ import { imageUploadDto } from '../models/product-models/ImageUploadDto';
 import { AddProductDto } from '../models/product-models/addProductDto';
 import { UpdateProductDto } from '../models/product-models/updateProductDto';
 import { viewSellerProductDto } from '../models/product-models/viewSellerProductDto';
+import { ProductWithFeatures } from '../models/product-models/product-with-features';
+
+
+
 @Injectable({
   providedIn: 'root',
 })
@@ -88,7 +92,11 @@ export class ProductService {
   changeProductCanBeRequsted(id: number): Observable<GenericRequestModel<string>> {
 
     return this.http.post<GenericRequestModel<string>>(`${this.apiUrl}/seller/edit-canBeRequested`,id);
+  }  getProductWithFeatures(id: number): Observable<GenericRequestModel<ProductWithFeatures>> {
+    return this.http.get<GenericRequestModel<ProductWithFeatures>>(`${this.apiUrl}/with-features/${id}`);
   }
+
+
 
 //! End Of Service
 }
