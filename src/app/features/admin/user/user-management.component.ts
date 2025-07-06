@@ -19,6 +19,8 @@ import { UserService } from '../../../core/services/user.service';
 import { UserReadDto } from '../../../core/models/user-models/user-read.dto';
 import { PaginatedDto } from '../../../core/models/user-models/paginated-dto';
 import { GenericResponseDto } from '../../../core/models/user-models/generic-response.dto';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-user-management',
@@ -45,7 +47,7 @@ import { GenericResponseDto } from '../../../core/models/user-models/generic-res
   styleUrls: ['./user-management.component.css'],
   providers: [MessageService, ConfirmationService]
 })
-export class UserManagementComponent implements OnInit {
+export class UserManagementComponent implements OnInit, OnDestroy {
   users: UserReadDto[] = [];
   selectedUser: UserReadDto | null = null;
   loading = false;
@@ -76,6 +78,9 @@ export class UserManagementComponent implements OnInit {
     blocked: 0
   };
 
+  searchTermChanged: Subject<string> = new Subject<string>();
+  private searchSubscription: any;
+
   constructor(
     private userService: UserService,
     private fb: FormBuilder,
@@ -92,6 +97,20 @@ export class UserManagementComponent implements OnInit {
   ngOnInit() {
     this.loadUsers();
     this.loadStatistics();
+
+    this.searchSubscription = this.searchTermChanged.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(term => {
+      this.currentPage = 1;
+      this.loadUsers();
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
   }
 
   loadUsers() {
@@ -273,5 +292,9 @@ export class UserManagementComponent implements OnInit {
 
   getCurrentDate(): Date {
     return new Date();
+  }
+
+  onSearchTermChange(term: string) {
+    this.searchTermChanged.next(term);
   }
 } 
