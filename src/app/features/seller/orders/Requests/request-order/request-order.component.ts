@@ -88,13 +88,13 @@ export class RequestOrderComponent {
     return order.status === 'PendingSeller';
   }
   canReject(order: SellerOrder) {
-    return order.status === 'Pending';
+    return order.status === 'PendingSeller' ;
   }
   canSetReady(order: SellerOrder) {
     return order.status === 'Processing';
   }
   canCancel(order: SellerOrder) {
-    return order.status === 'Processing' || order.status === 'Pending';
+    return order.status === 'Processing' || order.status === 'PendingBuyer';
   }
   isReadOnly(order: SellerOrder) {
     return ['Shipped', 'Completed', 'Delivered'].includes(order.status);

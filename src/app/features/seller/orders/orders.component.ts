@@ -77,7 +77,7 @@ export class OrdersComponent implements OnInit {
     return order.status === 'Processing';
   }
   canCancel(order: SellerOrder) {
-    return order.status === 'Processing' || order.status === 'Pending';
+    return order.status === 'Processing';
   }
   isReadOnly(order: SellerOrder) {
     return ['Shipped', 'Completed', 'Delivered'].includes(order.status);
