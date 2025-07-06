@@ -8,7 +8,7 @@
         <div class="h-6 bg-gray-200 rounded w-48 mx-auto animate-pulse"></div>
       </div>
       } @else {
-      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Seller Orders</h1>
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Seller Request Orders</h1>
       <p class="text-gray-600">Manage and track all your customer orders</p>
       }
     </div>
@@ -42,7 +42,8 @@
           </label>
           <p-dropdown [options]="[
               {label: 'All', value: ''},
-              {label: 'Pending', value: 'Pending'},
+              {label: 'PendingSeller', value: 'PendingSeller'},
+              {label: 'PendingBuyer', value: 'PendingBuyer'},
               {label: 'Processing', value: 'Processing'},
               {label: 'Ready', value: 'Ready'},
               {label: 'Shipped', value: 'Shipped'},
@@ -212,7 +213,7 @@
                 <div class="flex flex-wrap gap-2">
                   <ng-container *ngIf="!isReadOnly(order)">
                     <p-button *ngIf="canConfirm(order)" label="Confirm" icon="pi pi-check" size="small" variant="text"
-                      [raised]="true" severity="success" (onClick)="updateStatus(order, 'Processing')"
+                      [raised]="true" severity="success" (onClick)="updateStatus(order, 'PendingBuyer')"
                       pTooltip="Confirm and start processing" class="text-xs"></p-button>
                     <p-button *ngIf="canReject(order)" label="Reject" icon="pi pi-times" size="small" variant="text"
                       [raised]="true" severity="danger" (onClick)="updateStatus(order, 'Cancelled')"
