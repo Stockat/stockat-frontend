@@ -26,6 +26,11 @@ interface City {
   code: string;
 }
 
+// Extended ProductDto with image loading states
+interface ProductWithImageState extends ProductDto {
+  imageError?: boolean;
+}
+
 @Component({
   selector: 'app-product-card',
   imports: [
@@ -43,7 +48,7 @@ interface City {
   styleUrl: './product-card.component.css',
 })
 export class ProductCardComponent {
-  products: ProductDto[] | undefined;
+  products: ProductWithImageState[] | undefined;
   isLoading: boolean = false;
 
   //* Filters Holders
@@ -118,6 +123,14 @@ export class ProductCardComponent {
       next: (res) => {
         console.log(res);
         this.products = res.data.paginatedData;
+
+        // Initialize image loading states for each product
+        if (this.products) {
+          this.products.forEach((product) => {
+            product.imageError = false;
+          });
+        }
+
         this.first = res.data.page;
         this.totalRecords = res.data.count;
         this.isLoading = false;
@@ -165,6 +178,26 @@ export class ProductCardComponent {
     this.filters.minPrice = 1;
 
     this.getProducts();
+  }
+
+  getActiveFiltersCount(): number {
+    let count = 0;
+    if (this.selectedCity) count++;
+    if (this.selectedCategory) count++;
+    if (this.selectedTags && this.selectedTags.length > 0) count++;
+    if (this.SelectedPrice > 1) count++;
+    if (this.SelectedMinQty > 1) count++;
+    return count;
+  }
+
+  onImageError(product: ProductWithImageState) {
+    // Mark the product as having an image error
+    product.imageError = true;
+  }
+
+  onImageLoad(product: ProductWithImageState) {
+    // Mark the product as having loaded the image successfully
+    product.imageError = false;
   }
 
   //! End Product Card Component
