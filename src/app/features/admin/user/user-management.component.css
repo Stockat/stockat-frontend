@@ -74,6 +74,19 @@
 }
 
 /* Dialog styling */
+:host ::ng-deep .p-dialog {
+  border-radius: 1.25rem !important; /* 20px */
+  border: 1.5px solid #e5e7eb !important; /* Tailwind gray-200 */
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-content,
+:host ::ng-deep .p-dialog .p-dialog-header,
+:host ::ng-deep .p-dialog .p-dialog-footer {
+  border-radius: 1.25rem !important;
+}
+
 ::ng-deep .p-dialog .p-dialog-header {
   background: #ffffff !important;
   border-bottom: 1px solid #e5e7eb !important;
