@@ -1,6 +1,7 @@
 import { PunishmentInfoDto } from './punishment-info.dto';
 import { PunishmentHistoryDto } from './punishment-history.dto';
 import { UserStatisticsDto } from './user-statistics.dto';
+import { UserVerificationReadDto } from './user-verification-read.dto';
 
 export interface UserReadDto {
   id: string;
@@ -24,4 +25,5 @@ export interface UserReadDto {
   currentPunishment?: PunishmentInfoDto;
   punishmentHistory?: PunishmentHistoryDto[];
   statistics?: UserStatisticsDto;
+  UserVerification?: UserVerificationReadDto;
 } 

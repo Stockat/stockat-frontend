@@ -135,6 +135,10 @@ export class UserManagementComponent implements OnInit, OnDestroy {
         this.users = response.data.paginatedData;
         this.totalUsers = response.data.count;
         this.loading = false;
+        // Debug: print userVerification for each user
+        this.users.forEach(user => {
+          console.log('User:', user.userName, 'Verification:', user.userVerification);
+        });
       },
       error: (error) => {
         this.messageService.add({

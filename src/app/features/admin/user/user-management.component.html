@@ -198,13 +198,16 @@
 
             <!-- Verification -->
             <td class="p-4">
-              <p-tag 
-                *ngIf="user.userVerification"
-                [value]="user.userVerification.status"
-                [severity]="getVerificationSeverity(user.userVerification.status)"
-                class="text-xs"
-              ></p-tag>
-              <span *ngIf="!user.userVerification" class="text-gray-400 text-sm">Not submitted</span>
+              <ng-container *ngIf="user.UserVerification; else notSubmitted">
+                <p-tag 
+                  [value]="user.UserVerification.status"
+                  [severity]="getVerificationSeverity(user.UserVerification.status)"
+                  class="text-xs"
+                ></p-tag>
+              </ng-container>
+              <ng-template #notSubmitted>
+                <span class="text-gray-400 text-sm">Not submitted</span>
+              </ng-template>
             </td>
 
             <!-- Punishment -->
