@@ -142,7 +142,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.user = res.data;
         if (this.user) {
-          this.editForm.patchValue(this.user);
+          // Only patch the properties that exist in the form
+          this.editForm.patchValue({
+            firstName: this.user.firstName,
+            lastName: this.user.lastName,
+            email: this.user.email,
+            phoneNumber: this.user.phoneNumber || '',
+            address: this.user.address,
+            city: this.user.city,
+            country: this.user.country,
+            postalCode: this.user.postalCode,
+            aboutMe: this.user.aboutMe
+          });
         }
         this.editForm.disable();
         this.loading = false;
@@ -228,7 +239,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.user = res.data;
         if (this.user) {
-          this.editForm.patchValue(this.user);
+          // Only patch the properties that exist in the form
+          this.editForm.patchValue({
+            firstName: this.user.firstName,
+            lastName: this.user.lastName,
+            email: this.user.email,
+            phoneNumber: this.user.phoneNumber || '',
+            address: this.user.address,
+            city: this.user.city,
+            country: this.user.country,
+            postalCode: this.user.postalCode,
+            aboutMe: this.user.aboutMe
+          });
         }
         this.editForm.disable();
         this.editMode = false;
@@ -613,5 +635,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
            request.pricePerProduct !== 0 &&
            request.estimatedTime != null &&
            request.estimatedTime.trim() !== '';
+  }
+
+  upgradeToSeller() {
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Coming Soon',
+      detail: 'Seller account upgrade feature will be available soon!'
+    });
   }
 }

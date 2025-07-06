@@ -1,7 +1,12 @@
+import { PunishmentInfoDto } from './punishment-info.dto';
+import { PunishmentHistoryDto } from './punishment-history.dto';
+import { UserStatisticsDto } from './user-statistics.dto';
+
 export interface UserReadDto {
   id: string;
   userName: string;
   email: string;
+  phoneNumber?: string;
   firstName: string;
   lastName: string;
   address?: string;
@@ -14,4 +19,9 @@ export interface UserReadDto {
   isDeleted: boolean;
   needsVerification: boolean;
   roles: string[];
+  
+  // Admin-specific properties
+  currentPunishment?: PunishmentInfoDto;
+  punishmentHistory?: PunishmentHistoryDto[];
+  statistics?: UserStatisticsDto;
 } 
