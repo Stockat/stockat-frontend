@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { AvatarModule } from 'primeng/avatar';
 import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
@@ -23,6 +23,7 @@ export class SidebarComponent {
 
   @Input() visible:boolean = false;
   @Input() items:MenuItem[] = [];
+  @Output() menuItemClicked = new EventEmitter<void>();
 
 
 }
