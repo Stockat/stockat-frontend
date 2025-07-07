@@ -15,5 +15,6 @@ export interface AuctionDetailsDto {
     buyerId?: string;
     sellerId: string;
     productId: number;
+    stockId: number;
 }
   

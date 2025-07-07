@@ -59,4 +59,8 @@ export class UserService {
   toggleUserActivation(): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/toggle-activation`, {});
   }
-} 
+
+  getUserById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+}

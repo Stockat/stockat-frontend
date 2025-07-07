@@ -7,7 +7,7 @@ import { AuctionBidRequestCreateDto } from '../models/auction-models/bid-request
   providedIn: 'root'
 })
 export class BidService {
-  private baseUrl = 'http://localhost:5250/api/AuctionBidRequest'; // replace with actual API base
+  private baseUrl = 'http://localhost:5250/api/AuctionBidRequest'; 
 
   constructor(private http: HttpClient) {}
 
@@ -15,5 +15,12 @@ export class BidService {
     return this.http.post<any>(`${this.baseUrl}`, bid);
   }
 
+  GetBidsForAuction(auctionID: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/auction/${auctionID}`);
+  }
+  
+  GetBidsForUser(userID: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/user/${userID}`);
+  }
   
 }
