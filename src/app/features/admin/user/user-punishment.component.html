@@ -110,7 +110,7 @@
 
   <!-- Filters and Search (Unified) -->
   <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="md:col-span-1">
         <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
         <input
@@ -153,16 +153,6 @@
           class="w-full"
         ></p-dropdown>
       </div>
-      <div class="md:col-span-1 flex flex-col justify-end">
-        <label class="block text-sm font-medium text-gray-700 mb-2 invisible">Refresh</label>
-        <button 
-          pButton 
-          label="Refresh" 
-          icon="pi pi-refresh"
-          class="p-button-outlined w-full"
-          (click)="loadPunishments()"
-        ></button>
-      </div>
     </div>
   </div>
 
@@ -191,7 +181,7 @@
             <th class="text-left p-4 font-medium text-gray-700">Start Date</th>
             <th class="text-left p-4 font-medium text-gray-700">End Date</th>
             <th class="text-left p-4 font-medium text-gray-700">Status</th>
-            <th class="text-center p-4 font-medium text-gray-700">Actions</th>
+            <th class="p-4 font-medium text-gray-700" style="min-width: 120px; text-align: center !important;">Actions</th>
           </tr>
         </ng-template>
 
@@ -249,7 +239,7 @@
             </td>
 
             <!-- Actions -->
-            <td class="p-4">
+            <td class="p-4 text-center" style="min-width: 120px;">
               <div class="flex items-center justify-center space-x-2">
                 <button 
                   pButton 
