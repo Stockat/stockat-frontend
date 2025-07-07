@@ -53,7 +53,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   loading = false;
   totalUsers = 0;
   currentPage = 1;
-  pageSize = 10;
+  pageSize = 5;
   
   // Filters
   searchTerm = '';

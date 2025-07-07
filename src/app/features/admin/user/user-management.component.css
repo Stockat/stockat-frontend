@@ -120,6 +120,16 @@
   border-color: #3b82f6 !important;
 }
 
+/* Make paginator rows-per-page dropdown open upwards, left-aligned, and always on top */
+::ng-deep .p-paginator .p-dropdown-panel {
+  bottom: 100% !important;
+  top: auto !important;
+  left: 0 !important;
+  right: auto !important;
+  transform: translateY(-0.5rem) !important;
+  z-index: 99999 !important;
+}
+
 /* Toast styling */
 ::ng-deep .p-toast .p-toast-message {
   border-radius: 0.5rem !important;

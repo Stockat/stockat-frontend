@@ -48,7 +48,7 @@ export class UserVerificationComponent implements OnInit {
   loading = false;
   totalVerifications = 0;
   currentPage = 1;
-  pageSize = 10;
+  pageSize = 5;
   
   // Dialog states
   showVerificationDetails = false;

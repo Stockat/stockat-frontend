@@ -50,7 +50,7 @@ export class UserPunishmentComponent implements OnInit {
   loading = false;
   totalPunishments = 0;
   currentPage = 1;
-  pageSize = 10;
+  pageSize = 5;
   
   // Dialog states
   showPunishmentDetails = false;
