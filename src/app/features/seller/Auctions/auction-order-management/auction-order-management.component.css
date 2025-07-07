@@ -1,0 +1,23 @@
+/* auction-order-management.component.css */
+:host {
+    display: block;
+    padding: 1rem;
+  }
+  
+  .p-datatable .p-datatable-thead > tr > th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+  }
+  
+  .p-dialog .p-dialog-header {
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .p-dropdown {
+    min-width: 140px;
+  }
+  
+  .p-button {
+    transition: all 0.2s;
+  }

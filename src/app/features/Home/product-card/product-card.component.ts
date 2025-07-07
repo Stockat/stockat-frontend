@@ -26,6 +26,11 @@ interface City {
   code: string;
 }
 
+// Extended ProductDto with image loading states
+interface ProductWithImageState extends ProductDto {
+  imageError?: boolean;
+}
+
 @Component({
   selector: 'app-product-card',
   imports: [
@@ -37,31 +42,30 @@ interface City {
     InputNumberModule,
     PaginatorModule,
     CurrencyPipe,
-    RouterModule
+    RouterModule,
   ],
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.css',
 })
 export class ProductCardComponent {
-
-  products:[ProductDto] | undefined ;
+  products: ProductWithImageState[] | undefined;
+  isLoading: boolean = false;
 
   //* Filters Holders
-  categories:any = [];
-  tags:any = [];
-  cities:any = [];
-
+  categories: any = [];
+  tags: any = [];
+  cities: any = [];
 
   first: number = 0;
   totalRecords: number = 0;
 
   SelectedPrice: number = 1;
   SelectedMinQty: number = 1;
-  selectedCity: string ="";
-  selectedCategory: string = "";
+  selectedCity: string = '';
+  selectedCategory: string = '';
   selectedTags: string[] = [];
 
-  filters:ProductFilters = {
+  filters: ProductFilters = {
     location: '',
     category: '',
     tags: [],
@@ -69,15 +73,16 @@ export class ProductCardComponent {
     minPrice: 1,
     page: 0,
     size: 8,
-    sortBy:null,
-    filterDirection: 'asc' // Default sorting direction
-  }
+    sortBy: null,
+    filterDirection: 'asc', // Default sorting direction
+  };
 
-
-  constructor(private productService: ProductService,private sharedServ:SharedService,
-    private categoryServ:CategoryService,private tagServ:TagService) {
-
-    }
+  constructor(
+    private productService: ProductService,
+    private sharedServ: SharedService,
+    private categoryServ: CategoryService,
+    private tagServ: TagService
+  ) {}
 
   ngOnInit() {
     this.cities = this.sharedServ.governorates;
@@ -85,58 +90,66 @@ export class ProductCardComponent {
 
     this.categoryServ.getAllCategories().subscribe({
       next: (response) => {
-        console.log("Categories fetched successfully:", response.data);
+        console.log('Categories fetched successfully:', response.data);
         this.categories = response.data;
       },
       error: (error) => {
-        console.error("Error fetching categories:", error);
-      }
-    })
+        console.error('Error fetching categories:', error);
+      },
+    });
 
     this.tagServ.getAllTags().subscribe({
       next: (response) => {
-        console.log("Tags fetched successfully:", response.data);
+        console.log('Tags fetched successfully:', response.data);
         this.tags = response.data;
       },
       error: (error) => {
-        console.error("Error fetching tags:", error);
-      }
-    })
-
+        console.error('Error fetching tags:', error);
+      },
+    });
   }
 
   onPageChange(event: PaginatorState) {
-    console.log("Paginator Event:", event);
+    console.log('Paginator Event:', event);
     this.first = event.page ?? 0;
-    console.log("PageNum", this.first);
-    this.setFilters()
+    console.log('PageNum', this.first);
+    this.setFilters();
   }
 
-  getProducts(){
-
-    console.log("Filters before setting:", this.filters);
+  getProducts() {
+    this.isLoading = true;
+    console.log('Filters before setting:', this.filters);
     this.productService.getAllProductsPaginated(this.filters).subscribe({
       next: (res) => {
         console.log(res);
         this.products = res.data.paginatedData;
-        this.first=res.data.page;
-        this.totalRecords=res.data.count;
+
+        // Initialize image loading states for each product
+        if (this.products) {
+          this.products.forEach((product) => {
+            product.imageError = false;
+          });
+        }
+
+        this.first = res.data.page;
+        this.totalRecords = res.data.count;
+        this.isLoading = false;
       },
       error: (err) => {
         console.error('Error fetching products:', err);
-      }
+        this.isLoading = false;
+      },
     });
   }
 
-  setFilters(){
+  setFilters() {
+    console.log('Location', this.selectedCity);
+    console.log('category', this.selectedCategory);
+    console.log('Tags', this.selectedTags);
+    console.log('page', this.filters.page);
+    console.log('first', this.first);
 
-    console.log("Location", this.selectedCity);
-    console.log("category", this.selectedCategory);
-    console.log("Tags", this.selectedTags);
-    console.log("page", this.filters.page);
-    console.log("first", this.first);
-
-    this.filters.location = this.selectedCity ;
+    this.filters.location = this.selectedCity;
     this.filters.category = this.selectedCategory;
     this.filters.tags = this.selectedTags;
     this.filters.minQuantity = this.SelectedMinQty;
@@ -144,14 +157,14 @@ export class ProductCardComponent {
     this.filters.page = this.first;
     this.filters.size = 8;
 
-    console.log("-*****-",this.filters);
+    console.log('-*****-', this.filters);
 
     this.getProducts();
 
-console.log(this.filters);
+    console.log(this.filters);
   }
 
-  resetFilters(){
+  resetFilters() {
     this.selectedCity = '';
     this.selectedCategory = '';
     this.selectedTags = [];
@@ -167,6 +180,25 @@ console.log(this.filters);
     this.getProducts();
   }
 
+  getActiveFiltersCount(): number {
+    let count = 0;
+    if (this.selectedCity) count++;
+    if (this.selectedCategory) count++;
+    if (this.selectedTags && this.selectedTags.length > 0) count++;
+    if (this.SelectedPrice > 1) count++;
+    if (this.SelectedMinQty > 1) count++;
+    return count;
+  }
+
+  onImageError(product: ProductWithImageState) {
+    // Mark the product as having an image error
+    product.imageError = true;
+  }
+
+  onImageLoad(product: ProductWithImageState) {
+    // Mark the product as having loaded the image successfully
+    product.imageError = false;
+  }
 
   //! End Product Card Component
 }

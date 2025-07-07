@@ -12,17 +12,21 @@ import { RouterModule } from '@angular/router';
 })
 export class AdminLayoutComponent {
 
-  SidebarVisible:boolean=false;
+    SidebarVisible: boolean = false;
 
-  items: MenuItem[] = [];
+    items: MenuItem[] = [];
 
-  ngOnInit() {
+    ngOnInit() {
         this.items = [
             {
-                label: 'Mail',
-                icon: 'pi pi-envelope',
-                badge: '5',
+                label: 'Orders',
+                icon: 'ti ti-list-check',
                 items: [
+                     {
+                        label: 'Orders',
+                        icon: 'ti ti-list-check',
+                        route: '/admin/orders'
+                    },
                     {
                         label: 'Compose',
                         icon: 'pi pi-file-edit',
@@ -99,13 +103,12 @@ export class AdminLayoutComponent {
                         shortcut: '⌘+P'
                     }
                 ]
-            }
+            },
         ];
     }
 
-  toggleSidebar()
-  {
-    this.SidebarVisible =!this.SidebarVisible;
-  }
+    toggleSidebar() {
+        this.SidebarVisible = !this.SidebarVisible;
+    }
 
 }

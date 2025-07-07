@@ -1,0 +1,18 @@
+/* auction-analysis.component.css */
+:host {
+    display: block;
+    padding: 1rem;
+  }
+  
+  .bg-gradient-to-r {
+    background-image: linear-gradient(to right, var(--tw-gradient-stops));
+  }
+  
+  .from-indigo-500 {
+    --tw-gradient-from: #6366f1;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(99, 102, 241, 0));
+  }
+  
+  .to-purple-600 {
+    --tw-gradient-to: #7c3aed;
+  }

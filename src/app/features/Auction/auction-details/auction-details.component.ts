@@ -6,16 +6,26 @@ import { AuctionDetailsDto } from '../../../core/models/auction-models/auction-d
 import { AuctionBidRequestCreateDto } from '../../../core/models/auction-models/bid-request-auction-dto';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { interval, Subscription } from 'rxjs';
+import { catchError, forkJoin, interval, map, Observable, of, Subscription } from 'rxjs';
 import { MessagesModule } from 'primeng/messages';
 import { MessageModule } from 'primeng/message';
+import { UserService } from '../../../core/services/user.service';
+import { AuctionBidRequestDto } from '../../../core/models/auction-models/bid-details-dto';
+import { PaginatorModule } from 'primeng/paginator';
+import { DialogModule } from 'primeng/dialog';
+import { TableModule } from 'primeng/table';
+import { ProductService } from '../../../core/services/product.service';
+
 
 @Component({
   selector: 'app-auction-details',
   imports: [CommonModule,
      FormsModule,
      MessagesModule,
-    MessageModule
+    MessageModule,
+    PaginatorModule,
+    DialogModule,
+    TableModule
   ],
   templateUrl: './auction-details.component.html',
   styleUrls: ['./auction-details.component.css']
@@ -27,21 +37,58 @@ export class AuctionDetailsComponent implements OnInit, OnDestroy {
   timeLeft: string = '';
   private countdownSub!: Subscription;
   messages: { severity: string; summary: string; detail: string }[] = [];
+  userId: string = '';
+  productImageUrl='https://i.pinimg.com/736x/9e/18/fa/9e18fae10788270d8153de5850e0526f.jpg';
+
+  bids: AuctionBidRequestDto[] = [];
+  pagedBids: AuctionBidRequestDto[] = [];
+  loading = true;
+
+   // Pagination
+   bidPage = 0;
+   bidPageSize = 5;
+   totalBids = 0;
 
   constructor(
     private route: ActivatedRoute,
     private auctionService: AuctionService,
-    private bidService : BidService
+    private bidService : BidService,
+    private userService:UserService,
+    private productService: ProductService
   ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.params['id'];
+    this.loadUser();
     this.auctionService.getAuctionById(+id).subscribe(data => {
       this.auction = data;
+    
+      // Set bid values
       this.bidAmount = this.auction.currentBid + this.auction.incrementUnit;
       this.minBid = this.getMinBid();
+    
+      // Start countdown
       this.updateCountdown();
       this.startCountdown();
+    
+      // Load related product image
+      this.productService.getProductsDetails(this.auction.productId).subscribe(response => {
+        const product = response.data;
+        this.productImageUrl = product?.imagesArr?.[0] || 'assets/default-product.png';
+      });
+    });
+    
+    this.loadBids();
+  }
+
+  loadUser(){
+    this.userService.getCurrentUser().subscribe({
+      next: (response) => {
+        this.userId = response.data?.id || '';
+      },
+      error: (err) => {
+        console.error('Failed to get user:', err);
+      }
     });
   }
 
@@ -87,6 +134,64 @@ export class AuctionDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadBids() {
+    this.loading = true;
+    this.bidService.GetBidsForAuction(this.route.snapshot.params['id']).subscribe({
+      next: (bids) => {
+        if (!bids || bids.length === 0) {
+          this.bids = [];
+          this.totalBids = 0;
+          this.updatePagedBids();
+          this.loading = false;
+          return;
+        }
+  
+        const fetchUsers: Observable<AuctionBidRequestDto>[] = bids.map((bid: AuctionBidRequestDto) =>
+          this.userService.getUserById(bid.bidderId).pipe(
+            map(userResponse => {
+              const user = userResponse?.data ?? userResponse;
+              return {
+                ...bid,
+                bidderName: `${user.firstName} ${user.lastName}`
+              };
+            }),
+            catchError(() => of({
+              ...bid,
+              bidderName: 'Unknown Bidder'
+            }))
+          )
+        );
+  
+        forkJoin(fetchUsers).subscribe((enrichedBids: AuctionBidRequestDto[]) => {
+          setTimeout(() => {
+            this.bids = enrichedBids;
+            this.totalBids = enrichedBids.length;
+            this.updatePagedBids();
+            this.loading = false;
+          });
+        });
+      },
+      error: (err) => {
+        console.error('Error fetching bids:', err);
+        this.loading = false;
+      }
+    });
+  }
+  
+
+  updatePagedBids() {
+    const start = this.bidPage * this.bidPageSize;
+    const end = start + this.bidPageSize;
+    this.pagedBids = this.bids.slice(start, end);
+  }
+  
+
+  onBidPageChange(event: any) {
+    this.bidPageSize = event.rows;
+    this.bidPage = Math.floor(event.first / event.rows);
+    this.updatePagedBids();
+  }
+
   pad(n: number): string {
     return n.toString().padStart(2, '0');
   }
@@ -94,7 +199,7 @@ export class AuctionDetailsComponent implements OnInit, OnDestroy {
   placeBid(): void {
     const bidRequest: AuctionBidRequestCreateDto = {
       auctionId: this.auction.id,
-      bidderId: 'dd8eb1a2-0609-4368-9b0d-c8e55093646b', // Replace with actual user ID from auth
+      bidderId: this.userId, 
       bidAmount: this.bidAmount
     };
 

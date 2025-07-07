@@ -18,4 +18,5 @@ export interface ProductWithFeatures {
   sellerName: string;
   images: string[];
   features: Feature[];
+  minQuantity: number;
 } 

@@ -1,0 +1,55 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+<div class="mx-5 my-4">
+  <p-card header="Make a Product Request">
+    <p-divider />
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+      <!-- Gallery Section -->
+      <div>
+        <p-galleria [value]="images" thumbnailsPosition="bottom" [containerStyle]="{ 'max-width': '400px' }"
+          [numVisible]="5" [showThumbnails]="true">
+          <ng-template pTemplate="item" let-item>
+            <img [src]="item.itemImageSrc" style="width: 100%; display: block;" [alt]="item.alt" />
+          </ng-template>
+          <ng-template pTemplate="thumbnail" let-item>
+            <img [src]="item.thumbnailImageSrc" style="width: 60px;" [alt]="item.alt" />
+          </ng-template>
+        </p-galleria>
+      </div>
+      <!-- Product Section -->
+      <div class="md:col-span-2 px-2">
+        <div *ngIf="product">
+          <h3 class="text-xl font-semibold mb-2">{{ product.name }}</h3>
+          <p class="text-lg text-green-700 font-bold mb-2">Price: ${{ product.price }}</p>
+          <p class="text-gray-700">{{ product.description }}</p>
+        </div>
+        <div *ngIf="!product">
+          <p>No product details available.</p>
+        </div>
+        <p-divider />
+        <!-- Feature selectors -->
+        @for (feat of product?.features; track $index) {
+          <div class="block md:inline-block me-2 mb-2">
+            <p-floatlabel class="w-full md:w-56" variant="on">
+              <p-select inputId="feature_{{feat.id}}" [options]="feat.values" optionLabel="value"
+                [(ngModel)]="selectedFeatures[feat.id]" (onChange)="onFeatureChange(feat.id, $event.value)"
+                styleClass="w-full" />
+              <label for="feature_{{feat.id}}">{{feat.name}}</label>
+            </p-floatlabel>
+          </div>
+        }
+        <p-floatlabel class="w-full md:w-56 my-3" variant="on">
+          <p-inputNumber inputId="quantity" [(ngModel)]="quantity" [min]="minQuantity" [max]="1000" />
+          <label for="quantity">Quantity</label>
+        </p-floatlabel>
+        <div *ngIf="quantity < minQuantity" class="p-error text-sm mb-2">Minimum quantity is {{ minQuantity }}.</div>
+        <p-floatlabel class="w-full my-3" variant="on">
+          <textarea pInputTextarea inputId="description" [(ngModel)]="description" rows="3" cols="30"
+            style="resize: vertical;" placeholder="Enter a description (optional)"></textarea>
+          <label for="description">Description</label>
+        </p-floatlabel>
+        <p-button icon="pi pi-send" label="Submit Request" [raised]="true" [loading]="loading" (onClick)="submitRequest()" />
+      </div>
+    </div>
+  </p-card>
+</div> 

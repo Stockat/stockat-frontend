@@ -1,103 +1,249 @@
-<p-toast></p-toast>
-<p-card header="Seller Orders" styleClass="shadow-2xl">
-  <div class="mb-3 flex flex-col md:flex-row md:items-center gap-4">
-    <div class="flex items-center gap-4">
-      <label for="statusFilter" class="font-semibold">Filter by Status:</label>
-      <p-dropdown
-        inputId="statusFilter"
-        [options]="[
-          {label: 'All', value: ''},
-          {label: 'Pending', value: 'Pending'},
-          {label: 'Processing', value: 'Processing'},
-          {label: 'Ready', value: 'Ready'},
-          {label: 'Shipped', value: 'Shipped'},
-          {label: 'Completed', value: 'Completed'},
-          {label: 'Cancelled', value: 'Cancelled'},
-          {label: 'Delivered', value: 'Delivered'}
-        ]"
-        [(ngModel)]="statusFilter"
-        placeholder="Select Status"
-        (onChange)="dt.filter(statusFilter, 'status', 'equals')"
-        styleClass="w-40"
-      ></p-dropdown>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      @if (loading) {
+      <div class="space-y-4">
+        <div class="h-10 bg-gray-200 rounded-lg w-64 mx-auto animate-pulse"></div>
+        <div class="h-6 bg-gray-200 rounded w-48 mx-auto animate-pulse"></div>
+      </div>
+      } @else {
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Seller Orders</h1>
+      <p class="text-gray-600">Manage and track all your customer orders</p>
+      }
     </div>
-    <span class="ml-auto">
-      <input pInputText type="text" [(ngModel)]="globalFilter" (ngModelChange)="dt.filterGlobal($event, 'contains')" placeholder="Search orders, buyers, products..." class="p-inputtext-sm w-64" />
-    </span>
-  </div>
-  <p-table #dt [value]="orders" [loading]="loading" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]"
-    [globalFilterFields]="['buyerFirstName', 'buyerLastName', 'sellerFirstName', 'sellerLastName', 'status', 'orderType', 'productId', 'stockId']"
-    [filters]="{ status: { value: statusFilter, matchMode: 'equals' } }"
-    class="shadow-lg rounded-xl">
-    <ng-template pTemplate="header">
-      <tr>
-        <th pSortableColumn="id">Order #<p-sortIcon field="id" /></th>
-        <th pSortableColumn="craetedAt">Date<p-sortIcon field="craetedAt" /></th>
-        <th>Product</th>
-        <th>Stock</th>
-        <th>Buyer</th>
-        <th>Quantity</th>
-        <th>Price</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-order>
-      <tr>
-        <td>{{ order.id }}</td>
-        <td>{{ order.craetedAt | date:'short' }}</td>
-        <td>
-          <span class="flex items-center gap-2">
-            <i class="pi pi-box text-blue-500"></i>
-            <span class="font-semibold">#{{ order.productId }}</span>
-          </span>
-        </td>
-        <td>
-          <span class="flex items-center gap-2">
-            <i class="pi pi-tag text-green-500"></i>
-            <span class="font-semibold">#{{ order.stockId }}</span>
-          </span>
-        </td>
-        <td>
-          <span class="flex items-center gap-2">
-            <span class="inline-block w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">
-              {{ order.buyerFirstName[0] }}{{ order.buyerLastName[0] }}
-            </span>
-            <span>{{ order.buyerFirstName }} {{ order.buyerLastName }}</span>
-          </span>
-        </td>
-        <td>{{ order.quantity }}</td>
-        <td>{{ order.price | currency }}</td>
-        <td>
-          <span class="p-badge px-3 py-2 text-base" [ngClass]="{
-            'p-badge-info': order.status === 'Pending',
-            'p-badge-warning': order.status === 'Processing',
-            'p-badge-success': order.status === 'Ready',
-            'p-badge-danger': order.status === 'Cancelled',
-            'p-badge-secondary': ['Shipped','Completed','Delivered'].includes(order.status)
-          }" pTooltip="Order is {{order.status}}">
-            {{ order.status }}
-          </span>
-        </td>
-        <td>
-          <div class="flex flex-wrap gap-2">
-            <ng-container *ngIf="!isReadOnly(order)">
-              <p-button *ngIf="canConfirm(order)" label="Confirm" icon="pi pi-check" size="small" styleClass="p-button-success" (onClick)="updateStatus(order, 'Processing')" pTooltip="Confirm and start processing"></p-button>
-              <p-button *ngIf="canReject(order)" label="Reject" icon="pi pi-times" size="small" styleClass="p-button-danger" (onClick)="updateStatus(order, 'Cancelled')" pTooltip="Reject and cancel order"></p-button>
-              <p-button *ngIf="canSetReady(order)" label="Set Ready" icon="pi pi-box" size="small" styleClass="p-button-info" (onClick)="updateStatus(order, 'Ready')" pTooltip="Mark as ready for shipping"></p-button>
-              <p-button *ngIf="canCancel(order)" label="Cancel" icon="pi pi-ban" size="small" styleClass="p-button-warning" (onClick)="updateStatus(order, 'Cancelled')" pTooltip="Cancel order"></p-button>
-            </ng-container>
-            <ng-container *ngIf="isReadOnly(order)">
-              <span class="text-gray-400">Read Only</span>
-            </ng-container>
+
+    <!-- Filter Section -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold text-gray-800">Filter Orders</h2>
+      </div>
+
+      @if (loading) {
+      <!-- Filter Skeleton -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (item of [1,2,3]; track item) {
+        <div class="flex flex-col space-y-2">
+          <div class="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+          <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+        </div>
+        }
+      </div>
+      } @else {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Status Filter -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Order Status
+          </label>
+          <p-dropdown [options]="[
+              {label: 'All', value: ''},
+              {label: 'Pending', value: 'Pending'},
+              {label: 'Processing', value: 'Processing'},
+              {label: 'Ready', value: 'Ready'},
+              {label: 'Shipped', value: 'Shipped'},
+              {label: 'Completed', value: 'Completed'},
+              {label: 'Cancelled', value: 'Cancelled'},
+              {label: 'Delivered', value: 'Delivered'}
+            ]" [(ngModel)]="statusFilter" placeholder="Select Status"
+            (onChange)="dt.filter(statusFilter, 'status', 'equals')"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-blue-400"></p-dropdown>
+        </div>
+
+        <!-- Search Input -->
+        <div class="flex flex-col space-y-2 sm:col-span-2 lg:col-span-1">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            Search Orders
+          </label>
+          <input pInputText type="text" [(ngModel)]="globalFilter" (ngModelChange)="dt.filterGlobal($event, 'contains')"
+            placeholder="Search orders, buyers, products..."
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:border-green-400" />
+        </div>
+
+        <!-- Clear Filters -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            Actions
+          </label>
+          <p-button label="Clear Filters" icon="pi pi-times" variant="text" [raised]="true" severity="danger"
+            (onClick)="clear(dt)" class="w-full h-12 font-semibold" />
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Orders Table -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <!-- Loading Skeleton -->
+        @if (loading) {
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <div class="h-8 bg-gray-200 rounded-lg w-48 animate-pulse"></div>
+            <div class="h-6 bg-gray-200 rounded w-32 animate-pulse"></div>
           </div>
-        </td>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td colspan="9">No orders found.</td>
-      </tr>
-    </ng-template>
-  </p-table>
-</p-card> 
+
+          <!-- Table Header Skeleton -->
+          <div class="bg-gray-50 border-b border-gray-200">
+            <div class="grid grid-cols-9 gap-4 p-4">
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-20 animate-pulse"></div>
+            </div>
+          </div>
+
+          <!-- Table Rows Skeleton -->
+          @for (item of [1,2,3,4,5,6,7,8]; track item) {
+          <div class="border-b border-gray-100 p-4">
+            <div class="grid grid-cols-9 gap-4 items-center">
+              <!-- Order ID -->
+              <div class="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <!-- Date -->
+              <div class="h-5 bg-gray-200 rounded w-24 animate-pulse"></div>
+              <!-- Product -->
+              <div class="h-5 bg-gray-200 rounded w-20 animate-pulse"></div>
+              <!-- Stock -->
+              <div class="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <!-- Buyer -->
+              <div class="h-5 bg-gray-200 rounded w-24 animate-pulse"></div>
+              <!-- Quantity -->
+              <div class="h-5 bg-gray-200 rounded w-12 animate-pulse"></div>
+              <!-- Price -->
+              <div class="h-5 bg-gray-200 rounded w-20 animate-pulse"></div>
+              <!-- Status -->
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <!-- Actions -->
+              <div class="flex gap-2">
+                <div class="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
+                <div class="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+          }
+
+          <!-- Footer Skeleton -->
+          <div class="bg-gray-50 p-4 text-center">
+            <div class="h-5 bg-gray-200 rounded w-48 mx-auto animate-pulse"></div>
+          </div>
+        </div>
+        } @else {
+        <p-table #dt [value]="orders" [loading]="loading" [paginator]="true" [rows]="10"
+          [rowsPerPageOptions]="[10, 25, 50]"
+          [globalFilterFields]="['buyerFirstName', 'buyerLastName', 'sellerFirstName', 'sellerLastName', 'status', 'orderType', 'productId', 'stockId']"
+          [filters]="{ status: { value: statusFilter, matchMode: 'equals' } }" [tableStyle]="{ 'min-width': '60rem' }"
+          class="w-full" styleClass="w-full">
+          <ng-template #caption>
+            <div class="flex items-center justify-between p-6">
+              <span class="text-2xl font-bold text-gray-900">Orders List</span>
+              <span class="text-sm text-gray-600">Total: {{ orders ? orders.length : 0 }} orders</span>
+            </div>
+          </ng-template>
+
+          <ng-template #header>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="p-4 text-left font-semibold text-gray-700">Order #</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Date</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Product</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Stock</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Buyer</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Quantity</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Price</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Status</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Actions</th>
+            </tr>
+          </ng-template>
+
+          <ng-template #body let-order>
+            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="p-4">
+                <span class="font-semibold text-gray-900">#{{ order.id }}</span>
+              </td>
+              <td class="p-4">
+                <span class="text-gray-600">{{ order.craetedAt | date:'short' }}</span>
+              </td>
+              <td class="p-4">
+                <span class="flex items-center gap-2">
+                  <i class="pi pi-box text-blue-500"></i>
+                  <span class="font-semibold text-gray-900">#{{ order.productId }}</span>
+                </span>
+              </td>
+              <td class="p-4">
+                <span class="flex items-center gap-2">
+                  <i class="pi pi-tag text-green-500"></i>
+                  <span class="font-semibold text-gray-900">#{{ order.stockId }}</span>
+                </span>
+              </td>
+              <td class="p-4">
+                <span class="flex items-center gap-2">
+                  <span
+                    class="inline-block w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
+                    {{ order.buyerFirstName[0] }}{{ order.buyerLastName[0] }}
+                  </span>
+                  <span class="font-medium text-gray-900">{{ order.buyerFirstName }} {{ order.buyerLastName }}</span>
+                </span>
+              </td>
+              <td class="p-4">
+                <span class="font-semibold text-gray-900">{{ order.quantity }}</span>
+              </td>
+              <td class="p-4">
+                <span class="font-semibold text-green-600">{{ order.price | currency }}</span>
+              </td>
+              <td class="p-4">
+                <p-tag [value]="order.status" [severity]="getStatusSeverity(order.status)" class="text-xs" />
+              </td>
+              <td class="p-4">
+                <div class="flex flex-wrap gap-2">
+                  <ng-container *ngIf="!isReadOnly(order)">
+                    <p-button *ngIf="canConfirm(order)" label="Confirm" icon="pi pi-check" size="small" variant="text"
+                      [raised]="true" severity="success" (onClick)="updateStatus(order, 'Processing')"
+                      pTooltip="Confirm and start processing" class="text-xs"></p-button>
+                    <p-button *ngIf="canReject(order)" label="Reject" icon="pi pi-times" size="small" variant="text"
+                      [raised]="true" severity="danger" (onClick)="updateStatus(order, 'Cancelled')"
+                      pTooltip="Reject and cancel order" class="text-xs"></p-button>
+                    <p-button *ngIf="canSetReady(order)" label="Set Ready" icon="pi pi-box" size="small" variant="text"
+                      [raised]="true" severity="info" (onClick)="updateStatus(order, 'Ready')"
+                      pTooltip="Mark as ready for shipping" class="text-xs"></p-button>
+                    <p-button *ngIf="canCancel(order)" label="Cancel" icon="pi pi-ban" size="small" variant="text"
+                      [raised]="true" severity="danger" (onClick)="updateStatus(order, 'Cancelled')"
+                      pTooltip="Cancel order" class="text-xs"></p-button>
+                  </ng-container>
+                  <ng-container *ngIf="isReadOnly(order)">
+                    <span class="text-gray-400 text-xs">Read Only</span>
+                  </ng-container>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template #footer>
+            <tr class="bg-gray-50">
+              <td colspan="9" class="p-4 text-center text-gray-600">
+                Showing {{ orders ? orders.length : 0 }} orders
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<p-toast></p-toast>

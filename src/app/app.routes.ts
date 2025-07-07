@@ -4,6 +4,7 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { SellerLayoutComponent } from './layouts/seller-layout/seller-layout.component';
 import { sellerRoutes } from './features/seller/seller.routes';
+import { adminRoutes } from './features/admin/admin.routes';
 import { ProductCardComponent } from './features/Home/product-card/product-card.component';
 import { ProductDetailsComponent } from './features/ProductDetails/product-details/product-details.component';
 import { ServiceRequestDetailsComponent } from './features/profile/service-request-details.component';
@@ -70,36 +71,21 @@ export const routes: Routes = [
       { path: 'requests/:id', component: ServiceRequestDetailsComponent }
     ]
   },
+  // End Auth
   // Seller
   {
     path: 'seller',
     component: SellerLayoutComponent,
     children: sellerRoutes,
   },
+  // End Seller
   // Admin
   {
     path: 'admin',
     component: AdminLayoutComponent,
-    children: [
-      {
-        path: 'users',
-        loadComponent: () => import('./features/admin/user/user-management.component').then(m => m.UserManagementComponent)
-      },
-      {
-        path: 'verifications',
-        loadComponent: () => import('./features/admin/user/user-verification.component').then(m => m.UserVerificationComponent)
-      },
-      {
-        path: 'punishments',
-        loadComponent: () => import('./features/admin/user/user-punishment.component').then(m => m.UserPunishmentComponent)
-      },
-      {
-        path: '',
-        redirectTo: 'users',
-        pathMatch: 'full'
-      }
-    ]
+    children: adminRoutes,
   },
+  // End Admin
   // Services
   {
     path: 'services',
@@ -113,6 +99,10 @@ export const routes: Routes = [
   {
     path: 'auction/:id',
     loadComponent: () => import('./features/Auction/auction-details/auction-details.component').then(m => m.AuctionDetailsComponent)
+    },
+    {
+      path: 'auctions/mybids',
+      loadComponent: () => import('./features/Auction/buyer-bids/buyer-bids.component').then(m => m.BuyerBidsComponent)
   },
   // Seller Profile
   {
@@ -129,5 +119,9 @@ export const routes: Routes = [
   {
     path: 'order-process',
     loadComponent: () => import('./features/order-process/order-process.component').then(m => m.OrderProcessComponent)
+  },
+  {
+    path: 'request/:productId',
+    loadComponent: () => import('./features/request/make-request.component').then(m => m.MakeRequestComponent)
   },
 ];
