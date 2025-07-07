@@ -12,5 +12,22 @@ export const adminRoutes: Routes = [
     {
         path: 'products',
         loadComponent: () => import('./products/manageproducts/manageproducts.component').then(m => m.ManageproductsComponent)
-    }
+    },
+    {
+        path: 'users',
+        loadComponent: () => import('./features/admin/user/user-management.component').then(m => m.UserManagementComponent)
+      },
+      {
+        path: 'verifications',
+        loadComponent: () => import('./features/admin/user/user-verification.component').then(m => m.UserVerificationComponent)
+      },
+      {
+        path: 'punishments',
+        loadComponent: () => import('./features/admin/user/user-punishment.component').then(m => m.UserPunishmentComponent)
+      },
+      {
+        path: '',
+        redirectTo: 'users',
+        pathMatch: 'full'
+      }
 ]
