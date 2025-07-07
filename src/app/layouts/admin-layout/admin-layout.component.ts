@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 import { DashNavbarComponent } from "../../shared/components/dash-navbar/dash-navbar.component";
 import { MenuItem } from 'primeng/api';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [SidebarComponent, DashNavbarComponent],
+  imports: [SidebarComponent, DashNavbarComponent, RouterModule],
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.css'
 })

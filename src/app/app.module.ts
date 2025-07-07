@@ -5,10 +5,19 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SocialLoginModule, SocialAuthServiceConfig } from '@abacritt/angularx-social-login';
 import { GoogleLoginProvider } from '@abacritt/angularx-social-login';
+import { RouteReuseStrategy, ActivatedRouteSnapshot, DetachedRouteHandle } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { ServiceModule } from './features/service/service.module';
+
+export class NoReuseStrategy implements RouteReuseStrategy {
+  shouldDetach(route: ActivatedRouteSnapshot): boolean { return false; }
+  store(route: ActivatedRouteSnapshot, handle: DetachedRouteHandle | null): void {}
+  shouldAttach(route: ActivatedRouteSnapshot): boolean { return false; }
+  retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle | null { return null; }
+  shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean { return false; }
+}
 
 @NgModule({
   imports: [
@@ -40,7 +49,7 @@ import { ServiceModule } from './features/service/service.module';
         ]
       } as SocialAuthServiceConfig,
     },
-
+    { provide: RouteReuseStrategy, useClass: NoReuseStrategy }
   ]
 })
 export class AppModule { }

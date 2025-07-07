@@ -79,13 +79,26 @@ export const routes: Routes = [
   // Admin
   {
     path: 'admin',
-    component: AdminLayoutComponent
-  },
-
-  {
-    path: 'admin/users',
-    loadComponent: () => import('./features/admin/user/admin-user-management.component').then(m => m.AdminUserManagementComponent),
-    // Optionally add canActivate: [AdminGuard] if you have admin route protection
+    component: AdminLayoutComponent,
+    children: [
+      {
+        path: 'users',
+        loadComponent: () => import('./features/admin/user/user-management.component').then(m => m.UserManagementComponent)
+      },
+      {
+        path: 'verifications',
+        loadComponent: () => import('./features/admin/user/user-verification.component').then(m => m.UserVerificationComponent)
+      },
+      {
+        path: 'punishments',
+        loadComponent: () => import('./features/admin/user/user-punishment.component').then(m => m.UserPunishmentComponent)
+      },
+      {
+        path: '',
+        redirectTo: 'users',
+        pathMatch: 'full'
+      }
+    ]
   },
   // Services
   {
