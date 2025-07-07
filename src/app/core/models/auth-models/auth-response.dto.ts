@@ -2,6 +2,7 @@ export interface AuthResponseDto {
   token: TokenDto;
   isAuthSuccessful: boolean;
   isDeleted?: boolean;
+  isApproved: boolean;
   message?: string;
 }
 

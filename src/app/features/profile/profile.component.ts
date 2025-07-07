@@ -638,10 +638,37 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   upgradeToSeller() {
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Coming Soon',
-      detail: 'Seller account upgrade feature will be available soon!'
+    if (this.user && this.user.roles && this.user.roles.includes('Seller')) {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Already a Seller',
+        detail: 'You are already a seller.'
+      });
+      return;
+    }
+    this.userService.upgradeToSeller().subscribe({
+      next: (res) => {
+        if (res.token) {
+          this.authService.setTokens(res.token);
+        }
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Upgraded',
+          detail: 'You are now a seller!'
+        });
+        this.fetchUser(); // Refresh user info to update roles
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Upgrade Failed',
+          detail: err?.error?.message || 'Failed to upgrade to seller.'
+        });
+      }
     });
+  }
+
+  isSeller(): boolean {
+    return this.authService.getCurrentUserRoles().includes('Seller');
   }
 }

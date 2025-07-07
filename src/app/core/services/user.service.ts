@@ -170,4 +170,8 @@ export class UserService {
     if (searchTerm) params += `&searchTerm=${searchTerm}`;
     return this.http.get<GenericResponseDto<PaginatedDto<UserVerificationReadDto[]>>>(`${this.verificationApiUrl}/admin/all?${params}`);
   }
+
+  upgradeToSeller(): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/upgrade-to-seller`, {});
+  }
 }
