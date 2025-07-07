@@ -155,4 +155,8 @@ export class UserService {
   getPunishmentsByType(type: string, page: number = 1, size: number = 10): Observable<GenericResponseDto<PaginatedDto<PunishmentReadDto[]>>> {
     return this.http.get<GenericResponseDto<PaginatedDto<PunishmentReadDto[]>>>(`${this.punishmentApiUrl}/type/${type}?page=${page}&size=${size}`);
   }
+
+  getUserStatistics(): Observable<GenericResponseDto<any>> {
+    return this.http.get<GenericResponseDto<any>>(`${this.apiUrl}/admin/statistics`);
+  }
 }

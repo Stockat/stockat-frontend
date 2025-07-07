@@ -99,6 +99,26 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.loadUsers();
     this.loadStatistics();
 
+    this.userService.getUserStatistics().subscribe({
+      next: (response) => {
+        if (response.data) {
+          this.statistics.total = response.data.total;
+          this.statistics.active = response.data.active;
+          this.statistics.inactive = response.data.inactive;
+          this.statistics.verified = response.data.verified;
+          this.statistics.unverified = response.data.unverified;
+          this.statistics.blocked = response.data.blocked;
+        }
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load user statistics'
+        });
+      }
+    });
+
     this.searchSubscription = this.searchTermChanged.pipe(
       debounceTime(400),
       distinctUntilChanged()
