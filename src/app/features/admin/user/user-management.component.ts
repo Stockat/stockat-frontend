@@ -91,7 +91,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   ) {
     this.punishmentForm = this.fb.group({
       type: ['', Validators.required],
-      reason: ['', Validators.required],
+      reason: ['', [Validators.required, Validators.minLength(10)]],
       endDate: [null]
     });
   }
@@ -256,6 +256,9 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   }
 
   submitPunishment() {
+    // Mark all controls as touched to trigger validation
+    this.punishmentForm.markAllAsTouched();
+
     if (this.punishmentForm.valid && this.selectedUser) {
       this.punishmentLoading = true;
       const type = this.punishmentForm.value.type;
@@ -334,5 +337,10 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
   onSearchTermChange(term: string) {
     this.searchTermChanged.next(term);
+  }
+
+  // Optional: Add a getter for easy access in template
+  get punishmentReason() {
+    return this.punishmentForm.get('reason');
   }
 } 

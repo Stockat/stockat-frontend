@@ -426,6 +426,10 @@
           placeholder="Enter the reason for this punishment..."
           class="w-full"
         ></textarea>
+        <div *ngIf="punishmentReason?.touched && punishmentReason?.invalid" class="text-red-600 text-xs mt-1">
+          <div *ngIf="punishmentReason?.errors?.['required']">Reason is required.</div>
+          <div *ngIf="punishmentReason?.errors?.['minlength']">Reason must be at least 10 characters.</div>
+        </div>
       </div>
 
       <div *ngIf="punishmentForm.get('type')?.value === 'TemporaryBan'">
@@ -450,6 +454,7 @@
         ></button>
         <button 
           pButton 
+          type="button"
           class="p-button-danger"
           [disabled]="!punishmentForm.valid || punishmentLoading"
           (click)="submitPunishment()"
