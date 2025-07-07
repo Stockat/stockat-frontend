@@ -1,0 +1,65 @@
+<div class="p-6">
+  <h2 class="text-xl font-bold mb-4 text-gray-800">Edit Auction</h2>
+  
+  <!-- auction-edit-dialog.component.html -->
+<form [formGroup]="editForm" class="space-y-4">
+  <!-- Name Field -->
+  <!-- Always show all fields, but conditionally disable -->
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Auction Name</label>
+    <input pInputText formControlName="name" class="w-full" [disabled]="isControlDisabled('name')">
+    <small *ngIf="editForm.get('name')?.invalid" class="text-red-500 block mt-1">
+      Name is required (max 100 characters)
+    </small>
+  </div>
+  
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+    <textarea pInputTextarea formControlName="description" rows="3" class="w-full"
+              [disabled]="isControlDisabled('description')"></textarea>
+  </div>
+  
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+    <p-calendar formControlName="startTime" [showTime]="true" [minDate]="minDate"
+                class="w-full" [disabled]="isControlDisabled('startTime')"></p-calendar>
+    <!-- Validation messages... -->
+  </div>
+  
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+    <p-calendar formControlName="endTime" [showTime]="true" [minDate]="minEndDate || minDate"
+                class="w-full" [disabled]="isControlDisabled('endTime')"></p-calendar>
+    <!-- Validation messages... -->
+  </div>
+  
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Starting Price</label>
+    <p-inputNumber formControlName="startingPrice" mode="currency" currency="USD" 
+                  [min]="0.01" class="w-full" [disabled]="isControlDisabled('startingPrice')"></p-inputNumber>
+    <!-- Validation messages... -->
+  </div>
+
+  <!-- Add hidden field for productId -->
+<input type="hidden" formControlName="productId">
+<input type="hidden" formControlName="stockId">
+  
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+    <p-inputNumber formControlName="quantity" [min]="1" class="w-full" 
+                  [disabled]="isControlDisabled('quantity')"></p-inputNumber>
+    <!-- Validation messages... -->
+  </div>
+  
+  <!-- Form Actions -->
+  <div class="flex justify-end gap-3 pt-4">
+    <button pButton pRipple type="button" 
+            label="Cancel" class="p-button-outlined p-button-secondary"
+            (click)="close()"></button>
+    <button pButton pRipple type="button" 
+            label="Save Changes" class="p-button-primary"
+            [disabled]="editForm.invalid"
+            (click)="save()"></button>
+  </div>
+</form>
+</div>

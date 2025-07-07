@@ -99,6 +99,10 @@ export const routes: Routes = [
   {
     path: 'auction/:id',
     loadComponent: () => import('./features/Auction/auction-details/auction-details.component').then(m => m.AuctionDetailsComponent)
+    },
+    {
+      path: 'auctions/mybids',
+      loadComponent: () => import('./features/Auction/buyer-bids/buyer-bids.component').then(m => m.BuyerBidsComponent)
   },
   // Seller Profile
   {

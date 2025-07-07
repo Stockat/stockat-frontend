@@ -1,12 +1,12 @@
 <body ng-app="auctionApp" ng-controller="auctionCtrl">
   <div class="container">
-      <div class="auction-header">
+      <!-- <div class="auction-header">
           <div class="logo">ArtVenture</div>
           <div class="auction-actions">
               <button class="btn-icon"><i class="fas fa-heart"></i></button>
               <button class="btn-icon"><i class="fas fa-share-alt"></i></button>
           </div>
-      </div>
+      </div> -->
 
     <div *ngIf="auction; else loading">
       <p-messages [(value)]="messages"></p-messages>
@@ -19,7 +19,7 @@
         <div class="auction-image-wrapper">
           <div class="image-badge">Premium Auction</div>
           <img
-            [src]=" 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&auto=format&fit=crop&w=1399&q=80'"
+            [src]="productImageUrl ? productImageUrl : 'https://i.pinimg.com/736x/9e/18/fa/9e18fae10788270d8153de5850e0526f.jpg'" 
             [alt]="auction?.name"
             class="auction-image"
           />
@@ -39,6 +39,17 @@
               <div class="end-date">
                 Ends on {{ auction?.endTime | date:'fullDate' }} at {{ auction?.endTime | date:'shortTime' }} GMT
               </div>
+            </div>
+          </div>
+          
+           <!-- Quantity Section -->
+          <div class="info-section">
+            <div class="section-heading">
+              <i class="fas fa-boxes"></i>
+              <span>Available Quantity</span>
+            </div>
+            <div class="quantity-value">
+              <span>{{ auction?.quantity }}</span>
             </div>
           </div>
       
@@ -101,7 +112,7 @@
       <div class="auction-meta">
           <div class="meta-item">
               <div class="meta-label">BIDS</div>
-              <div class="meta-value">27</div>
+              <div class="meta-value">{{ bids?.length || 0 }}</div>
           </div>
           <div class="meta-item">
               <div class="meta-label">VIEWS</div>
@@ -120,36 +131,49 @@
       <div class="auction-description">
           <h3 class="description-title">Item Description</h3>
           <p class="description-content">
-              This exquisite vintage Rolex Submariner from the 1950s is a true collector's item. Featuring the original 
-              <br><br>
-              The watch comes with its original riveted bracelet and clasp, both showing appropriate signs of wear consistent 
+              {{auction.description}} 
           </p>
       </div>
       
+      <!-- Bids Section -->
       <div class="bid-history">
-          <h3 class="history-title">Bid History</h3>
-          <div class="history-item">
-              <div class="bidder-info">
-                  <div class="bidder-avatar">JD</div>
-                  <div>
-                      <div class="bidder-name">John Doe</div>
-                      <div class="bid-time">5 minutes ago</div>
-                  </div>
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="history-title">Bidding History</h2>
+          <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+            Total: {{ totalBids }}
+          </span>
+        </div>
+      
+        <div *ngIf="totalBids === 0" class="text-center py-8 bg-gray-50 rounded-lg">
+          <i class="pi pi-info-circle text-4xl text-gray-400 mb-3"></i>
+          <p class="text-gray-600">No bids placed yet</p>
+        </div>
+      
+        <!-- Bidding items -->
+        <div *ngIf="totalBids > 0">
+          <div class="history-item" *ngFor="let bid of pagedBids">
+            <div class="bidder-info">
+              <div class="bidder-avatar">
+                {{ bid.bidderName?.charAt(0) }}
               </div>
-              <div class="bid-amount">$12,750</div>
-          </div>
-          <div class="history-item">
-              <div class="bidder-info">
-                  <div class="bidder-avatar">SR</div>
-                  <div>
-                      <div class="bidder-name">Sarah Reynolds</div>
-                      <div class="bid-time">12 minutes ago</div>
-                  </div>
+              <div>
+                <div class="bidder-name">{{ bid.bidderName }}</div>
+                <!-- <div class="bid-time">{{ bid.bidTime | date:'short' }}</div> -->
               </div>
-              <div class="bid-amount">$12,500</div>
+            </div>
+            <div class="bid-amount">{{ bid.bidAmount | currency }}</div>
           </div>
-          
+      
+          <!-- Pagination -->
+          <p-paginator 
+            [rows]="bidPageSize"
+            [totalRecords]="totalBids"
+            [first]="bidPage * bidPageSize"
+            (onPageChange)="onBidPageChange($event)">
+          </p-paginator>
+        </div>
       </div>
+      
               
     </div>
       
