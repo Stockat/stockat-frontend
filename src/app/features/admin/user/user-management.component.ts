@@ -285,7 +285,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: error?.error?.message || error?.error || 'Failed to apply punishment'
+            detail: error?.error?.Message || error?.error || 'Failed to apply punishment'
           });
           this.punishmentLoading = false;
         }

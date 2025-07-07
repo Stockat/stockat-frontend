@@ -78,7 +78,7 @@
   border-radius: 1.25rem !important; /* 20px */
   border: 1.5px solid #e5e7eb !important; /* Tailwind gray-200 */
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  overflow: hidden;
+  /* overflow: hidden; */ /* Commented out to allow calendar popup to display */
 }
 
 :host ::ng-deep .p-dialog .p-dialog-content,
@@ -234,4 +234,31 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Ensure calendar popup appears above dialog */
+::ng-deep .p-datepicker {
+  z-index: 9999 !important;
+}
+
+/* Custom style for native datetime-local input in punishment dialog */
+::ng-deep input[type="datetime-local"] {
+  background: #f9fafb;
+  border: 1.5px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  color: #374151;
+  transition: border-color 0.2s;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+::ng-deep input[type="datetime-local"]:focus {
+  border-color: #3b82f6;
+  background: #fff;
+}
+::ng-deep input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+  cursor: pointer;
 } 

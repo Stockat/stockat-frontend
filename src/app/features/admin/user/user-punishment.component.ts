@@ -225,8 +225,9 @@ export class UserPunishmentComponent implements OnInit {
         },
         error: (error) => {
           let detail = 'Failed to create punishment';
-          if (error?.error?.message) {
-            detail = error.error.message;
+          console.log(error.error.Message);
+          if (error?.error?.Message) {
+            detail = error.error.Message;
           } else if (typeof error?.error === 'string') {
             detail = error.error;
           } else if (error?.error?.errors) {
