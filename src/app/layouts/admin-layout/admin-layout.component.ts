@@ -46,6 +46,27 @@ export class AdminLayoutComponent {
                 ]
             },
             {
+                label: 'Users',
+                icon: 'pi pi-users',
+                items: [
+                    {
+                        label: 'User Management',
+                        icon: 'pi pi-user-edit',
+                        routerLink: '/admin/users'
+                    },
+                    {
+                        label: 'Verification Requests',
+                        icon: 'pi pi-file-edit',
+                        routerLink: '/admin/verifications'
+                    },
+                    {
+                        label: 'Punishments',
+                        icon: 'pi pi-shield',
+                        routerLink: '/admin/punishments'
+                    }
+                ]
+            },
+            {
                 label: 'Reports',
                 icon: 'pi pi-chart-bar',
                 shortcut: '⌘+R',
