@@ -1,5 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+  FormControl,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -15,7 +21,12 @@ import { UserVerificationReadDto } from '../../core/models/user-models/user-veri
 import { UserVerificationUpdateDto } from '../../core/models/user-models/user-verification-update.dto';
 import { AuthService } from '../../core/services/auth.service';
 import { ServiceRequestService } from '../../core/services/service-request.service';
-import { RouterModule, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import {
+  RouterModule,
+  Router,
+  ActivatedRoute,
+  NavigationEnd,
+} from '@angular/router';
 import { ServiceRequestDetailsComponent } from './service-request-details.component';
 import { FormsModule } from '@angular/forms';
 import { filter } from 'rxjs/operators';
@@ -26,14 +37,34 @@ import { DropdownModule } from 'primeng/dropdown';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
+import { OrderDetailsComponent } from './order-details.component';
+import { OrderRequestDetailsComponent } from './order-request-details.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ButtonModule, InputTextModule, ReactiveFormsModule, ToastModule, ConfirmDialogModule, RouterModule, ServiceRequestDetailsComponent, FormsModule, PaginatorModule, TableModule, DropdownModule, ProgressSpinnerModule, TagModule, TooltipModule],
+  imports: [
+    CommonModule,
+    ButtonModule,
+    InputTextModule,
+    ReactiveFormsModule,
+    ToastModule,
+    ConfirmDialogModule,
+    RouterModule,
+    ServiceRequestDetailsComponent,
+    FormsModule,
+    PaginatorModule,
+    TableModule,
+    DropdownModule,
+    ProgressSpinnerModule,
+    TagModule,
+    TooltipModule,
+    OrderDetailsComponent,
+    OrderRequestDetailsComponent,
+  ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css'],
-  providers: [MessageService, ConfirmationService]
+  providers: [MessageService, ConfirmationService],
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   activeTab: string = 'about';
@@ -84,24 +115,27 @@ export class ProfileComponent implements OnInit, OnDestroy {
       city: [''],
       country: [''],
       postalCode: [''],
-      aboutMe: ['']
+      aboutMe: [''],
     });
     this.editForm.disable();
     this.changePasswordForm = this.fb.group({
       currentPassword: ['', Validators.required],
-      newPassword: ['', [Validators.required, Validators.minLength(6)]]
+      newPassword: ['', [Validators.required, Validators.minLength(6)]],
     });
     this.verifyForm = this.fb.group({
-      nationalId: ['', [Validators.required, Validators.pattern(/^[2-3]\d{13}$/)]],
+      nationalId: [
+        '',
+        [Validators.required, Validators.pattern(/^[2-3]\d{13}$/)],
+      ],
       image: [null],
-      imagePreview: ['']
+      imagePreview: [''],
     });
     this.router.events.subscribe(() => {
       this.isDetailsRoute = !!this.route.firstChild;
     });
     // Listen for navigation events to refresh requests list
     this.navigationSubscription = this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
+      .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => {
         if (this.activeTab === 'requests') {
           this.fetchBuyerRequests();
@@ -148,7 +182,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.loading = false;
         console.log('User data loaded:', this.user);
         console.log('Loaded roles:', this.user?.roles);
-
       },
       error: (err) => {
         this.error = 'Failed to load user data.';
@@ -156,9 +189,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.messageService.add({
           severity: 'error',
           summary: 'Load Failed',
-          detail: 'Failed to load user data.'
+          detail: 'Failed to load user data.',
         });
-      }
+      },
     });
   }
 
@@ -172,7 +205,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.verifyForm.patchValue({
             nationalId: this.verification.nationalId,
             image: null,
-            imagePreview: ''
+            imagePreview: '',
           });
         } else {
           this.verifyForm.reset();
@@ -182,7 +215,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.verification = null;
         // this.verificationLoading = false;
         this.verifyForm.reset();
-      }
+      },
     });
   }
 
@@ -217,7 +250,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           }
           this.editForm.disable();
           this.editMode = false;
-        }
+        },
       });
     }
   }
@@ -236,7 +269,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.messageService.add({
           severity: 'success',
           summary: 'Profile Updated',
-          detail: 'Your profile has been updated successfully.'
+          detail: 'Your profile has been updated successfully.',
         });
       },
       error: (err) => {
@@ -245,9 +278,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.messageService.add({
           severity: 'error',
           summary: 'Update Failed',
-          detail: 'Failed to update your profile.'
+          detail: 'Failed to update your profile.',
         });
-      }
+      },
     });
   }
 
@@ -257,13 +290,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
       next: (res) => {
         console.log('Profile image updated:', res);
         if (this.user) {
-            this.user.profileImageUrl = res.data;
+          this.user.profileImageUrl = res.data;
         }
         this.loading = false;
         this.messageService.add({
           severity: 'success',
           summary: 'Image Updated',
-          detail: 'Profile image updated successfully.'
+          detail: 'Profile image updated successfully.',
         });
       },
       error: (err) => {
@@ -272,9 +305,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.messageService.add({
           severity: 'error',
           summary: 'Image Update Failed',
-          detail: 'Failed to update profile image.'
+          detail: 'Failed to update profile image.',
         });
-      }
+      },
     });
   }
 
@@ -286,7 +319,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.messageService.add({
           severity: 'success',
           summary: 'Password Changed',
-          detail: 'Your password has been changed successfully.'
+          detail: 'Your password has been changed successfully.',
         });
       },
       error: (err) => {
@@ -295,9 +328,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.messageService.add({
           severity: 'error',
           summary: 'Password Change Failed',
-          detail: 'Failed to change password.'
+          detail: 'Failed to change password.',
         });
-      }
+      },
     });
   }
 
@@ -309,7 +342,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.messageService.add({
           severity: 'error',
           summary: 'Invalid File',
-          detail: 'Please select an image file.'
+          detail: 'Please select an image file.',
         });
         return;
       }
@@ -318,7 +351,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.messageService.add({
           severity: 'error',
           summary: 'File Too Large',
-          detail: 'Please select an image smaller than 5MB.'
+          detail: 'Please select an image smaller than 5MB.',
         });
         return;
       }
@@ -332,7 +365,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         },
         reject: () => {
           // Do nothing, user cancelled
-        }
+        },
       });
     }
   }
@@ -342,13 +375,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.messageService.add({
         severity: 'warn',
         summary: 'Invalid Input',
-        detail: 'Please fill in both fields. New password must be at least 6 characters.'
+        detail:
+          'Please fill in both fields. New password must be at least 6 characters.',
       });
       return;
     }
     const dto = {
       currentPassword: this.changePasswordForm.value.currentPassword,
-      newPassword: this.changePasswordForm.value.newPassword
+      newPassword: this.changePasswordForm.value.newPassword,
     };
     this.changePasswordLoading = true;
     this.confirmationService.confirm({
@@ -361,7 +395,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
             this.messageService.add({
               severity: 'success',
               summary: 'Password Changed',
-              detail: 'Your password has been changed successfully.'
+              detail: 'Your password has been changed successfully.',
             });
             this.changePasswordForm.reset();
             this.changePasswordLoading = false;
@@ -370,27 +404,31 @@ export class ProfileComponent implements OnInit, OnDestroy {
             this.messageService.add({
               severity: 'error',
               summary: 'Change Failed',
-              detail: err?.error?.message || 'Failed to change password.'
+              detail: err?.error?.message || 'Failed to change password.',
             });
             this.changePasswordLoading = false;
-          }
+          },
         });
       },
       reject: () => {
         this.changePasswordLoading = false;
-      }
+      },
     });
   }
 
   createUserVerification(form: FormGroup) {
     this.submitted = true;
     if (form.invalid) {
-      this.messageService.add({ severity: 'warn', summary: 'Invalid Input', detail: 'Please fill in all fields and upload an image.' });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Invalid Input',
+        detail: 'Please fill in all fields and upload an image.',
+      });
       return;
     }
     const dto: UserVerificationCreateDto = {
       nationalId: form.value.nationalId,
-      image: form.value.image
+      image: form.value.image,
     };
     this.confirmationService.confirm({
       message: 'Are you sure you want to submit your verification documents?',
@@ -400,28 +438,40 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.verificationLoading = true;
         this.userService.createUserVerification(dto).subscribe({
           next: (res) => {
-            this.messageService.add({ severity: 'success', summary: 'Submitted', detail: 'Verification submitted successfully.' });
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Submitted',
+              detail: 'Verification submitted successfully.',
+            });
             this.fetchUserVerification();
             form.reset();
             this.verificationLoading = false;
           },
           error: (err) => {
-            this.messageService.add({ severity: 'error', summary: 'Failed', detail: err?.error?.message || 'Failed to submit verification.' });
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Failed',
+              detail: err?.error?.message || 'Failed to submit verification.',
+            });
             this.verificationLoading = false;
-          }
+          },
         });
-      }
+      },
     });
   }
 
   updateUserVerification(form: FormGroup) {
     if (form.invalid) {
-      this.messageService.add({ severity: 'warn', summary: 'Invalid Input', detail: 'Please fill in all fields.' });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Invalid Input',
+        detail: 'Please fill in all fields.',
+      });
       return;
     }
     const dto: UserVerificationUpdateDto = {
       nationalId: form.value.nationalId,
-      image: form.value.image
+      image: form.value.image,
     };
     this.confirmationService.confirm({
       message: 'Are you sure you want to update your verification documents?',
@@ -431,17 +481,25 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.verificationLoading = true;
         this.userService.updateUserVerification(dto).subscribe({
           next: (res) => {
-            this.messageService.add({ severity: 'success', summary: 'Updated', detail: 'Verification updated successfully.' });
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Updated',
+              detail: 'Verification updated successfully.',
+            });
             this.fetchUserVerification();
             form.reset();
             this.verificationLoading = false;
           },
           error: (err) => {
-            this.messageService.add({ severity: 'error', summary: 'Failed', detail: err?.error?.message || 'Failed to update verification.' });
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Failed',
+              detail: err?.error?.message || 'Failed to update verification.',
+            });
             this.verificationLoading = false;
-          }
+          },
         });
-      }
+      },
     });
   }
 
@@ -454,22 +512,31 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.verificationLoading = true;
         this.userService.deleteUserVerification().subscribe({
           next: (res) => {
-            this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Verification entry deleted.' });
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Deleted',
+              detail: 'Verification entry deleted.',
+            });
             this.fetchUserVerification();
             this.verificationLoading = false;
           },
           error: (err) => {
-            this.messageService.add({ severity: 'error', summary: 'Failed', detail: err?.error?.message || 'Failed to delete verification.' });
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Failed',
+              detail: err?.error?.message || 'Failed to delete verification.',
+            });
             this.verificationLoading = false;
-          }
+          },
         });
-      }
+      },
     });
   }
 
   deactivateUser() {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to deactivate your account? This action cannot be undone.',
+      message:
+        'Are you sure you want to deactivate your account? This action cannot be undone.',
       header: 'Confirm Deactivation',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
@@ -482,19 +549,28 @@ export class ProfileComponent implements OnInit, OnDestroy {
             this.deactivateLoading = false;
           },
           error: (err) => {
-            this.messageService.add({ severity: 'error', summary: 'Failed', detail: err?.error?.message || 'Failed to deactivate account.' });
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Failed',
+              detail: err?.error?.message || 'Failed to deactivate account.',
+            });
             this.deactivateLoading = false;
-          }
+          },
         });
-      }
+      },
     });
   }
 
-      fetchBuyerRequests() {
+  fetchBuyerRequests() {
     this.buyerRequestsLoading = true;
     // Convert 0-based page to 1-based for API
     const apiPage = this.requestsPage + 1;
-    console.log('Fetching buyer requests - Page:', apiPage, 'Size:', this.requestsSize);
+    console.log(
+      'Fetching buyer requests - Page:',
+      apiPage,
+      'Size:',
+      this.requestsSize
+    );
 
     // Add a timeout to prevent infinite loading
     const timeout = setTimeout(() => {
@@ -504,40 +580,42 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.totalRequests = 0;
     }, 10000); // 10 second timeout
 
-    this.serviceRequestService.getBuyerRequests(apiPage, this.requestsSize).subscribe({
-      next: (res) => {
-        clearTimeout(timeout); // Clear timeout on success
-        console.log('Buyer requests API response:', res);
+    this.serviceRequestService
+      .getBuyerRequests(apiPage, this.requestsSize)
+      .subscribe({
+        next: (res) => {
+          clearTimeout(timeout); // Clear timeout on success
+          console.log('Buyer requests API response:', res);
 
-        if (res && res.data) {
-          this.buyerRequests = res.data.paginatedData || res.data;
-          this.totalRequests = res.data.count || this.buyerRequests.length;
-          // Convert 1-based page back to 0-based for PrimeNG
-          this.requestsPage = (res.data.page || 1) - 1;
-          this.requestsSize = res.data.size || 10;
-        } else {
-          // Handle case where response is direct array
-          this.buyerRequests = Array.isArray(res) ? res : [];
-          this.totalRequests = this.buyerRequests.length;
-        }
+          if (res && res.data) {
+            this.buyerRequests = res.data.paginatedData || res.data;
+            this.totalRequests = res.data.count || this.buyerRequests.length;
+            // Convert 1-based page back to 0-based for PrimeNG
+            this.requestsPage = (res.data.page || 1) - 1;
+            this.requestsSize = res.data.size || 10;
+          } else {
+            // Handle case where response is direct array
+            this.buyerRequests = Array.isArray(res) ? res : [];
+            this.totalRequests = this.buyerRequests.length;
+          }
 
-        console.log('Processed buyer requests:', this.buyerRequests);
-        console.log('Total requests:', this.totalRequests);
-        console.log('Current page:', this.requestsPage);
-        console.log('Page size:', this.requestsSize);
+          console.log('Processed buyer requests:', this.buyerRequests);
+          console.log('Total requests:', this.totalRequests);
+          console.log('Current page:', this.requestsPage);
+          console.log('Page size:', this.requestsSize);
 
-        this.filterRequests();
-        this.buyerRequestsLoading = false;
-      },
-      error: (err) => {
-        clearTimeout(timeout); // Clear timeout on error
-        console.error('Error fetching buyer requests:', err);
-        this.buyerRequests = [];
-        this.totalRequests = 0;
-        this.filterRequests();
-        this.buyerRequestsLoading = false;
-      }
-    });
+          this.filterRequests();
+          this.buyerRequestsLoading = false;
+        },
+        error: (err) => {
+          clearTimeout(timeout); // Clear timeout on error
+          console.error('Error fetching buyer requests:', err);
+          this.buyerRequests = [];
+          this.totalRequests = 0;
+          this.filterRequests();
+          this.buyerRequestsLoading = false;
+        },
+      });
   }
 
   showRequestDetails(id: number) {
@@ -557,11 +635,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   filterRequests() {
-    this.filteredRequests = this.buyerRequests.filter(req => {
-      const matchesSearch = !this.searchTerm ||
-        (req.serviceTitle && req.serviceTitle.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
-        (req.sellerName && req.sellerName.toLowerCase().includes(this.searchTerm.toLowerCase()));
-      const matchesStatus = !this.statusFilter || req.serviceStatus === this.statusFilter;
+    this.filteredRequests = this.buyerRequests.filter((req) => {
+      const matchesSearch =
+        !this.searchTerm ||
+        (req.serviceTitle &&
+          req.serviceTitle
+            .toLowerCase()
+            .includes(this.searchTerm.toLowerCase())) ||
+        (req.sellerName &&
+          req.sellerName.toLowerCase().includes(this.searchTerm.toLowerCase()));
+      const matchesStatus =
+        !this.statusFilter || req.serviceStatus === this.statusFilter;
       return matchesSearch && matchesStatus;
     });
   }
@@ -574,34 +658,49 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   getStatusSeverity(status: string): string {
     switch (status) {
-      case 'Pending': return 'warning';
-      case 'InProgress': return 'info';
-      case 'Delivered': return 'success';
-      case 'Cancelled': return 'danger';
-      default: return 'secondary';
+      case 'Pending':
+        return 'warning';
+      case 'InProgress':
+        return 'info';
+      case 'Delivered':
+        return 'success';
+      case 'Cancelled':
+        return 'danger';
+      default:
+        return 'secondary';
     }
   }
 
   getBuyerStatusSeverity(status: string): string {
     switch (status) {
-      case 'Pending': return 'warning';
-      case 'Approved': return 'success';
-      case 'Rejected': return 'danger';
-      default: return 'warning';
+      case 'Pending':
+        return 'warning';
+      case 'Approved':
+        return 'success';
+      case 'Rejected':
+        return 'danger';
+      default:
+        return 'warning';
     }
   }
 
   // Computed properties for stats
   get pendingRequestsCount(): number {
-    return (this.buyerRequests || []).filter(r => r.serviceStatus === 'Pending').length;
+    return (this.buyerRequests || []).filter(
+      (r) => r.serviceStatus === 'Pending'
+    ).length;
   }
 
   get approvedRequestsCount(): number {
-    return (this.buyerRequests || []).filter(r => r.buyerApprovalStatus === 'Approved').length;
+    return (this.buyerRequests || []).filter(
+      (r) => r.buyerApprovalStatus === 'Approved'
+    ).length;
   }
 
   get rejectedRequestsCount(): number {
-    return (this.buyerRequests || []).filter(r => r.buyerApprovalStatus === 'Rejected').length;
+    return (this.buyerRequests || []).filter(
+      (r) => r.buyerApprovalStatus === 'Rejected'
+    ).length;
   }
 
   get totalRequestsCount(): number {
@@ -609,9 +708,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   hasSellerOffer(request: any): boolean {
-    return request.pricePerProduct != null &&
-           request.pricePerProduct !== 0 &&
-           request.estimatedTime != null &&
-           request.estimatedTime.trim() !== '';
+    return (
+      request.pricePerProduct != null &&
+      request.pricePerProduct !== 0 &&
+      request.estimatedTime != null &&
+      request.estimatedTime.trim() !== ''
+    );
   }
 }

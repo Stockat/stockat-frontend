@@ -22,7 +22,7 @@ export class OrderService {
   getAdminOrders(): Observable<{ data: AdminOrder[] }> {
     return this.http.get<{ data: AdminOrder[] }>(`${this.orderUrl}/admin`);
   }
-  
+
   getSellerRequestOrders(): Observable<{ data: SellerOrder[] }> {
     return this.http.get<{ data: SellerOrder[] }>(`${this.orderUrl}/seller/req`);
   }
@@ -32,4 +32,15 @@ export class OrderService {
       headers: { 'Content-Type': 'application/json' }
     });
   }
+
+  getBuyerOrders(): Observable<{ data: SellerOrder[] }> {
+    return this.http.get<{ data: SellerOrder[] }>(`${this.orderUrl}/user`);
+  }
+
+  getBuyerRequestOrders(): Observable<{ data: SellerOrder[] }> {
+    return this.http.get<{ data: SellerOrder[] }>(`${this.orderUrl}/user/req`);
+  }
+
+
+
 }
