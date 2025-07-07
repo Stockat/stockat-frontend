@@ -163,4 +163,11 @@ export class UserService {
   getUserStatistics(): Observable<GenericResponseDto<any>> {
     return this.http.get<GenericResponseDto<any>>(`${this.apiUrl}/admin/statistics`);
   }
+
+  getAllVerifications(page: number = 1, size: number = 10, status?: string, searchTerm?: string): Observable<GenericResponseDto<PaginatedDto<UserVerificationReadDto[]>>> {
+    let params = `page=${page}&size=${size}`;
+    if (status) params += `&status=${status}`;
+    if (searchTerm) params += `&searchTerm=${searchTerm}`;
+    return this.http.get<GenericResponseDto<PaginatedDto<UserVerificationReadDto[]>>>(`${this.verificationApiUrl}/admin/all?${params}`);
+  }
 }

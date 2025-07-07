@@ -68,6 +68,13 @@ export class UserVerificationComponent implements OnInit {
   };
 
   verificationSearchTerm: string = '';
+  verificationStatus: string = ''; // default to All
+  statusOptions = [
+    { label: 'All', value: '' },
+    { label: 'Pending', value: 'Pending' },
+    { label: 'Approved', value: 'Approved' },
+    { label: 'Rejected', value: 'Rejected' }
+  ];
 
   constructor(
     private userService: UserService,
@@ -82,14 +89,13 @@ export class UserVerificationComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.loadPendingVerifications();
+    this.loadVerifications();
     this.loadStatistics();
   }
 
-  loadPendingVerifications() {
+  loadVerifications() {
     this.loading = true;
-    
-    this.userService.getPendingVerifications(this.currentPage, this.pageSize, this.verificationSearchTerm).subscribe({
+    this.userService.getAllVerifications(this.currentPage, this.pageSize, this.verificationStatus, this.verificationSearchTerm).subscribe({
       next: (response: GenericResponseDto<PaginatedDto<UserVerificationReadDto[]>>) => {
         this.verifications = response.data.paginatedData;
         this.totalVerifications = response.data.count;
@@ -120,7 +126,7 @@ export class UserVerificationComponent implements OnInit {
   onPageChange(event: any) {
     this.currentPage = event.page + 1;
     this.pageSize = event.rows;
-    this.loadPendingVerifications();
+    this.loadVerifications();
   }
 
   viewVerificationDetails(verification: UserVerificationReadDto) {
@@ -153,7 +159,7 @@ export class UserVerificationComponent implements OnInit {
             detail: `Verification ${statusData.status.toLowerCase()} successfully`
           });
           this.showStatusUpdateDialog = false;
-          this.loadPendingVerifications();
+          this.loadVerifications();
           this.loadStatistics();
         },
         error: (error) => {
@@ -197,6 +203,12 @@ export class UserVerificationComponent implements OnInit {
 
   onVerificationSearchChange(term: string) {
     this.currentPage = 1;
-    this.loadPendingVerifications();
+    this.loadVerifications();
+  }
+
+  onStatusFilterChange(status: string) {
+    this.verificationStatus = status;
+    this.currentPage = 1;
+    this.loadVerifications();
   }
 } 

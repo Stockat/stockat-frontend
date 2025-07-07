@@ -6,12 +6,6 @@
         <h1 class="text-3xl font-bold text-gray-900">User Verification Management</h1>
         <p class="text-gray-600 mt-2">Review and manage user verification requests</p>
       </div>
-      <div class="flex items-center space-x-4">
-        <div class="bg-white rounded-lg shadow-sm p-4">
-          <div class="text-sm text-gray-500">Pending Requests</div>
-          <div class="text-2xl font-bold text-orange-600">{{ totalVerifications }}</div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -93,10 +87,43 @@
     </div>
   </div>
 
+  <!-- Filters and Search (User Management Style) -->
+  <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+      <div class="md:col-span-3">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Search Verifications</label>
+        <div class="relative">
+          <input 
+            pInputText 
+            #searchBox
+            [(ngModel)]="verificationSearchTerm"
+            (ngModelChange)="onVerificationSearchChange($event)"
+            placeholder="Search by name, email, or username..."
+            class="w-full pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+      </div>
+      <div class="md:col-span-1">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+        <p-dropdown 
+          [options]="statusOptions" 
+          [(ngModel)]="verificationStatus" 
+          (onChange)="onStatusFilterChange($event.value)"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select status"
+          class="w-full"
+        ></p-dropdown>
+      </div>
+      <!-- Add more filters here if needed, leave empty columns for spacing -->
+      <div class="md:col-span-2"></div>
+    </div>
+  </div>
+
   <!-- Verification Requests Table -->
   <div class="bg-white rounded-lg shadow-sm overflow-hidden">
     <div class="p-6 border-b border-gray-200">
-      <h3 class="text-lg font-medium text-gray-900">Pending Verification Requests</h3>
+      <h3 class="text-lg font-medium text-gray-900">Verification Requests</h3>
     </div>
 
     <div class="relative">
