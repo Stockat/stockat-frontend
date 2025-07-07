@@ -71,9 +71,12 @@ export class SellerLayoutComponent {
             routerLinkActiveOptions: { endWith: '/seller/stocks' }
           },
           {
-            label: 'Products',
-            icon: 'pi pi-list',
-            badge: '6'
+            label: 'Orders',
+            icon: 'ti ti-list',
+            badge: '6',
+            route: '/seller/orders',
+            routerLink: '/seller/orders',
+            routerLinkActiveOptions: { endWith: '/seller/orders' }
           }
         ]
       },
@@ -82,9 +85,12 @@ export class SellerLayoutComponent {
         icon: 'ti ti-settings-bolt',
         items: [
           {
-            label: 'Settings',
+            label: 'All Services',
             icon: 'pi pi-cog',
-            shortcut: '⌘+O'
+            shortcut: '⌘+O',
+            route: '/seller/services',
+            routerLink: '/seller/services',
+            routerLinkActiveOptions: { endWith: '/seller/services' }
           },
           {
             label: 'Privacy',

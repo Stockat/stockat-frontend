@@ -1,0 +1,337 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
+  <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      @if (isLoading) {
+      <div class="space-y-4">
+        <div class="h-10 bg-gray-200 rounded-lg w-80 mx-auto animate-pulse"></div>
+        <div class="h-6 bg-gray-200 rounded w-64 mx-auto animate-pulse"></div>
+      </div>
+      } @else {
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Update Product Form</h1>
+      <p class="text-gray-600">Modify your product details below</p>
+      }
+    </div>
+
+    <!-- Main Content -->
+    @if (isLoading) {
+    <!-- Loading Skeleton -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Left: Image Gallery Skeleton -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div class="p-4">
+            <div class="h-6 bg-gray-200 rounded w-32 mb-4 animate-pulse"></div>
+            <!-- Image Gallery Skeleton -->
+            <div class="mb-4">
+              <div class="w-full h-64 bg-gray-200 rounded-lg animate-pulse"></div>
+            </div>
+            <!-- Existing Images Grid Skeleton -->
+            <div class="mb-4">
+              <div class="h-4 bg-gray-200 rounded w-28 mb-2 animate-pulse"></div>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="w-full h-24 bg-gray-200 rounded-lg animate-pulse"></div>
+                <div class="w-full h-24 bg-gray-200 rounded-lg animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Product Form Skeleton -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div class="p-6 md:p-8 space-y-6">
+            <!-- Title Skeleton -->
+            <div>
+              <div class="h-4 bg-gray-200 rounded w-24 mb-2 animate-pulse"></div>
+              <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+            </div>
+
+            <!-- Image Upload Skeleton -->
+            <div>
+              <div class="h-4 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+              <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50">
+                <div class="h-20 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+
+            <!-- Location and Category Skeleton -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div class="h-4 bg-gray-200 rounded w-20 mb-2 animate-pulse"></div>
+                <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+              </div>
+              <div>
+                <div class="h-4 bg-gray-200 rounded w-20 mb-2 animate-pulse"></div>
+                <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+              </div>
+            </div>
+
+            <!-- Price and Quantity Skeleton -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div class="h-4 bg-gray-200 rounded w-16 mb-2 animate-pulse"></div>
+                <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+              </div>
+              <div>
+                <div class="h-4 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+                <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+              </div>
+            </div>
+
+            <!-- Description Skeleton -->
+            <div>
+              <div class="h-4 bg-gray-200 rounded w-24 mb-2 animate-pulse"></div>
+              <div class="h-32 bg-gray-200 rounded-lg animate-pulse"></div>
+            </div>
+
+            <!-- Features Section Skeleton -->
+            <div>
+              <div class="h-8 bg-gray-200 rounded w-40 mb-4 animate-pulse"></div>
+              <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div class="h-12 bg-gray-200 rounded-lg mb-3 animate-pulse"></div>
+                <div class="space-y-2 mb-3">
+                  <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                </div>
+                <div class="flex gap-2">
+                  <div class="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
+                  <div class="h-8 w-32 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tags Skeleton -->
+            <div>
+              <div class="h-4 bg-gray-200 rounded w-12 mb-2 animate-pulse"></div>
+              <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+            </div>
+
+            <!-- Submit Button Skeleton -->
+            <div class="text-center">
+              <div class="h-12 w-48 bg-gray-200 rounded-lg mx-auto animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    } @else {
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- Left: Image Gallery -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div class="p-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Images</h3>
+
+            <!-- Image Gallery -->
+            <div class="mb-4">
+              <p-galleria [value]="images" [showIndicators]="true" [showThumbnails]="false"
+                [changeItemOnIndicatorHover]="true" [containerStyle]="{ 'max-width': '100%' }" class="w-full">
+                <ng-template #item let-item>
+                  <img [src]="item.imageUrl" class="w-full h-64 object-cover rounded-lg" alt="Product image" />
+                </ng-template>
+              </p-galleria>
+            </div>
+
+            <!-- Existing Images Grid -->
+            <div class="existing-images mb-4" *ngIf="images?.length">
+              <h4 class="text-sm font-semibold text-gray-700 mb-2">Manage Images</h4>
+              <div class="grid grid-cols-2 gap-2">
+                <div *ngFor="let img of images; let i = index" class="relative group">
+                  <img [src]="img.imageUrl" class="w-full h-24 object-cover rounded-lg border border-gray-200"
+                    alt="Product image" />
+                  <button
+                    class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                    type="button" (click)="removeExistingImage(i)" [disabled]="isUpdating">
+                    ×
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Product Form -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <p-toast />
+
+          <form class="p-6 md:p-8" [formGroup]="productForm" (submit)="Updateproduct()" [class.opacity-50]="isUpdating">
+
+            <!-- Product Title -->
+            <div class="mb-6">
+              <label for="title" class="block text-sm font-semibold text-gray-700 mb-2">Product Title *</label>
+              <input type="text" pInputText formControlName="title"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Enter product title" [disabled]="isUpdating" />
+              <div class="mt-2" *ngIf="productForm.get('title')?.invalid && productForm.get('title')?.touched">
+                @if(productForm.get('title')?.errors?.['required']){
+                <p-message severity="error" variant="simple" size="small">Title is required.</p-message>
+                }
+                @if(productForm.get('title')?.errors?.['minlength']){
+                <p-message severity="error" variant="simple" size="small">Minimum 3 characters required.</p-message>
+                }
+                @if(productForm.get('title')?.errors?.['maxlength']){
+                <p-message severity="error" variant="simple" size="small">Maximum 50 characters allowed.</p-message>
+                }
+              </div>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="mb-6">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Add New Images</label>
+              <div
+                class="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 hover:bg-gray-100 transition-colors">
+                <p-fileUpload #imgref name="images" [multiple]="true" accept="image/*" mode="advanced" [auto]="false"
+                  customUpload="true" (onSelect)="onSelect($event)" (onRemove)="onRemove($event)"
+                  [showUploadButton]="false" [showCancelButton]="false" [maxFileSize]="5000000" styleClass="w-full"
+                  [disabled]="isUpdating">
+                </p-fileUpload>
+              </div>
+              @if ( images?.length == 0 && imgref.files.length == 0) {
+              <p-message severity="error" variant="simple" size="small" class="mt-2">At least one image is
+                required.</p-message>
+              }
+            </div>
+
+            <!-- Location and Category -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Location *</label>
+                <p-select [options]="cities" formControlName="location" placeholder="Select a City" class="w-full"
+                  styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  [disabled]="isUpdating" />
+                @if(productForm.get('location')?.errors?.['required']){
+                <p-message severity="error" variant="simple" size="small" class="mt-2">Location is required.</p-message>
+                }
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
+                <p-select [options]="categories" formControlName="category" optionLabel="categoryName" optionValue="id"
+                  placeholder="Select a Category" class="w-full"
+                  styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  [disabled]="isUpdating" />
+                <div class="mt-2" *ngIf="productForm.get('category')?.invalid && productForm.get('category')?.touched">
+                  @if(productForm.get('category')?.errors?.['required']){
+                  <p-message severity="error" variant="simple" size="small">Category is required.</p-message>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Price and Quantity -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label for="price" class="block text-sm font-semibold text-gray-700 mb-2">Price *</label>
+                <p-inputNumber inputId="price" formControlName="price" [min]="1" mode="decimal" class="w-full"
+                  styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter price" [disabled]="isUpdating" />
+              </div>
+
+              <div>
+                <label for="minQty" class="block text-sm font-semibold text-gray-700 mb-2">Minimum Quantity *</label>
+                <p-inputNumber inputId="minQty" formControlName="minQuantity" [min]="1" mode="decimal" class="w-full"
+                  styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter minimum quantity" [disabled]="isUpdating" />
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-6">
+              <label for="description" class="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
+              <textarea
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                pTextarea id="description" formControlName="description" rows="5"
+                placeholder="Enter product description" [disabled]="isUpdating"></textarea>
+              @if (productForm.get('description')?.errors?.['required'] && productForm.get('description')?.touched) {
+              <p-message severity="error" variant="simple" size="small" class="mt-2">
+                Description is required.
+              </p-message>
+              }
+            </div>
+
+            <!-- Features Section -->
+            <div class="mb-6">
+              <h3 class="text-2xl font-bold text-gray-900 mb-4">Product Features</h3>
+
+              <div formArrayName="features" class="space-y-4">
+                <div *ngFor="let feature of features.controls; let i = index" [formGroupName]="i"
+                  class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <!-- Feature Key -->
+                  <div class="mb-3">
+                    <input type="text"
+                      class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      formControlName="key" placeholder="Feature Key (e.g., Color, Size, Material)"
+                      [disabled]="isUpdating" />
+                  </div>
+
+                  <!-- Feature Values -->
+                  <div formArrayName="values" class="space-y-2 mb-3">
+                    <div *ngFor="let value of featureValues(i).controls; let j = index" class="flex gap-2 items-center">
+                      <input [formControlName]="j"
+                        class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Feature Value" [disabled]="isUpdating" />
+                      <p-button icon="pi pi-trash" [rounded]="true" severity="danger" (click)="removeFeatureValue(i, j)"
+                        [raised]="true" class="p-3" [disabled]="isUpdating" />
+                    </div>
+                  </div>
+
+                  <!-- Feature Action Buttons -->
+                  <div class="flex flex-wrap gap-2">
+                    <p-button label="Add Value" icon="pi pi-plus" [rounded]="true" severity="success"
+                      (click)="addFeatureValue(i)" [raised]="true" class="text-sm" [disabled]="isUpdating" />
+                    <p-button label="Remove Feature" icon="pi pi-trash" [rounded]="true" severity="danger"
+                      (click)="removeFeature(i)" [raised]="true" class="text-sm" [disabled]="isUpdating" />
+                  </div>
+                </div>
+
+                @if (productForm.get('features')?.errors?.['required'] && productForm.get('features')?.touched) {
+                <p-message severity="error" variant="simple" size="small">
+                  At least one feature is required.
+                </p-message>
+                }
+
+                @if (productForm.get('features')?.errors?.['invalidFormat'] && productForm.get('features')?.touched) {
+                <p-message severity="error" variant="simple" size="small">
+                  Each feature must have a non-empty key and at least one non-empty value.
+                </p-message>
+                }
+              </div>
+
+              <!-- Add Feature Button -->
+              <p-button label="Add Feature" icon="pi pi-plus" [rounded]="true" severity="success" (click)="addFeature()"
+                [raised]="true" class="mt-4" [disabled]="isUpdating" />
+            </div>
+
+            <!-- Tags -->
+            <div class="mb-8">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Tags *</label>
+              <p-multiselect [options]="tags" formControlName="tags" optionLabel="name" optionValue="id"
+                placeholder="Select Tags" [maxSelectedLabels]="5" class="w-full"
+                styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                [disabled]="isUpdating" />
+              @if (productForm.get('tags')?.errors?.['required'] && productForm.get('tags')?.touched) {
+              <p-message severity="error" variant="simple" size="small" class="mt-2">
+                At least one Tag is required.
+              </p-message>
+              }
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center">
+              <p-button [label]="isUpdating ? 'Updating...' : 'Update Product'"
+                [icon]="isUpdating ? 'pi pi-spinner pi-spin' : 'pi pi-check'"
+                [disabled]="productForm.invalid || isUpdating" [rounded]="true" severity="success" type="submit"
+                [raised]="true" class="px-8 py-3 text-lg font-semibold"
+                styleClass="px-8 py-3 text-lg font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 border-0 shadow-lg" />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+</div>

@@ -1,1 +1,102 @@
-<p>all-stocks works!</p>
+<div class="mx-5 my-4">
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+    <p-card header="All Stocks">
+        <p-divider />
+        <div class="mb-3 flex items-center gap-4">
+            <label for="stockStatusFilter" class="font-semibold">Filter by Status:</label>
+            <p-dropdown
+                inputId="stockStatusFilter"
+                [options]="[
+                    {label: 'All', value: ''},
+                    {label: 'For Sale', value: 'ForSale'},
+                    {label: 'Sold Out', value: 'SoldOut'}
+                ]"
+                [(ngModel)]="stockStatusFilter"
+                placeholder="Select Status"
+                (onChange)="dt1.filter(stockStatusFilter, 'stockStatus', 'equals')"
+                styleClass="w-40"
+            ></p-dropdown>
+        </div>
+        <p-table #dt1 [value]="stockList" dataKey="id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]"
+            [loading]="loading" [paginator]="true" [globalFilterFields]="['prodcutName', 'quantity']" >
+            <ng-template #header>
+                <tr>
+                    <th pSortableColumn="productName" style="min-width:15rem">
+                        <div class="flex items-center justify-between">
+                            Product Name
+                            <p-sortIcon field="productName" />
+                        </div>
+                    </th>
+                    <th style="min-width:5rem">
+                        <div class="flex items-center justify-between">
+                            Quantity
+                        </div>
+                    </th>
+                    <th style="min-width:10rem">
+                        <div class="flex items-center justify-between">
+                            Features
+                        </div>
+                    </th>
+                    <th style="min-width:10rem">
+                        <div class="flex items-center justify-between">
+                            Actions
+                        </div>
+                    </th>
+                    <th style="min-width:10rem">
+                        <div class="flex items-center justify-between">
+                            Status
+                        </div>
+                    </th>
+                </tr>
+            </ng-template>
+            <ng-template #body let-stock>
+                <tr [ngClass]="{'opacity-50': stock.stockStatus !== 'ForSale'}">
+                    <td>
+                        {{ stock.productName }}
+                    </td>
+                    <td>
+                        {{ stock.quantity }}
+                    </td>
+                    <td>
+                        <p-button (click)="op.toggle($event)" icon="ti ti-stars" variant="text" raised="true" rounded="true" label="Features" />
+                        <p-popover #op>
+                            <span class="font-medium text-surface-900 dark:text-surface-0 block mb-2">Features</span>
+                            @for (item of stock.stockFeatures; track $index) {
+                                <p class="flex items-center justify-between">
+                                    <p-chip label="{{item.name}} : {{item.value}}" icon="ti ti-star" class="mb-2" />
+                                </p>
+                            }
+                        </p-popover>
+                    </td>
+                    <td>
+                        @if(stock.stockStatus == 'ForSale'){
+                        <ng-container >
+                            <p-button class="me-2" label="Edit" icon="ti ti-edit" (click)="navigateToUpdateStock(stock.id)"
+                                variant="text" [raised]="true" [rounded]="true" severity="help" />
+                            <p-button icon="ti ti-trash" (click)="deleteStock(stock.id)" variant="text" [raised]="true"
+                                [rounded]="true" severity="danger" />
+                        </ng-container>
+                    }
+                    @else{
+                        Sold Out
+                    }
+                    </td>
+                    <td>
+                        <span class="p-badge" [ngClass]="{
+                            'p-badge-success': stock.stockStatus === 'ForSale',
+                            'p-badge-danger': stock.stockStatus === 'SoldOut'
+                        }">
+                            {{ stock.stockStatus }}
+                        </span>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="7">No Stocks found.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-card>
+</div>

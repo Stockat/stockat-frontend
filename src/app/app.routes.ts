@@ -4,8 +4,12 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { SellerLayoutComponent } from './layouts/seller-layout/seller-layout.component';
 import { sellerRoutes } from './features/seller/seller.routes';
+import { adminRoutes } from './features/admin/admin.routes';
 import { ProductCardComponent } from './features/Home/product-card/product-card.component';
 import { ProductDetailsComponent } from './features/ProductDetails/product-details/product-details.component';
+import { ServiceRequestDetailsComponent } from './features/profile/service-request-details.component';
+import { ProductStocksComponent } from './features/product-stocks/product-stocks.component';
+import { SellerProfileComponent } from './features/seller/seller-profile/seller-profile.component';
 
 export const routes: Routes = [
   {
@@ -13,7 +17,14 @@ export const routes: Routes = [
     component: ProductCardComponent,
     children: [],
   },
-  { path: 'ProductDetails/:id', component: ProductDetailsComponent },
+  { 
+    path: 'ProductDetails/:id',
+    component: ProductDetailsComponent
+  },
+  {
+    path: 'product-stocks/:id',
+    component: ProductStocksComponent
+  },
   // Auth
   {
     path: 'login',
@@ -56,29 +67,57 @@ export const routes: Routes = [
       import('./features/profile/profile.component').then(
         (m) => m.ProfileComponent
       ),
+    children: [
+      { path: 'requests/:id', component: ServiceRequestDetailsComponent }
+    ]
   },
-  // Admin
-  {
-    path: 'admin',
-    component: AdminLayoutComponent,
-  },
+  // End Auth
   // Seller
   {
     path: 'seller',
     component: SellerLayoutComponent,
     children: sellerRoutes,
   },
-    //Auction
-    {
-        path: 'auctions',
-        loadComponent: () => import('./features/Auction/auctions-list/auctions-list.component').then(m => m.AuctionsListComponent)
-    },
-    {
-        path: 'auction/:id',
-        loadComponent: () => import('./features/Auction/auction-details/auction-details.component').then(m => m.AuctionDetailsComponent)
+  // End Seller
+  // Admin
+  {
+    path: 'admin',
+    component: AdminLayoutComponent,
+    children: adminRoutes,
+  },
+  // End Admin
+  // Services
+  {
+    path: 'services',
+    loadChildren: () => import('./features/service/service.module').then(m => m.ServiceModule)
+  },
+  //Auction
+  {
+    path: 'auctions',
+    loadComponent: () => import('./features/Auction/auctions-list/auctions-list.component').then(m => m.AuctionsListComponent)
+  },
+  {
+    path: 'auction/:id',
+    loadComponent: () => import('./features/Auction/auction-details/auction-details.component').then(m => m.AuctionDetailsComponent)
     },
     {
       path: 'auctions/mybids',
       loadComponent: () => import('./features/Auction/buyer-bids/buyer-bids.component').then(m => m.BuyerBidsComponent)
-    }
+  },
+  // Seller Profile
+  {
+    path: 'seller-profile/:id',
+    component: SellerProfileComponent
+  },
+  {
+    path: 'chat',
+    loadComponent: () =>
+      import('./features/chat/chat-page/chat-page.component').then(
+        (m) => m.ChatPageComponent
+      ),
+  },
+  {
+    path: 'order-process',
+    loadComponent: () => import('./features/order-process/order-process.component').then(m => m.OrderProcessComponent)
+  },
 ];

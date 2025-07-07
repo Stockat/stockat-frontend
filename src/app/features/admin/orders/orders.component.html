@@ -1,0 +1,348 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Admin Orders Management</h1>
+      <p class="text-gray-600">Monitor and manage all orders and requests across the platform</p>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-xl font-semibold text-gray-800">Order Summary</h2>
+      </div>
+
+      <!-- First Row -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+        <!-- Pending -->
+        <div
+          class="bg-blue-50 p-6 rounded-xl border border-blue-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-blue-100 rounded-xl mr-4">
+              <i class="pi pi-clock text-blue-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-blue-600 font-medium">Pending</div>
+              <div class="text-2xl font-bold text-blue-800">{{ pendingCount }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Processing -->
+        <div
+          class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-yellow-100 rounded-xl mr-4">
+              <i class="pi pi-cog text-yellow-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-yellow-600 font-medium">Processing</div>
+              <div class="text-2xl font-bold text-yellow-800">{{ processingCount }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ready -->
+        <div
+          class="bg-green-50 p-6 rounded-xl border border-green-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-green-100 rounded-xl mr-4">
+              <i class="pi pi-check-circle text-green-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-green-600 font-medium">Ready</div>
+              <div class="text-2xl font-bold text-green-800">{{ readyCount }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shipped -->
+        <div
+          class="bg-purple-50 p-6 rounded-xl border border-purple-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-purple-100 rounded-xl mr-4">
+              <i class="pi pi-send text-purple-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-purple-600 font-medium">Shipped</div>
+              <div class="text-2xl font-bold text-purple-800">{{ shippedCount }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Second Row -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <!-- Delivered -->
+        <div
+          class="bg-emerald-50 p-6 rounded-xl border border-emerald-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-emerald-100 rounded-xl mr-4">
+              <i class="pi pi-home text-emerald-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-emerald-600 font-medium">Delivered</div>
+              <div class="text-2xl font-bold text-emerald-800">{{ deliveredCount }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cancelled -->
+        <div
+          class="bg-red-50 p-6 rounded-xl border border-red-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-red-100 rounded-xl mr-4">
+              <i class="pi pi-ban text-red-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-red-600 font-medium">Cancelled</div>
+              <div class="text-2xl font-bold text-red-800">{{ cancelledCount }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending Seller -->
+        <div
+          class="bg-orange-50 p-6 rounded-xl border border-orange-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-orange-100 rounded-xl mr-4">
+              <i class="pi pi-user text-orange-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-orange-600 font-medium">Pending Seller</div>
+              <div class="text-2xl font-bold text-orange-800">{{ pendingSellerCount }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending Buyer -->
+        <div
+          class="bg-indigo-50 p-6 rounded-xl border border-indigo-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-indigo-100 rounded-xl mr-4">
+              <i class="pi pi-users text-indigo-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-indigo-600 font-medium">Pending Buyer</div>
+              <div class="text-2xl font-bold text-indigo-800">{{ pendingBuyerCount }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold text-gray-800">Filter Orders</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Status Filter -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Order Status
+          </label>
+          <p-dropdown [options]="[
+              {label: 'All Status', value: ''},
+              {label: 'Pending', value: 'Pending'},
+              {label: 'Processing', value: 'Processing'},
+              {label: 'Ready', value: 'Ready'},
+              {label: 'Shipped', value: 'Shipped'},
+              {label: 'Cancelled', value: 'Cancelled'},
+              {label: 'Delivered', value: 'Delivered'}
+            ]" [(ngModel)]="statusFilter" placeholder="Select Status"
+            (onChange)="dt.filter(statusFilter, 'status', 'equals')"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-blue-400"></p-dropdown>
+        </div>
+
+        <!-- Order Type Filter -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+              </path>
+            </svg>
+            Order Type
+          </label>
+          <p-dropdown [options]="[
+              {label: 'All Types', value: ''},
+              {label: 'Order', value: 'Order'},
+              {label: 'Request', value: 'Request'}
+            ]" [(ngModel)]="orderTypeFilter" placeholder="Select Type"
+            (onChange)="dt.filter(orderTypeFilter, 'orderType', 'equals')"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:border-green-400"></p-dropdown>
+        </div>
+
+        <!-- Search -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            Search
+          </label>
+          <input pInputText type="text" [(ngModel)]="globalFilter" (ngModelChange)="dt.filterGlobal($event, 'contains')"
+            placeholder="Search orders, buyers, sellers..."
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 hover:border-purple-400" />
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-gray-200">
+        <div class="w-1/2">
+          <p-button label="Clear Filters" icon="pi pi-times" variant="text" [raised]="true" severity="danger"
+            (onClick)="clearFilters()" class="w-full h-12 font-semibold" />
+        </div>
+        <div class="w-1/2">
+          <p-button label="Refresh Data" icon="pi pi-refresh" variant="text" [raised]="true" severity="info"
+            (onClick)="refreshData()" class="w-full h-12 font-semibold" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <p-table #dt [value]="orders" [loading]="loading" [paginator]="true" [rows]="10"
+          [rowsPerPageOptions]="[10, 25, 50]"
+          [globalFilterFields]="['buyerFirstName', 'buyerLastName', 'sellerFirstName', 'sellerLastName', 'status', 'orderType', 'productId', 'stockId']"
+          [filters]="{ status: { value: statusFilter, matchMode: 'equals' }, orderType: { value: orderTypeFilter, matchMode: 'equals' } }"
+          [tableStyle]="{ 'min-width': '80rem' }" class="w-full" styleClass="w-full">
+          <ng-template #caption>
+            <div class="flex items-center justify-between p-6">
+              <span class="text-2xl font-bold text-gray-900">Orders List</span>
+              <span class="text-sm text-gray-600">Total: {{ orders ? orders.length : 0 }} orders</span>
+            </div>
+          </ng-template>
+
+          <ng-template pTemplate="header">
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="p-4 text-left font-semibold text-gray-700">Order #</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Date</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Type</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Product</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Stock</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Buyer</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Seller</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Quantity</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Price</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Status</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Actions</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-order>
+            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="p-4">
+                <div class="font-medium text-gray-900">#{{ order.id }}</div>
+              </td>
+              <td class="p-4">
+                <div class="text-sm text-gray-600">{{ order.craetedAt | date:'short' }}</div>
+              </td>
+              <td class="p-4">
+                <p-tag [value]="order.orderType" [severity]="order.orderType === 'Request' ? 'info' : 'success'"
+                  class="text-xs" />
+              </td>
+              <td class="p-4">
+                <div class="flex items-center gap-2">
+                  <div class="p-2 bg-blue-100 rounded-lg">
+                    <i class="pi pi-box text-blue-600 text-sm"></i>
+                  </div>
+                  <span class="font-semibold text-gray-900">#{{ order.productId }}</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex items-center gap-2">
+                  <div class="p-2 bg-green-100 rounded-lg">
+                    <i class="pi pi-tag text-green-600 text-sm"></i>
+                  </div>
+                  <span class="font-semibold text-gray-900">#{{ order.stockId }}</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-600 font-bold text-sm">
+                    {{ order.buyerFirstName[0] }}{{ order.buyerLastName[0] }}
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">{{ order.buyerFirstName }} {{ order.buyerLastName }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-full bg-green-200 flex items-center justify-center text-green-600 font-bold text-sm">
+                    {{ order.sellerFirstName[0] }}{{ order.sellerLastName[0] }}
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">{{ order.sellerFirstName }} {{ order.sellerLastName }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="p-4">
+                <div class="font-semibold text-gray-900">{{ order.quantity }}</div>
+              </td>
+              <td class="p-4">
+                <div class="font-semibold text-green-600">{{ order.price | currency }}</div>
+              </td>
+              <td class="p-4">
+                <p-tag [value]="order.status" [severity]="getStatusSeverity(order.status)" class="text-xs" />
+              </td>
+              <td class="p-4">
+                <div class="flex flex-wrap gap-2">
+                  <ng-container *ngIf="canShip(order)">
+                    <p-button label="Ship" icon="pi pi-send" size="small" variant="text" [raised]="true" severity="info"
+                      (onClick)="updateStatus(order, 'Shipped')" pTooltip="Mark as shipped" class="text-xs" />
+                  </ng-container>
+                  <ng-container *ngIf="canDeliver(order)">
+                    <p-button label="Deliver" icon="pi pi-check-circle" size="small" variant="text" [raised]="true"
+                      severity="success" (onClick)="updateStatus(order, 'Delivered')" pTooltip="Mark as delivered"
+                      class="text-xs" />
+                  </ng-container>
+                  <ng-container *ngIf="canCancel(order)">
+                    <p-button label="Cancel" icon="pi pi-ban" size="small" variant="text" [raised]="true"
+                      severity="danger" (onClick)="updateStatus(order, 'Cancelled')" pTooltip="Cancel order"
+                      class="text-xs" />
+                  </ng-container>
+                  <ng-container *ngIf="!canShip(order) && !canDeliver(order) && !canCancel(order)">
+                    <span class="text-gray-400 text-sm">No Actions</span>
+                  </ng-container>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="11" class="p-8 text-center">
+                <div class="flex flex-col items-center space-y-4">
+                  <i class="pi pi-inbox text-4xl text-gray-300"></i>
+                  <div class="text-gray-500">No orders found.</div>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="footer">
+            <tr class="bg-gray-50">
+              <td colspan="11" class="p-4 text-center text-gray-600">
+                Showing {{ orders ? orders.length : 0 }} orders
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p-toast></p-toast>

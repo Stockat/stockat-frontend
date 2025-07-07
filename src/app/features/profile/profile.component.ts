@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
@@ -14,16 +14,28 @@ import { UserVerificationCreateDto } from '../../core/models/user-models/user-ve
 import { UserVerificationReadDto } from '../../core/models/user-models/user-verification-read.dto';
 import { UserVerificationUpdateDto } from '../../core/models/user-models/user-verification-update.dto';
 import { AuthService } from '../../core/services/auth.service';
+import { ServiceRequestService } from '../../core/services/service-request.service';
+import { RouterModule, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { ServiceRequestDetailsComponent } from './service-request-details.component';
+import { FormsModule } from '@angular/forms';
+import { filter } from 'rxjs/operators';
+import { PaginatorModule } from 'primeng/paginator';
+import { PaginatorState } from 'primeng/paginator';
+import { TableModule } from 'primeng/table';
+import { DropdownModule } from 'primeng/dropdown';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ButtonModule, InputTextModule, ReactiveFormsModule, ToastModule, ConfirmDialogModule],
+  imports: [CommonModule, ButtonModule, InputTextModule, ReactiveFormsModule, ToastModule, ConfirmDialogModule, RouterModule, ServiceRequestDetailsComponent, FormsModule, PaginatorModule, TableModule, DropdownModule, ProgressSpinnerModule, TagModule, TooltipModule],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css'],
   providers: [MessageService, ConfirmationService]
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
   activeTab: string = 'about';
   user: UserReadDto | null = null;
   loading = false;
@@ -38,13 +50,30 @@ export class ProfileComponent implements OnInit {
   verifyForm: FormGroup;
   changePasswordLoading = false;
   submitted = false;
+  buyerRequests: any[] = [];
+  buyerRequestsLoading = false;
+  isDetailsRoute = false;
+  buyerRequestDetailsId: number = 0;
+  searchTerm: string = '';
+  statusFilter: string = '';
+  filteredRequests: any[] = [];
+
+  // Pagination properties for requests
+  totalRequests: number = 0;
+  requestsPage: number = 0;
+  requestsSize: number = 10;
+
+  private navigationSubscription: any;
 
   constructor(
     private userService: UserService,
     private fb: FormBuilder,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private serviceRequestService: ServiceRequestService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.editForm = this.fb.group({
       firstName: ['', Validators.required],
@@ -67,21 +96,43 @@ export class ProfileComponent implements OnInit {
       image: [null],
       imagePreview: ['']
     });
+    this.router.events.subscribe(() => {
+      this.isDetailsRoute = !!this.route.firstChild;
+    });
+    // Listen for navigation events to refresh requests list
+    this.navigationSubscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        if (this.activeTab === 'requests') {
+          this.fetchBuyerRequests();
+        }
+      });
   }
 
   ngOnInit() {
     this.fetchUser();
     this.fetchUserVerification();
+    this.filterRequests();
+  }
+
+  ngOnDestroy() {
+    if (this.navigationSubscription) {
+      this.navigationSubscription.unsubscribe();
+    }
   }
 
   switchTab(tab: string) {
     this.activeTab = tab;
+    this.buyerRequestDetailsId = 0;
     if (tab !== 'edit') {
       this.editMode = false;
       this.editForm.disable();
     }
     if (tab === 'verify') {
       this.fetchUserVerification();
+    }
+    if (tab === 'requests') {
+      this.fetchBuyerRequests();
     }
   }
 
@@ -439,6 +490,60 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+      fetchBuyerRequests() {
+    this.buyerRequestsLoading = true;
+    // Convert 0-based page to 1-based for API
+    const apiPage = this.requestsPage + 1;
+    console.log('Fetching buyer requests - Page:', apiPage, 'Size:', this.requestsSize);
+
+    // Add a timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      console.warn('Buyer requests fetch timed out');
+      this.buyerRequestsLoading = false;
+      this.buyerRequests = [];
+      this.totalRequests = 0;
+    }, 10000); // 10 second timeout
+
+    this.serviceRequestService.getBuyerRequests(apiPage, this.requestsSize).subscribe({
+      next: (res) => {
+        clearTimeout(timeout); // Clear timeout on success
+        console.log('Buyer requests API response:', res);
+
+        if (res && res.data) {
+          this.buyerRequests = res.data.paginatedData || res.data;
+          this.totalRequests = res.data.count || this.buyerRequests.length;
+          // Convert 1-based page back to 0-based for PrimeNG
+          this.requestsPage = (res.data.page || 1) - 1;
+          this.requestsSize = res.data.size || 10;
+        } else {
+          // Handle case where response is direct array
+          this.buyerRequests = Array.isArray(res) ? res : [];
+          this.totalRequests = this.buyerRequests.length;
+        }
+
+        console.log('Processed buyer requests:', this.buyerRequests);
+        console.log('Total requests:', this.totalRequests);
+        console.log('Current page:', this.requestsPage);
+        console.log('Page size:', this.requestsSize);
+
+        this.filterRequests();
+        this.buyerRequestsLoading = false;
+      },
+      error: (err) => {
+        clearTimeout(timeout); // Clear timeout on error
+        console.error('Error fetching buyer requests:', err);
+        this.buyerRequests = [];
+        this.totalRequests = 0;
+        this.filterRequests();
+        this.buyerRequestsLoading = false;
+      }
+    });
+  }
+
+  showRequestDetails(id: number) {
+    this.buyerRequestDetailsId = id;
+  }
+
   onVerifyImageSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -449,5 +554,64 @@ export class ProfileComponent implements OnInit {
       };
       reader.readAsDataURL(file);
     }
+  }
+
+  filterRequests() {
+    this.filteredRequests = this.buyerRequests.filter(req => {
+      const matchesSearch = !this.searchTerm ||
+        (req.serviceTitle && req.serviceTitle.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
+        (req.sellerName && req.sellerName.toLowerCase().includes(this.searchTerm.toLowerCase()));
+      const matchesStatus = !this.statusFilter || req.serviceStatus === this.statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }
+
+  onRequestsPageChange(event: PaginatorState) {
+    this.requestsPage = event.page ?? 0;
+    this.requestsSize = event.rows ?? 10;
+    this.fetchBuyerRequests();
+  }
+
+  getStatusSeverity(status: string): string {
+    switch (status) {
+      case 'Pending': return 'warning';
+      case 'InProgress': return 'info';
+      case 'Delivered': return 'success';
+      case 'Cancelled': return 'danger';
+      default: return 'secondary';
+    }
+  }
+
+  getBuyerStatusSeverity(status: string): string {
+    switch (status) {
+      case 'Pending': return 'warning';
+      case 'Approved': return 'success';
+      case 'Rejected': return 'danger';
+      default: return 'warning';
+    }
+  }
+
+  // Computed properties for stats
+  get pendingRequestsCount(): number {
+    return (this.buyerRequests || []).filter(r => r.serviceStatus === 'Pending').length;
+  }
+
+  get approvedRequestsCount(): number {
+    return (this.buyerRequests || []).filter(r => r.buyerApprovalStatus === 'Approved').length;
+  }
+
+  get rejectedRequestsCount(): number {
+    return (this.buyerRequests || []).filter(r => r.buyerApprovalStatus === 'Rejected').length;
+  }
+
+  get totalRequestsCount(): number {
+    return (this.buyerRequests || []).length;
+  }
+
+  hasSellerOffer(request: any): boolean {
+    return request.pricePerProduct != null &&
+           request.pricePerProduct !== 0 &&
+           request.estimatedTime != null &&
+           request.estimatedTime.trim() !== '';
   }
 }

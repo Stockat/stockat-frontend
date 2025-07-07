@@ -1,0 +1,195 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+  <!-- Hero Section -->
+  <div class="bg-white/70 backdrop-blur-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex-1">
+          <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">My Services</h1>
+          <p class="text-gray-600 text-lg">Manage and organize your service offerings</p>
+        </div>
+        <div class="mt-6 lg:mt-0">
+          <button
+            pButton
+            label="Add New Service"
+            icon="pi pi-plus"
+            class="bg-gradient-to-r from-blue-600 to-purple-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+            (click)="addService()">
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+            <i class="pi pi-briefcase text-blue-600 text-xl"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Total Services</p>
+            <p class="text-2xl font-bold text-gray-900">{{ totalCount || 0 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+            <i class="pi pi-check-circle text-green-600 text-xl"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Active Services</p>
+            <p class="text-2xl font-bold text-gray-900">{{ services?.length || 0 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+            <i class="pi pi-dollar text-purple-600 text-xl"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Average Price</p>
+            <p class="text-2xl font-bold text-gray-900">${{ getAveragePrice() }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Services Table -->
+    <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+      <!-- Loading State -->
+      <div *ngIf="loading" class="text-center py-16">
+        <p-progressSpinner
+          styleClass="w-16 h-16"
+          strokeWidth="4"
+          fill="var(--surface-ground)"
+          animationDuration=".5s">
+        </p-progressSpinner>
+        <p class="text-gray-600 font-semibold mt-4">Loading your services...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!loading && (!services || services.length === 0)" class="text-center py-16">
+        <div class="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="pi pi-briefcase text-white text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">No Services Yet</h3>
+        <p class="text-gray-600 mb-6">Start by adding your first service to showcase your offerings</p>
+        <button
+          pButton
+          label="Add Your First Service"
+          icon="pi pi-plus"
+          class="bg-gradient-to-r from-blue-600 to-purple-600 border-0"
+          (click)="addService()">
+        </button>
+      </div>
+
+      <!-- Services Table -->
+      <div *ngIf="!loading && services && services.length > 0" class="overflow-x-auto">
+        <p-table
+          [value]="services"
+          styleClass="p-datatable-lg"
+          class="modern-table">
+          <ng-template pTemplate="header">
+            <tr class="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+              <th class="px-6 py-4 text-left font-semibold text-sm">Service Name</th>
+              <th class="px-6 py-4 text-left font-semibold text-sm">Description</th>
+              <th class="px-6 py-4 text-left font-semibold text-sm">Price</th>
+              <th class="px-6 py-4 text-left font-semibold text-sm">Min Qty</th>
+              <th class="px-6 py-4 text-left font-semibold text-sm">Est. Time</th>
+              <th class="px-6 py-4 text-left font-semibold text-sm">Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-service>
+            <tr class="border-b border-gray-100 hover:bg-blue-50/50 transition-all duration-200">
+              <td class="px-6 py-4">
+                <div class="font-semibold text-gray-900 text-sm">{{ service.name }}</div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="text-gray-700 text-sm max-w-xs truncate" [pTooltip]="service.description">
+                  {{ service.description }}
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="text-green-700 font-bold text-sm">${{ service.pricePerProduct }}</div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="text-gray-700 text-sm">{{ service.minQuantity }}</div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="text-gray-700 text-sm">{{ service.estimatedTime }}</div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <button
+                    pButton
+                    icon="pi pi-eye"
+                    class="p-button-sm p-button-rounded p-button-outlined p-button-info"
+                    (click)="viewServiceDetails(service)"
+                    pTooltip="View Details">
+                  </button>
+                  <button
+                    pButton
+                    icon="pi pi-pencil"
+                    class="p-button-sm p-button-rounded p-button-outlined p-button-warning"
+                    (click)="editService(service)"
+                    pTooltip="Edit Service">
+                  </button>
+                  <button
+                    pButton
+                    icon="pi pi-trash"
+                    class="p-button-sm p-button-rounded p-button-outlined p-button-danger"
+                    (click)="deleteService(service)"
+                    pTooltip="Delete Service">
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+
+    <!-- Paginator -->
+    <div *ngIf="!loading && services && services.length > 0" class="mt-8">
+      <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+        <p-paginator
+          [rows]="size"
+          [totalRecords]="totalCount"
+          [rowsPerPageOptions]="[10, 20, 50]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} services"
+          [showFirstLastIcon]="true"
+          [showPageLinks]="true"
+          (onPageChange)="onPageChange($event)"
+          styleClass="!bg-transparent !border-none !p-0">
+        </p-paginator>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <app-service-edit-modal
+    [visible]="editModalVisible"
+    [service]="selectedService"
+    (close)="handleEditModalClose()"
+    (save)="handleEditModalSave($event)">
+  </app-service-edit-modal>
+
+  <app-service-add-modal
+    [visible]="addModalVisible"
+    [isAddingService]="isAddingService"
+    (close)="addModalVisible = false"
+    (save)="handleAddModalSave($event)">
+  </app-service-add-modal>
+
+  <!-- Toast and ConfirmDialog -->
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+</div>
