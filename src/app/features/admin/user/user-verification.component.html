@@ -206,22 +206,15 @@
                   pTooltip="View Details"
                   (click)="viewVerificationDetails(verification)"
                 ></button>
-
-                <button 
-                  pButton 
-                  icon="pi pi-check" 
-                  class="p-button-text p-button-sm p-button-success"
-                  pTooltip="Approve"
-                  (click)="openStatusUpdateDialog(verification)"
-                ></button>
-
-                <button 
-                  pButton 
-                  icon="pi pi-times" 
-                  class="p-button-text p-button-sm p-button-danger"
-                  pTooltip="Reject"
-                  (click)="openStatusUpdateDialog(verification)"
-                ></button>
+                <ng-container *ngIf="!isApprovedStatus(verification)">
+                  <button 
+                    pButton 
+                    icon="pi pi-pencil" 
+                    class="p-button-text p-button-sm p-button-warning"
+                    pTooltip="Update Status"
+                    (click)="openStatusUpdateDialog(verification)"
+                  ></button>
+                </ng-container>
               </div>
             </td>
           </tr>
@@ -369,7 +362,8 @@
           pButton 
           label="Update Status" 
           [class]="statusUpdateForm.get('status')?.value === 'Approved' ? 'p-button-success' : 'p-button-danger'"
-          [disabled]="!statusUpdateForm.valid"
+          [disabled]="!statusUpdateForm.valid || statusUpdateLoading"
+          [loading]="statusUpdateLoading"
           (click)="submitStatusUpdate()"
         ></button>
       </div>

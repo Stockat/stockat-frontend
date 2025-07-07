@@ -76,6 +76,8 @@ export class UserVerificationComponent implements OnInit {
     { label: 'Rejected', value: 'Rejected' }
   ];
 
+  statusUpdateLoading = false;
+
   constructor(
     private userService: UserService,
     private fb: FormBuilder,
@@ -145,6 +147,7 @@ export class UserVerificationComponent implements OnInit {
 
   submitStatusUpdate() {
     if (this.statusUpdateForm.valid && this.selectedVerification) {
+      this.statusUpdateLoading = true;
       const statusData: UserVerificationStatusUpdateDto = {
         userId: this.selectedVerification.userId,
         status: this.statusUpdateForm.value.status,
@@ -159,6 +162,7 @@ export class UserVerificationComponent implements OnInit {
             detail: `Verification ${statusData.status.toLowerCase()} successfully`
           });
           this.showStatusUpdateDialog = false;
+          this.statusUpdateLoading = false;
           this.loadVerifications();
           this.loadStatistics();
         },
@@ -168,9 +172,14 @@ export class UserVerificationComponent implements OnInit {
             summary: 'Error',
             detail: 'Failed to update verification status'
           });
+          this.statusUpdateLoading = false;
         }
       });
     }
+  }
+
+  isApprovedStatus(verification: UserVerificationReadDto): boolean {
+    return verification.status === 'Approved';
   }
 
   getStatusSeverity(status: string): string {

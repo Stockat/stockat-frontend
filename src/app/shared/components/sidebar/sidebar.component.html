@@ -28,8 +28,8 @@
       
       <ng-template #footer>
           <div class="flex items-center gap-2">
-              <button pButton label="Account" icon="pi pi-user" class="w-full" outlined></button>
-              <button pButton label="Logout" icon="pi pi-sign-out" class="w-full" severity="danger" text></button>
+              <button pButton label="Account" icon="pi pi-user" class="w-full" outlined (click)="goToAccount()"></button>
+              <button pButton label="Logout" icon="pi pi-sign-out" class="w-full" severity="danger" text (click)="logout()"></button>
           </div>
       </ng-template>
   </p-drawer>
