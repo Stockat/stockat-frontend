@@ -450,11 +450,13 @@
         ></button>
         <button 
           pButton 
-          label="Apply Punishment" 
           class="p-button-danger"
-          [disabled]="!punishmentForm.valid"
+          [disabled]="!punishmentForm.valid || punishmentLoading"
           (click)="submitPunishment()"
-        ></button>
+        >
+          <i *ngIf="punishmentLoading" class="pi pi-spin pi-spinner mr-2"></i>
+          {{ punishmentLoading ? 'Applying...' : 'Apply Punishment' }}
+        </button>
       </div>
     </ng-template>
   </p-dialog>

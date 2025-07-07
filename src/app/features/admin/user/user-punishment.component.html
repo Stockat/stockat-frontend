@@ -373,13 +373,15 @@
     [resizable]="false"
   >
     <form [formGroup]="createPunishmentForm" class="space-y-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">User ID</label>
-        <input 
-          pInputText 
-          formControlName="userId"
-          placeholder="Enter user ID"
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">User Email <span class="text-red-500">*</span></label>
+        <input
+          pInputText
+          formControlName="email"
+          type="email"
+          placeholder="Enter user email"
           class="w-full"
+          required
         />
       </div>
 
@@ -429,11 +431,13 @@
         ></button>
         <button 
           pButton 
-          label="Create Punishment" 
           class="p-button-danger"
-          [disabled]="!createPunishmentForm.valid"
+          [disabled]="!createPunishmentForm.valid || createPunishmentLoading"
           (click)="submitPunishment()"
-        ></button>
+        >
+          <i *ngIf="createPunishmentLoading" class="pi pi-spin pi-spinner mr-2"></i>
+          {{ createPunishmentLoading ? 'Creating...' : 'Create Punishment' }}
+        </button>
       </div>
     </ng-template>
   </p-dialog>

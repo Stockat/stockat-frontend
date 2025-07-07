@@ -55,6 +55,7 @@ export class UserPunishmentComponent implements OnInit {
   // Dialog states
   showPunishmentDetails = false;
   showCreatePunishmentDialog = false;
+  createPunishmentLoading = false;
   
   // Forms
   createPunishmentForm: FormGroup;
@@ -90,9 +91,9 @@ export class UserPunishmentComponent implements OnInit {
     private confirmationService: ConfirmationService
   ) {
     this.createPunishmentForm = this.fb.group({
-      userId: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
       type: ['', Validators.required],
-      reason: ['', Validators.required],
+      reason: ['', [Validators.required, Validators.minLength(10)]],
       endDate: [null]
     });
   }
@@ -202,8 +203,9 @@ export class UserPunishmentComponent implements OnInit {
 
   submitPunishment() {
     if (this.createPunishmentForm.valid) {
+      this.createPunishmentLoading = true;
       const punishmentData: CreatePunishmentDto = {
-        userId: this.createPunishmentForm.value.userId,
+        email: this.createPunishmentForm.value.email,
         type: this.createPunishmentForm.value.type,
         reason: this.createPunishmentForm.value.reason,
         endDate: this.createPunishmentForm.value.endDate
@@ -217,17 +219,50 @@ export class UserPunishmentComponent implements OnInit {
             detail: 'Punishment created successfully'
           });
           this.showCreatePunishmentDialog = false;
+          this.createPunishmentLoading = false;
           this.loadPunishments();
           this.loadStatistics();
         },
         error: (error) => {
+          let detail = 'Failed to create punishment';
+          if (error?.error?.message) {
+            detail = error.error.message;
+          } else if (typeof error?.error === 'string') {
+            detail = error.error;
+          } else if (error?.error?.errors) {
+            detail = Object.values(error.error.errors).flat().join(' ');
+          }
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to create punishment'
+            detail
           });
+          this.createPunishmentLoading = false;
         }
       });
+    } else {
+      // Show frontend validation errors in toast
+      const controls = this.createPunishmentForm.controls;
+      if (controls['email'].errors) {
+        if (controls['email'].errors['required']) {
+          this.messageService.add({ severity: 'error', summary: 'Validation Error', detail: 'Email is required.' });
+        } else if (controls['email'].errors['email']) {
+          this.messageService.add({ severity: 'error', summary: 'Validation Error', detail: 'Email must be a valid email address.' });
+        }
+      }
+      if (controls['type'].errors) {
+        this.messageService.add({ severity: 'error', summary: 'Validation Error', detail: 'Punishment type is required.' });
+      }
+      if (controls['reason'].errors) {
+        if (controls['reason'].errors['required']) {
+          this.messageService.add({ severity: 'error', summary: 'Validation Error', detail: 'Reason is required.' });
+        } else if (controls['reason'].errors['minlength']) {
+          this.messageService.add({ severity: 'error', summary: 'Validation Error', detail: 'Reason must be at least 10 characters long.' });
+        }
+      }
+      if (controls['endDate'].errors) {
+        this.messageService.add({ severity: 'error', summary: 'Validation Error', detail: 'End date is required for temporary bans.' });
+      }
     }
   }
 

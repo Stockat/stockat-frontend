@@ -65,6 +65,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   showUserDetails = false;
   showPunishmentDialog = false;
   showVerificationDialog = false;
+  punishmentLoading = false;
   
   // Forms
   punishmentForm: FormGroup;
@@ -256,6 +257,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
   submitPunishment() {
     if (this.punishmentForm.valid && this.selectedUser) {
+      this.punishmentLoading = true;
       const type = this.punishmentForm.value.type;
       const punishmentData = {
         userId: this.selectedUser.id,
@@ -272,6 +274,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
             detail: 'Punishment applied successfully'
           });
           this.showPunishmentDialog = false;
+          this.punishmentLoading = false;
           this.loadUsers();
         },
         error: (error) => {
@@ -281,6 +284,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
             summary: 'Error',
             detail: error?.error?.message || error?.error || 'Failed to apply punishment'
           });
+          this.punishmentLoading = false;
         }
       });
     }

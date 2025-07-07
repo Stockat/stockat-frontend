@@ -1,6 +1,7 @@
 export interface CreatePunishmentDto {
-  userId: string;
+  userId?: string;
   type: string;
   reason: string;
   endDate?: Date;
+  email?: string;
 } 
