@@ -72,5 +72,11 @@ export class ProductDetailsComponent {
     event.target.src = '../../../../assets/1.jpg';
   }
 
+  makeRequest() {
+    if (this.product) {
+      this.router.navigate(['/request', this.product.id]);
+    }
+  }
+
   //! End Of Component
 }
