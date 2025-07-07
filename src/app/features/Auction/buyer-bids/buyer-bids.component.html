@@ -1,0 +1,112 @@
+<div class="bg-white rounded-xl shadow-md overflow-hidden">
+    <!-- Header -->
+    <div class="border-b border-gray-200 px-6 py-4">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-semibold">My Bids</h2>
+        <div class="flex items-center space-x-2">
+          <span class="text-sm font-medium text-gray-500">Total Bids:</span>
+          <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+            {{ bids.length }}
+          </span>
+        </div>
+      </div>
+      <p class="text-gray-500 mt-1">Active and closed auctions you've bid on</p>
+    </div>
+  
+    <!-- Loading Indicator -->
+    <div *ngIf="loading" class="p-8 text-center">
+      <p-progressSpinner></p-progressSpinner>
+      <p class="mt-2 text-gray-500">Loading your bids...</p>
+    </div>
+  
+    <!-- Active Bids Section -->
+    <div *ngIf="!loading" class="p-6">
+      <h3 class="text-lg font-medium mb-4 flex items-center">
+        <i class="pi pi-bolt text-yellow-500 mr-2"></i>
+        Active Auctions
+        <span class="ml-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
+          {{ activeBids.length }}
+        </span>
+      </h3>
+  
+      <div *ngIf="activeBids.length === 0" class="text-center py-6 bg-yellow-50 rounded-lg">
+        <i class="pi pi-info-circle text-yellow-500 text-xl"></i>
+        <p class="text-gray-500 mt-2">No active bids found</p>
+      </div>
+  
+      <p-table *ngIf="activeBids.length > 0" [value]="activeBids" [rows]="5" [paginator]="true" 
+               dataKey="id" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="auction.title">Auction <p-sortIcon field="auction.title"></p-sortIcon></th>
+            <th pSortableColumn="amount">Bid Amount <p-sortIcon field="amount"></p-sortIcon></th>
+            <th pSortableColumn="auction.startDate">Start Date <p-sortIcon field="auction.startDate"></p-sortIcon></th>
+            <th pSortableColumn="auction.endDate">End Date <p-sortIcon field="auction.endDate"></p-sortIcon></th>
+            <th>Status</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-bid>
+          <tr (click)="viewAuction(bid.auction.id)" class="cursor-pointer hover:bg-blue-50">
+            <td>
+              <div class="font-semibold">{{ bid.auction.name || 'Untitled Auction' }}</div>
+              <div class="text-xs text-gray-500">ID: {{ bid.auction.id | truncate:8 }}</div>
+            </td>
+            <td class="font-semibold">${{ bid.bidAmount | number:'1.2-2' }}</td>
+            <td>{{ bid.auction.startTime | date:'MMM d, y' }}</td>
+            <td>{{ bid.auction.endTime | date:'MMM d, y' }}</td>
+            <td>
+              <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                Active
+              </span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+  
+      <!-- Closed Bids Section -->
+      <h3 class="text-lg font-medium mb-4 mt-8 flex items-center">
+        <i class="pi pi-history text-gray-500 mr-2"></i>
+        Closed Auctions
+        <span class="ml-2 bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">
+          {{ closedBids.length }}
+        </span>
+      </h3>
+  
+      <div *ngIf="closedBids.length === 0" class="text-center py-6 bg-gray-50 rounded-lg">
+        <i class="pi pi-info-circle text-gray-500 text-xl"></i>
+        <p class="text-gray-500 mt-2">No closed bids found</p>
+      </div>
+  
+      <p-table *ngIf="closedBids.length > 0" [value]="closedBids" [rows]="5" [paginator]="true" 
+               dataKey="id" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="auction.title">Auction <p-sortIcon field="auction.title"></p-sortIcon></th>
+            <th pSortableColumn="amount">Bid Amount <p-sortIcon field="amount"></p-sortIcon></th>
+            <th pSortableColumn="bidTime">Bid Time <p-sortIcon field="bidTime"></p-sortIcon></th>
+            <th pSortableColumn="auction.endDate">End Date <p-sortIcon field="auction.endDate"></p-sortIcon></th>
+            <th>Result</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-bid>
+          <tr (click)="viewAuction(bid.auction.id)" class="cursor-pointer hover:bg-gray-50">
+            <td>
+              <div class="font-semibold">{{ bid.auction.title || 'Untitled Auction' }}</div>
+              <div class="text-xs text-gray-500">ID: {{ bid.auction.id | truncate:8 }}</div>
+            </td>
+            <td class="font-semibold">${{ bid.amount | number:'1.2-2' }}</td>
+            <td>{{ bid.bidTime | date:'MMM d, y h:mm a' }}</td>
+            <td>{{ bid.auction.endDate | date:'MMM d, y' }}</td>
+            <td>
+              <span [ngClass]="{
+                'bg-green-100 text-green-800': bid.isWinning,
+                'bg-red-100 text-red-800': !bid.isWinning
+              }" class="px-2 py-1 rounded text-xs">
+                {{ bid.isWinning ? 'Won' : 'Lost' }}
+              </span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>

@@ -1,0 +1,135 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Back Button -->
+    <button (click)="goBack()" class="mb-4 flex items-center text-blue-600 hover:text-blue-800">
+      <i class="pi pi-arrow-left mr-2"></i> Back 
+    </button>
+
+    <!-- Loading Indicator -->
+    <div *ngIf="!auction" class="flex justify-center py-12">
+      <i class="pi pi-spin pi-spinner text-4xl text-blue-500"></i>
+    </div>
+
+    <!-- Auction Details -->
+    <div *ngIf="auction" class="bg-white rounded-lg shadow-lg p-6 mb-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">{{ auction.name }}</h1>
+          <span [class]="'px-4 py-1 rounded-full text-sm font-semibold ' + getStatusClass()">
+            {{ status }}
+          </span>
+        </div>
+        <!-- <div class="mt-4 md:mt-0">
+          <button pButton pRipple icon="pi pi-pencil" label="Edit Auction"
+                  class="p-button-outlined p-button-info"
+                  (click)="editAuction()"></button>
+        </div> -->
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Product Image -->
+        <div class="lg:col-span-1">
+          <div class="bg-gray-100 rounded-lg p-4 flex justify-center items-center h-64">
+            <img [src]="productImageUrl"
+                 alt="Product"
+                 class="max-h-full object-contain">
+          </div>
+        </div>
+
+        <!-- Auction Info -->
+        <div class="lg:col-span-2">
+          <div class="mb-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Description</h2>
+            <p class="text-gray-600">{{ auction.description || 'No description available' }}</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="bg-blue-50 p-4 rounded-lg">
+              <div class="text-sm text-gray-500">Start Price</div>
+              <div class="text-xl font-bold text-blue-700">{{ auction.startingPrice | currency }}</div>
+            </div>
+
+            <div class="bg-green-50 p-4 rounded-lg">
+              <div class="text-sm text-gray-500">Current Bid</div>
+              <div class="text-xl font-bold text-green-700">{{ auction.currentBid | currency }}</div>
+            </div>
+
+            <div class="bg-purple-50 p-4 rounded-lg">
+              <div class="text-sm text-gray-500">Quantity</div>
+              <div class="text-xl font-bold text-purple-700">{{ auction.quantity }}</div>
+            </div>
+
+            <div class="bg-yellow-50 p-4 rounded-lg">
+              <div class="text-sm text-gray-500">Bid Increment</div>
+              <div class="text-xl font-bold text-yellow-700">{{ auction.incrementUnit | currency }}</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <div class="text-sm text-gray-500">Start Time</div>
+              <div class="font-medium">{{ auction.startTime | date:'medium' }}</div>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <div class="text-sm text-gray-500">End Time</div>
+              <div class="font-medium">{{ auction.endTime | date:'medium' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bids Section -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold text-gray-800">Bidding History</h2>
+        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+          Total: {{ totalBids }}
+        </span>
+      </div>
+
+      <div *ngIf="totalBids === 0" class="text-center py-8 bg-gray-50 rounded-lg">
+        <i class="pi pi-info-circle text-4xl text-gray-400 mb-3"></i>
+        <p class="text-gray-600">No bids placed yet</p>
+      </div>
+
+      <p-table *ngIf="totalBids > 0"
+               [value]="pagedBids"
+               [lazy]="true"
+               [paginator]="true"
+               [rows]="bidPageSize"
+               [totalRecords]="totalBids"
+               [loading]="loading"
+               (onLazyLoad)="onBidPageChange($event)"
+               [first]="bidPage * bidPageSize"
+               [responsiveLayout]="'scroll'"
+               class="p-datatable-striped p-datatable-gridlines">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Bidder</th>
+            <th>Amount</th>
+            <!-- <th>Time</th> -->
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-bid>
+          <tr>
+            <td>{{ bid.bidderName }}</td>
+            <td>{{ bid.bidAmount | currency }}</td>
+            <!-- <td>{{ bid.bidTime | date:'medium' }}</td> -->
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="3" class="text-center py-4">
+              No bids found
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
