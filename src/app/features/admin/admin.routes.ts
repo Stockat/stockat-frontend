@@ -15,15 +15,15 @@ export const adminRoutes: Routes = [
     },
     {
         path: 'users',
-        loadComponent: () => import('./features/admin/user/user-management.component').then(m => m.UserManagementComponent)
+        loadComponent: () => import('./user/user-management.component').then(m => m.UserManagementComponent)
       },
       {
         path: 'verifications',
-        loadComponent: () => import('./features/admin/user/user-verification.component').then(m => m.UserVerificationComponent)
+        loadComponent: () => import('./user/user-verification.component').then(m => m.UserVerificationComponent)
       },
       {
         path: 'punishments',
-        loadComponent: () => import('./features/admin/user/user-punishment.component').then(m => m.UserPunishmentComponent)
+        loadComponent: () => import('./user/user-punishment.component').then(m => m.UserPunishmentComponent)
       },
       {
         path: '',
