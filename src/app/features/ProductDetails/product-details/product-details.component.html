@@ -37,15 +37,7 @@
       <!-- Breadcrumb -->
       <nav class="mb-8">
         <ol class="flex items-center space-x-2 text-sm text-gray-600">
-          <li><a href="#" class="hover:text-blue-600 transition-colors">Home</a></li>
-          <li class="flex items-center">
-            <svg class="w-4 h-4 mx-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd"
-                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clip-rule="evenodd"></path>
-            </svg>
-            <a href="#" class="hover:text-blue-600 transition-colors">Products</a>
-          </li>
+          <li><a routerLink="/" class="hover:text-blue-600 transition-colors">Home</a></li>
           <li class="flex items-center">
             <svg class="w-4 h-4 mx-2" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd"
@@ -123,7 +115,8 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-4">
-              <p-button label="View Stocks" (click)="viewStocks()" [raised]="true" severity="info" class="flex-1 h-14 font-semibold text-lg"
+              <p-button label="View Stocks" (click)="viewStocks()" [raised]="true" severity="info"
+                class="flex-1 h-14 font-semibold text-lg"
                 styleClass="flex-1 h-14 font-semibold text-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 border-0 shadow-lg rounded-xl" />
               <p-button label="Make Request" [raised]="true" severity="success"
                 class="flex-1 h-14 font-semibold text-lg"

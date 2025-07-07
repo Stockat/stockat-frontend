@@ -38,6 +38,7 @@ import { MessageModule } from 'primeng/message';
 import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { TextareaModule } from 'primeng/textarea';
+import { AuthService } from '../../../../core/services/auth.service';
 @Component({
   selector: 'app-update-product',
   imports: [
@@ -70,7 +71,8 @@ export class UpdateProductComponent implements OnInit {
     private categoryServ: CategoryService,
     private tagServ: TagService,
     private messageService: MessageService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authServ:AuthService
   ) {
     this.productForm = new FormGroup({
       title: new FormControl('', [
@@ -115,8 +117,12 @@ export class UpdateProductComponent implements OnInit {
     productTags: [],
     images: [],
   };
-
+  sellerId: string|null = '';
   ngOnInit(): void {
+    this.sellerId=this.authServ.getCurrentUserId();
+    if (!this.sellerId) {
+      console.error("Seller ID is not available");
+    }
     this.route.paramMap.subscribe((params) => {
       const idParam = params.get('id');
       this.selectedProductId = idParam ? +idParam : 0;
@@ -141,7 +147,7 @@ export class UpdateProductComponent implements OnInit {
     this.updatedproductDto.location = this.productForm.get('location')?.value;
     this.updatedproductDto.description =
       this.productForm.get('description')?.value;
-    this.updatedproductDto.sellerId = '64c5d9f7-690e-42d4-b035-1945ab3476db'; // Hardcoded for now
+    this.updatedproductDto.sellerId = this.sellerId!;
     this.updatedproductDto.productTags = this.productForm
       .get('tags')
       ?.value.map((tagId: number) => ({ tagId }));

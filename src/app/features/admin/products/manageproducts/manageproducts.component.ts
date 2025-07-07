@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 //* PrimeNg Modules
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -112,7 +113,8 @@ export class ManageproductsComponent {
     private tagServ: TagService,
     private sharedServ: SharedService,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -555,4 +557,14 @@ export class ManageproductsComponent {
       },
     });
   }
+
+
+  //* View Details
+  viewDetails(productId: number) {
+    this.router.navigate(['/product-stocks', productId]);
+  }
+
+
+
+
 }

@@ -237,9 +237,11 @@
                     class="text-xs" />
                   }
 
-                  <p-button label="Add Stock" variant="text" [raised]="true" severity="info" class="text-xs" />
+                  <p-button label="Add Stock" variant="text" [raised]="true" severity="info" class="text-xs"
+                  (click)="addStock(product.id)" />
+
                   <p-button icon="pi pi-pen-to-square" [rounded]="true" severity="success" [outlined]="true"
-                    class="text-xs" />
+                    class="text-xs" (click)="updateProduct(product.id)"  />
                   <p-button icon="pi pi-times" [rounded]="true" severity="danger" [outlined]="true"
                     (onClick)="confirmDelete($event,product.id)" class="text-xs" />
                 </div>

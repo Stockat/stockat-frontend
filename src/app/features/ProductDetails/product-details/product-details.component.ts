@@ -4,6 +4,7 @@ import {
   ProductDto,
   ProductStatus,
 } from '../../../../../src/app/core/models/product-models/productDto';
+import { RouterModule } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -13,7 +14,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-product-details',
-  imports: [GalleriaModule, CardModule, ButtonModule, FloatLabelModule],
+  imports: [GalleriaModule, CardModule, ButtonModule, FloatLabelModule, RouterModule],
   templateUrl: './product-details.component.html',
   styleUrl: './product-details.component.css',
 })
@@ -59,6 +60,11 @@ export class ProductDetailsComponent {
   viewStocks() {
     // Navigate to the product-stocks component with the product ID
     this.router.navigate(['/product-stocks', this.product?.id]);
+  }
+
+  //! Routing To Home
+  gotohome() {
+    this.router.navigate(['/home']);
   }
 
   onImageError(event: any) {
