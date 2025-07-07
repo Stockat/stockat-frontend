@@ -81,6 +81,8 @@ export class UserPunishmentComponent implements OnInit {
     { label: 'Permanent Ban', value: 'PermanentBan' }
   ];
 
+  punishmentSearchTerm: string = '';
+
   constructor(
     private userService: UserService,
     private fb: FormBuilder,
@@ -103,7 +105,7 @@ export class UserPunishmentComponent implements OnInit {
   loadPunishments() {
     this.loading = true;
     
-    this.userService.getAllPunishments(this.currentPage, this.pageSize).subscribe({
+    this.userService.getAllPunishments(this.currentPage, this.pageSize, this.punishmentSearchTerm).subscribe({
       next: (response: GenericResponseDto<PunishmentReadDto[]>) => {
         this.punishments = response.data;
         this.totalPunishments = this.punishments.length; // This should come from pagination
@@ -310,5 +312,10 @@ export class UserPunishmentComponent implements OnInit {
 
   getCurrentDate(): Date {
     return new Date();
+  }
+
+  onPunishmentSearchChange(term: string) {
+    this.currentPage = 1;
+    this.loadPunishments();
   }
 } 

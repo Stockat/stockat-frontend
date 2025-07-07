@@ -67,6 +67,8 @@ export class UserVerificationComponent implements OnInit {
     rejectionRate: 0
   };
 
+  verificationSearchTerm: string = '';
+
   constructor(
     private userService: UserService,
     private fb: FormBuilder,
@@ -87,7 +89,7 @@ export class UserVerificationComponent implements OnInit {
   loadPendingVerifications() {
     this.loading = true;
     
-    this.userService.getPendingVerifications(this.currentPage, this.pageSize).subscribe({
+    this.userService.getPendingVerifications(this.currentPage, this.pageSize, this.verificationSearchTerm).subscribe({
       next: (response: GenericResponseDto<PaginatedDto<UserVerificationReadDto[]>>) => {
         this.verifications = response.data.paginatedData;
         this.totalVerifications = response.data.count;
@@ -191,5 +193,10 @@ export class UserVerificationComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  onVerificationSearchChange(term: string) {
+    this.currentPage = 1;
+    this.loadPendingVerifications();
   }
 } 

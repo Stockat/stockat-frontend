@@ -103,8 +103,10 @@ export class UserService {
   }
 
   // Admin User Verification Endpoints
-  getPendingVerifications(page: number = 1, size: number = 10): Observable<GenericResponseDto<PaginatedDto<UserVerificationReadDto[]>>> {
-    return this.http.get<GenericResponseDto<PaginatedDto<UserVerificationReadDto[]>>>(`${this.verificationApiUrl}/admin/pending?page=${page}&size=${size}`);
+  getPendingVerifications(page: number = 1, size: number = 10, searchTerm?: string): Observable<GenericResponseDto<PaginatedDto<UserVerificationReadDto[]>>> {
+    let params = `page=${page}&size=${size}`;
+    if (searchTerm) params += `&searchTerm=${searchTerm}`;
+    return this.http.get<GenericResponseDto<PaginatedDto<UserVerificationReadDto[]>>>(`${this.verificationApiUrl}/admin/pending?${params}`);
   }
 
   getVerificationStatistics(): Observable<GenericResponseDto<any>> {
@@ -128,8 +130,10 @@ export class UserService {
     return this.http.get<GenericResponseDto<PunishmentReadDto[]>>(`${this.punishmentApiUrl}/user/${userId}`);
   }
 
-  getAllPunishments(page: number = 1, size: number = 10): Observable<GenericResponseDto<PunishmentReadDto[]>> {
-    return this.http.get<GenericResponseDto<PunishmentReadDto[]>>(`${this.punishmentApiUrl}?page=${page}&size=${size}`);
+  getAllPunishments(page: number = 1, size: number = 10, searchTerm?: string): Observable<GenericResponseDto<PunishmentReadDto[]>> {
+    let params = `page=${page}&size=${size}`;
+    if (searchTerm) params += `&searchTerm=${searchTerm}`;
+    return this.http.get<GenericResponseDto<PunishmentReadDto[]>>(`${this.punishmentApiUrl}?${params}`);
   }
 
   removePunishment(id: number): Observable<GenericResponseDto<string>> {
