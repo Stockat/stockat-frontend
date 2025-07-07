@@ -59,6 +59,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   searchTerm = '';
   statusFilter: string = '';
   verificationFilter: string = '';
+  blockedFilter: string = '';
   
   // Dialog states
   showUserDetails = false;
@@ -121,7 +122,8 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       size: this.pageSize,
       searchTerm: this.searchTerm || undefined,
       isActive: this.statusFilter === 'active' ? true : this.statusFilter === 'inactive' ? false : undefined,
-      isVerified: this.verificationFilter === 'verified' ? true : this.verificationFilter === 'unverified' ? false : undefined
+      isVerified: this.verificationFilter === 'verified' ? true : this.verificationFilter === 'unverified' ? false : undefined,
+      isBlocked: this.blockedFilter === 'blocked' ? true : this.blockedFilter === 'notBlocked' ? false : undefined
     };
 
     this.userService.getAllUsers(
@@ -129,7 +131,8 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       params.size,
       params.searchTerm,
       params.isActive,
-      params.isVerified
+      params.isVerified,
+      params.isBlocked
     ).subscribe({
       next: (response: GenericResponseDto<PaginatedDto<UserReadDto[]>>) => {
         this.users = response.data.paginatedData;
