@@ -77,6 +77,18 @@ export class AdminLayoutComponent {
                         shortcut: '⌘+P'
                     }
                 ]
+            },
+            {
+                label: 'AI Assistant',
+                icon: 'pi pi-robot',
+                items: [
+                    {
+                        label: 'Chat with AI',
+                        icon: 'pi pi-comments',
+                        route: '/chatbot',
+                        routerLink: '/chatbot'
+                    }
+                ]
             }
         ];
     }

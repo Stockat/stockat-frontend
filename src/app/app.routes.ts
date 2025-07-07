@@ -16,7 +16,7 @@ export const routes: Routes = [
     component: ProductCardComponent,
     children: [],
   },
-  { 
+  {
     path: 'ProductDetails/:id',
     component: ProductDetailsComponent
   },
@@ -110,5 +110,10 @@ export const routes: Routes = [
   {
     path: 'order-process',
     loadComponent: () => import('./features/order-process/order-process.component').then(m => m.OrderProcessComponent)
+  },
+  // Chatbot
+  {
+    path: 'chatbot',
+    loadComponent: () => import('./features/chatbot/chatbot.component').then(m => m.ChatbotComponent)
   },
 ];
