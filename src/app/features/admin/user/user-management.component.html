@@ -249,21 +249,12 @@
                 ></button>
 
                 <button 
-                  *ngIf="user.isDeleted"
                   pButton 
-                  icon="pi pi-check" 
-                  class="p-button-text p-button-sm p-button-success"
-                  pTooltip="Activate User"
-                  (click)="activateUser(user)"
-                ></button>
-
-                <button 
-                  *ngIf="!user.isDeleted"
-                  pButton 
-                  icon="pi pi-ban" 
-                  class="p-button-text p-button-sm p-button-warning"
-                  pTooltip="Deactivate User"
-                  (click)="deactivateUser(user)"
+                  [icon]="user.isDeleted ? 'pi pi-check' : 'pi pi-ban'"
+                  class="p-button-text p-button-sm"
+                  [ngClass]="user.isDeleted ? 'p-button-success' : 'p-button-warning'"
+                  [pTooltip]="user.isDeleted ? 'Activate User' : 'Deactivate User'"
+                  (click)="toggleUserActivation(user)"
                 ></button>
 
                 <button 

@@ -200,53 +200,47 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.showUserDetails = true;
   }
 
-  activateUser(user: UserReadDto) {
+  toggleUserActivation(user: UserReadDto) {
+    const action = user.isDeleted ? 'activate' : 'deactivate';
+    const confirmMsg = user.isDeleted
+      ? `Are you sure you want to activate ${user.firstName} ${user.lastName}?`
+      : `Are you sure you want to deactivate ${user.firstName} ${user.lastName}?`;
+    const confirmHeader = user.isDeleted ? 'Confirm Activation' : 'Confirm Deactivation';
+    const confirmIcon = user.isDeleted ? 'pi pi-check-circle' : 'pi pi-ban';
     this.confirmationService.confirm({
-      message: `Are you sure you want to activate ${user.firstName} ${user.lastName}?`,
-      header: 'Confirm Activation',
-      icon: 'pi pi-check-circle',
+      message: confirmMsg,
+      header: confirmHeader,
+      icon: confirmIcon,
       accept: () => {
-        this.userService.activateUser(user.id).subscribe({
+        const obs = user.isDeleted
+          ? this.userService.activateUser(user.id)
+          : this.userService.deactivateUser(user.id);
+        obs.subscribe({
           next: () => {
             this.messageService.add({
               severity: 'success',
               summary: 'Success',
-              detail: 'User activated successfully'
+              detail: user.isDeleted ? 'User activated successfully' : 'User deactivated successfully'
             });
             this.loadUsers();
+            this.userService.getUserStatistics().subscribe({
+              next: (response) => {
+                if (response.data) {
+                  this.statistics.total = response.data.total;
+                  this.statistics.active = response.data.active;
+                  this.statistics.inactive = response.data.inactive;
+                  this.statistics.verified = response.data.verified;
+                  this.statistics.unverified = response.data.unverified;
+                  this.statistics.blocked = response.data.blocked;
+                }
+              }
+            });
           },
           error: (error) => {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'Failed to activate user'
-            });
-          }
-        });
-      }
-    });
-  }
-
-  deactivateUser(user: UserReadDto) {
-    this.confirmationService.confirm({
-      message: `Are you sure you want to deactivate ${user.firstName} ${user.lastName}?`,
-      header: 'Confirm Deactivation',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.userService.deactivateUser(user.id).subscribe({
-          next: () => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Success',
-              detail: 'User deactivated successfully'
-            });
-            this.loadUsers();
-          },
-          error: (error) => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'Failed to deactivate user'
+              detail: user.isDeleted ? 'Failed to activate user' : 'Failed to deactivate user'
             });
           }
         });
