@@ -54,6 +54,8 @@ export class OrderRequestDetailsComponent implements OnInit {
   ngOnInit(): void {
     this.orderService.getBuyerRequestOrders().subscribe({
       next: (res: { data: SellerOrder[] }) => {
+        console.log(res);
+
         this.orders = res.data;
         this.totalRecords = this.orders.length;
         this.filterOrders();
@@ -146,7 +148,13 @@ export class OrderRequestDetailsComponent implements OnInit {
   }
 
   confirmOrder(order: SellerOrder) {
-    console.log(order);
+      console.log(order);
+      this.orderService.UpdateRequestOrderWithStripe(order).subscribe({
+        next: (res) => {
+          console.log(res);
+          window.location.href=res.redirectUrl!;
+        },
+      });
   }
 
   deleteOrder(order: SellerOrder) {

@@ -47,6 +47,10 @@ export class OrderService {
     return this.http.post(this.orderUrl + '/request', request);
   }
 
+  UpdateRequestOrderWithStripe(request: any): Observable<GenericResponseDto<any>> {
+    return this.http.post<GenericResponseDto<any>>(this.orderUrl + '/request/stripe', request);
+  }
+
 
   //* Analysis
   getorderSales(): Observable<GenericResponseDto<AnalysisDto>> {
