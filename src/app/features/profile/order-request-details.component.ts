@@ -136,4 +136,20 @@ export class OrderRequestDetailsComponent implements OnInit {
         return 'info';
     }
   }
+
+  showAcceptButton(order: SellerOrder): boolean {
+    return order.status === 'PendingBuyer';
+  }
+
+  showDeleteButton(order: SellerOrder): boolean {
+    return order.status === 'PendingSeller' || order.status === 'PendingBuyer';
+  }
+
+  confirmOrder(order: SellerOrder) {
+    console.log(order);
+  }
+
+  deleteOrder(order: SellerOrder) {
+    console.log(order);
+  }
 }
