@@ -7,11 +7,12 @@
           </div>
       </ng-template>
       <p-panelMenu [model]="items" styleClass="">
-        <ng-template #item let-item>
-        <a pRipple class="flex items-center px-4 py-2 cursor-pointer group"
-           [routerLink]="item.route"
-           routerLinkActive="active"
-           >
+        <ng-template #item let-item let-parent=parent>
+          <a pRipple class="flex items-center px-4 py-2 cursor-pointer group"
+             [routerLink]="item.routerLink"
+             routerLinkActive="active"
+             (click)="item.routerLink ? menuItemClicked.emit() : null"
+          >
             <i [class]="item.icon + ' text-primary group-hover:text-inherit'"></i>
             <span class="ml-2">
                 {{ item.label }}
@@ -21,15 +22,14 @@
             bg-emphasis text-muted-color text-xs p-1">
                 {{ item.shortcut }}
             </span>
-            
-        </a>
-    </ng-template>
+          </a>
+        </ng-template>
       </p-panelMenu>
       
       <ng-template #footer>
           <div class="flex items-center gap-2">
-              <button pButton label="Account" icon="pi pi-user" class="w-full" outlined></button>
-              <button pButton label="Logout" icon="pi pi-sign-out" class="w-full" severity="danger" text></button>
+              <button pButton label="Account" icon="pi pi-user" class="w-full" outlined (click)="goToAccount()"></button>
+              <button pButton label="Logout" icon="pi pi-sign-out" class="w-full" severity="danger" text (click)="logout()"></button>
           </div>
       </ng-template>
   </p-drawer>

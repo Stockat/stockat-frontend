@@ -1,0 +1,193 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Order Analysis</h1>
+      <p class="text-gray-600">Visualize and analyze order statistics and trends</p>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-xl font-semibold text-gray-800">Order Summary</h2>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+        <div
+          class="bg-blue-50 p-6 rounded-xl border border-blue-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-blue-100 rounded-xl mr-4">
+              <i class="pi pi-clock text-blue-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-blue-600 font-medium">Pending</div>
+              <div class="text-2xl font-bold text-blue-800">{{ pendingCount }}</div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-yellow-100 rounded-xl mr-4">
+              <i class="pi pi-cog text-yellow-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-yellow-600 font-medium">Processing</div>
+              <div class="text-2xl font-bold text-yellow-800">{{ processingCount }}</div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="bg-green-50 p-6 rounded-xl border border-green-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-green-100 rounded-xl mr-4">
+              <i class="pi pi-check-circle text-green-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-green-600 font-medium">Ready</div>
+              <div class="text-2xl font-bold text-green-800">{{ readyCount }}</div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="bg-purple-50 p-6 rounded-xl border border-purple-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-purple-100 rounded-xl mr-4">
+              <i class="pi pi-send text-purple-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-purple-600 font-medium">Shipped</div>
+              <div class="text-2xl font-bold text-purple-800">{{ shippedCount }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div
+          class="bg-emerald-50 p-6 rounded-xl border border-emerald-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-emerald-100 rounded-xl mr-4">
+              <i class="pi pi-home text-emerald-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-emerald-600 font-medium">Delivered</div>
+              <div class="text-2xl font-bold text-emerald-800">{{ deliveredCount }}</div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="bg-red-50 p-6 rounded-xl border border-red-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-red-100 rounded-xl mr-4">
+              <i class="pi pi-ban text-red-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-red-600 font-medium">Cancelled</div>
+              <div class="text-2xl font-bold text-red-800">{{ cancelledCount }}</div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="bg-orange-50 p-6 rounded-xl border border-orange-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-orange-100 rounded-xl mr-4">
+              <i class="pi pi-user text-orange-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-orange-600 font-medium">Pending Seller</div>
+              <div class="text-2xl font-bold text-orange-800">{{ pendingSellerCount }}</div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="bg-indigo-50 p-6 rounded-xl border border-indigo-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-indigo-100 rounded-xl mr-4">
+              <i class="pi pi-users text-indigo-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-indigo-600 font-medium">Pending Buyer</div>
+              <div class="text-2xl font-bold text-indigo-800">{{ pendingBuyerCount }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold text-gray-800">Filter Orders</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Order Status
+          </label>
+          <p-dropdown [options]="statusOptions" [(ngModel)]="statusFilter" placeholder="Select Status"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-blue-400"></p-dropdown>
+        </div>
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+              </path>
+            </svg>
+            Order Type
+          </label>
+          <p-dropdown [options]="orderTypeOptions" [(ngModel)]="orderTypeFilter" placeholder="Select Type"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:border-green-400"></p-dropdown>
+        </div>
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            Search
+          </label>
+          <input pInputText type="text" [(ngModel)]="globalFilter" placeholder="Search orders, buyers, sellers..."
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 hover:border-purple-400" />
+        </div>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-gray-200">
+        <div class="w-1/2">
+          <p-button label="Clear Filters" icon="pi pi-times" variant="text" [raised]="true" severity="danger"
+            class="w-full h-12 font-semibold" />
+        </div>
+        <div class="w-1/2">
+          <p-button label="Refresh Data" icon="pi pi-refresh" variant="text" [raised]="true" severity="info"
+            class="w-full h-12 font-semibold" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="bg-white rounded-2xl shadow-xl p-6 w-full">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Orders by Status</h2>
+        <div class="relative w-full" style="min-height:300px;">
+          <p-chart #statusBarChart type="bar" [data]="basicData" [options]="basicOptions" styleClass="w-full h-full"
+            [responsive]="true" />
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl shadow-xl p-6 flex flex-col items-center justify-center">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Orders Distribution</h2>
+        <p-chart #pieChart type="pie" [data]="data" [options]="options" styleClass="w-full md:w-[24rem]" />
+      </div>
+    </div>
+
+    <!-- Additional Chart Example -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 mt-8 flex flex-col w-full col-span-1 md:col-span-2">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Monthly Orders</h2>
+      <div class="relative w-full" style="min-height:300px;">
+        <p-chart #monthlyBarChart type="bar" [data]="basicData" [options]="basicOptions" styleClass="w-full h-full"
+          [responsive]="true" />
+      </div>
+    </div>
+  </div>
+</div>

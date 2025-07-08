@@ -262,10 +262,6 @@
                   <p-toast />
                   <p-confirmdialog />
 
-                  <!-- View Details Button -->
-                  <p-button icon="pi pi-eye" [rounded]="true" severity="info" [outlined]="true"
-                    (onClick)="viewDetails(product.id)" class="text-xs" pTooltip="View Details" />
-
                   <!-- Pending Status - Show Accept & Reject buttons -->
                   @if (product.productStatus == "Pending") {
                   <p-button label="Accept" icon="pi pi-check" variant="text" [raised]="true" severity="success"

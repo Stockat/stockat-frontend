@@ -120,6 +120,10 @@ export const routes: Routes = [
     path: 'order-process',
     loadComponent: () => import('./features/order-process/order-process.component').then(m => m.OrderProcessComponent)
   },
+  {
+    path: 'request/:productId',
+    loadComponent: () => import('./features/request/make-request.component').then(m => m.MakeRequestComponent)
+  },
   // Chatbot
   {
     path: 'chatbot',

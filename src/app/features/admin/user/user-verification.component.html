@@ -1,0 +1,378 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Header Section -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">User Verification Management</h1>
+        <p class="text-gray-600 mt-2">Review and manage user verification requests</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-blue-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-blue-100">
+          <i class="pi pi-file-edit text-blue-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Total Requests</p>
+          <p class="text-2xl font-bold text-gray-900">{{ statistics.total }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-yellow-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-yellow-100">
+          <i class="pi pi-clock text-yellow-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Pending</p>
+          <p class="text-2xl font-bold text-gray-900">{{ statistics.pending }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-green-100">
+          <i class="pi pi-check-circle text-green-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Approved</p>
+          <p class="text-2xl font-bold text-gray-900">{{ statistics.approved }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-red-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-red-100">
+          <i class="pi pi-times-circle text-red-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Rejected</p>
+          <p class="text-2xl font-bold text-gray-900">{{ statistics.rejected }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approval Rate Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Approval Rate</p>
+          <p class="text-2xl font-bold text-green-600">{{ statistics.approvalRate | number:'1.1-1' }}%</p>
+        </div>
+        <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+          <i class="pi pi-chart-line text-green-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Rejection Rate</p>
+          <p class="text-2xl font-bold text-red-600">{{ statistics.rejectionRate | number:'1.1-1' }}%</p>
+        </div>
+        <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+          <i class="pi pi-chart-bar text-red-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search (User Management Style) -->
+  <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+      <div class="md:col-span-3">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Search Verifications</label>
+        <div class="relative">
+          <input 
+            pInputText 
+            #searchBox
+            [(ngModel)]="verificationSearchTerm"
+            (ngModelChange)="onVerificationSearchChange($event)"
+            placeholder="Search by name, email, or username..."
+            class="w-full pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+      </div>
+      <div class="md:col-span-1">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+        <p-dropdown 
+          [options]="statusOptions" 
+          [(ngModel)]="verificationStatus" 
+          (onChange)="onStatusFilterChange($event.value)"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select status"
+          class="w-full"
+        ></p-dropdown>
+      </div>
+      <!-- Add more filters here if needed, leave empty columns for spacing -->
+      <div class="md:col-span-2"></div>
+    </div>
+  </div>
+
+  <!-- Verification Requests Table -->
+  <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">Verification Requests</h3>
+    </div>
+
+    <div class="relative">
+      <p-table 
+        [value]="verifications" 
+        [loading]="loading"
+        [paginator]="false"
+        [rows]="pageSize"
+        [showCurrentPageReport]="false"
+        responsiveLayout="scroll"
+        class="w-full"
+        styleClass="p-datatable-sm"
+      >
+        <ng-template pTemplate="header">
+          <tr class="bg-gray-50">
+            <th class="text-left p-4 font-medium text-gray-700">User</th>
+            <th class="text-left p-4 font-medium text-gray-700">National ID</th>
+            <th class="text-left p-4 font-medium text-gray-700">Document</th>
+            <th class="text-left p-4 font-medium text-gray-700">Submitted</th>
+            <th class="text-left p-4 font-medium text-gray-700">Status</th>
+            <th class="p-4 font-medium text-gray-700" style="min-width: 120px; text-align: center !important;">Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-verification>
+          <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+            <!-- User Info -->
+            <td class="p-4">
+              <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                  <i class="pi pi-user text-gray-600"></i>
+                </div>
+                <div>
+                  <div class="font-medium text-gray-900">{{ verification.userName }}</div>
+                  <div class="text-sm text-gray-500">{{ verification.userEmail }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- National ID -->
+            <td class="p-4">
+              <div class="text-gray-900 font-mono text-sm">{{ verification.nationalId }}</div>
+            </td>
+
+            <!-- Document -->
+            <td class="p-4">
+              <button 
+                *ngIf="verification.imageURL"
+                pButton 
+                icon="pi pi-eye" 
+                class="p-button-text p-button-sm p-button-info"
+                pTooltip="View Document"
+                (click)="viewVerificationDetails(verification)"
+              ></button>
+              <span *ngIf="!verification.imageURL" class="text-gray-400 text-sm">No document</span>
+            </td>
+
+            <!-- Submitted Date -->
+            <td class="p-4">
+              <div class="text-gray-900">{{ formatDate(verification.createdAt) }}</div>
+            </td>
+
+            <!-- Status -->
+            <td class="p-4">
+              <p-tag 
+                [value]="verification.status"
+                [severity]="getStatusSeverity(verification.status)"
+                [icon]="getStatusIcon(verification.status)"
+                class="text-xs"
+              ></p-tag>
+            </td>
+
+            <!-- Actions -->
+            <td class="p-4 text-center" style="min-width: 120px;">
+              <div class="flex items-center justify-center space-x-2">
+                <button 
+                  pButton 
+                  icon="pi pi-eye" 
+                  class="p-button-text p-button-sm p-button-info"
+                  pTooltip="View Details"
+                  (click)="viewVerificationDetails(verification)"
+                ></button>
+                <ng-container *ngIf="!isApprovedStatus(verification)">
+                  <button 
+                    pButton 
+                    icon="pi pi-pencil" 
+                    class="p-button-text p-button-sm p-button-warning"
+                    pTooltip="Update Status"
+                    (click)="openStatusUpdateDialog(verification)"
+                  ></button>
+                </ng-container>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6" class="text-center p-8">
+              <div class="flex flex-col items-center">
+                <i class="pi pi-file-edit text-4xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">No pending verification requests</p>
+                <p class="text-gray-400 text-sm">All verification requests have been processed</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="p-4 border-t border-gray-200">
+      <p-paginator 
+        [rows]="pageSize"
+        [totalRecords]="totalVerifications"
+        [rowsPerPageOptions]="[5, 10, 20, 50]"
+        (onPageChange)="onPageChange($event)"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} requests"
+      ></p-paginator>
+    </div>
+  </div>
+
+  <!-- Verification Details Dialog -->
+  <p-dialog 
+    [(visible)]="showVerificationDetails" 
+    [modal]="true" 
+    [style]="{width: '60vw'}"
+    header="Verification Details"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <div *ngIf="selectedVerification" class="space-y-6">
+      <!-- User Information -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h4 class="font-medium text-gray-900 mb-3">User Information</h4>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Name</label>
+            <p class="text-gray-900">{{ selectedVerification.userName }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Email</label>
+            <p class="text-gray-900">{{ selectedVerification.userEmail }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">National ID</label>
+            <p class="text-gray-900 font-mono">{{ selectedVerification.nationalId }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Submitted</label>
+            <p class="text-gray-900">{{ formatDate(selectedVerification.createdAt) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Document Image -->
+      <div *ngIf="selectedVerification.imageURL" class="bg-gray-50 rounded-lg p-4">
+        <h4 class="font-medium text-gray-900 mb-3">Verification Document</h4>
+        <div class="flex justify-center">
+          <img 
+            [src]="selectedVerification.imageURL" 
+            [alt]="'Verification document for ' + selectedVerification.userName"
+            class="max-w-full h-auto rounded-lg shadow-sm border border-gray-200"
+            style="max-height: 400px;"
+          />
+        </div>
+      </div>
+
+      <!-- Status Information -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h4 class="font-medium text-gray-900 mb-3">Status Information</h4>
+        <div class="flex items-center space-x-4">
+          <p-tag 
+            [value]="selectedVerification.status"
+            [severity]="getStatusSeverity(selectedVerification.status)"
+            [icon]="getStatusIcon(selectedVerification.status)"
+          ></p-tag>
+          <span class="text-sm text-gray-600">
+            Last updated: {{ selectedVerification.updatedAt ? formatDate(selectedVerification.updatedAt) : 'Never' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </p-dialog>
+
+  <!-- Status Update Dialog -->
+  <p-dialog 
+    [(visible)]="showStatusUpdateDialog" 
+    [modal]="true" 
+    [style]="{width: '40vw'}"
+    header="Update Verification Status"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <form [formGroup]="statusUpdateForm" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+        <p-dropdown 
+          formControlName="status"
+          [options]="[
+            {label: 'Approve', value: 'Approved'},
+            {label: 'Reject', value: 'Rejected'}
+          ]"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select status"
+          class="w-full"
+        ></p-dropdown>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Admin Note (Optional)</label>
+        <textarea 
+          pInputTextarea 
+          formControlName="note"
+          rows="3"
+          placeholder="Add a note for the user (especially useful for rejections)..."
+          class="w-full"
+        ></textarea>
+        <p class="text-sm text-gray-500 mt-1">
+          This note will be included in the email notification sent to the user.
+        </p>
+      </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end space-x-2">
+        <button 
+          pButton 
+          label="Cancel" 
+          class="p-button-text"
+          (click)="showStatusUpdateDialog = false"
+        ></button>
+        <button 
+          pButton 
+          label="Update Status" 
+          [class]="statusUpdateForm.get('status')?.value === 'Approved' ? 'p-button-success' : 'p-button-danger'"
+          [disabled]="!statusUpdateForm.valid || statusUpdateLoading"
+          [loading]="statusUpdateLoading"
+          (click)="submitStatusUpdate()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Toast Messages -->
+  <p-toast></p-toast>
+  
+  <!-- Confirmation Dialog -->
+  <p-confirmDialog></p-confirmDialog>
+</div> 

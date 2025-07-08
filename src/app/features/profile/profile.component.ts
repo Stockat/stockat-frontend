@@ -176,7 +176,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.user = res.data;
         if (this.user) {
-          this.editForm.patchValue(this.user);
+          // Only patch the properties that exist in the form
+          this.editForm.patchValue({
+            firstName: this.user.firstName,
+            lastName: this.user.lastName,
+            email: this.user.email,
+            phoneNumber: this.user.phoneNumber || '',
+            address: this.user.address,
+            city: this.user.city,
+            country: this.user.country,
+            postalCode: this.user.postalCode,
+            aboutMe: this.user.aboutMe
+          });
         }
         this.editForm.disable();
         this.loading = false;
@@ -261,7 +272,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.user = res.data;
         if (this.user) {
-          this.editForm.patchValue(this.user);
+          // Only patch the properties that exist in the form
+          this.editForm.patchValue({
+            firstName: this.user.firstName,
+            lastName: this.user.lastName,
+            email: this.user.email,
+            phoneNumber: this.user.phoneNumber || '',
+            address: this.user.address,
+            city: this.user.city,
+            country: this.user.country,
+            postalCode: this.user.postalCode,
+            aboutMe: this.user.aboutMe
+          });
         }
         this.editForm.disable();
         this.editMode = false;
@@ -714,5 +736,40 @@ export class ProfileComponent implements OnInit, OnDestroy {
       request.estimatedTime != null &&
       request.estimatedTime.trim() !== ''
     );
+  }
+
+  upgradeToSeller() {
+    if (this.user && this.user.roles && this.user.roles.includes('Seller')) {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Already a Seller',
+        detail: 'You are already a seller.'
+      });
+      return;
+    }
+    this.userService.upgradeToSeller().subscribe({
+      next: (res) => {
+        if (res.token) {
+          this.authService.setTokens(res.token);
+        }
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Upgraded',
+          detail: 'You are now a seller!'
+        });
+        this.fetchUser(); // Refresh user info to update roles
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Upgrade Failed',
+          detail: err?.error?.message || 'Failed to upgrade to seller.'
+        });
+      }
+    });
+  }
+
+  isSeller(): boolean {
+    return this.authService.getCurrentUserRoles().includes('Seller');
   }
 }

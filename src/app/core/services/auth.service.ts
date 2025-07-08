@@ -129,4 +129,24 @@ export class AuthService {
       return null;
     }
   }
+
+  getCurrentUserRoles(): string[] {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return [];
+    try {
+      const decoded: any = jwtDecode(token);
+      const roles = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+      return Array.isArray(roles) ? roles : [roles].filter(Boolean);
+    } catch {
+      return [];
+    }
+  }
+
+  isAdmin(): boolean {
+    return this.getCurrentUserRoles().includes('Admin');
+  }
+
+  isSeller(): boolean {
+    return this.getCurrentUserRoles().includes('Seller');
+  }
 }

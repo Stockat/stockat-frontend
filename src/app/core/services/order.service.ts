@@ -41,6 +41,8 @@ export class OrderService {
     return this.http.get<{ data: SellerOrder[] }>(`${this.orderUrl}/user/req`);
   }
 
-
+  placeRequestOrder(request: any): Observable<any> {
+    return this.http.post(this.orderUrl + '/request', request);
+  }
 
 }

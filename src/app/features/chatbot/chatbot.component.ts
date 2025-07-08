@@ -281,7 +281,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
       const sellerId = sellerIdMatch[1];
       try {
         const sellerResp = await firstValueFrom(this.userService.getUserById(sellerId));
-        const sellerName = sellerResp.firstName && sellerResp.lastName ? `${sellerResp.firstName} ${sellerResp.lastName}` : `Seller #${sellerId}`;
+        const sellerName = sellerResp.data.firstName && sellerResp.data.lastName ? `${sellerResp.data.firstName} ${sellerResp.data.lastName}` : `Seller #${sellerId}`;
         enrichedMessage = enrichedMessage.replace(`sellerId: ${sellerId}`, `Seller: ${sellerName}`);
       } catch {
         // ignore errors, fallback to ID

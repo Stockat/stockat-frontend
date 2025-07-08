@@ -282,18 +282,53 @@
                   {{ verification.status }}
                 </span>
               </span>
-              <span class="text-gray-400 text-sm">Created: {{ verification.createdAt ? (verification.createdAt |
-                date:'medium') : 'N/A' }}</span>
-              <span *ngIf="verification.updatedAt" class="text-gray-400 text-sm">Updated: {{ verification.updatedAt ?
-                (verification.updatedAt | date:'medium') : 'N/A' }}</span>
-              <button pButton type="button" label="Delete"
-                class="mt-6 bg-red-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-red-700 transition-colors w-full"
-                (click)="deleteUserVerification()" [loading]="verificationLoading"
-                [disabled]="verificationLoading"></button>
+              <span class="text-gray-400 text-sm">Created: {{ verification.createdAt ? (verification.createdAt | date:'medium') : 'N/A' }}</span>
+              <span *ngIf="verification.updatedAt" class="text-gray-400 text-sm">Updated: {{ verification.updatedAt ? (verification.updatedAt | date:'medium') : 'N/A' }}</span>
+              
+              <!-- Show delete button only if not approved -->
+              <button *ngIf="verification.status !== 'Approved'" pButton type="button" label="Delete" class="mt-6 bg-red-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-red-700 transition-colors w-full" (click)="deleteUserVerification()" [loading]="verificationLoading" [disabled]="verificationLoading"></button>
+              
+              <!-- Show upgrade to seller section if approved -->
+              <div *ngIf="verification.status === 'Approved'" class="mt-6 w-full">
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                  <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                      <i class="pi pi-check-circle text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                      <h6 class="font-semibold text-gray-800 mb-2">
+                        {{ isSeller() ? 'You are now a seller!' : 'Upgrade to Seller Account' }}
+                      </h6>
+                      <p class="text-gray-600 text-sm mb-4">Start selling your products and services on Stockat</p>
+                    </div>
+                  </div>
+                  <div class="bg-white rounded-lg p-4 border border-green-100">
+                    <div class="space-y-2 text-sm text-gray-600">
+                      <div class="flex items-center gap-2">
+                        <i class="pi pi-check text-green-500"></i>
+                        <span>Create and manage products</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <i class="pi pi-check text-green-500"></i>
+                        <span>Participate in auctions</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <i class="pi pi-check text-green-500"></i>
+                        <span>Access seller dashboard</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <i class="pi pi-check text-green-500"></i>
+                        <span>Earn money from sales</span>
+                      </div>
+                    </div>
+                    <button *ngIf="!isSeller()" pButton type="button" label="Upgrade to Seller" class="mt-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:from-green-600 hover:to-emerald-700 transition-all w-full" (click)="upgradeToSeller()"></button>
+                  </div>
+                </div>
+              </div>
             </div>
-            <!-- Update Form -->
-            <form [formGroup]="verifyForm" (ngSubmit)="updateUserVerification(verifyForm)"
-              class="flex-1 flex flex-col gap-6 items-center">
+            
+            <!-- Update Form - Only show if not approved -->
+            <form *ngIf="verification.status !== 'Approved'" [formGroup]="verifyForm" (ngSubmit)="updateUserVerification(verifyForm)" class="flex-1 flex flex-col gap-6 items-center">
               <div class="w-full flex flex-col items-center">
                 <label class="text-lg font-semibold text-gray-700 mb-2">Update Document</label>
                 <label
