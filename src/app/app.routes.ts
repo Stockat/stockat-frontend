@@ -17,7 +17,7 @@ export const routes: Routes = [
     component: ProductCardComponent,
     children: [],
   },
-  { 
+  {
     path: 'ProductDetails/:id',
     component: ProductDetailsComponent
   },
@@ -123,5 +123,10 @@ export const routes: Routes = [
   {
     path: 'request/:productId',
     loadComponent: () => import('./features/request/make-request.component').then(m => m.MakeRequestComponent)
+  },
+  // Chatbot
+  {
+    path: 'chatbot',
+    loadComponent: () => import('./features/chatbot/chatbot.component').then(m => m.ChatbotComponent)
   },
 ];

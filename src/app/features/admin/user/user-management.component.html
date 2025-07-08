@@ -1,0 +1,474 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Header Section -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">User Management</h1>
+        <p class="text-gray-600 mt-2">Manage all users, their status, and permissions</p>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="bg-white rounded-lg shadow-sm p-4">
+          <div class="text-sm text-gray-500">Total Users</div>
+          <div class="text-2xl font-bold text-blue-600">{{ totalUsers }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-green-100">
+          <i class="pi pi-users text-green-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Active Users</p>
+          <p class="text-2xl font-bold text-gray-900">{{ statistics.active }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-yellow-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-yellow-100">
+          <i class="pi pi-check-circle text-yellow-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Verified Users</p>
+          <p class="text-2xl font-bold text-gray-900">{{ statistics.verified }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-red-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-red-100">
+          <i class="pi pi-ban text-red-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Blocked Users</p>
+          <p class="text-2xl font-bold text-gray-900">{{ statistics.blocked }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-blue-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-blue-100">
+          <i class="pi pi-clock text-blue-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Pending Verification</p>
+          <p class="text-2xl font-bold text-gray-900">{{ statistics.unverified }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+      <div class="md:col-span-3">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Search Users</label>
+        <div class="relative">
+          <input 
+            pInputText 
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search by name, email, or username..."
+            class="w-full pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+      </div>
+
+      <div class="md:col-span-1">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+        <p-dropdown 
+          [(ngModel)]="statusFilter"
+          (onChange)="onFilterChange()"
+          [options]="[
+            {label: 'All Status', value: ''},
+            {label: 'Active', value: 'active'},
+            {label: 'Inactive', value: 'inactive'}
+          ]"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select Status"
+          class="w-full"
+        ></p-dropdown>
+      </div>
+
+      <div class="md:col-span-1">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Verification</label>
+        <p-dropdown 
+          [(ngModel)]="verificationFilter"
+          (onChange)="onFilterChange()"
+          [options]="[
+            {label: 'All Users', value: ''},
+            {label: 'Verified', value: 'verified'},
+            {label: 'Unverified', value: 'unverified'}
+          ]"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select Verification"
+          class="w-full"
+        ></p-dropdown>
+      </div>
+
+      <div class="md:col-span-1">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Blocked Status</label>
+        <p-dropdown 
+          [(ngModel)]="blockedFilter"
+          (onChange)="onFilterChange()"
+          [options]="[
+            {label: 'All Users', value: ''},
+            {label: 'Blocked', value: 'blocked'},
+            {label: 'Not Blocked', value: 'notBlocked'}
+          ]"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select Blocked Status"
+          class="w-full"
+        ></p-dropdown>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">Users List</h3>
+    </div>
+
+    <div class="relative">
+      <p-table 
+        [value]="users" 
+        [loading]="loading"
+        [paginator]="false"
+        [rows]="pageSize"
+        [showCurrentPageReport]="false"
+        responsiveLayout="scroll"
+        class="w-full"
+        styleClass="p-datatable-sm"
+      >
+        <!-- Avatar and Name Column -->
+        <ng-template pTemplate="header">
+          <tr class="bg-gray-50">
+            <th class="text-center p-4 font-medium text-gray-700">User</th>
+            <th class="text-center p-4 font-medium text-gray-700">Email</th>
+            <th class="text-center p-4 font-medium text-gray-700">Role</th>
+            <th class="text-center p-4 font-medium text-gray-700">Status</th>
+            <th class="text-center p-4 font-medium text-gray-700">Verification</th>
+            <th class="text-center p-4 font-medium text-gray-700">Punishment</th>
+            <th class="p-4 font-medium text-gray-700" style="min-width: 120px; text-align: center !important;">Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-user>
+          <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+            <!-- User Info -->
+            <td class="p-4">
+              <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                  <img 
+                    *ngIf="user.profileImageUrl" 
+                    [src]="user.profileImageUrl" 
+                    [alt]="user.firstName"
+                    class="w-10 h-10 rounded-full object-cover"
+                  />
+                  <span *ngIf="!user.profileImageUrl" class="text-gray-600 font-medium">
+                    {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                  </span>
+                </div>
+                <div>
+                  <div class="font-medium text-gray-900">{{ user.firstName }} {{ user.lastName }}</div>
+                  <div class="text-sm text-gray-500">{{ '@' + user.userName }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Email -->
+            <td class="p-4">
+              <div class="text-gray-900">{{ user.email }}</div>
+              <div class="text-sm text-gray-500">{{ user.phoneNumber || 'No phone' }}</div>
+            </td>
+
+            <!-- Role -->
+            <td class="p-4">
+              <p-tag 
+                [value]="getRoleBadge(user.roles)"
+                [severity]="getRoleSeverity(user.roles)"
+                class="text-xs"
+              ></p-tag>
+            </td>
+
+            <!-- Status -->
+            <td class="p-4">
+              <p-tag 
+                [value]="user.isDeleted ? 'Inactive' : 'Active'"
+                [severity]="user.isDeleted ? 'danger' : 'success'"
+                class="text-xs"
+              ></p-tag>
+            </td>
+
+            <!-- Verification -->
+            <td class="p-4">
+              <ng-container *ngIf="user.userVerification; else notSubmitted">
+                <p-tag 
+                  [value]="user.userVerification.status"
+                  [severity]="getVerificationSeverity(user.userVerification.status)"
+                  class="text-xs"
+                ></p-tag>
+              </ng-container>
+              <ng-template #notSubmitted>
+                <span class="text-gray-400 text-sm">Not submitted</span>
+              </ng-template>
+            </td>
+
+            <!-- Punishment -->
+            <td class="p-4">
+              <p-tag 
+                *ngIf="user.currentPunishment"
+                [value]="user.currentPunishment.type"
+                [severity]="getPunishmentSeverity(user.currentPunishment)"
+                class="text-xs"
+              ></p-tag>
+              <span *ngIf="!user.currentPunishment" class="text-green-600 text-sm">Clean</span>
+            </td>
+
+            <!-- Actions -->
+            <td class="p-4 text-center" style="min-width: 120px;">
+              <div class="flex items-center justify-center space-x-2">
+                <button 
+                  pButton 
+                  icon="pi pi-eye" 
+                  class="p-button-text p-button-sm p-button-info"
+                  pTooltip="View Details"
+                  (click)="viewUserDetails(user)"
+                ></button>
+
+                <button 
+                  pButton 
+                  [icon]="user.isDeleted ? 'pi pi-check' : 'pi pi-ban'"
+                  class="p-button-text p-button-sm"
+                  [ngClass]="user.isDeleted ? 'p-button-success' : 'p-button-warning'"
+                  [pTooltip]="user.isDeleted ? 'Activate User' : 'Deactivate User'"
+                  (click)="toggleUserActivation(user)"
+                ></button>
+
+                <button 
+                  pButton 
+                  icon="pi pi-exclamation-triangle" 
+                  class="p-button-text p-button-sm p-button-danger"
+                  pTooltip="Apply Punishment"
+                  (click)="openPunishmentDialog(user)"
+                ></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="text-center p-8">
+              <div class="flex flex-col items-center">
+                <i class="pi pi-users text-4xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">No users found</p>
+                <p class="text-gray-400 text-sm">Try adjusting your search or filters</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="p-4 border-t border-gray-200">
+      <p-paginator 
+        [rows]="pageSize"
+        [totalRecords]="totalUsers"
+        [rowsPerPageOptions]="[5, 10, 20, 50]"
+        (onPageChange)="onPageChange($event)"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
+      ></p-paginator>
+    </div>
+  </div>
+
+  <!-- User Details Dialog -->
+  <p-dialog 
+    [(visible)]="showUserDetails" 
+    [modal]="true" 
+    [style]="{width: '50vw'}"
+    header="User Details"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <div *ngIf="selectedUser" class="space-y-6">
+      <!-- User Info -->
+      <div class="flex items-center space-x-4">
+        <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+          <img 
+            *ngIf="selectedUser.profileImageUrl" 
+            [src]="selectedUser.profileImageUrl" 
+            [alt]="selectedUser.firstName"
+            class="w-16 h-16 rounded-full object-cover"
+          />
+          <span *ngIf="!selectedUser.profileImageUrl" class="text-gray-600 font-medium text-xl">
+            {{ selectedUser.firstName.charAt(0) }}{{ selectedUser.lastName.charAt(0) }}
+          </span>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-gray-900">{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h3>
+          <p class="text-gray-600">{{ selectedUser.email }}</p>
+          <p class="text-sm text-gray-500">{{ '@' + selectedUser.userName }}</p>
+        </div>
+      </div>
+
+      <!-- User Details Grid -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Phone</label>
+          <p class="text-gray-900">{{ selectedUser.phoneNumber || 'Not provided' }}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Location</label>
+          <p class="text-gray-900">{{ selectedUser.city }}, {{ selectedUser.country }}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Address</label>
+          <p class="text-gray-900">{{ selectedUser.address || 'Not provided' }}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Postal Code</label>
+          <p class="text-gray-900">{{ selectedUser.postalCode || 'Not provided' }}</p>
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div *ngIf="selectedUser.statistics" class="bg-gray-50 rounded-lg p-4">
+        <h4 class="font-medium text-gray-900 mb-3">User Statistics</h4>
+        <div class="grid grid-cols-4 gap-4 text-center">
+          <div>
+            <div class="text-2xl font-bold text-blue-600">{{ selectedUser.statistics.totalProducts }}</div>
+            <div class="text-sm text-gray-600">Products</div>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-green-600">{{ selectedUser.statistics.totalServices }}</div>
+            <div class="text-sm text-gray-600">Services</div>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-purple-600">{{ selectedUser.statistics.totalAuctions }}</div>
+            <div class="text-sm text-gray-600">Auctions</div>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-red-600">{{ selectedUser.statistics.totalPunishments }}</div>
+            <div class="text-sm text-gray-600">Punishments</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Punishment History -->
+      <div *ngIf="selectedUser.punishmentHistory && selectedUser.punishmentHistory.length > 0">
+        <h4 class="font-medium text-gray-900 mb-3">Punishment History</h4>
+        <div class="space-y-2">
+          <div 
+            *ngFor="let punishment of selectedUser.punishmentHistory" 
+            class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+          >
+            <div>
+              <p class="font-medium text-gray-900">{{ punishment.type }}</p>
+              <p class="text-sm text-gray-600">{{ punishment.reason }}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm text-gray-600">{{ punishment.startDate | date:'short' }}</p>
+              <p *ngIf="punishment.endDate" class="text-sm text-gray-600">Until {{ punishment.endDate | date:'short' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </p-dialog>
+
+  <!-- Punishment Dialog -->
+  <p-dialog 
+    [(visible)]="showPunishmentDialog" 
+    [modal]="true" 
+    [style]="{width: '40vw'}"
+    header="Apply Punishment"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <form [formGroup]="punishmentForm" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Punishment Type</label>
+        <p-dropdown 
+          formControlName="type"
+          [options]="[
+            {label: 'Warning', value: 'Warning'},
+            {label: 'Temporary Ban', value: 'TemporaryBan'},
+            {label: 'Permanent Ban', value: 'PermanentBan'}
+          ]"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select punishment type"
+          class="w-full"
+        ></p-dropdown>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Reason</label>
+        <textarea 
+          pInputTextarea 
+          formControlName="reason"
+          rows="3"
+          placeholder="Enter the reason for this punishment..."
+          class="w-full"
+        ></textarea>
+        <div *ngIf="punishmentReason?.touched && punishmentReason?.invalid" class="text-red-600 text-xs mt-1">
+          <div *ngIf="punishmentReason?.errors?.['required']">Reason is required.</div>
+          <div *ngIf="punishmentReason?.errors?.['minlength']">Reason must be at least 10 characters.</div>
+        </div>
+      </div>
+
+      <div *ngIf="punishmentForm.get('type')?.value === 'TemporaryBan'">
+        <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+        <input 
+          type="date" 
+          formControlName="endDate" 
+          class="w-full border p-2 rounded text-lg"
+          [min]="getCurrentDate() | date:'yyyy-MM-dd'"
+        >
+        <small class="text-gray-500 block mt-1">Pick the end date</small>
+      </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end space-x-2">
+        <button 
+          pButton 
+          label="Cancel" 
+          class="p-button-text"
+          (click)="showPunishmentDialog = false"
+        ></button>
+        <button 
+          pButton 
+          type="button"
+          class="p-button-danger"
+          [disabled]="!punishmentForm.valid || punishmentLoading"
+          (click)="submitPunishment()"
+        >
+          <i *ngIf="punishmentLoading" class="pi pi-spin pi-spinner mr-2"></i>
+          {{ punishmentLoading ? 'Applying...' : 'Apply Punishment' }}
+        </button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Toast Messages -->
+  <p-toast></p-toast>
+  
+  <!-- Confirmation Dialog -->
+  <p-confirmDialog></p-confirmDialog>
+</div> 

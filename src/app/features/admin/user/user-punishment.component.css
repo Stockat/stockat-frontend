@@ -1,0 +1,385 @@
+/* Custom styles for User Punishment Component */
+
+/* Inherit base styles from user-management component */
+@import './user-management.component.css';
+
+/* Additional specific styles for punishment component */
+
+/* Punishment type indicators */
+.punishment-warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-left: 4px solid #f59e0b;
+}
+
+.punishment-temporary {
+  background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+  border-left: 4px solid #ea580c;
+}
+
+.punishment-permanent {
+  background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+  border-left: 4px solid #dc2626;
+}
+
+/* Status indicators */
+.status-active {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  font-weight: 600;
+}
+
+.status-inactive {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-weight: 600;
+}
+
+/* Punishment card styling */
+.punishment-card {
+  transition: all 0.3s ease;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.punishment-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Statistics card animations */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.stat-card:hover::before {
+  left: 100%;
+}
+
+/* Table row styling for punishments */
+.punishment-row {
+  transition: all 0.2s ease;
+}
+
+.punishment-row:hover {
+  background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  transform: translateX(4px);
+}
+
+/* Action button styling */
+.action-btn-danger {
+  transition: all 0.2s ease;
+}
+
+.action-btn-danger:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+}
+
+/* Form styling for punishment creation */
+.punishment-form {
+  background: #f8fafc;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+
+.punishment-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.punishment-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.punishment-form input,
+.punishment-form textarea,
+.punishment-form select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.punishment-form input:focus,
+.punishment-form textarea:focus,
+.punishment-form select:focus {
+  outline: none;
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* Calendar styling for end date */
+::ng-deep .p-calendar {
+  width: 100%;
+}
+
+::ng-deep .p-calendar .p-inputtext {
+  width: 100%;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+::ng-deep .p-calendar .p-inputtext:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* Modal styling for punishment details */
+.punishment-details-modal {
+  max-width: 600px;
+}
+
+.punishment-details-modal .modal-header {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+/* Badge styling for punishment types */
+.punishment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.punishment-badge-warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+
+.punishment-badge-temporary {
+  background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+  color: #9a3412;
+  border: 1px solid #ea580c;
+}
+
+.punishment-badge-permanent {
+  background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+  color: #991b1b;
+  border: 1px solid #dc2626;
+}
+
+/* Progress bar for punishment statistics */
+.progress-bar-punishment {
+  height: 8px;
+  background: linear-gradient(90deg, #e5e7eb 0%, #d1d5db 100%);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-fill-warning {
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+}
+
+.progress-fill-danger {
+  background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+}
+
+/* Loading animation for punishment operations */
+.punishment-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.punishment-loading .p-progress-spinner {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Empty state styling */
+.punishment-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #6b7280;
+}
+
+.punishment-empty i {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.3;
+}
+
+.punishment-empty h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.punishment-empty p {
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .punishment-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .punishment-filters {
+    grid-template-columns: 1fr;
+  }
+  
+  .punishment-table {
+    font-size: 0.875rem;
+  }
+  
+  .punishment-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .punishment-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .punishment-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .punishment-create-btn {
+    width: 100%;
+  }
+}
+
+/* Animation for punishment creation */
+.punishment-create-animation {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover effects for punishment cards */
+.punishment-card-hover {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.punishment-card-hover:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Custom scrollbar for punishment tables */
+.punishment-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.punishment-table-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.punishment-table-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.punishment-table-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Tooltip styling for punishment actions */
+::ng-deep .p-tooltip.punishment-tooltip {
+  background: #1f2937 !important;
+  color: white !important;
+  border-radius: 0.5rem !important;
+  font-size: 0.75rem !important;
+  padding: 0.75rem 1rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #374151 !important;
+}
+
+/* Button group styling for punishment actions */
+.punishment-button-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.punishment-button-group .p-button {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Form validation styling */
+.punishment-form .ng-invalid.ng-touched {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+.punishment-form .ng-valid.ng-touched {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* Success/Error message styling */
+.punishment-message {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.punishment-message.success {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.punishment-message.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #dc2626;
+} 
