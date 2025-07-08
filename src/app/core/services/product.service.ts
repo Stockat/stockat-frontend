@@ -27,9 +27,6 @@ export class ProductService {
   getAllProductsPaginated(filters: ProductFilters): Observable<GenericRequestModel<PaginationDto<ProductDto>>> {
 
     const params = new HttpParams({ fromObject: filters as any });
-
-
-
     console.log("params",params.toString());
 
     return this.http.get<GenericRequestModel<PaginationDto<ProductDto>>>(this.apiUrl, { params });
@@ -96,6 +93,14 @@ export class ProductService {
     return this.http.get<GenericRequestModel<ProductWithFeatures>>(`${this.apiUrl}/with-features/${id}`);
   }
 
+  //* Admin Services
+  getAllProductsPaginatedForAdmin(filters: ProductFilters): Observable<GenericRequestModel<PaginationDto<ProductDto>>> {
+
+    const params = new HttpParams({ fromObject: filters as any });
+    console.log("params",params.toString());
+
+    return this.http.get<GenericRequestModel<PaginationDto<ProductDto>>>(this.apiUrl+'/admin', { params });
+  }
 
 
 //! End Of Service

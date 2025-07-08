@@ -37,32 +37,27 @@
   [modal]="true"
   [closable]="false"
   [style]="{width: '400px'}"
-  contentStyleClass="bg-gray-100"
-  header="Send Image"
+  contentStyleClass="custom-confirm-dialog"
 >
-  <div class="flex flex-col items-center gap-6 p-4">
-    <div class="text-gray-900 text-lg font-semibold mb-2">Are you sure you want to send this image?</div>
-    <img *ngIf="imagePreviewUrl" [src]="imagePreviewUrl" class="rounded-2xl max-h-80 shadow-lg border-4 border-white" />
-    <div class="flex gap-6 justify-center mt-4">
-      <button pButton label="No, Cancel" class="bg-red-200 text-red-900 px-6 py-2 rounded-lg font-semibold" (click)="cancelSendImage()"></button>
-      <button pButton label="Yes, Send" class="bg-green-200 text-green-900 px-6 py-2 rounded-lg font-semibold" (click)="confirmSendImage()"></button>
-    </div>
+  <div class="custom-confirm-title">Are you sure you want to send this image?</div>
+  <img *ngIf="imagePreviewUrl" [src]="imagePreviewUrl" class="confirm-dialog-image" />
+  <div class="custom-confirm-actions">
+    <button pButton class="custom-confirm-btn" (click)="cancelSendImage()">No, Cancel</button>
+    <button pButton class="custom-confirm-btn confirm" (click)="confirmSendImage()">Yes, Send</button>
   </div>
 </p-dialog>
+
 <p-dialog
   [(visible)]="showVoiceConfirm"
   [modal]="true"
   [closable]="false"
   [style]="{width: '400px'}"
-  contentStyleClass="bg-gray-100"
-  header="Send Voice Message"
+  contentStyleClass="custom-confirm-dialog"
 >
-  <div class="flex flex-col items-center gap-6 p-4">
-    <div class="text-gray-900 text-lg font-semibold mb-2">Are you sure you want to send this voice message?</div>
-    <audio *ngIf="voicePreviewUrl" [src]="voicePreviewUrl" controls class="w-full rounded-lg bg-gray-100"></audio>
-    <div class="flex gap-6 justify-center mt-4">
-      <button pButton label="No, Cancel" class="bg-red-200 text-red-900 px-6 py-2 rounded-lg font-semibold" (click)="cancelSendVoice()"></button>
-      <button pButton label="Yes, Send" class="bg-green-200 text-green-900 px-6 py-2 rounded-lg font-semibold" (click)="confirmSendVoice()"></button>
-    </div>
+  <div class="custom-confirm-title">Are you sure you want to send this voice message?</div>
+  <audio *ngIf="voicePreviewUrl" [src]="voicePreviewUrl" controls class="w-full rounded-lg bg-gray-100"></audio>
+  <div class="custom-confirm-actions">
+    <button pButton class="custom-confirm-btn" (click)="cancelSendVoice()">No, Cancel</button>
+    <button pButton class="custom-confirm-btn confirm" (click)="confirmSendVoice()">Yes, Send</button>
   </div>
 </p-dialog>

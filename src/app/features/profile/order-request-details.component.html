@@ -1,0 +1,184 @@
+<!-- Header Section -->
+<div
+    class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 mb-8 relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-pink-50/50 to-purple-50/50"></div>
+    <div
+        class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-400/20 to-purple-400/20 rounded-full -translate-y-16 translate-x-8">
+    </div>
+    <div class="relative z-10">
+        <div class="flex items-center gap-4 mb-6">
+            <div
+                class="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <i class="pi pi-shopping-cart text-white text-xl"></i>
+            </div>
+            <div>
+                <h2 class="text-3xl font-bold text-gray-800">My Order Requests</h2>
+                <p class="text-gray-600">Track and manage your order requests</p>
+            </div>
+        </div>
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-white/20">
+                <div class="flex items-center gap-2 md:gap-3">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <i class="pi pi-clock text-yellow-600 text-sm md:text-base"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Pending</p>
+                        <p class="font-bold text-gray-800 text-sm md:text-base">{{ pendingOrdersCount }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-white/20">
+                <div class="flex items-center gap-2 md:gap-3">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="pi pi-check-circle text-green-600 text-sm md:text-base"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Delivered</p>
+                        <p class="font-bold text-gray-800 text-sm md:text-base">{{ completedOrdersCount }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-white/20">
+                <div class="flex items-center gap-2 md:gap-3">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                        <i class="pi pi-times-circle text-red-600 text-sm md:text-base"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Cancelled</p>
+                        <p class="font-bold text-gray-800 text-sm md:text-base">{{ cancelledOrdersCount }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-white/20">
+                <div class="flex items-center gap-2 md:gap-3">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                        <i class="pi pi-dollar text-indigo-600 text-sm md:text-base"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Total</p>
+                        <p class="font-bold text-gray-800 text-sm md:text-base">{{ totalOrdersCount }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Search and Filter Controls -->
+        <div class="flex flex-col md:flex-row md:items-center gap-4">
+            <div class="relative flex-1">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="pi pi-search text-gray-400"></i>
+                </div>
+                <input type="text" [(ngModel)]="searchTerm" placeholder="Search by seller or status..."
+                    class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-400 focus:border-pink-400 transition bg-white"
+                    (ngModelChange)="filterOrders()" />
+            </div>
+            <p-dropdown [(ngModel)]="statusFilter" [options]="orderStatusOptions" optionLabel="label"
+                optionValue="value" placeholder="Filter by status" (onChange)="filterOrders()" class="w-full md:w-48"
+                [appendTo]="'body'">
+            </p-dropdown>
+        </div>
+    </div>
+</div>
+<!-- Orders Table Section -->
+<div class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="text-center py-12">
+        <p-progressSpinner styleClass="w-16 h-16" strokeWidth="4" fill="var(--surface-ground)"
+            animationDuration=".5s"></p-progressSpinner>
+        <p class="text-gray-600 font-semibold mt-4">Loading your order requests...</p>
+    </div>
+    <!-- Empty State -->
+    <div *ngIf="!loading && (!orders || orders.length === 0)" class="text-center py-12">
+        <div
+            class="w-20 h-20 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="pi pi-shopping-cart text-white text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">No Order Requests</h3>
+        <p class="text-gray-600">You haven't placed any order requests yet.</p>
+    </div>
+    <!-- Orders Table -->
+    <div *ngIf="!loading && filteredOrders && filteredOrders.length > 0"
+        class="rounded-2xl border border-white/20 shadow-lg">
+        <!-- Mobile Cards View -->
+        <div class="block lg:hidden">
+            <div *ngFor="let order of pagedOrders"
+                class="bg-white/80 backdrop-blur-sm rounded-xl p-4 mb-3 border border-white/20">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-800 text-sm mb-1">Order #{{ order.id }}</h4>
+                        <p class="text-gray-600 text-xs mb-2">Seller: {{ order.sellerFirstName }} {{
+                            order.sellerLastName }}</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                        <p-tag [value]="order.status" [severity]="getOrderStatusSeverity(order.status)"
+                            styleClass="text-xs"></p-tag>
+                        <p-tag [value]="order.paymentStatus" [severity]="getPaymentStatusSeverity(order.paymentStatus)"
+                            styleClass="text-xs"></p-tag>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500">Quantity</p>
+                        <p class="font-semibold text-gray-800">{{ order.quantity }}</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500">Total</p>
+                        <span class="font-semibold text-gray-800">{{ order.price | currency }}</span>
+                    </div>
+                </div>
+                <div class="flex justify-center">
+                    <p-button label="Details" icon="pi pi-eye" styleClass="p-button-raised p-button-sm"
+                        class="bg-gradient-to-r from-pink-500 to-purple-600 border-0"></p-button>
+                </div>
+            </div>
+        </div>
+        <!-- Desktop Table View -->
+        <div class="hidden lg:block overflow-x-auto">
+            <p-table [value]="pagedOrders" [paginator]="false" [showCurrentPageReport]="false"
+                styleClass="p-datatable-sm" class="modern-table w-full">
+                <ng-template pTemplate="header">
+                    <tr class="bg-gradient-to-r from-pink-500 to-purple-600 text-white">
+                        <th class="px-3 py-3 text-left font-semibold text-sm w-1/6">Order #</th>
+                        <th class="px-3 py-3 text-left font-semibold text-sm w-1/6">Seller</th>
+                        <th class="px-3 py-3 text-left font-semibold text-sm w-1/12">Qty</th>
+                        <th class="px-3 py-3 text-left font-semibold text-sm w-1/8">Total</th>
+                        <th class="px-3 py-3 text-left font-semibold text-sm w-1/8">Status</th>
+                        <th class="px-3 py-3 text-left font-semibold text-sm w-1/8">Payment</th>
+                        <th class="px-3 py-3 text-left font-semibold text-sm w-1/6">Actions</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-order>
+                    <tr class="border-b border-gray-100 hover:bg-pink-50/50 transition-all duration-200">
+                        <td class="px-3 py-3 font-semibold text-gray-800">{{ order.id }}</td>
+                        <td class="px-3 py-3 text-gray-700">{{ order.sellerFirstName }} {{ order.sellerLastName }}</td>
+                        <td class="px-3 py-3 text-gray-700 text-sm">{{ order.quantity }}</td>
+                        <td class="px-3 py-3 font-semibold text-gray-800">{{ order.price | currency }}</td>
+                        <td class="px-3 py-3">
+                            <p-tag [value]="order.status" [severity]="getOrderStatusSeverity(order.status)"
+                                styleClass="text-xs"></p-tag>
+                        </td>
+                        <td class="px-3 py-3">
+                            <p-tag [value]="order.paymentStatus"
+                                [severity]="getPaymentStatusSeverity(order.paymentStatus)" styleClass="text-xs"></p-tag>
+                        </td>
+                        <td class="px-3 py-3">
+                            <p-button label="Details" icon="pi pi-eye" styleClass="p-button-raised p-button-sm"
+                                class="bg-gradient-to-r from-pink-500 to-purple-600 border-0"></p-button>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+        <!-- Paginator -->
+        <div *ngIf="filteredOrders && filteredOrders.length > 0" class="mt-8">
+            <div class="bg-white/50 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+                <p-paginator [rows]="rows" [totalRecords]="totalRecords" [first]="page * rows"
+                    (onPageChange)="onPageChange($event)" [showCurrentPageReport]="true"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} order requests"
+                    [rowsPerPageOptions]="[5, 10, 20]" styleClass="!bg-transparent !border-none !p-0">
+                </p-paginator>
+            </div>
+        </div>
+    </div>
+</div>

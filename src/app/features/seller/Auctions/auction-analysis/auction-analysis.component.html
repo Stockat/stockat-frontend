@@ -1,0 +1,107 @@
+<!-- auction-analysis.component.html -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Total Auctions -->
+      <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-sm font-medium text-gray-500">Total Auctions</p>
+            <p class="text-3xl font-bold mt-1">{{ totalAuctions }}</p>
+          </div>
+          <i class="pi pi-box text-blue-500 text-3xl"></i>
+        </div>
+      </div>
+  
+      <!-- Active Auctions -->
+      <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-sm font-medium text-gray-500">Active Auctions</p>
+            <p class="text-3xl font-bold mt-1">{{ activeAuctions }}</p>
+          </div>
+          <i class="pi pi-bolt text-purple-500 text-3xl"></i>
+        </div>
+      </div>
+  
+      <!-- Completed Auctions -->
+      <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-sm font-medium text-gray-500">Completed Auctions</p>
+            <p class="text-3xl font-bold mt-1">{{ completedAuctions }}</p>
+          </div>
+          <i class="pi pi-check-circle text-green-500 text-3xl"></i>
+        </div>
+      </div>
+  
+      <!-- Revenue Card -->
+      <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-sm font-medium opacity-80">Total Revenue</p>
+            <p class="text-3xl font-bold mt-1">${{ totalRevenue | number:'1.0-0' }}</p>
+            <div class="flex items-center mt-2">
+              <i class="pi pi-arrow-up mr-1"></i>
+              <span>{{ averageBidIncrease | number:'1.0-2' }}% avg increase</span>
+            </div>
+          </div>
+          <i class="pi pi-wallet text-white text-3xl opacity-70"></i>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Status Distribution Chart -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+      <h3 class="text-lg font-semibold mb-4">Auction Status Distribution</h3>
+      <div class="flex justify-center">
+        <p-chart type="doughnut" [data]="statusChartData" [options]="statusChartOptions" 
+                 width="100%" height="250px"></p-chart>
+      </div>
+    </div>
+  
+    <!-- Price Performance Chart -->
+    <div class="bg-white rounded-xl shadow-md p-6 lg:col-span-2">
+      <h3 class="text-lg font-semibold mb-4">Top Performing Auctions</h3>
+      <p-chart type="bar" [data]="priceChartData" [options]="priceChartOptions" 
+               height="80px"></p-chart>
+    </div>
+  
+    <!-- Mini Stats -->
+    <div class="bg-white rounded-xl shadow-md p-6 lg:col-span-2">
+      <h3 class="text-lg font-semibold mb-4">Performance Insights</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="flex items-center p-4 bg-blue-50 rounded-lg">
+          <div class="mr-4 bg-blue-100 p-3 rounded-full">
+            <i class="pi pi-percentage text-blue-600 text-xl"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Avg. Bid Increase</p>
+            <p class="text-xl font-bold">{{ averageBidIncrease | number:'1.0-2' }}%</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center p-4 bg-amber-50 rounded-lg">
+          <div class="mr-4 bg-amber-100 p-3 rounded-full">
+            <i class="pi pi-shopping-bag text-amber-600 text-xl"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Successful Auctions</p>
+            <p class="text-xl font-bold">
+              {{ completedAuctions > 0 ? (completedAuctions - statusChartData.datasets[0].data[2]) : 0 }}/{{ completedAuctions }}
+            </p>
+          </div>
+        </div>
+        
+        <div class="flex items-center p-4 bg-rose-50 rounded-lg">
+          <div class="mr-4 bg-rose-100 p-3 rounded-full">
+            <i class="pi pi-ban text-rose-600 text-xl"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">No-Bid Auctions</p>
+            <p class="text-xl font-bold">{{ statusChartData.datasets[0].data[2] }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

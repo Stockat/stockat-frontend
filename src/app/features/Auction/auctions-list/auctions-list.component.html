@@ -22,21 +22,24 @@
       <p-toggleButton 
         [(ngModel)]="filters.hasBid" 
         (onChange)="onFilterChange()"
-        onLabel="Has Bids" 
+        onLabel="Has
+         Bids" 
         offLabel="All Bids"
       ></p-toggleButton>
     
       <p-toggleButton 
         [(ngModel)]="filters.isClosed" 
         (onChange)="onFilterChange()"
-        onLabel="Closed Only" 
+        onLabel="Closed
+         Only" 
         offLabel="Include Closed"
       ></p-toggleButton>
     
       <p-toggleButton 
         [(ngModel)]="filters.activeOnly" 
         (onChange)="onFilterChange()"
-        onLabel="Active Only" 
+        onLabel="Active 
+        Only" 
         offLabel="All Statuses"
       ></p-toggleButton>
     </div>
@@ -44,25 +47,34 @@
 
   <div class="auctions-grid">
     <p-card 
-      *ngFor="let auction of filteredAuctions" 
+      *ngFor="let auction of pagedAuctions"
       class="auction-card"
       [ngClass]="{'closed-auction': auction.isClosed}"
     >
     <div class="card-header">
       <div class="badge-container">
         <p-tag 
-          *ngIf="auction.currentBid > auction.startingPrice" 
+          *ngIf="auction.currentBid > auction.startingPrice && isActive(auction)" 
           value="Active Bids" 
           severity="success" 
           icon="pi pi-bolt"
         ></p-tag>
+    
         <p-tag 
-          *ngIf="auction.isClosed" 
+          *ngIf="isClosed(auction)" 
           value="Closed" 
           severity="danger" 
           icon="pi pi-lock"
         ></p-tag>
+    
+        <p-tag 
+          *ngIf="isUpcoming(auction)" 
+          value="Coming Soon" 
+          severity="info" 
+          icon="pi pi-clock"
+        ></p-tag>
       </div>
+    
       <div class="time-remaining">
         <i class="pi pi-clock"></i>
         {{ getTimeRemaining(auction.endTime) }}
@@ -107,24 +119,44 @@
     </div>
 
     <div class="card-footer">
+      <!-- Upcoming -->
       <p-button 
-        *ngIf="!auction.isClosed"
+        *ngIf="isUpcoming(auction)"
+        label="Coming Soon"
+        icon="pi pi-clock"
+        styleClass="p-button-raised p-button-info"
+        [disabled]="true"
+      ></p-button>
+    
+      <!-- Active -->
+      <p-button 
+        *ngIf="isActive(auction)"
         [routerLink]="['/auction', auction.id]"
         label="Place Bid"
         icon="pi pi-gavel"
         styleClass="p-button-raised p-button-warning"
       ></p-button>
-      
+    
+      <!-- Closed -->
       <p-button 
-        *ngIf="auction.isClosed"
-        [routerLink]="['/auction', auction.id]"
-        label="View Results"
-        icon="pi pi-chart-bar"
-        styleClass="p-button-raised p-button-secondary"
-      ></p-button>
-    </div>
+      *ngIf="isClosed(auction)"
+      (click)="viewResults(auction)"
+      label="View Results"
+      icon="pi pi-chart-bar"
+      styleClass="p-button-raised p-button-secondary"
+    ></p-button>
+
+    </div>    
     </p-card>
   </div>
+
+  <!--paganator  -->
+  <p-paginator 
+  [rows]="pageSize"
+  [totalRecords]="totalRecords"
+  [first]="currentPage * pageSize"
+  (onPageChange)="onPageChange($event)">
+  </p-paginator>
 
   <div *ngIf="filteredAuctions.length === 0" class="no-results">
     <i class="pi pi-search" style="font-size: 3rem"></i>
@@ -137,3 +169,7 @@
     ></p-button>
   </div>
 </div>
+<p-dialog header="Auction Result" [(visible)]="showDialog" [modal]="true" [closable]="true" [style]="{width: '350px'}">
+  <p *ngIf="winnerName === 'No winner'">This auction had no winner.</p>
+  <p *ngIf="winnerName !== 'No winner'">The winner is: <strong>{{ winnerName }}</strong></p>
+</p-dialog>

@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ChatBotService } from '../../core/services/chatbot.service';
 import { ChatBotMessage, ChatBotRequestDto } from '../../core/models/chatbot-models';
@@ -31,7 +32,12 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
     'Show platform statistics'
   ];
 
-  constructor(private chatBotService: ChatBotService, private productService: ProductService, private userService: UserService) {}
+  constructor(
+    private chatBotService: ChatBotService,
+    private productService: ProductService,
+    private userService: UserService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     // Do not open or load chat until user clicks the icon
@@ -42,6 +48,26 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
       this.scrollToBottom();
       this.shouldScroll = false;
     }
+  }
+
+  /**
+   * Check if we're on auth pages (login, register, etc.)
+   */
+  isOnAuthPage(): boolean {
+    const currentUrl = this.router.url;
+    return currentUrl.includes('/login') ||
+           currentUrl.includes('/register') ||
+           currentUrl.includes('/forgot-password') ||
+           currentUrl.includes('/reset-password') ||
+           currentUrl.includes('/confirm-email') ||
+           currentUrl.includes('/admin')
+  }
+
+  /**
+   * Check if chatbot should be visible
+   */
+  shouldShowChatbot(): boolean {
+    return !this.isOnAuthPage();
   }
 
   /**
@@ -106,7 +132,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
         // Convert DTOs to component messages
         this.messages = historyResponse.messages.map(dto =>
           this.chatBotService.convertToChatBotMessage(dto)
-        ).reverse(); // Show oldest first
+        ); // Show in chronological order (oldest to newest)
         this.shouldScroll = true;
       } else {
         this.addWelcomeMessage();

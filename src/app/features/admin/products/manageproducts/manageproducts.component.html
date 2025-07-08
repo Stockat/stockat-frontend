@@ -1,0 +1,320 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      @if (isLoading) {
+      <div class="space-y-4">
+        <div class="h-10 bg-gray-200 rounded-lg w-64 mx-auto animate-pulse"></div>
+        <div class="h-6 bg-gray-200 rounded w-48 mx-auto animate-pulse"></div>
+      </div>
+      } @else {
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">My Products</h1>
+      <p class="text-gray-600">Manage and view all your products</p>
+      }
+    </div>
+
+    <!-- Filter Section -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold text-gray-800">Filter Products</h2>
+      </div>
+
+      @if (isLoading) {
+      <!-- Filter Skeleton -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+        @for (item of [1,2,3,4,5,6]; track item) {
+        <div class="flex flex-col space-y-2">
+          <div class="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+          <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+        </div>
+        }
+      </div>
+
+      <!-- Action Buttons Skeleton -->
+      <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-gray-200">
+        <div class="flex-1">
+          <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+        </div>
+        <div class="flex-1">
+          <div class="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+        </div>
+      </div>
+      } @else {
+      <!-- First Row - Status and Location Filters -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <!-- Status Select -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Product Status
+          </label>
+          <p-select [options]="statusOptions" [(ngModel)]="selectedStatus" placeholder="Select Status" class="w-full"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-blue-400 shadow-sm" />
+        </div>
+
+        <!-- Is Deleted Select -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+              </path>
+            </svg>
+            Deletion Status
+          </label>
+          <p-select [options]="deletedOptions" [(ngModel)]="selectedIsDeleted" placeholder="Select Deletion Status"
+            class="w-full"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 hover:border-red-400 shadow-sm" />
+        </div>
+
+        <!-- Location Select -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            Location
+          </label>
+          <p-select [options]="cities" [(ngModel)]="selectedCity" placeholder="Select a Location" class="w-full"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 hover:border-purple-400 shadow-sm" />
+        </div>
+
+        <!-- Category Select -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+              </path>
+            </svg>
+            Category
+          </label>
+          <p-select [options]="categories" [(ngModel)]="selectedCategory" optionValue="id" optionLabel="categoryName"
+            placeholder="Select a Category" class="w-full"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:border-green-400 shadow-sm" />
+        </div>
+      </div>
+
+      <!-- Second Row - Tags, Price, and Quantity Filters -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Tags MultiSelect -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
+              </path>
+            </svg>
+            Tags
+          </label>
+          <p-multiselect [options]="tags" [(ngModel)]="selectedTags" optionLabel="name" optionValue="id"
+            placeholder="Select Tags" [maxSelectedLabels]="3" class="w-full"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 hover:border-indigo-400 shadow-sm" />
+        </div>
+
+        <!-- Price Input -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center" for="price">
+            <svg class="w-4 h-4 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
+              </path>
+            </svg>
+            Min Price
+          </label>
+          <p-inputnumber [(ngModel)]="SelectedPrice" inputId="price" mode="decimal" [min]="1" class="w-full"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200 hover:border-yellow-400 shadow-sm" />
+        </div>
+
+        <!-- Min Quantity Input -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center" for="minQty">
+            <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+            Min Quantity
+          </label>
+          <p-inputnumber [(ngModel)]="SelectedMinQty" inputId="minQty" mode="decimal" [min]="1" class="w-full"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 hover:border-red-400 shadow-sm" />
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-gray-200">
+        <div class="w-1/2">
+          <p-button label="Apply Filters" icon="pi pi-filter" variant="text" [raised]="true" severity="success"
+            (onClick)="setFilters()" class="w-full h-12 font-semibold" />
+        </div>
+        <div class="w-1/2">
+          <p-button label="Clear All" icon="pi pi-times" variant="text" [raised]="true" severity="danger"
+            (onClick)="resetFilters()" class="w-full h-12 font-semibold" />
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Products Table -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <!-- Loading Skeleton -->
+        @if (isLoading) {
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <div class="h-8 bg-gray-200 rounded-lg w-48 animate-pulse"></div>
+            <div class="h-6 bg-gray-200 rounded w-32 animate-pulse"></div>
+          </div>
+
+          <!-- Table Header Skeleton -->
+          <div class="bg-gray-50 border-b border-gray-200">
+            <div class="grid grid-cols-6 gap-4 p-4">
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-24 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-20 animate-pulse"></div>
+            </div>
+          </div>
+
+          <!-- Table Rows Skeleton -->
+          @for (item of [1,2,3,4,5,6,7,8]; track item) {
+          <div class="border-b border-gray-100 p-4">
+            <div class="grid grid-cols-6 gap-4 items-center">
+              <!-- Name -->
+              <div class="h-5 bg-gray-200 rounded w-32 animate-pulse"></div>
+              <!-- Image -->
+              <div class="w-16 h-16 bg-gray-200 rounded-lg animate-pulse"></div>
+              <!-- Price -->
+              <div class="h-5 bg-gray-200 rounded w-20 animate-pulse"></div>
+              <!-- Min Quantity -->
+              <div class="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <!-- Status -->
+              <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <!-- Actions -->
+              <div class="flex gap-2">
+                <div class="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
+                <div class="h-8 w-8 bg-gray-200 rounded-full animate-pulse"></div>
+                <div class="h-8 w-8 bg-gray-200 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+          }
+
+          <!-- Footer Skeleton -->
+          <div class="bg-gray-50 p-4 text-center">
+            <div class="h-5 bg-gray-200 rounded w-48 mx-auto animate-pulse"></div>
+          </div>
+        </div>
+        } @else {
+        <p-table [value]="products" [tableStyle]="{ 'min-width': '60rem' }" class="w-full" styleClass="w-full">
+          <ng-template #caption>
+            <div class="flex items-center justify-between p-6">
+              <span class="text-2xl font-bold text-gray-900">Products List</span>
+              <span class="text-sm text-gray-600">Total: {{ products ? products.length : 0 }} out of
+                {{totalRecords}}</span>
+            </div>
+          </ng-template>
+
+          <ng-template #header>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="p-4 text-left font-semibold text-gray-700">Name</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Image</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Price</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Min Quantity</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Status</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Actions</th>
+            </tr>
+          </ng-template>
+
+          <ng-template #body let-product>
+            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="p-4">
+                <div class="font-medium text-gray-900">{{ product.name }}</div>
+              </td>
+              <td class="p-4">
+                <img [src]="product.images[0]" [alt]="product.name"
+                  class="w-16 h-16 object-cover rounded-lg border border-gray-200" />
+              </td>
+              <td class="p-4">
+                <span class="font-semibold text-green-600">{{ product.price | currency: 'USD' }}</span>
+              </td>
+              <td class="p-4">
+                <span class="font-semibold text-gray-900">{{ product.minQuantity }}</span>
+              </td>
+              <td class="p-4">
+                @if (product.isDeleted) {
+                <p-tag value="Deleted" severity="danger" class="text-xs" />
+                } @else {
+                <p-tag [value]="product.productStatus" [severity]="getSeverity(product.productStatus)"
+                  class="text-xs" />
+                }
+              </td>
+              <td class="p-4">
+                @if (!product.isDeleted) {
+                <div class="flex flex-wrap gap-2">
+                  <p-toast />
+                  <p-confirmdialog />
+
+                  <!-- View Details Button -->
+                  <p-button icon="pi pi-eye" [rounded]="true" severity="info" [outlined]="true"
+                    (onClick)="viewDetails(product.id)" class="text-xs" pTooltip="View Details" />
+
+                  <!-- Pending Status - Show Accept & Reject buttons -->
+                  @if (product.productStatus == "Pending") {
+                  <p-button label="Accept" icon="pi pi-check" variant="text" [raised]="true" severity="success"
+                    class="text-xs" (onClick)="confirmAccept($event, product.id)" />
+                  <p-button label="Reject" icon="pi pi-ban" variant="text" [raised]="true" severity="danger"
+                    class="text-xs" (onClick)="confirmReject($event, product.id)" />
+                  }
+
+                  <!-- All Status - Show Delete button -->
+                  <p-button icon="pi pi-times" [rounded]="true" severity="danger" [outlined]="true"
+                    (onClick)="confirmDelete($event, product.id)" class="text-xs" pTooltip="Delete Product" />
+                </div>
+                } @else {
+                <div class="text-gray-400 text-sm italic">No actions available</div>
+                }
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template #footer>
+            <tr class="bg-gray-50">
+              <td colspan="6" class="p-4 text-center text-gray-600">
+                Showing {{ products ? products.length : 0 }} products out of {{totalRecords}} total
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+        }
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-center mt-8">
+      @if (isLoading) {
+      <div class="bg-white rounded-xl shadow-lg p-4">
+        <div class="flex items-center gap-4">
+          <div class="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
+          <div class="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
+          <div class="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
+          <div class="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
+          <div class="h-10 w-10 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+      </div>
+      } @else {
+      <div class="bg-white rounded-xl shadow-lg p-4">
+        <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="8" [totalRecords]="totalRecords"
+          class="w-full max-w-md" />
+      </div>
+      }
+    </div>
+  </div>
+</div>

@@ -24,6 +24,7 @@ import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { IftaLabelModule } from 'primeng/iftalabel';
 import { TextareaModule } from 'primeng/textarea';
+import { AuthService } from '../../../../core/services/auth.service';
 @Component({
   selector: 'app-addproduct',
   imports: [GalleriaModule,CardModule,ButtonModule,FloatLabelModule,
@@ -54,7 +55,7 @@ export class AddproductComponent {
 
   constructor(private productServ:ProductService,private sharedServ:SharedService,
               private categoryServ:CategoryService,private tagServ:TagService,
-              private messageService: MessageService
+              private messageService: MessageService,private authServ:AuthService
             ){
     this.productForm = new FormGroup({
       title: new FormControl("", [Validators.required, Validators.minLength(3), Validators.maxLength(50)]),
@@ -75,8 +76,13 @@ export class AddproductComponent {
   categories:CategoryDto[] = [];
   tags:tagdto[] = [];
   selectedCity: any;
+  sellerId: string|null = '';
   ngOnInit() {
 
+    this.sellerId=this.authServ.getCurrentUserId();
+    if (!this.sellerId) {
+      console.error("Seller ID is not available");
+    }
     this.cities = this.sharedServ.governorates;
 
     this.categoryServ.getAllCategories().subscribe({
@@ -103,11 +109,13 @@ export class AddproductComponent {
 
 
   addproduct(){
+
     const formData = new FormData();
 
 // Add images
 //*
 const wrappedImages = this.productForm.get("images")?.value || [];
+console.log("Wrapped Images:", wrappedImages);
 const files: File[] = wrappedImages.map((img: any) => img.file); // ✅ This fixes the issue
 
 files.forEach((file) => {
@@ -126,7 +134,7 @@ console.log("Images added to formData:", this.productForm.get("images")?.value);
     this.productDto.minQuantity = this.productForm.get("minQuantity")?.value
     this.productDto.location = this.productForm.get("location")?.value
     this.productDto.description = this.productForm.get("description")?.value
-    this.productDto.sellerId ="64c5d9f7-690e-42d4-b035-1945ab3476db"
+    this.productDto.sellerId =this.sellerId! //* Not Null For sure
     this.productDto.productTags = this.productForm.get("tags")?.value.map((tagId: number) => ({ tagId }));
     this.productDto.features = this.productDto.features = this.productForm.get("features")?.value.map((feature: any) => ({
       name: feature.key,

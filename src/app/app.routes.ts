@@ -4,6 +4,7 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { SellerLayoutComponent } from './layouts/seller-layout/seller-layout.component';
 import { sellerRoutes } from './features/seller/seller.routes';
+import { adminRoutes } from './features/admin/admin.routes';
 import { ProductCardComponent } from './features/Home/product-card/product-card.component';
 import { ProductDetailsComponent } from './features/ProductDetails/product-details/product-details.component';
 import { ServiceRequestDetailsComponent } from './features/profile/service-request-details.component';
@@ -70,17 +71,21 @@ export const routes: Routes = [
       { path: 'requests/:id', component: ServiceRequestDetailsComponent }
     ]
   },
+  // End Auth
   // Seller
   {
     path: 'seller',
     component: SellerLayoutComponent,
     children: sellerRoutes,
   },
+  // End Seller
   // Admin
   {
     path: 'admin',
-    component: AdminLayoutComponent
+    component: AdminLayoutComponent,
+    children: adminRoutes,
   },
+  // End Admin
   // Services
   {
     path: 'services',
@@ -94,6 +99,10 @@ export const routes: Routes = [
   {
     path: 'auction/:id',
     loadComponent: () => import('./features/Auction/auction-details/auction-details.component').then(m => m.AuctionDetailsComponent)
+    },
+    {
+      path: 'auctions/mybids',
+      loadComponent: () => import('./features/Auction/buyer-bids/buyer-bids.component').then(m => m.BuyerBidsComponent)
   },
   // Seller Profile
   {

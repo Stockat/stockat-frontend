@@ -175,6 +175,12 @@ body {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.quantity-value {
+    margin-top: 0.5rem;
+    font-size: 1.5rem;
+    color: var(--gray);
+  }
+
 .end-date {
     font-size: 0.95rem;
     opacity: 0.85;
@@ -270,7 +276,7 @@ body {
     padding: 18px;
     font-size: 1.1rem;
     font-weight: 600;
-    color: white;
+    color: rgb(68, 51, 64);
     background: linear-gradient(90deg, var(--secondary), var(--primary));
     border: none;
     border-radius: 12px;
@@ -406,6 +412,27 @@ body {
     color: var(--gray);
     font-size: 0.95rem;
 }
+
+.bidder-avatar {
+    width: 48px; /* slightly larger */
+    height: 48px;
+    font-size: 1.25rem; /* increase font size */
+    font-weight: 700; /* bold for visibility */
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-transform: uppercase;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* subtle shadow */
+  }
+
+  .bidder-avatar {
+    background: linear-gradient(135deg, #6366f1, #3b82f6); /* Indigo to blue */
+    color: white; /* ensure contrast */
+}
+  
 
 @media (max-width: 992px) {
     .auction-main {
