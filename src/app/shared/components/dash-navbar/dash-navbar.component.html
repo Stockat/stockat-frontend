@@ -2,4 +2,15 @@
     <ng-template #start>
         <button pButton (click)="onToggleSidebar()"  icon="pi pi-bars"></button>
     </ng-template>
+
+    <ng-template #end>
+        <button
+            pButton
+            (click)="openChatbot()"
+            icon="pi pi-robot"
+            class="p-button-rounded p-button-text"
+            pTooltip="AI Assistant"
+            tooltipPosition="bottom">
+        </button>
+    </ng-template>
 </p-menubar>

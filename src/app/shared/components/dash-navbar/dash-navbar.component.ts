@@ -30,4 +30,8 @@ export class DashNavbarComponent {
     this.authService.logout().subscribe();
   }
 
+  openChatbot() {
+    this.router.navigate(['/chatbot']);
+  }
+
 }
