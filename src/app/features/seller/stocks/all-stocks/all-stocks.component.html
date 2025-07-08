@@ -17,6 +17,7 @@
                 (onChange)="dt1.filter(stockStatusFilter, 'stockStatus', 'equals')"
                 styleClass="w-40"
             ></p-dropdown>
+
         </div>
         <p-table #dt1 [value]="stockList" dataKey="id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]"
             [loading]="loading" [paginator]="true" [globalFilterFields]="['prodcutName', 'quantity']" >
@@ -76,6 +77,22 @@
                                 variant="text" [raised]="true" [rounded]="true" severity="help" />
                             <p-button icon="ti ti-trash" (click)="deleteStock(stock.id)" variant="text" [raised]="true"
                                 [rounded]="true" severity="danger" />
+                            <!--auction  -->
+                            <!-- <button pButton pRipple
+                                    icon="pi pi-gavel"
+                                    label="Add Auction"
+                                    class="p-button-success"
+                                    (click)="openAuctionDialog(stock)">
+                            </button> -->
+                            <button 
+                                pButton 
+                                type="button" 
+                                icon="pi pi-gavel" 
+                                class="p-button-rounded p-button-info p-button-text" 
+                                (click)="openAuctionDialog(stock)" 
+                                pTooltip="Add Auction" tooltipPosition="top">
+                                </button>
+
                         </ng-container>
                     }
                     @else{
@@ -100,3 +117,13 @@
         </p-table>
     </p-card>
 </div>
+
+<!-- Auction Create Dialog -->
+<app-auction-create-dialog 
+    *ngIf="showAuctionDialog"
+    [visible]="showAuctionDialog"
+    [stock]="selectedStock"
+    [product]="selectedProduct"
+    (close)="closeAuctionDialog()"
+    (auctionCreated)="handleAuctionCreated()">
+</app-auction-create-dialog>

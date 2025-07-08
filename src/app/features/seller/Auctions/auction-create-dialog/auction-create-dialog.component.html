@@ -1,0 +1,104 @@
+<p-dialog header="Create Auction" [(visible)]="visible" [style]="{ width: '650px' }" [modal]="true">
+    <form [formGroup]="auctionForm" (ngSubmit)="createAuction()" class="p-fluid">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Product Info -->
+            <div class="col-span-2 mb-4 p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <div class="mr-3">
+                        <i class="pi pi-box text-2xl text-blue-500"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg">{{ product?.name }}</h4>
+                        <p class="text-gray-600">Available: {{ stock?.quantity }} units</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Left Column -->
+            <div>
+                <div class="field">
+                    <label for="name">Auction Name*</label>
+                    <input id="name" type="text" pInputText formControlName="name" />
+                    <small *ngIf="auctionForm.controls['name'].invalid" class="p-error">
+                        Auction name is required
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="startingPrice">Starting Price ($)*</label>
+                    <p-inputNumber id="startingPrice" formControlName="startingPrice" 
+                        mode="currency" currency="USD" locale="en-US"
+                        [min]="0.01" [maxFractionDigits]="2">
+                    </p-inputNumber>
+                    <small *ngIf="auctionForm.controls['startingPrice'].invalid" class="p-error">
+                        Must be at least $0.01
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="incrementUnit">Bid Increment ($)*</label>
+                    <p-inputNumber id="incrementUnit" formControlName="incrementUnit" 
+                        mode="currency" currency="USD" locale="en-US"
+                        [min]="0.01" [maxFractionDigits]="2">
+                    </p-inputNumber>
+                    <small *ngIf="auctionForm.controls['incrementUnit'].invalid" class="p-error">
+                        Must be at least $0.01
+                    </small>
+                </div>
+                
+                <div class="field">
+                    <label for="quantity">Quantity*</label>
+                    <p-inputNumber id="quantity" formControlName="quantity" [min]="1" [max]="stock?.quantity">
+                    </p-inputNumber>
+                    <small *ngIf="auctionForm.controls['quantity'].invalid" class="p-error">
+                        Must be between 1 and {{ stock?.quantity }}
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div>
+                <div class="field">
+                    <label for="startTime">Start Time*</label>
+                    <p-calendar
+                        formControlName="startTime"
+                        [showTime]="true"
+                        [showIcon]="true"
+                        [touchUI]="false"  
+                        dateFormat="yy-mm-dd"
+                        hourFormat="24"
+                        [minDate]="minStartDate"
+                        [maxDate]="maxStartDate">
+                        </p-calendar>
+                    <small *ngIf="auctionForm.controls['startTime'].invalid" class="p-error">
+                        Must be a future date
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="endTime">End Time*</label>
+                    <p-calendar id="endTime" formControlName="endTime" 
+                        [showTime]="true" [minDate]="minEndDate" [maxDate]="maxEndDate"
+                        [showIcon]="true" [touchUI]="false" dateFormat="yy-mm-dd" hourFormat="24">
+                    </p-calendar>
+                    <small *ngIf="auctionForm.controls['endTime'].invalid" class="p-error">
+                        Must be after start time
+                    </small>
+                </div>
+                
+                <div class="field">
+                    <label for="description">Description</label>
+                    <textarea id="description" pInputTextarea formControlName="description" rows="4"></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex justify-end gap-3 mt-4">
+            <button pButton pRipple type="button" label="Cancel" 
+                class="p-button-outlined" (click)="closeDialog()"></button>
+            <button pButton pRipple type="submit" label="Create Auction" 
+                [disabled]="auctionForm.invalid || creatingAuction"
+                icon="pi pi-check" iconPos="right"></button>
+        </div>
+    </form>
+</p-dialog>

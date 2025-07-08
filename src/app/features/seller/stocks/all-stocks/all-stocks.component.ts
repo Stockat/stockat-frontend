@@ -14,13 +14,16 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast'; 
 import { PopoverModule } from 'primeng/popover'; 
 import { ChipModule } from 'primeng/chip'; 
-import { NgClass } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule } from '@angular/forms';
+import { ProductDetailsDto } from '../../../../core/models/product-models/ProductDetails';
+import { ProductService } from '../../../../core/services/product.service';
+import { AuctionCreateDialogComponent } from '../../Auctions/auction-create-dialog/auction-create-dialog.component';
 
 @Component({
   selector: 'app-all-stocks',
-  imports: [NgClass, ChipModule,ButtonModule,TableModule,IconFieldModule,InputIconModule,CardModule,DividerModule, ConfirmDialogModule, ToastModule, PopoverModule, DropdownModule, FormsModule],
+  imports: [NgClass, ChipModule,ButtonModule,TableModule,IconFieldModule,InputIconModule,CardModule,DividerModule, ConfirmDialogModule, ToastModule, PopoverModule, DropdownModule, FormsModule, AuctionCreateDialogComponent, CommonModule],
   templateUrl: './all-stocks.component.html',
   styleUrl: './all-stocks.component.css',
   providers: [MessageService, ConfirmationService]
@@ -32,8 +35,13 @@ export class AllStocksComponent {
   searchValue: string | undefined;
   stockStatusFilter: string = '';
 
+   // Auction dialog
+   showAuctionDialog = false;
+   selectedStock: StockModel | null = null;
+   selectedProduct: ProductDetailsDto | null = null;
 
-  constructor(private stockService: StockService, private router: Router, private messageService: MessageService, private confirmationService: ConfirmationService) {
+
+  constructor(private stockService: StockService, private router: Router, private messageService: MessageService, private confirmationService: ConfirmationService, private productService: ProductService) {
     this.router = router;
   }
 
@@ -83,5 +91,66 @@ export class AllStocksComponent {
         table.clear();
         this.searchValue = ''
     }
+
+
+    //reload after auction added 
+    loadStocks(): void {
+      this.stockService.getAllStocks().subscribe({
+        next: (stocks) => {
+          this.stockList = stocks.data;
+          this.loading = false;
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load stocks'
+          });
+          this.loading = false;
+        }
+      });
+    }
+
+    showAddAuctionDialog(): void {
+      this.selectedStock = null;
+      this.selectedProduct = null;
+      this.showAuctionDialog = true;
+    }
+
+    openAuctionDialog(stock: StockModel): void {
+      this.selectedStock = stock;
+      
+      // Load product details
+      this.productService.getProductsDetails(stock.productId).subscribe({
+        next: (product) => {
+          this.selectedProduct = product.data;
+          this.showAuctionDialog = true;
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load product details'
+          });
+        }
+      });
+    }
+  
+    closeAuctionDialog(): void {
+      this.showAuctionDialog = false;
+      this.selectedStock = null;
+      this.selectedProduct = null;
+    }
+  
+    handleAuctionCreated(): void {
+      this.closeAuctionDialog();
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Auction created successfully'
+      });
+      this.loadStocks();
+    }
+  
 
 }
