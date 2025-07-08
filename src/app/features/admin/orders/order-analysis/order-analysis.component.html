@@ -140,21 +140,37 @@
             Order Type
           </label>
           <p-dropdown [options]="orderTypeOptions" [(ngModel)]="orderTypeFilter" placeholder="Select Type"
+            (onChange)="onOrderTypeChange()"
             styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:border-green-400"></p-dropdown>
         </div>
         <div class="flex flex-col space-y-2">
           <label class="text-sm font-semibold text-gray-700 flex items-center">
-            <svg class="w-4 h-4 mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 mr-1 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                d="M12 8v4l3 3m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            Search
+            Time
           </label>
-          <input pInputText type="text" [(ngModel)]="globalFilter" placeholder="Search orders, buyers, sellers..."
-            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 hover:border-purple-400" />
+          <p-dropdown [options]="timeOptions" [(ngModel)]="time" placeholder="Select Time"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 hover:border-cyan-400"></p-dropdown>
+        </div>
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8v4l3 3m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Metric Type
+          </label>
+          <p-dropdown [options]="metricTypeOptions" [(ngModel)]="metricType" placeholder="Select Metric"
+            styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200 hover:border-pink-400"></p-dropdown>
         </div>
       </div>
       <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-gray-200">
+        <div class="w-full">
+          <p-button label="Apply Filters" icon="pi pi-filter" [raised]="true" severity="primary"
+            (onClick)="applyFilters()" class="w-full h-12 font-semibold" />
+        </div>
         <div class="w-1/2">
           <p-button label="Clear Filters" icon="pi pi-times" variant="text" [raised]="true" severity="danger"
             class="w-full h-12 font-semibold" />
@@ -171,19 +187,24 @@
       <div class="bg-white rounded-2xl shadow-xl p-6 w-full">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">Orders by Status</h2>
         <div class="relative w-full" style="min-height:300px;">
-          <p-chart #statusBarChart type="bar" [data]="basicData" [options]="basicOptions" styleClass="w-full h-full"
-            [responsive]="true" />
+          <p-chart #pieChart1 type="doughnut" [data]="data1" [options]="options1" styleClass="w-full md:w-[24rem]" />
+
         </div>
       </div>
-      <div class="bg-white rounded-2xl shadow-xl p-6 flex flex-col items-center justify-center">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Orders Distribution</h2>
-        <p-chart #pieChart type="pie" [data]="data" [options]="options" styleClass="w-full md:w-[24rem]" />
+      <div class="bg-white rounded-2xl shadow-xl p-6 w-full">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Orders by Status</h2>
+        <div class="relative w-full" style="min-height:300px;">
+          <p-chart #pieChart2 type="doughnut" [data]="data2" [options]="options2" styleClass="w-full md:w-[24rem]" />
+
+        </div>
       </div>
     </div>
 
     <!-- Additional Chart Example -->
     <div class="bg-white rounded-2xl shadow-xl p-6 mt-8 flex flex-col w-full col-span-1 md:col-span-2">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Monthly Orders</h2>
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">
+        {{ getStatusLabel() }}  {{ getOrderTypeLabel() }}  {{ getTimeLabel() }} {{ getMetricTypeLabel() }}
+      </h2>
       <div class="relative w-full" style="min-height:300px;">
         <p-chart #monthlyBarChart type="bar" [data]="basicData" [options]="basicOptions" styleClass="w-full h-full"
           [responsive]="true" />

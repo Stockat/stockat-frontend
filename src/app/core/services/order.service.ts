@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { OrderRequest } from '../models/order-request.model';
 import { SellerOrder } from '../models/order-models/seller-order.model';
 import { AdminOrder } from '../models/order-models/admin-order.model';
+import { GenericResponseDto } from '../models/user-models/generic-response.dto';
+import { AnalysisDto, BarChartAnalysisDto, BarChartAnalysisFilterationDto } from '../models/order-models/AnalysisDto';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -43,6 +45,24 @@ export class OrderService {
 
   placeRequestOrder(request: any): Observable<any> {
     return this.http.post(this.orderUrl + '/request', request);
+  }
+
+
+  //* Analysis
+  getorderSales(): Observable<GenericResponseDto<AnalysisDto>> {
+    return this.http.get<GenericResponseDto<AnalysisDto>>(`${this.orderUrl}/analysis/orderSales`);
+  }
+  getOrdersVsStatus(filteration: BarChartAnalysisFilterationDto): Observable<GenericResponseDto<BarChartAnalysisDto>> {
+
+    //const params = new HttpParams();
+   /* params.set('type', filteration.type.toString());
+    params.set('status', filteration.status.toString());
+    params.set('metricType', filteration.metricType.toString());
+*/
+const params = new HttpParams({ fromObject: filteration as any });
+    console.log(params);
+
+    return this.http.get<GenericResponseDto<BarChartAnalysisDto>>(`${this.orderUrl}/analysis/OrdersVsStatus`, { params });
   }
 
 }
