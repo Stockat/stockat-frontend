@@ -45,18 +45,22 @@ export class OrderProcessComponent implements OnInit {
   }
 
   placeOrder() {
+    console.log('Placing order:Entered ');
     if (!this.order) return;
     this.loading = true;
     this.orderService.placeOrder(this.order).subscribe({
-      next: () => {
+      next: (res) => {
+        console.log('Order placed successfully:', res);
         this.messageService.add({ severity: 'success', summary: 'Order Placed', detail: 'Your order has been placed successfully.' });
         this.loading = false;
-        setTimeout(() => this.router.navigate(['/']), 2000);
+        window.location.href=res.redirectUrl
+        //setTimeout(() => this.router.navigate(['/']), 2000);
       },
-      error: () => {
+      error: (e) => {
+        console.error('Error placing order:', e);
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to place order.' });
         this.loading = false;
       }
     });
   }
-} 
+}

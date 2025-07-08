@@ -24,6 +24,7 @@ export class ProductStocksComponent {
   images: string[] = [];
   product: ProductDetailsDto | null = null;
   selectedProductId: string | null = '';
+  sessionId: string | null = '';
   productStocks: StockModel[] = [];
 
   constructor(
@@ -39,6 +40,13 @@ export class ProductStocksComponent {
     this.route.paramMap.subscribe((params) => {
       this.selectedProductId = params.get('id');
     });
+
+    this.route.queryParamMap.subscribe((params) => {
+      this.sessionId = params.get('session_id');
+      console.log('sessionId:', this.sessionId);
+    });
+
+
     this.getProductDetails();
     this.getProductStocks();
   }
