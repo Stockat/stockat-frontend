@@ -16,10 +16,18 @@ import { DividerModule } from 'primeng/divider';
 @Component({
   selector: 'app-order-process',
   standalone: true,
-  imports: [CardModule, BadgeModule, ButtonModule, ToastModule, DividerModule, CurrencyPipe, CommonModule],
+  imports: [
+    CardModule,
+    BadgeModule,
+    ButtonModule,
+    ToastModule,
+    DividerModule,
+    CurrencyPipe,
+    CommonModule,
+  ],
   templateUrl: './order-process.component.html',
   styleUrl: './order-process.component.css',
-  providers: [MessageService]
+  providers: [MessageService],
 })
 export class OrderProcessComponent implements OnInit {
   order: OrderRequest | null = null;
@@ -44,19 +52,38 @@ export class OrderProcessComponent implements OnInit {
     }
   }
 
+  onImageError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.src = 'assets/img/faces/default-image.png';
+    }
+  }
+
   placeOrder() {
+    console.log('Placing order:Entered ');
     if (!this.order) return;
     this.loading = true;
     this.orderService.placeOrder(this.order).subscribe({
-      next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Order Placed', detail: 'Your order has been placed successfully.' });
+      next: (res) => {
+        console.log('Order placed successfully:', res);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Order Placed',
+          detail: 'Your order has been placed successfully.',
+        });
         this.loading = false;
-        setTimeout(() => this.router.navigate(['/']), 2000);
+        window.location.href = res.redirectUrl;
+        //setTimeout(() => this.router.navigate(['/']), 2000);
       },
-      error: () => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to place order.' });
+      error: (e) => {
+        console.error('Error placing order:', e);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to place order.',
+        });
         this.loading = false;
-      }
+      },
     });
   }
-} 
+}

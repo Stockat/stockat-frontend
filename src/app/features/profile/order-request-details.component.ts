@@ -54,6 +54,8 @@ export class OrderRequestDetailsComponent implements OnInit {
   ngOnInit(): void {
     this.orderService.getBuyerRequestOrders().subscribe({
       next: (res: { data: SellerOrder[] }) => {
+        console.log(res);
+
         this.orders = res.data;
         this.totalRecords = this.orders.length;
         this.filterOrders();
@@ -135,5 +137,27 @@ export class OrderRequestDetailsComponent implements OnInit {
       default:
         return 'info';
     }
+  }
+
+  showAcceptButton(order: SellerOrder): boolean {
+    return order.status === 'PendingBuyer';
+  }
+
+  showDeleteButton(order: SellerOrder): boolean {
+    return order.status === 'PendingSeller' || order.status === 'PendingBuyer';
+  }
+
+  confirmOrder(order: SellerOrder) {
+      console.log(order);
+      this.orderService.UpdateRequestOrderWithStripe(order).subscribe({
+        next: (res) => {
+          console.log(res);
+          window.location.href=res.redirectUrl!;
+        },
+      });
+  }
+
+  deleteOrder(order: SellerOrder) {
+    console.log(order);
   }
 }

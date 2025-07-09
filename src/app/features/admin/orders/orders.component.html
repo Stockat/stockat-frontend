@@ -147,15 +147,7 @@
             </svg>
             Order Status
           </label>
-          <p-dropdown [options]="[
-              {label: 'All Status', value: ''},
-              {label: 'Pending', value: 'Pending'},
-              {label: 'Processing', value: 'Processing'},
-              {label: 'Ready', value: 'Ready'},
-              {label: 'Shipped', value: 'Shipped'},
-              {label: 'Cancelled', value: 'Cancelled'},
-              {label: 'Delivered', value: 'Delivered'}
-            ]" [(ngModel)]="statusFilter" placeholder="Select Status"
+          <p-dropdown [options]="statusOptions" [(ngModel)]="statusFilter" placeholder="Select Status"
             (onChange)="dt.filter(statusFilter, 'status', 'equals')"
             styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-blue-400"></p-dropdown>
         </div>
@@ -174,8 +166,7 @@
               {label: 'All Types', value: ''},
               {label: 'Order', value: 'Order'},
               {label: 'Request', value: 'Request'}
-            ]" [(ngModel)]="orderTypeFilter" placeholder="Select Type"
-            (onChange)="dt.filter(orderTypeFilter, 'orderType', 'equals')"
+            ]" [(ngModel)]="orderTypeFilter" placeholder="Select Type" (onChange)="onOrderTypeChange()"
             styleClass="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:border-green-400"></p-dropdown>
         </div>
 
