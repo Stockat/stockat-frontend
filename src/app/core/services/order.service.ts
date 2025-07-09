@@ -5,7 +5,11 @@ import { OrderRequest } from '../models/order-request.model';
 import { SellerOrder } from '../models/order-models/seller-order.model';
 import { AdminOrder } from '../models/order-models/admin-order.model';
 import { GenericResponseDto } from '../models/user-models/generic-response.dto';
-import { AnalysisDto, BarChartAnalysisDto, BarChartAnalysisFilterationDto } from '../models/order-models/AnalysisDto';
+import {
+  AnalysisDto,
+  BarChartAnalysisDto,
+  BarChartAnalysisFilterationDto,
+} from '../models/order-models/AnalysisDto';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -26,13 +30,19 @@ export class OrderService {
   }
 
   getSellerRequestOrders(): Observable<{ data: SellerOrder[] }> {
-    return this.http.get<{ data: SellerOrder[] }>(`${this.orderUrl}/seller/req`);
+    return this.http.get<{ data: SellerOrder[] }>(
+      `${this.orderUrl}/seller/req`
+    );
   }
 
   updateOrderStatus(orderId: number, status: string): Observable<any> {
-    return this.http.put(`${this.orderUrl}/${orderId}`, JSON.stringify(status), {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return this.http.put(
+      `${this.orderUrl}/${orderId}`,
+      JSON.stringify(status),
+      {
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 
   getBuyerOrders(): Observable<{ data: SellerOrder[] }> {
@@ -47,26 +57,39 @@ export class OrderService {
     return this.http.post(this.orderUrl + '/request', request);
   }
 
-  UpdateRequestOrderWithStripe(request: any): Observable<GenericResponseDto<any>> {
-    return this.http.post<GenericResponseDto<any>>(this.orderUrl + '/request/stripe', request);
+  UpdateRequestOrderWithStripe(
+    request: any
+  ): Observable<GenericResponseDto<any>> {
+    return this.http.post<GenericResponseDto<any>>(
+      this.orderUrl + '/request/stripe',
+      request
+    );
   }
-
 
   //* Analysis
   getorderSales(): Observable<GenericResponseDto<AnalysisDto>> {
-    return this.http.get<GenericResponseDto<AnalysisDto>>(`${this.orderUrl}/analysis/orderSales`);
+    return this.http.get<GenericResponseDto<AnalysisDto>>(
+      `${this.orderUrl}/analysis/orderSales`
+    );
   }
-  getOrdersVsStatus(filteration: BarChartAnalysisFilterationDto): Observable<GenericResponseDto<BarChartAnalysisDto>> {
-
-    //const params = new HttpParams();
-   /* params.set('type', filteration.type.toString());
-    params.set('status', filteration.status.toString());
-    params.set('metricType', filteration.metricType.toString());
-*/
-const params = new HttpParams({ fromObject: filteration as any });
+  getorderPayment(
+    filteration: BarChartAnalysisFilterationDto
+  ): Observable<GenericResponseDto<BarChartAnalysisDto>> {
+    const params = new HttpParams({ fromObject: filteration as any });
+    return this.http.get<GenericResponseDto<BarChartAnalysisDto>>(
+      `${this.orderUrl}/analysis/orderPayment`,
+      { params }
+    );
+  }
+  getOrdersVsStatus(
+    filteration: BarChartAnalysisFilterationDto
+  ): Observable<GenericResponseDto<BarChartAnalysisDto>> {
+    const params = new HttpParams({ fromObject: filteration as any });
     console.log(params);
 
-    return this.http.get<GenericResponseDto<BarChartAnalysisDto>>(`${this.orderUrl}/analysis/OrdersVsStatus`, { params });
+    return this.http.get<GenericResponseDto<BarChartAnalysisDto>>(
+      `${this.orderUrl}/analysis/OrdersVsStatus`,
+      { params }
+    );
   }
-
 }

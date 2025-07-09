@@ -86,7 +86,7 @@ export class OrderAnalysisComponent {
     { label: 'Count', value: 'count' },
     { label: 'Revenue', value: 'revenue' },
   ];
-  time: Time = Time.Yearly;
+  time: Time = Time.Monthly;
   timeOptions = [
     { label: 'Yearly', value: Time.Yearly },
     { label: 'Monthly', value: Time.Monthly },
@@ -121,7 +121,7 @@ export class OrderAnalysisComponent {
   @ViewChild('pieChart2') pieChart2Comp!: UIChart;
 
   // Applied filter values for header
-  appliedTime: Time = Time.Yearly;
+  appliedTime: Time = Time.Monthly;
   appliedOrderType: string = '';
   appliedMetricType: string = 'count';
   appliedStatus: string = '';
@@ -131,6 +131,7 @@ export class OrderAnalysisComponent {
   ngOnInit() {
     this.getOrderSales();
     this.getOrdersRequestBarChartValues();
+    this.getOrderPaymentData();
     this.initChartbar1();
     this.initPaymentStatusDonut();
     this.initOrderTypeDonut();
@@ -318,6 +319,116 @@ export class OrderAnalysisComponent {
     }
   }
 
+  getOrderPaymentData() {
+    let mappedOrderType: OrderType | '' = '';
+    let mappedMetricType: ReportMetricType = ReportMetricType.Count;
+
+    if (this.orderTypeFilter === 'Order') mappedOrderType = OrderType.Order;
+    else if (this.orderTypeFilter === 'Request')
+      mappedOrderType = OrderType.Request;
+    else mappedOrderType = '';
+
+    mappedMetricType =
+      this.metricType === 'revenue'
+        ? ReportMetricType.Revenue
+        : ReportMetricType.Count;
+
+    this.orderServ
+      .getorderPayment({
+        type: mappedOrderType as OrderType,
+        status: '' as any, // Payment analysis doesn't use status filter
+        metricType: mappedMetricType as ReportMetricType,
+        time: this.time,
+      })
+      .subscribe({
+        next: (res) => {
+          console.log('Payment data:', res);
+          // The response should be BarChartAnalysisDto structure
+          if (res.data && res.data.labels && res.data.values) {
+            this.updatePaymentStatusDonut(res.data.labels, res.data.values);
+          } else {
+            console.error('Unexpected response structure:', res.data);
+          }
+        },
+        error: (err) => {
+          console.log('Error getting payment data:', err);
+        },
+      });
+  }
+
+  updatePaymentStatusDonut(labels: string[], values: number[]) {
+    if (isPlatformBrowser(this.platformId)) {
+      const documentStyle = getComputedStyle(document.documentElement);
+      const textColor =
+        documentStyle.getPropertyValue('--p-text-color') || '#374151';
+      const legendFontSize = 16;
+      const legendFontWeight = 'bold';
+
+      // Define color palette for payment statuses
+      const palette = [
+        '#fbbf24', // yellow (Pending)
+        '#22c55e', // green (Paid)
+        '#ef4444', // red (Failed)
+        '#6366f1', // indigo (Refunded)
+        '#8b5cf6', // purple (Other)
+      ];
+      const hoverPalette = [
+        '#f59e42', // darker yellow
+        '#16a34a', // darker green
+        '#b91c1c', // darker red
+        '#3730a3', // darker indigo
+        '#7c3aed', // darker purple
+      ];
+
+      this.data1 = {
+        labels: labels,
+        datasets: [
+          {
+            data: values,
+            backgroundColor: palette.slice(0, labels.length),
+            hoverBackgroundColor: hoverPalette.slice(0, labels.length),
+            borderColor: '#fff',
+            borderWidth: 2,
+          },
+        ],
+      };
+      this.options1 = {
+        cutout: '70%',
+        plugins: {
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: {
+              color: textColor,
+              font: {
+                size: legendFontSize,
+                weight: legendFontWeight,
+              },
+              padding: 20,
+              usePointStyle: true,
+            },
+          },
+          tooltip: {
+            enabled: true,
+            backgroundColor: '#fff',
+            titleColor: palette[0],
+            bodyColor: textColor,
+            borderColor: palette[0],
+            borderWidth: 1,
+            padding: 12,
+            caretSize: 8,
+            cornerRadius: 8,
+            titleFont: { size: 16, weight: 'bold' },
+            bodyFont: { size: 14 },
+          },
+        },
+        responsive: true,
+        maintainAspectRatio: false,
+      };
+      this.cd.markForCheck();
+    }
+  }
+
   // First donut: Orders by Payment Status
   initPaymentStatusDonut() {
     if (isPlatformBrowser(this.platformId)) {
@@ -342,7 +453,7 @@ export class OrderAnalysisComponent {
         labels: ['Pending', 'Paid', 'Failed', 'Refunded'],
         datasets: [
           {
-            data: [10, 25, 5, 2], // dummy data
+            data: [0, 0, 0, 0], // Initialize with zeros, will be updated by getOrderPaymentData
             backgroundColor: palette,
             hoverBackgroundColor: hoverPalette,
             borderColor: '#fff',
@@ -407,7 +518,7 @@ export class OrderAnalysisComponent {
         labels: ['Order', 'Request'],
         datasets: [
           {
-            data: this.DonutValues2, // dummy data
+            data: this.DonutValues2,
             backgroundColor: palette,
             hoverBackgroundColor: hoverPalette,
             borderColor: '#fff',
@@ -573,7 +684,29 @@ export class OrderAnalysisComponent {
     this.appliedMetricType = this.metricType;
     this.appliedStatus = this.statusFilter;
     this.getOrdersRequestBarChartValues();
+    this.getOrderPaymentData(); // Add this line to refresh payment data
     // Add any other data refresh logic if needed
+  }
+
+  clearFilters() {
+    // Reset all filters to default values
+    this.statusFilter = '';
+    this.orderTypeFilter = '';
+    this.time = Time.Monthly; // Default to monthly
+    this.metricType = 'count'; // Default to count
+
+    // Update status options based on reset order type
+    this.updateStatusOptions();
+
+    // Store applied filter values as defaults
+    this.appliedTime = this.time;
+    this.appliedOrderType = this.orderTypeFilter;
+    this.appliedMetricType = this.metricType;
+    this.appliedStatus = this.statusFilter;
+
+    // Refresh data with default filters
+    this.getOrdersRequestBarChartValues();
+    this.getOrderPaymentData();
   }
 
   getTimeLabel(): string {
