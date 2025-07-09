@@ -71,7 +71,7 @@ export class SellerServiceListComponent implements OnInit {
     this.loading = true;
     const apiPage = this.page;
 
-    this.serviceService.getSellerServices(this.sellerId, apiPage, this.size).subscribe({
+    this.serviceService.getMyServices(apiPage, this.size).subscribe({
       next: (response) => {
         if (response && response.data && response.data.paginatedData) {
           this.services = response.data.paginatedData;

@@ -23,6 +23,7 @@ export class ServiceDetailsComponent {
   hasPendingRequest = false;
   sellerIdFromQuery: string | null = null;
   isCheckingPendingRequest = true; // Add loading state for pending request check
+  errorMessage: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -40,11 +41,13 @@ export class ServiceDetailsComponent {
     this.serviceService.getServiceById(id).subscribe({
       next: (service) => {
         this.service = service;
+        this.errorMessage = null;
         // Check for pending request for this service
         this.checkPendingRequest(id);
       },
       error: (error) => {
         console.error('Error loading service:', error);
+        this.errorMessage = error?.error || 'Service not found.';
         this.isCheckingPendingRequest = false;
       }
     });
