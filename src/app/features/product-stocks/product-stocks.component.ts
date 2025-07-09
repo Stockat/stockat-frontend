@@ -12,10 +12,10 @@ import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../core/services/auth.service';
 import { OrderRequest } from '../../core/models/order-request.model';
 import { OrderStateService } from '../../core/services/order-state.service';
-
+import { RouterModule } from '@angular/router';
 @Component({
   selector: 'app-product-stocks',
-  imports: [CardModule, GalleriaModule, DividerModule, DataView, DataViewModule, ButtonModule],
+  imports: [CardModule, GalleriaModule, DividerModule, DataView, DataViewModule, ButtonModule, RouterModule],
   templateUrl: './product-stocks.component.html',
   styleUrl: './product-stocks.component.css'
 })
@@ -91,6 +91,7 @@ export class ProductStocksComponent {
       return;
     }
     const order: OrderRequest = {
+      productName: this.product.name,
       quantity: stock.quantity,
       price: this.product.price,
       orderType: 'Order',

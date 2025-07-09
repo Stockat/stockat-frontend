@@ -213,7 +213,7 @@
                 <div class="flex flex-wrap gap-2">
                   <ng-container *ngIf="!isReadOnly(order)">
                     <p-button *ngIf="canConfirm(order)" label="Confirm" icon="pi pi-check" size="small" variant="text"
-                      [raised]="true" severity="success" (onClick)="updateStatus(order, 'PendingBuyer')"
+                      [raised]="true" severity="success" (onClick)="showDialog(order)"
                       pTooltip="Confirm and start processing" class="text-xs"></p-button>
                     <p-button *ngIf="canReject(order)" label="Reject" icon="pi pi-times" size="small" variant="text"
                       [raised]="true" severity="danger" (onClick)="updateStatus(order, 'Cancelled')"
@@ -248,3 +248,58 @@
 </div>
 
 <p-toast></p-toast>
+<p-dialog header="Confirm Order" [modal]="true" [(visible)]="visible" [style]="{ width: '30rem' }">
+  <form [formGroup]="orderForm" class="space-y-6">
+    <div class="space-y-4">
+      <div class="flex flex-col space-y-2">
+        <label for="price" class="text-sm font-semibold text-gray-700 flex items-center">
+          <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
+            </path>
+          </svg>
+          Price
+        </label>
+        <p-inputNumber id="price" formControlName="price" [minFractionDigits]="2" [maxFractionDigits]="2"
+          placeholder="Enter price" [showButtons]="false" class="w-full"
+          [styleClass]="'w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200'"
+          [inputStyleClass]="'w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200'">
+        </p-inputNumber>
+        <div *ngIf="orderForm.get('price')?.invalid && orderForm.get('price')?.touched"
+          class="text-red-500 text-xs mt-1">
+          <span *ngIf="orderForm.get('price')?.errors?.['required']">Price is required</span>
+          <span *ngIf="orderForm.get('price')?.errors?.['min']">Price must be greater than 0</span>
+        </div>
+      </div>
+
+      <div class="flex flex-col space-y-2">
+        <label for="deliveryDate" class="text-sm font-semibold text-gray-700 flex items-center">
+          <svg class="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          Delivery Date
+        </label>
+        <p-calendar id="deliveryDate" formControlName="deliveryDate" [minDate]="minDate" [showIcon]="true"
+          dateFormat="dd/mm/yy" placeholder="Select delivery date" (onSelect)="onDateSelect($event)" class="w-full"
+          [styleClass]="'w-full'"
+          [inputStyleClass]="'w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-blue-400'"
+          [panelStyleClass]="'shadow-lg border border-gray-200 rounded-lg bg-white'">
+        </p-calendar>
+        <div *ngIf="orderForm.get('deliveryDate')?.invalid && orderForm.get('deliveryDate')?.touched"
+          class="text-red-500 text-xs mt-1">
+          <span *ngIf="orderForm.get('deliveryDate')?.errors?.['required']">Delivery date is required</span>
+          <span *ngIf="orderForm.get('deliveryDate')?.errors?.['invalidDate']">Date must be after today</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+      <p-button label="Cancel" severity="secondary" (click)="closeDialog()" [outlined]="true" class="px-4 py-2">
+      </p-button>
+      <p-button label="Confirm Order" icon="pi pi-check" [disabled]="!isFormValid()" (click)="confirmOrder()"
+        severity="success" class="px-4 py-2">
+      </p-button>
+    </div>
+  </form>
+</p-dialog>
