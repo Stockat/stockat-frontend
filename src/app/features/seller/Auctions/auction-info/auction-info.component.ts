@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuctionService } from '../../../../../app/core/services/auction.service';
 import { ActivatedRoute } from '@angular/router';
 import { AuctionDetailsDto } from '../../../../core/models/auction-models/auction-details-dto';
@@ -14,6 +14,7 @@ import { RippleModule } from 'primeng/ripple';
 import { PaginatorModule } from 'primeng/paginator'; 
 import { ChangeDetectorRef } from '@angular/core';
 import { Observable, catchError, forkJoin, map, of } from 'rxjs';
+import { AuctionSignalRService } from '../../../../core/services/auction-signalr.service';
 
 @Component({
   selector: 'app-auction-info',
@@ -26,7 +27,7 @@ import { Observable, catchError, forkJoin, map, of } from 'rxjs';
   templateUrl: './auction-info.component.html',
   styleUrls: ['./auction-info.component.css']
 })
-export class AuctionInfoComponent implements OnInit {
+export class AuctionInfoComponent implements OnInit, OnDestroy {
   auction: AuctionDetailsDto | null = null;
   bids: AuctionBidRequestDto[] = [];
   pagedBids: AuctionBidRequestDto[] = [];
@@ -40,6 +41,31 @@ export class AuctionInfoComponent implements OnInit {
   bidPageSize = 5;
   totalBids = 0;
 
+  // Add status filter and soft delete logic
+  statusFilter: string = 'All';
+
+  get filteredAuctions() {
+    if (!this.auction) return [];
+    switch (this.statusFilter) {
+      case 'Upcoming':
+        return this.status === 'Upcoming' ? [this.auction] : [];
+      case 'Active':
+        return this.status === 'Active' ? [this.auction] : [];
+      case 'Closed':
+        return this.status === 'Closed' ? [this.auction] : [];
+      default:
+        return [this.auction];
+    }
+  }
+
+  get canEdit(): boolean {
+    return this.status !== 'Closed';
+  }
+
+  get canDelete(): boolean {
+    return this.status === 'Upcoming' || this.status === 'Closed';
+  }
+
   constructor(
     private auctionService: AuctionService,
     private productService: ProductService,
@@ -47,13 +73,54 @@ export class AuctionInfoComponent implements OnInit {
     private location: Location,
     private userService: UserService,
     private bidService: BidService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private signalRService: AuctionSignalRService
   ) {}
 
   ngOnInit() {
     this.auctionId = Number(this.route.snapshot.paramMap.get('id'));
     this.loadAuctionDetails();
     this.loadBids();
+    
+    // SignalR real-time updates for seller
+    this.signalRService.startConnection();
+    this.signalRService.joinAuction(this.auctionId);
+
+    this.signalRService.bidPlaced$.subscribe(data => {
+      if (data && data.Auction && data.Auction.id === this.auctionId) {
+        this.auction = data.Auction;
+        this.calculateStatus();
+        this.cdr.detectChanges();
+        
+        // Add the new bid to the bids array if it exists
+        if (data.Bid) {
+          const newBid = {
+            ...data.Bid,
+            bidderName: 'New Bidder' // Will be updated when we fetch user details
+          };
+          this.bids.unshift(newBid);
+          this.totalBids = this.bids.length;
+          this.updatePagedBids();
+        } else {
+          // Fallback: reload all bids
+          this.loadBids();
+        }
+      }
+    });
+
+    this.signalRService.auctionUpdate$.subscribe(data => {
+      if (data && data.Auction && data.Auction.id === this.auctionId) {
+        this.auction = data.Auction;
+        this.calculateStatus();
+        this.cdr.detectChanges();
+        
+        if (data.Bids) {
+          this.bids = data.Bids;
+          this.totalBids = this.bids.length;
+          this.updatePagedBids();
+        }
+      }
+    });
   }
 
   loadAuctionDetails() {
@@ -149,13 +216,35 @@ export class AuctionInfoComponent implements OnInit {
     }
   }
 
-  editAuction()
-  {
+  editAuction() {
+    if (!this.canEdit) return;
     console.log("Edit");
     //edit logic ...
   }
 
+  deleteAuction() {
+    if (!this.auction) return;
+    if (this.status === 'Upcoming' || this.status === 'Closed') {
+      this.auctionService.deleteAuction(this.auction.id).subscribe({
+        next: () => {
+          // For upcoming, backend will update stock to ForSale
+          // For closed, just soft delete
+          this.goBack();
+        },
+        error: (err) => {
+          alert('Failed to delete auction: ' + err?.error?.message || err.message);
+        }
+      });
+    }
+  }
+
   goBack() {
     this.location.back();
+  }
+
+  ngOnDestroy() {
+    if (this.auctionId) {
+      this.signalRService.leaveAuction(this.auctionId);
+    }
   }
 }

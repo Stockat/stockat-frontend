@@ -49,29 +49,38 @@ export class AuctionOrderManagementComponent implements OnInit {
   showSellerColumn = false;
   showBuyerColumn = false;
   
-  // Valid status transitions
+  // Updated valid status transitions (forward only)
   statusTransitions = {
     Seller: {
-      [OrderStatus.Pending]: [OrderStatus.Ready, OrderStatus.Cancelled],
-      [OrderStatus.PendingSeller]: [OrderStatus.Ready, OrderStatus.Cancelled],
-      [OrderStatus.Processing]: [OrderStatus.Ready, OrderStatus.Cancelled],
-      [OrderStatus.PaymentFailed]: [OrderStatus.Cancelled],
-      [OrderStatus.Ready]: [] // No further actions for seller
+      [OrderStatus.PendingSeller]: [OrderStatus.Processing, OrderStatus.Cancelled],
+      [OrderStatus.Processing]: [OrderStatus.Ready],
+      [OrderStatus.Ready]: [OrderStatus.Shipped],
+      [OrderStatus.Payed]: [OrderStatus.Processing],
+      [OrderStatus.Pending]: [OrderStatus.Processing, OrderStatus.Cancelled], // treat Pending as PendingSeller
     },
     Buyer: {
-      [OrderStatus.PendingBuyer]: [OrderStatus.Cancelled],
-      [OrderStatus.PaymentFailed]: [OrderStatus.Cancelled],
-      [OrderStatus.Ready]: [OrderStatus.Cancelled],
-      [OrderStatus.Shipped]: [OrderStatus.Cancelled],
-      [OrderStatus.Delivered]: [OrderStatus.Cancelled]
-    },
-    Admin: {
-      [OrderStatus.Ready]: [OrderStatus.Shipped, OrderStatus.Cancelled],
+      [OrderStatus.PendingBuyer]: [OrderStatus.Payed, OrderStatus.Cancelled],
       [OrderStatus.Shipped]: [OrderStatus.Delivered],
       [OrderStatus.Delivered]: [OrderStatus.Completed],
-      [OrderStatus.PaymentFailed]: [OrderStatus.Cancelled]
+      [OrderStatus.Pending]: [OrderStatus.Payed, OrderStatus.Cancelled], // treat Pending as PendingBuyer
+    },
+    Admin: {
+      [OrderStatus.PendingSeller]: [OrderStatus.Processing, OrderStatus.Cancelled],
+      [OrderStatus.Processing]: [OrderStatus.Ready, OrderStatus.Cancelled],
+      [OrderStatus.Ready]: [OrderStatus.Shipped, OrderStatus.Cancelled],
+      [OrderStatus.Shipped]: [OrderStatus.Delivered, OrderStatus.Cancelled],
+      [OrderStatus.Delivered]: [OrderStatus.Completed, OrderStatus.Cancelled],
+      [OrderStatus.PendingBuyer]: [OrderStatus.Payed, OrderStatus.Cancelled],
+      [OrderStatus.Payed]: [OrderStatus.Processing, OrderStatus.Cancelled],
+      [OrderStatus.PaymentFailed]: [OrderStatus.Cancelled],
+      [OrderStatus.Pending]: [OrderStatus.Processing, OrderStatus.Ready, OrderStatus.Shipped, OrderStatus.Delivered, OrderStatus.Completed, OrderStatus.Cancelled, OrderStatus.PaymentFailed],
     }
   };
+
+  // Dialog state for buyer address/info
+  showAddressDialog = false;
+  addressForm: Partial<AuctionOrderDto> = {};
+  addressOrderId: number | null = null;
 
   cols: any[] = [];
 
@@ -142,10 +151,23 @@ export class AuctionOrderManagementComponent implements OnInit {
 
   loadOrders() {
     this.loading = true;
+    const populateNames = (orders: AuctionOrderDto[]) => {
+      orders.forEach(order => {
+        if (!order.sellerName && order.sellerId) {
+          this.userService.getUserById(order.sellerId).subscribe(res => {
+            order.sellerName = res.data?.firstName + ' ' + res.data?.lastName;
+          });
+        }
+        if (!order.buyerName && order.winningBidId) {
+          // If you have buyerId, use it; otherwise, skip
+          // order.buyerId is not in the DTO, so skip unless you add it
+        }
+      });
+    };
     if (this.userRole === 'Admin') {
-      // Admin gets all orders
       this.auctionOrderService.getAllOrders().subscribe({
         next: (orders) => {
+          populateNames(orders);
           this.orders = orders;
           this.loading = false;
         },
@@ -159,9 +181,9 @@ export class AuctionOrderManagementComponent implements OnInit {
         }
       });
     } else {
-      // Seller/Buyer gets their own orders
       this.auctionOrderService.getUserOrders(this.userId).subscribe({
         next: (orders) => {
+          populateNames(orders);
           this.orders = orders;
           this.loading = false;
         },
@@ -190,7 +212,83 @@ export class AuctionOrderManagementComponent implements OnInit {
   }
 
   getValidStatuses(currentStatus: OrderStatus): OrderStatus[] {
+    if (this.userRole === 'Admin') {
+      // Admin can do any forward transition (not backward)
+      return this.getAdminForwardTransitions(currentStatus);
+    }
     return (this.statusTransitions as any)[this.userRole][currentStatus] || [];
+  }
+
+  getAdminForwardTransitions(currentStatus: OrderStatus): OrderStatus[] {
+    // Only allow forward transitions from currentStatus
+    const adminTransitions = this.statusTransitions.Admin;
+
+  // Assert that currentStatus is a key of the Admin transitions object
+  const key = OrderStatus[currentStatus] as keyof typeof adminTransitions;
+
+  return adminTransitions[key] || [];
+   // return adminTransitions[currentStatus as any] || [];
+  }
+
+  // Buyer: Show Proceed/Pay button for PendingBuyer
+  showPayButton(status: OrderStatus): boolean {
+    return this.userRole === 'Buyer' && (status === OrderStatus.PendingBuyer||status === OrderStatus.Pending);
+  }
+
+  // Buyer: Show Mark as Delivered for Shipped
+  showMarkDeliveredButton(status: OrderStatus): boolean {
+    return this.userRole === 'Buyer' && status === OrderStatus.Shipped;
+  }
+
+  // Buyer: Show Mark as Completed for Delivered
+  showMarkCompletedButton(status: OrderStatus): boolean {
+    return this.userRole === 'Buyer' && status === OrderStatus.Delivered;
+  }
+
+  // Buyer: Open address dialog
+  openAddressDialog(order: AuctionOrderDto) {
+    this.addressOrderId = order.id;
+    this.addressForm = {
+      shippingAddress: order.shippingAddress || '',
+      recipientName: order.recipientName || '',
+      phoneNumber: order.phoneNumber || '',
+      notes: order.notes || ''
+    };
+    this.showAddressDialog = true;
+  }
+
+  // Buyer: Save address info and set status to Payed
+  saveAddressInfo() {
+    if (!this.addressOrderId) return;
+    this.auctionOrderService.updateOrderAddressInfo(this.addressOrderId, this.addressForm).subscribe({
+      next: () => {
+        this.updateOrderStatusById(this.addressOrderId!, OrderStatus.Payed);
+        this.showAddressDialog = false;
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Order info saved. You can now proceed to payment.' });
+        this.loadOrders();
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to save order info.' });
+      }
+    });
+  }
+
+  // Helper to update order status by id
+  updateOrderStatusById(orderId: number, newStatus: OrderStatus) {
+    this.auctionOrderService.updateOrderStatus(orderId, newStatus).subscribe({
+      next: () => this.loadOrders(),
+      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update order status.' })
+    });
+  }
+
+  // Mark as Delivered
+  markAsDelivered(order: AuctionOrderDto) {
+    this.updateOrderStatus(order, OrderStatus.Delivered);
+  }
+
+  // Mark as Completed
+  markAsCompleted(order: AuctionOrderDto) {
+    this.updateOrderStatus(order, OrderStatus.Completed);
   }
 
   showOrderDetails(order: AuctionOrderDto) {
@@ -215,11 +313,6 @@ export class AuctionOrderManagementComponent implements OnInit {
     if (order.auctionId) {
       this.router.navigate(['/seller/auctions', order.auctionId]);
     }
-  }
-
-  // New: Show pay button for specific buyer statuses
-  showPayButton(status: OrderStatus): boolean {
-    return [OrderStatus.PendingBuyer, OrderStatus.PaymentFailed].includes(status);
   }
 
   // New: Payment initiation (mock)
@@ -270,5 +363,13 @@ export class AuctionOrderManagementComponent implements OnInit {
         this.statusChangeLoading = false;
       }
     });
+  }
+
+  // Helper to get display name for seller/buyer
+  getSellerName(order: AuctionOrderDto): string {
+    return order.sellerName || 'N/A';
+  }
+  getBuyerName(order: AuctionOrderDto): string {
+    return order.buyerName || 'N/A';
   }
 }

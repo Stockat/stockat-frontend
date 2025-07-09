@@ -1,4 +1,4 @@
-import { Component, OnInit , OnDestroy} from '@angular/core';
+import { Component, OnInit , OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuctionService } from '../../../core/services/auction.service'; 
 import { BidService } from '../../../core/services/bid.service'; 
@@ -6,7 +6,7 @@ import { AuctionDetailsDto } from '../../../core/models/auction-models/auction-d
 import { AuctionBidRequestCreateDto } from '../../../core/models/auction-models/bid-request-auction-dto';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { catchError, forkJoin, interval, map, Observable, of, Subscription } from 'rxjs';
+import { catchError, forkJoin, interval, map, Observable, of, Subscription, combineLatest, merge, filter } from 'rxjs';
 import { MessagesModule } from 'primeng/messages';
 import { MessageModule } from 'primeng/message';
 import { UserService } from '../../../core/services/user.service';
@@ -15,6 +15,10 @@ import { PaginatorModule } from 'primeng/paginator';
 import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { ProductService } from '../../../core/services/product.service';
+import { AuctionSignalRService } from '../../../core/services/auction-signalr.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { ChangeDetectorRef } from '@angular/core';
+import { NgZone } from '@angular/core';
 
 
 @Component({
@@ -49,36 +53,159 @@ export class AuctionDetailsComponent implements OnInit, OnDestroy {
    bidPageSize = 5;
    totalBids = 0;
 
+   //a=bis updata
+   isInputFocused = false;
+private destroyed = false;
+
+  @ViewChild('bidInput') bidInput!: ElementRef<HTMLInputElement>;
+
   constructor(
     private route: ActivatedRoute,
     private auctionService: AuctionService,
     private bidService : BidService,
     private userService:UserService,
-    private productService: ProductService
+    private productService: ProductService,
+    private signalRService: AuctionSignalRService,
+    private authService: AuthService,
+    private cdRef: ChangeDetectorRef,
+    private zone: NgZone,
   ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.params['id'];
-    this.loadUser();
-    this.auctionService.getAuctionById(+id).subscribe(data => {
-      this.auction = data;
-    
-      // Set bid values
-      this.bidAmount = this.auction.currentBid + this.auction.incrementUnit;
-      this.minBid = this.getMinBid();
-    
-      // Start countdown
-      this.updateCountdown();
-      this.startCountdown();
-    
-      // Load related product image
-      this.productService.getProductsDetails(this.auction.productId).subscribe(response => {
-        const product = response.data;
-        this.productImageUrl = product?.imagesArr?.[0] || 'assets/default-product.png';
+  this.loadUser();
+  
+  // 1. Simplify initialization
+  this.signalRService.startConnection();
+  
+  // 2. Load auction after connection is established
+  this.signalRService.connectionStarted$.subscribe(connected => {
+    if (connected) {
+      this.loadAuction(id);
+    }
+  });
+
+  // 3. Unified SignalR handling
+  this.setupSignalRSubscriptions();
+  
+  // 4. Tab visibility handling
+  this.setupVisibilityHandler();
+  }
+
+
+  private setupSignalRSubscriptions() {
+    // Combined handler for auction updates
+    const auctionUpdate$ = merge(
+      this.signalRService.bidPlaced$,
+      this.signalRService.auctionUpdate$
+    );
+  
+    auctionUpdate$.pipe(
+      filter(data => data?.Auction?.id === this.auction?.id)
+    ).subscribe(data => {
+      this.zone.run(() => {
+        this.handleAuctionUpdate(data);
       });
     });
+  
+    // Bid success handling
+    this.signalRService.bidSuccess$.subscribe(bid => {
+      this.zone.run(() => {
+        if (bid) {
+          this.messages = [
+            { severity: 'success', summary: 'Success', detail: 'Bid placed successfully!' }
+          ];
+          // Don't reload auction - will be handled by auctionUpdate$
+          this.cdRef.detectChanges();
+        }
+      });
+    });
+  
+    // Error handling
+    this.signalRService.error$.subscribe(msg => {
+      this.zone.run(() => {
+        if (msg) {
+          this.messages = [
+            { severity: 'error', summary: 'Error', detail: msg }
+          ];
+          this.cdRef.detectChanges();
+        }
+      });
+    });
+  }
+  
+  private handleAuctionUpdate(data: any) {
+    // 1. Update auction with new reference
+    this.auction = {...data.Auction};
     
-    this.loadBids();
+    // 2. Update bids if available
+    if (data.Bids) {
+      this.bids = [...data.Bids];
+      this.totalBids = this.bids.length;
+      this.updatePagedBids();
+    }
+    
+    // 3. Update bid values
+    this.updateBidValues();
+    
+    // 4. Start countdown if needed
+    if (!this.countdownSub || this.countdownSub.closed) {
+      this.startCountdown();
+    }
+    
+    // 5. Force UI update
+    this.cdRef.detectChanges();
+    console.log('Auction updated:', this.auction);
+  }
+  
+  private updateBidValues() {
+    const newMinBid = this.getMinBid();
+    
+    // Only update if:
+    // 1. User hasn't manually changed the bid
+    // 2. Or input is not focused
+    if (this.bidAmount === this.minBid || !this.isInputFocused) {
+      this.bidAmount = newMinBid;
+    }
+    
+    this.minBid = newMinBid;
+  }
+  
+  private setupVisibilityHandler() {
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && this.auction?.id) {
+        this.loadAuction(this.auction.id);
+      }
+    });
+  }
+  
+  loadAuction(id: number): void {
+    this.auctionService.getAuctionById(id).subscribe(data => {
+      this.zone.run(() => {
+        this.auction = {...data};
+        this.minBid = this.getMinBid();
+        
+        // Only reset bid if input not focused
+        if (!this.isInputFocused) {
+          this.bidAmount = this.minBid;
+        }
+        
+        this.startCountdown();
+        this.loadProductImage();
+        this.signalRService.joinAuction(this.auction.id);
+        this.cdRef.detectChanges();
+      });
+    });
+  }
+  
+  private loadProductImage() {
+    if (!this.auction?.productId) return;
+    
+    this.productService.getProductsDetails(this.auction.productId).subscribe(response => {
+      const product = response.data;
+      this.productImageUrl = product?.imagesArr?.[0] || 'assets/default-product.png';
+      this.cdRef.detectChanges();
+    });
   }
 
   loadUser(){
@@ -126,13 +253,13 @@ export class AuctionDetailsComponent implements OnInit, OnDestroy {
     return (this.auction?.currentBid || 0) + (this.auction?.incrementUnit || 0);
   }
 
-  loadAuction(id: number): void {
-    this.auctionService.getAuctionById(id).subscribe(data => {
-      this.auction = data;
-      this.minBid = this.auction.currentBid + this.auction.incrementUnit;
-      this.bidAmount = this.minBid;
-    });
-  }
+  // loadAuction(id: number): void {
+  //   this.auctionService.getAuctionById(id).subscribe(data => {
+  //     this.auction = data;
+  //     this.minBid = this.auction.currentBid + this.auction.incrementUnit;
+  //     this.bidAmount = this.minBid;
+  //   });
+  // }
 
   loadBids() {
     this.loading = true;
@@ -211,25 +338,21 @@ export class AuctionDetailsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.bidService.submitBid(bidRequest).subscribe({
-      next: () => {
-        this.messages = [
-          { severity: 'success', summary: 'Success', detail: 'Bid placed successfully!' }
-        ];
-        this.loadAuction(this.auction.id); // Refresh auction details
-      },
-      error: (err) => {
-        console.error(err);
-        this.messages = [
-          { severity: 'error', summary: 'Error', detail: 'Failed to place bid.' }
-        ];
-      }
-    });
+    this.signalRService.placeBid(bidRequest);
   }
+
+  // private updateBidValues() {
+  //   this.minBid = this.getMinBid();
+  //   this.bidAmount = this.minBid;
+  //   // if (this.bidInput && this.bidInput.nativeElement) {
+  //   //   this.bidInput.nativeElement.value = this.minBid.toString();
+  //   // }
+  // }
 
   ngOnDestroy(): void {
     if (this.countdownSub) {
       this.countdownSub.unsubscribe();
     }
+    this.signalRService.leaveAuction(this.auction.id);
   }
 }

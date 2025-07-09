@@ -14,6 +14,8 @@ import { CommonModule } from '@angular/common';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
 import { Router } from '@angular/router';
+import { AuctionSignalRService } from '../../../../core/services/auction-signalr.service';
+import { TooltipModule } from 'primeng/tooltip';
 
 
 @Component({
@@ -27,7 +29,7 @@ import { Router } from '@angular/router';
     DropdownModule,
     ReactiveFormsModule,
     InputTextModule,
-    
+    TooltipModule,
   ],
   styleUrls: ['./auctions-view.component.css'],
   providers: [DialogService, ConfirmationService]
@@ -35,7 +37,7 @@ import { Router } from '@angular/router';
 export class AuctionsViewComponent implements OnInit {
   @ViewChild('auctionTable') auctionTable!: Table;
   
-  auctions: (AuctionDetailsDto & { status: string, productImage?: string })[] = [];
+  auctions: (AuctionDetailsDto & { status: string, productImage?: string, productName?: string, stockId?: number })[] = [];
   loading = true;
   totalRecords = 0;
   rows = 10;
@@ -55,13 +57,15 @@ export class AuctionsViewComponent implements OnInit {
   statusFilter = new FormControl('all');
   searchControl = new FormControl('');
   ref: DynamicDialogRef | undefined;
+  allowedStatusValues = ['all', 'upcoming', 'active', 'closed'];
 
   constructor(
     private auctionService: AuctionService,
     private productService: ProductService,
     private dialogService: DialogService,
     private confirmationService: ConfirmationService,
-    private router: Router
+    private router: Router,
+    private signalRService: AuctionSignalRService
   ) {}
 
   ngOnInit() {
@@ -81,32 +85,63 @@ export class AuctionsViewComponent implements OnInit {
         this.first = 0;
         this.loadAuctions();
       });
+    // SignalR real-time updates
+    this.signalRService.startConnection();
+    this.signalRService.auctionUpdate$.subscribe(() => {
+      this.loadAuctions();
+    });
+    this.signalRService.auctionCreated$.subscribe(() => {
+      this.loadAuctions();
+    });
+    this.signalRService.auctionDeleted$.subscribe(() => {
+      this.loadAuctions();
+    });
   }
 
   loadAuctions() {
     this.loading = true;
-    const status: string = this.statusFilter.value || '';
-    const search = this.searchControl.value || '';
+    let status: string = this.statusFilter.value || '';
+    const search = this.searchControl.value?.toLowerCase() || '';
     const page = Math.floor(this.first / this.rows) + 1;
 
-    this.auctionService.getSellerAuctions(page, this.rows, status, search)
-  .pipe(finalize(() => this.loading = false))
-  .subscribe(response => {
-    this.totalRecords = response.totalCount;
+    // If status is not allowed, clear auctions and return
+    if (status && !this.allowedStatusValues.includes(status)) {
+      this.auctions = [];
+      this.totalRecords = 0;
+      this.loading = false;
+      return;
+    }
 
-    this.auctions = response.data.map(auction => ({
-      ...auction,
-      status: this.calculateStatus(auction)
-    }));
+    this.auctionService.getSellerAuctions(page, this.rows, status, '').pipe(finalize(() => this.loading = false)).subscribe(response => {
+      let auctions = response.data.map(auction => ({
+        ...auction,
+        status: this.calculateStatus(auction),
+        productName: '',
+        stockId: auction.stockId
+      }));
 
-    this.auctions.forEach(auction => {
-      this.productService.getProductsDetails(auction.productId).subscribe(response => {
-        const product = response.data;
-        const imageUrl = response.data?.imagesArr?.[0] || this.defaultImage;
-        this.productImages[auction.id] = imageUrl;
+      // Fetch product names for each auction
+      auctions.forEach((auction, idx) => {
+        this.productService.getProductsDetails(auction.productId).subscribe(response => {
+          const product = response.data;
+          const imageUrl = response.data?.imagesArr?.[0] || this.defaultImage;
+          this.productImages[auction.id] = imageUrl;
+          auctions[idx].productName = product?.name || '';
+        });
       });
+
+      // Filter auctions by search (name, productName, stockId)
+      if (search) {
+        auctions = auctions.filter(a =>
+          a.name?.toLowerCase().includes(search) ||
+          a.productName?.toLowerCase().includes(search) ||
+          (a.stockId && a.stockId.toString().includes(search))
+        );
+      }
+
+      this.auctions = auctions;
+      this.totalRecords = auctions.length;
     });
-  });
   }
 
   calculateStatus(auction: AuctionDetailsDto): string {
@@ -130,20 +165,20 @@ export class AuctionsViewComponent implements OnInit {
     // Recalculate status using ORIGINAL dates
     console.log('Original auction:', auction);
   
-  const now = new Date();
-  const start = new Date(auction.startTime);
-  const end = new Date(auction.endTime);
-  console.log('Current time:', now);
-  console.log('Start time:', start);
-  console.log('End time:', end);
+    const now = new Date();
+    const start = new Date(auction.startTime);
+    const end = new Date(auction.endTime);
+    console.log('Current time:', now);
+    console.log('Start time:', start);
+    console.log('End time:', end);
   
-  let currentStatus = 'Upcoming';
-  if (now >= start && now <= end) currentStatus = 'Active';
-  if (now > end) currentStatus = 'Closed';
-  console.log('Recalculated status:', currentStatus);
+    let currentStatus = 'Upcoming';
+    if (now >= start && now <= end) currentStatus = 'Active';
+    if (now > end) currentStatus = 'Closed';
+    console.log('Recalculated status:', currentStatus);
   
-  const editableFields = this.getEditableFieldsByStatus(currentStatus);
-  console.log('Editable fields:', editableFields);
+    const editableFields = this.getEditableFieldsByStatus(currentStatus);
+    console.log('Editable fields:', editableFields);
   
     this.ref = this.dialogService.open(AuctionEditDialogComponent, {
       header: 'Edit Auction',
@@ -171,16 +206,56 @@ export class AuctionsViewComponent implements OnInit {
     return ['name', 'description'];
   }
 
+  canEdit(auction: any): boolean {
+    const now = new Date();
+    const start = new Date(auction.startTime);
+    const end = new Date(auction.endTime);
+    
+    // Can edit if auction is upcoming or active (not closed)
+    return now <= end;
+  }
+
+  canDelete(auction: any): boolean {
+    const now = new Date();
+    const start = new Date(auction.startTime);
+    const end = new Date(auction.endTime);
+    
+    // Can delete if auction is upcoming or closed
+    return now < start || now > end;
+  }
 
   confirmDelete(auctionId: number) {
+    const auction = this.auctions.find(a => a.id === auctionId);
+    if (!auction) return;
+
+    const now = new Date();
+    const start = new Date(auction.startTime);
+    const end = new Date(auction.endTime);
+    const isUpcoming = now < start;
+    const isClosed = now > end;
+
+    let message = 'Are you sure you want to delete this auction?';
+    if (isUpcoming) {
+      message = 'Are you sure you want to delete this upcoming auction? The stock will be returned to "For Sale" status.';
+    } else if (isClosed) {
+      message = 'Are you sure you want to delete this closed auction?';
+    }
+
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete this auction?',
+      message: message,
       header: 'Confirm Deletion',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         console.log('Delete auction with ID:', auctionId);
-        this.auctionService.deleteAuction(auctionId).subscribe(() => {
-          this.loadAuctions();
+        this.auctionService.deleteAuction(auctionId).subscribe({
+          next: () => {
+            this.loadAuctions();
+            // Show success message
+            console.log('Auction deleted successfully');
+          },
+          error: (err) => {
+            console.error('Failed to delete auction:', err);
+          }
         });
       }
     });

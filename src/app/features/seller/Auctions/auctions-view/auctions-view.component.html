@@ -31,6 +31,8 @@
         <tr>
           <th style="width: 60px">Image</th>
           <th>Auction</th>
+          <th style="width: 180px">Product Name</th>
+          <th style="width: 100px">Stock ID</th>
           <th style="width: 120px">Status</th>
           <th style="width: 200px">Dates</th>
           <th style="width: 150px">Price</th>
@@ -54,6 +56,16 @@
           <td>
             <div class="font-semibold text-gray-900">{{ auction.name }}</div>
             <div class="text-sm text-gray-500 line-clamp-2 mt-1">{{ auction.description }}</div>
+          </td>
+
+          <!-- Product Name -->
+          <td>
+            <div class="text-sm text-gray-900">{{ auction.productName }}</div>
+          </td>
+
+          <!-- Stock ID -->
+          <td>
+            <div class="text-sm text-gray-900">{{ auction.stockId }}</div>
           </td>
           
           <!-- Status -->
@@ -90,14 +102,17 @@
           <!-- Actions -->
           <td>
             <div class="flex gap-2">
-              <button pButton pRipple type="button" icon="pi pi-pencil" 
-                      class="p-button-sm p-button-info"
-                      (click)="editAuction(auction); $event.stopPropagation()"></button>
+              <button *ngIf="canEdit(auction)" pButton pRipple type="button" 
+                      icon="pi pi-pencil" 
+                      class="p-button-sm p-button-outlined p-button-info"
+                      (click)="editAuction(auction); $event.stopPropagation()"
+                      pTooltip="Edit Auction"></button>
               
-              <button *ngIf="auction.status === 'Upcoming'" pButton pRipple 
+              <button *ngIf="canDelete(auction)" pButton pRipple 
                       type="button" icon="pi pi-trash" 
-                      class="p-button-sm p-button-danger"
-                      (click)="confirmDelete(auction.id); $event.stopPropagation()"></button>
+                      class="p-button-sm p-button-outlined p-button-danger"
+                      (click)="confirmDelete(auction.id); $event.stopPropagation()"
+                      pTooltip="Delete Auction"></button>
             </div>
           </td>
         </tr>

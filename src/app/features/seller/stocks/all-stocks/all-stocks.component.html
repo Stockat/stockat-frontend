@@ -71,27 +71,24 @@
                         </p-popover>
                     </td>
                     <td>
-                        @if(stock.stockStatus == 'ForSale'){
+                        @if(stock.stockStatus == 'ForSale' && stock.quantity > 0){
                         <ng-container >
                             <p-button class="me-2" label="Edit" icon="ti ti-edit" (click)="navigateToUpdateStock(stock.id)"
                                 variant="text" [raised]="true" [rounded]="true" severity="help" />
                             <p-button icon="ti ti-trash" (click)="deleteStock(stock.id)" variant="text" [raised]="true"
                                 [rounded]="true" severity="danger" />
                             <!--auction  -->
-                            <!-- <button pButton pRipple
-                                    icon="pi pi-gavel"
-                                    label="Add Auction"
-                                    class="p-button-success"
-                                    (click)="openAuctionDialog(stock)">
-                            </button> -->
                             <button 
                                 pButton 
                                 type="button" 
                                 icon="pi pi-gavel" 
-                                class="p-button-rounded p-button-info p-button-text" 
+                                class="p-button-rounded p-button-success p-button-outlined" 
                                 (click)="openAuctionDialog(stock)" 
-                                pTooltip="Add Auction" tooltipPosition="top">
-                                </button>
+                                pTooltip="Add Auction" 
+                                tooltipPosition="top"
+                                styleClass="p-button-sm">
+                                Add Auction
+                            </button>
 
                         </ng-container>
                     }

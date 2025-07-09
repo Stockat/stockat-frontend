@@ -1,104 +1,110 @@
 <p-dialog header="Create Auction" [(visible)]="visible" [style]="{ width: '650px' }" [modal]="true">
-    <form [formGroup]="auctionForm" (ngSubmit)="createAuction()" class="p-fluid">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Product Info -->
-            <div class="col-span-2 mb-4 p-3 bg-gray-50 rounded-lg">
-                <div class="flex items-center">
-                    <div class="mr-3">
-                        <i class="pi pi-box text-2xl text-blue-500"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-lg">{{ product?.name }}</h4>
-                        <p class="text-gray-600">Available: {{ stock?.quantity }} units</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Left Column -->
-            <div>
+    <div class="auction-create-dialog">
+        <form [formGroup]="auctionForm" (ngSubmit)="createAuction()">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Name Field -->
                 <div class="field">
-                    <label for="name">Auction Name*</label>
-                    <input id="name" type="text" pInputText formControlName="name" />
-                    <small *ngIf="auctionForm.controls['name'].invalid" class="p-error">
-                        Auction name is required
-                    </small>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Auction Name</label>
+                    <input id="name" type="text" pInputText formControlName="name" 
+                           class="w-full" placeholder="Enter auction name">
+                    <small *ngIf="auctionForm.get('name')?.invalid && auctionForm.get('name')?.touched" 
+                           class="text-red-500">Name is required</small>
                 </div>
 
+                <!-- Description Field -->
                 <div class="field">
-                    <label for="startingPrice">Starting Price ($)*</label>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="description" pInputTextarea formControlName="description" 
+                              rows="3" class="w-full" placeholder="Enter auction description"></textarea>
+                </div>
+
+                <!-- Start Time Field -->
+                <div class="field">
+                    <label for="startTime" class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                    <p-calendar #startCalendar id="startTime" formControlName="startTime" 
+                               [showIcon]="true" [minDate]="minStartDate" [maxDate]="maxStartDate"
+                               dateFormat="dd/mm/yy" [showTime]="true" hourFormat="24"
+                               [autoZIndex]="true" [baseZIndex]="10000"
+                               class="w-full"></p-calendar>
+                    <small *ngIf="auctionForm.get('startTime')?.invalid && auctionForm.get('startTime')?.touched" 
+                           class="text-red-500">Start time is required and must be in the future</small>
+                </div>
+
+                <!-- End Time Field -->
+                <div class="field">
+                    <label for="endTime" class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                    <p-calendar #endCalendar id="endTime" formControlName="endTime" 
+                               [showIcon]="true" [minDate]="minEndDate" [maxDate]="maxEndDate"
+                               dateFormat="dd/mm/yy" [showTime]="true" hourFormat="24"
+                               [autoZIndex]="true" [baseZIndex]="10000"
+                               class="w-full"></p-calendar>
+                    <small *ngIf="auctionForm.get('endTime')?.invalid && auctionForm.get('endTime')?.touched" 
+                           class="text-red-500">End time is required and must be after start time</small>
+                </div>
+
+                <!-- Starting Price Field -->
+                <div class="field">
+                    <label for="startingPrice" class="block text-sm font-medium text-gray-700 mb-1">Starting Price</label>
                     <p-inputNumber id="startingPrice" formControlName="startingPrice" 
-                        mode="currency" currency="USD" locale="en-US"
-                        [min]="0.01" [maxFractionDigits]="2">
-                    </p-inputNumber>
-                    <small *ngIf="auctionForm.controls['startingPrice'].invalid" class="p-error">
-                        Must be at least $0.01
-                    </small>
+                                  mode="currency" currency="USD" [minFractionDigits]="2"
+                                  class="w-full"></p-inputNumber>
+                    <small *ngIf="auctionForm.get('startingPrice')?.invalid && auctionForm.get('startingPrice')?.touched" 
+                           class="text-red-500">Starting price must be greater than 0</small>
                 </div>
 
+                <!-- Increment Unit Field -->
                 <div class="field">
-                    <label for="incrementUnit">Bid Increment ($)*</label>
+                    <label for="incrementUnit" class="block text-sm font-medium text-gray-700 mb-1">Bid Increment</label>
                     <p-inputNumber id="incrementUnit" formControlName="incrementUnit" 
-                        mode="currency" currency="USD" locale="en-US"
-                        [min]="0.01" [maxFractionDigits]="2">
-                    </p-inputNumber>
-                    <small *ngIf="auctionForm.controls['incrementUnit'].invalid" class="p-error">
-                        Must be at least $0.01
-                    </small>
-                </div>
-                
-                <div class="field">
-                    <label for="quantity">Quantity*</label>
-                    <p-inputNumber id="quantity" formControlName="quantity" [min]="1" [max]="stock?.quantity">
-                    </p-inputNumber>
-                    <small *ngIf="auctionForm.controls['quantity'].invalid" class="p-error">
-                        Must be between 1 and {{ stock?.quantity }}
-                    </small>
-                </div>
-            </div>
-            
-            <!-- Right Column -->
-            <div>
-                <div class="field">
-                    <label for="startTime">Start Time*</label>
-                    <p-calendar
-                        formControlName="startTime"
-                        [showTime]="true"
-                        [showIcon]="true"
-                        [touchUI]="false"  
-                        dateFormat="yy-mm-dd"
-                        hourFormat="24"
-                        [minDate]="minStartDate"
-                        [maxDate]="maxStartDate">
-                        </p-calendar>
-                    <small *ngIf="auctionForm.controls['startTime'].invalid" class="p-error">
-                        Must be a future date
-                    </small>
+                                  mode="currency" currency="USD" [minFractionDigits]="2"
+                                  class="w-full"></p-inputNumber>
+                    <small *ngIf="auctionForm.get('incrementUnit')?.invalid && auctionForm.get('incrementUnit')?.touched" 
+                           class="text-red-500">Bid increment must be greater than 0</small>
                 </div>
 
+                <!-- Quantity Field (Read-only) -->
                 <div class="field">
-                    <label for="endTime">End Time*</label>
-                    <p-calendar id="endTime" formControlName="endTime" 
-                        [showTime]="true" [minDate]="minEndDate" [maxDate]="maxEndDate"
-                        [showIcon]="true" [touchUI]="false" dateFormat="yy-mm-dd" hourFormat="24">
-                    </p-calendar>
-                    <small *ngIf="auctionForm.controls['endTime'].invalid" class="p-error">
-                        Must be after start time
-                    </small>
-                </div>
-                
-                <div class="field">
-                    <label for="description">Description</label>
-                    <textarea id="description" pInputTextarea formControlName="description" rows="4"></textarea>
+                    <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                    <p-inputNumber id="quantity" formControlName="quantity" 
+                                  [min]="1" class="w-full" [disabled]="true"></p-inputNumber>
                 </div>
             </div>
-        </div>
-        
-        <div class="flex justify-end gap-3 mt-4">
-            <button pButton pRipple type="button" label="Cancel" 
-                class="p-button-outlined" (click)="closeDialog()"></button>
-            <button pButton pRipple type="submit" label="Create Auction" 
-                [disabled]="auctionForm.invalid || creatingAuction"
-                icon="pi pi-check" iconPos="right"></button>
-        </div>
-    </form>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end gap-2 mt-6">
+                <button type="button" pButton pRipple label="Cancel" 
+                        class="p-button-outlined" (click)="closeDialog()"></button>
+                <button type="submit" pButton pRipple label="Create Auction" 
+                        class="p-button-primary" [disabled]="auctionForm.invalid || creatingAuction"
+                        [loading]="creatingAuction"></button>
+            </div>
+        </form>
+    </div>
+
+    <style>
+        .auction-create-dialog {
+            min-height: 400px;
+        }
+
+        /* Ensure calendar overlays are visible */
+        :host ::ng-deep .p-calendar .p-calendar-w-btn .p-datepicker-trigger {
+            z-index: 10001;
+        }
+
+        :host ::ng-deep .p-calendar .p-datepicker {
+            z-index: 10002 !important;
+        }
+
+        :host ::ng-deep .p-calendar .p-datepicker-panel {
+            z-index: 10003 !important;
+        }
+
+        :host ::ng-deep .p-inputnumber {
+            width: 100%;
+        }
+
+        :host ::ng-deep .p-calendar {
+            width: 100%;
+        }
+    </style>
 </p-dialog>

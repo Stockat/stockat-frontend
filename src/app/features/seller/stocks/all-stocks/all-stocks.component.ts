@@ -20,10 +20,12 @@ import { FormsModule } from '@angular/forms';
 import { ProductDetailsDto } from '../../../../core/models/product-models/ProductDetails';
 import { ProductService } from '../../../../core/services/product.service';
 import { AuctionCreateDialogComponent } from '../../Auctions/auction-create-dialog/auction-create-dialog.component';
+import { AuctionSignalRService } from '../../../../core/services/auction-signalr.service';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-all-stocks',
-  imports: [NgClass, ChipModule,ButtonModule,TableModule,IconFieldModule,InputIconModule,CardModule,DividerModule, ConfirmDialogModule, ToastModule, PopoverModule, DropdownModule, FormsModule, AuctionCreateDialogComponent, CommonModule],
+  imports: [NgClass, ChipModule, ButtonModule, TableModule, IconFieldModule, InputIconModule, CardModule, DividerModule, ConfirmDialogModule, ToastModule, PopoverModule, DropdownModule, FormsModule, AuctionCreateDialogComponent, CommonModule, TooltipModule],
   templateUrl: './all-stocks.component.html',
   styleUrl: './all-stocks.component.css',
   providers: [MessageService, ConfirmationService]
@@ -41,7 +43,7 @@ export class AllStocksComponent {
    selectedProduct: ProductDetailsDto | null = null;
 
 
-  constructor(private stockService: StockService, private router: Router, private messageService: MessageService, private confirmationService: ConfirmationService, private productService: ProductService) {
+  constructor(private stockService: StockService, private router: Router, private messageService: MessageService, private confirmationService: ConfirmationService, private productService: ProductService, private signalRService: AuctionSignalRService) {
     this.router = router;
   }
 
@@ -84,6 +86,17 @@ export class AllStocksComponent {
         this.stockList = response.data;
         this.loading = false;
       }
+    });
+    // SignalR real-time updates
+    this.signalRService.startConnection();
+    this.signalRService.auctionUpdate$.subscribe(() => {
+      this.loadStocks();
+    });
+    this.signalRService.auctionCreated$.subscribe(() => {
+      this.loadStocks();
+    });
+    this.signalRService.auctionDeleted$.subscribe(() => {
+      this.loadStocks();
     });
   }
 
@@ -138,18 +151,22 @@ export class AllStocksComponent {
   
     closeAuctionDialog(): void {
       this.showAuctionDialog = false;
-      this.selectedStock = null;
-      this.selectedProduct = null;
+      // Reset after a short delay to ensure proper cleanup
+      setTimeout(() => {
+        this.selectedStock = null;
+        this.selectedProduct = null;
+      }, 100);
     }
   
     handleAuctionCreated(): void {
       this.closeAuctionDialog();
+      // Only show one success message and redirect
       this.messageService.add({
         severity: 'success',
         summary: 'Success',
         detail: 'Auction created successfully'
       });
-      this.loadStocks();
+      this.router.navigate(['/seller/auctions']);
     }
   
 

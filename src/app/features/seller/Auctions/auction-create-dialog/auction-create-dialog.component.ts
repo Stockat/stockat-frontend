@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { AuctionService } from '../../../../core/services/auction.service';
@@ -12,6 +12,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { CalendarModule } from 'primeng/calendar';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
+import { Calendar } from 'primeng/calendar';
 
 @Component({
   selector: 'app-auction-create-dialog',
@@ -28,12 +29,15 @@ import { CommonModule } from '@angular/common';
   templateUrl: './auction-create-dialog.component.html',
   styleUrls: ['./auction-create-dialog.component.css']
 })
-export class AuctionCreateDialogComponent implements OnInit {
+export class AuctionCreateDialogComponent implements OnInit, AfterViewInit {
   @Input() visible: boolean = false;
   @Input() stock: StockModel | null = null;
   @Input() product: ProductDetailsDto | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() auctionCreated = new EventEmitter<void>();
+
+  @ViewChild('startCalendar') startCalendar: Calendar | undefined;
+  @ViewChild('endCalendar') endCalendar: Calendar | undefined;
 
   auctionForm: FormGroup;
   creatingAuction = false;
@@ -48,14 +52,15 @@ export class AuctionCreateDialogComponent implements OnInit {
     private fb: FormBuilder,
     private auctionService: AuctionService,
     private userService: UserService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {
     this.auctionForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', Validators.maxLength(500)],
       startingPrice: [0.01, [Validators.required, Validators.min(0.01)]],
       incrementUnit: [1.00, [Validators.required, Validators.min(0.01)]],
-      quantity: [1, [Validators.required, Validators.min(1)]],
+      quantity: [{value: 1, disabled: true}, [Validators.required, Validators.min(1)]],
       startTime: [null, [Validators.required]],
       endTime: [null, [Validators.required]],
       productId: [0, Validators.required],
@@ -65,12 +70,20 @@ export class AuctionCreateDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Update minEndDate when startTime changes
     this.auctionForm.get('startTime')?.valueChanges.subscribe((startTime) => {
       if (startTime) {
         this.minEndDate = new Date(startTime);
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      if (this.startCalendar) this.startCalendar.overlayVisible = true;
+      if (this.endCalendar) this.endCalendar.overlayVisible = true;
+      this.cdr.detectChanges();
+    }, 0);
   }
 
   ngOnChanges(): void {
@@ -83,26 +96,26 @@ export class AuctionCreateDialogComponent implements OnInit {
     this.userService.getCurrentUser().subscribe({
       next: (res) => {
         const sellerId = res.data.id;
-  
         this.auctionForm.patchValue({
           productId: this.stock!.productId,
           stockId: this.stock!.id,
           sellerId: sellerId,
-          quantity: 1
+          quantity: this.stock!.quantity
         });
+        this.auctionForm.get('quantity')?.disable();
       },
       error: (err) => {
         console.error("Failed to get current user", err);
       }
     });
-    
-    // Set max quantity validator
     this.auctionForm.controls['quantity'].setValidators([
       Validators.required,
       Validators.min(1),
       Validators.max(this.stock!.quantity)
     ]);
     this.auctionForm.controls['quantity'].updateValueAndValidity();
+    this.auctionForm.patchValue({ quantity: this.stock!.quantity });
+    this.auctionForm.get('quantity')?.disable();
   }
 
   closeDialog(): void {
@@ -111,15 +124,11 @@ export class AuctionCreateDialogComponent implements OnInit {
 
   createAuction(): void {
     if (this.auctionForm.invalid) return;
-    
     this.creatingAuction = true;
-    const auctionData: AuctionCreateDto = this.auctionForm.value;
-    
-    // Convert dates to UTC
+    const auctionData: AuctionCreateDto = this.auctionForm.getRawValue();
     auctionData.startTime = new Date(auctionData.startTime).toISOString();
     auctionData.endTime = new Date(auctionData.endTime).toISOString();
-
-    
+    auctionData.quantity = this.stock?.quantity || 1;
     this.auctionService.createAuction(auctionData).subscribe({
       next: () => {
         this.messageService.add({

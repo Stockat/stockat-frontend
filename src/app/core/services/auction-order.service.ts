@@ -22,4 +22,9 @@ export class AuctionOrderService {
   updateOrderStatus(orderId: number, newStatus: OrderStatus): Observable<any> {
     return this.http.put(`${this.baseUrl}/${orderId}/status`, { status: newStatus });
   }
+
+  // New: Update address/order info fields
+  updateOrderAddressInfo(orderId: number, addressForm: any): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${orderId}/address-info`, addressForm);
+  }
 }

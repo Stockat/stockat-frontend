@@ -84,7 +84,7 @@
     <div class="card-content">
       <div class="image-container">
         <img 
-          src="https://primefaces.org/cdn/primeng/images/card-ng.jpg" 
+          [src]="getProductImage(auction.id)" 
           alt="{{ auction.name }}"
           class="auction-image"
         />

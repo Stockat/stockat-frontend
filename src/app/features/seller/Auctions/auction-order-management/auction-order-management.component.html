@@ -34,8 +34,8 @@
             <td>
               <div class="font-medium truncate max-w-xs">{{ order.auctionTitle || order.auctionId || 'N/A' }}</div>
             </td>
-            <td *ngIf="showSellerColumn">{{ order.sellerName || 'N/A' }}</td>
-            <td *ngIf="showBuyerColumn">{{ order.buyerName || 'N/A' }}</td>
+            <td *ngIf="showSellerColumn">{{ getSellerName(order) }}</td>
+            <td *ngIf="showBuyerColumn">{{ getBuyerName(order) }}</td>
             <td class="font-semibold">${{ order.amountPaid | number:'1.2-2' }}</td>
             <td>
               <span [class]="getStatusClass(order.status)">
@@ -54,9 +54,24 @@
                 <button *ngIf="userRole === 'Buyer' && showPayButton(order.status)"
                         pButton pRipple
                         icon="pi pi-dollar"
-                        label="Pay"
+                        label="Proceed/Pay"
+                        class="p-button-lg p-button-primary w-full mb-2"
+                        style="font-size: 1.1rem; font-weight: 600;"
+                        (click)="openAddressDialog(order)">
+                </button>
+                <button *ngIf="showMarkDeliveredButton(order.status)"
+                        pButton pRipple
+                        icon="pi pi-check"
+                        label="Mark as Delivered"
+                        class="p-button-sm p-button-info"
+                        (click)="markAsDelivered(order)">
+                </button>
+                <button *ngIf="showMarkCompletedButton(order.status)"
+                        pButton pRipple
+                        icon="pi pi-check-circle"
+                        label="Mark as Completed"
                         class="p-button-sm p-button-success"
-                        (click)="initiatePayment(order)">
+                        (click)="markAsCompleted(order)">
                 </button>
                 
                 <!-- Status Dropdown -->
@@ -150,7 +165,7 @@
                 <label class="text-sm font-medium text-gray-500">Seller</label>
                 <span *ngIf="userRole === 'Seller'" class="text-xs text-gray-500">(You)</span>
               </div>
-              <p class="font-semibold">{{ selectedOrder.sellerName || 'N/A' }}</p>
+              <p class="font-semibold">{{ getSellerName(selectedOrder) }}</p>
               <p *ngIf="userRole === 'Admin' || userRole === 'Buyer'" class="text-xs text-gray-500 mt-1">
                 ID: {{ selectedOrder.sellerId || 'N/A' }}
               </p>
@@ -162,7 +177,7 @@
                 <label class="text-sm font-medium text-gray-500">Buyer</label>
                 <span *ngIf="userRole === 'Buyer'" class="text-xs text-gray-500">(You)</span>
               </div>
-              <p class="font-semibold">{{ selectedOrder.buyerName || 'N/A' }}</p>
+              <p class="font-semibold">{{ getBuyerName(selectedOrder) }}</p>
               <p *ngIf="userRole === 'Admin' || userRole === 'Seller'" class="text-xs text-gray-500 mt-1">
                 <!-- ID: {{ selectedOrder.buyerId || 'N/A' }} -->
               </p>
@@ -171,6 +186,31 @@
         </div>
       </div>
     </p-dialog>
+  <!-- Buyer Address/Order Info Dialog -->
+  <p-dialog header="Order Info" [(visible)]="showAddressDialog" [modal]="true" [style]="{ width: '400px' }">
+    <form (ngSubmit)="saveAddressInfo()" class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold mb-1">Shipping Address</label>
+        <input type="text" [(ngModel)]="addressForm.shippingAddress" name="shippingAddress" class="p-inputtext p-component w-full border border-gray-300 rounded px-2 py-2" required />
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Recipient Name</label>
+        <input type="text" [(ngModel)]="addressForm.recipientName" name="recipientName" class="p-inputtext p-component w-full border border-gray-300 rounded px-2 py-2" required />
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Phone Number</label>
+        <input type="text" [(ngModel)]="addressForm.phoneNumber" name="phoneNumber" class="p-inputtext p-component w-full border border-gray-300 rounded px-2 py-2" required />
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Notes</label>
+        <textarea [(ngModel)]="addressForm.notes" name="notes" class="p-inputtext p-component w-full border border-gray-300 rounded px-2 py-2"></textarea>
+      </div>
+      <div class="flex justify-end gap-2 mt-6">
+        <button pButton type="button" class="p-button-text" (click)="showAddressDialog = false">Cancel</button>
+        <button pButton type="submit" class="p-button-primary px-6">Save</button>
+      </div>
+    </form>
+  </p-dialog>
   </div>
 
   <p-confirmDialog></p-confirmDialog>
