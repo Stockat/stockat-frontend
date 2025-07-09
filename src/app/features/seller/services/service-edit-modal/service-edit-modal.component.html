@@ -3,6 +3,11 @@
     <span>Edit Service</span>
   </ng-template>
   <form *ngIf="form" [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+    <div class="flex flex-col items-center mb-2">
+      <label class="block font-medium mb-1">Service Image</label>
+      <img *ngIf="imagePreview" [src]="imagePreview" alt="Service Image Preview" class="w-24 h-24 object-cover rounded shadow border mb-2" />
+      <input type="file" accept="image/*" (change)="onFileSelected($event)" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+    </div>
     <div>
       <label class="block font-medium mb-1">Name</label>
       <input pInputText formControlName="name" class="w-full" />

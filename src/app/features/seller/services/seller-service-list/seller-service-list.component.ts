@@ -34,7 +34,7 @@ export class SellerServiceListComponent implements OnInit {
   page: number = 0; // PrimeNG pages are 0-based
   size: number = 10; // Default page size - match first option in rowsPerPageOptions
   loading: boolean = false;
-
+  selectedServiceForImage: any = null;
 
 
   // Computed property for table first position
@@ -117,10 +117,11 @@ onPageChange(event: any) {
             });
           },
           error: (error) => {
+            const detail = error?.error || 'Failed to delete service';
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'Failed to delete service'
+              detail
             });
             console.error('Error deleting service:', error);
           }
@@ -139,26 +140,70 @@ onPageChange(event: any) {
     this.selectedService = null;
   }
 
-  handleEditModalSave(updatedService: any) {
-    this.serviceService.updateService(updatedService).subscribe({
-      next: (data) => {
-        this.services = this.services.map(s => s.id === data.id ? data : s);
-        this.handleEditModalClose();
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Service updated successfully'
-        });
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to update service'
-        });
-        console.error('Error updating service:', error);
-      }
-    });
+  handleEditModalSave(payload: any) {
+    const serviceId = payload.id;
+    // Map frontend fields to backend DTO fields
+    const editRequest = {
+      EditedName: payload.name,
+      EditedDescription: payload.description,
+      EditedMinQuantity: payload.minQuantity,
+      EditedPricePerProduct: payload.pricePerProduct,
+      EditedEstimatedTime: payload.estimatedTime,
+      EditedImageId: payload.EditedImageId || '',
+      EditedImageUrl: payload.EditedImageUrl || ''
+    };
+    if (payload.file) {
+      this.serviceService.uploadServiceImage(payload.file, serviceId).subscribe({
+        next: (imgRes) => {
+          editRequest.EditedImageId = imgRes.fileId;
+          editRequest.EditedImageUrl = imgRes.url;
+          this.serviceService.submitEditRequest(serviceId, editRequest).subscribe({
+            next: () => {
+              this.handleEditModalClose();
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Edit request submitted successfully'
+              });
+            },
+            error: (error) => {
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to submit edit request'
+              });
+              console.error('Error submitting edit request:', error);
+            }
+          });
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to upload image'
+          });
+        }
+      });
+    } else {
+      this.serviceService.submitEditRequest(serviceId, editRequest).subscribe({
+        next: () => {
+          this.handleEditModalClose();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Edit request submitted successfully'
+          });
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to submit edit request'
+          });
+          console.error('Error submitting edit request:', error);
+        }
+      });
+    }
   }
 
   addService() {
@@ -195,10 +240,11 @@ onPageChange(event: any) {
             },
             error: (error) => {
               this.isAddingService = false;
+              const detail = error?.error || 'Failed to add service';
               this.messageService.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Failed to add service'
+                detail
               });
               console.error('Error adding service:', error);
             }
@@ -206,10 +252,11 @@ onPageChange(event: any) {
         },
         error: (error) => {
           this.isAddingService = false;
+          const detail = error?.error || 'Failed to upload image';
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to upload image'
+            detail
           });
           console.error('Error uploading image:', error);
         }
@@ -230,10 +277,11 @@ onPageChange(event: any) {
         },
         error: (error) => {
           this.isAddingService = false;
+          const detail = error?.error || 'Failed to add service';
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to add service'
+            detail
           });
           console.error('Error adding service:', error);
         }
@@ -249,6 +297,40 @@ onPageChange(event: any) {
     this.serviceDetailsModalVisible = false;
     this.selectedService = null;
     this.selectedServiceRequests = [];
+  }
+
+  // Add this method to trigger file input
+  triggerImageEdit(service: any) {
+    this.selectedServiceForImage = service;
+    const fileInput = document.getElementById('service-image-input-' + service.id) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
+  }
+
+  // Handle file input change
+  onServiceImageSelected(event: any, service: any) {
+    const file: File = event.target.files[0];
+    if (file && this.sellerId) {
+      this.serviceService.uploadServiceImage(file, service.id).subscribe({
+        next: (res) => {
+          service.imageUrl = res.url;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Service image updated successfully'
+          });
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update service image'
+          });
+        }
+      });
+    }
   }
 
 

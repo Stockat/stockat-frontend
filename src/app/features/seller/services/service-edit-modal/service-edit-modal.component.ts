@@ -18,6 +18,8 @@ export class ServiceEditModalComponent {
   @Output() save = new EventEmitter<any>();
 
   form!: FormGroup;
+  selectedFile: File | null = null;
+  imagePreview: string | null = null;
 
   constructor(private fb: FormBuilder) {}
 
@@ -30,12 +32,26 @@ export class ServiceEditModalComponent {
         minQuantity: [this.service.minQuantity, [Validators.required, Validators.min(1)]],
         estimatedTime: [this.service.estimatedTime, Validators.required],
       });
+      this.imagePreview = this.service.imageUrl || null;
+      this.selectedFile = null;
+    }
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagePreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
     }
   }
 
   submit() {
     if (this.form.valid) {
-      this.save.emit({ ...this.service, ...this.form.value });
+      this.save.emit({ ...this.service, ...this.form.value, file: this.selectedFile });
     }
   }
 }

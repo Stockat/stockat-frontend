@@ -59,8 +59,9 @@ export class ServiceService {
     return this.http.post(`${this.baseUrl}/upload-image`, formData);
   }
 
-  updateService(service: Service): Observable<Service> {
-    return this.http.patch<Service>(`${this.baseUrl}/${service.id}`, service);
+  // Replace updateService with submitEditRequest
+  submitEditRequest(serviceId: number, editRequest: any): Observable<any> {
+    return this.http.post<any>(`http://localhost:5250/api/ServiceEditRequest/${serviceId}`, editRequest);
   }
 
   deleteService(id: number): Observable<void> {
