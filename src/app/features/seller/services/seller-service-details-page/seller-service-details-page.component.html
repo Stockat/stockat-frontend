@@ -66,14 +66,15 @@
           <div class="lg:w-2/3 p-8">
             <div class="mb-4">
               <span class="font-semibold text-gray-700">Status:</span>
-              <span *ngIf="service.isApproved; else pendingStatus" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800 ml-2">
+              <span *ngIf="service.isApproved === 'Approved'" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800 ml-2">
                 <i class="pi pi-check-circle mr-1"></i> Approved
               </span>
-              <ng-template #pendingStatus>
-                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-800 ml-2">
-                  <i class="pi pi-clock mr-1"></i> Pending (awaiting admin approval)
-                </span>
-              </ng-template>
+              <span *ngIf="service.isApproved === 'Rejected'" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-800 ml-2">
+                <i class="pi pi-times-circle mr-1"></i> Rejected
+              </span>
+              <span *ngIf="service.isApproved === 'Pending' || service.isApproved === null" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-800 ml-2">
+                <i class="pi pi-clock mr-1"></i> Pending (awaiting admin approval)
+              </span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200">
@@ -137,7 +138,7 @@
       </div>
 
       <!-- Buyer Requests Section -->
-      <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+      <div *ngIf="service.isApproved !== 'Rejected'" class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
         <div class="p-8 border-b border-gray-100">
           <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
@@ -180,7 +181,7 @@
         </div>
 
         <!-- Requests Table -->
-        <div *ngIf="service.isApproved; else noRequestsForPending" class="overflow-x-auto">
+        <div *ngIf="service.isApproved === 'Approved'; else noRequestsForPending" class="overflow-x-auto">
           <p-table
             [value]="filteredRequests()"
             [paginator]="true"
@@ -291,6 +292,18 @@
             <p class="text-gray-500">Once this service is approved by an admin, buyer requests will appear here.</p>
           </div>
         </ng-template>
+      </div>
+
+      <!-- Rejected Service Message -->
+      <div *ngIf="service.isApproved === 'Rejected'" class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+        <div class="text-center py-12">
+          <div class="w-20 h-20 bg-gradient-to-r from-red-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="pi pi-times-circle text-white text-3xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-4">Service Rejected</h3>
+          <p class="text-gray-600 text-lg mb-6">This service has been rejected by an administrator and is not available for buyer requests.</p>
+
+        </div>
       </div>
     </div>
   </div>

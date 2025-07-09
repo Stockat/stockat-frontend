@@ -64,8 +64,38 @@ export class ServiceService {
     return this.http.post<any>(`http://localhost:5250/api/ServiceEditRequest/${serviceId}`, editRequest);
   }
 
-  deleteService(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  deleteService(id: number): Observable<any> {
+    return this.http.patch<any>(`${this.baseUrl}/${id}/delete`, {});
+  }
+
+  restoreService(id: number): Observable<any> {
+    return this.http.patch<any>(`${this.baseUrl}/${id}/restore`, {});
+  }
+
+  getPendingServices(page: number = 1, size: number = 10): Observable<GenericRequestModel<PaginationDto<Service>>> {
+    return this.http.get<GenericRequestModel<PaginationDto<Service>>>(`${this.baseUrl}/admin/pending?page=${page}&size=${size}`);
+  }
+
+  getAllServicesForAdmin(page: number = 1, size: number = 10, includeBlockedSellers?: boolean, includeDeletedSellers?: boolean, includeDeletedServices?: boolean): Observable<GenericRequestModel<PaginationDto<Service>>> {
+    let url = `${this.baseUrl}/admin/all?page=${page}&size=${size}`;
+    if (includeBlockedSellers !== undefined) {
+      url += `&includeBlockedSellers=${includeBlockedSellers}`;
+    }
+    if (includeDeletedSellers !== undefined) {
+      url += `&includeDeletedSellers=${includeDeletedSellers}`;
+    }
+    if (includeDeletedServices !== undefined) {
+      url += `&includeDeletedServices=${includeDeletedServices}`;
+    }
+    return this.http.get<GenericRequestModel<PaginationDto<Service>>>(url);
+  }
+
+  approveService(serviceId: number): Observable<any> {
+    return this.http.patch<any>(`${this.baseUrl}/approve/${serviceId}`, true);
+  }
+
+  rejectService(serviceId: number): Observable<any> {
+    return this.http.patch<any>(`${this.baseUrl}/approve/${serviceId}`, false);
   }
 
 }

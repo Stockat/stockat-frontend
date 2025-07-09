@@ -14,10 +14,11 @@ import { ServiceRequestService } from '../../../../core/services/service-request
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-service-list',
-  imports: [TableModule, ButtonModule, PaginatorModule, ToastModule, ConfirmDialogModule, ProgressSpinnerModule, TooltipModule, ServiceEditModalComponent, ServiceAddModalComponent, CommonModule, RouterModule, ToastModule],
+  imports: [TableModule, ButtonModule, PaginatorModule, ToastModule, ConfirmDialogModule, ProgressSpinnerModule, TooltipModule, ServiceEditModalComponent, ServiceAddModalComponent, CommonModule, RouterModule, ToastModule, FormsModule],
   templateUrl: './seller-service-list.component.html',
   providers: [MessageService, ConfirmationService]
 })
@@ -37,6 +38,7 @@ export class SellerServiceListComponent implements OnInit {
   selectedServiceForImage: any = null;
   accountNotVerified: boolean = false;
   initialized: boolean = false;
+  showDeletedServices: boolean = false;
 
 
   // Computed property for table first position
@@ -52,6 +54,25 @@ export class SellerServiceListComponent implements OnInit {
     const total = this.services.reduce((sum, service) => sum + (service.pricePerProduct || 0), 0);
     const average = total / this.services.length;
     return average.toFixed(2);
+  }
+
+  // Get filtered services based on showDeletedServices flag
+  getFilteredServices(): any[] {
+    if (this.showDeletedServices) {
+      return this.services;
+    }
+    return this.services.filter(service => !service.isDeleted);
+  }
+
+  // Get count of active (non-deleted) services
+  getActiveServicesCount(): number {
+    return this.services.filter(service => !service.isDeleted).length;
+  }
+
+  // Truncate text to specified length
+  truncateText(text: string, maxLength: number): string {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength) : text;
   }
 
   constructor(
@@ -116,7 +137,7 @@ onPageChange(event: any) {
 
   deleteService(service: any) {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete this service?',
+      message: 'Are you sure you want to delete this service? This action can be undone.',
       header: 'Delete Confirmation',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
@@ -137,6 +158,35 @@ onPageChange(event: any) {
               detail
             });
             console.error('Error deleting service:', error);
+          }
+        });
+      }
+    });
+  }
+
+  restoreService(service: any) {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to restore this service?',
+      header: 'Restore Confirmation',
+      icon: 'pi pi-question-circle',
+      accept: () => {
+        this.serviceService.restoreService(service.id).subscribe({
+          next: () => {
+            this.loadSellerServices(); // Reload to get updated list
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: 'Service has been restored successfully'
+            });
+          },
+          error: (error) => {
+            const detail = error?.error || 'Failed to restore service';
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail
+            });
+            console.error('Error restoring service:', error);
           }
         });
       }

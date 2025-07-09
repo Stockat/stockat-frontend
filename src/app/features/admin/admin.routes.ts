@@ -26,6 +26,10 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./user/user-punishment.component').then(m => m.UserPunishmentComponent)
       },
       {
+        path: 'services',
+        loadComponent: () => import('./services/pending-services/pending-services.component').then(m => m.PendingServicesComponent)
+      },
+      {
         path: '',
         redirectTo: 'users',
         pathMatch: 'full'

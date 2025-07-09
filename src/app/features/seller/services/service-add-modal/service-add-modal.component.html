@@ -44,12 +44,18 @@
             pInputText
             formControlName="name"
             placeholder="Enter service name"
+            maxlength="100"
             class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
             [class.border-red-300]="submitted && form.get('name')?.invalid"
             [disabled]="isAddingService" />
         </div>
-        <div *ngIf="submitted && form.get('name')?.invalid" class="text-red-500 text-xs">
-          Service name is required
+        <div class="flex items-center justify-between">
+          <div *ngIf="submitted && form.get('name')?.invalid" class="text-red-500 text-xs">
+            Service name is required
+          </div>
+          <div class="text-xs text-gray-500 ml-auto">
+            {{ (form.get('name')?.value?.length || 0) }}/100 characters
+          </div>
         </div>
       </div>
 
