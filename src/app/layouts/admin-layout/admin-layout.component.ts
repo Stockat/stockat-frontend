@@ -115,6 +115,22 @@ export class AdminLayoutComponent {
                         routerLink: '/chatbot'
                     }
                 ]
+            },
+            {
+                label: 'Services',
+                icon: 'pi pi-briefcase',
+                items: [
+                    {
+                        label: 'Pending Services',
+                        icon: 'pi pi-clock',
+                        routerLink: '/admin/services/pending'
+                    },
+                    {
+                        label: 'Edit Requests',
+                        icon: 'pi pi-pencil',
+                        routerLink: '/admin/services/edit-requests'
+                    }
+                ]
             }
         ];
     }

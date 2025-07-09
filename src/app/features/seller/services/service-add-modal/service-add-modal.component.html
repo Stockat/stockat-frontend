@@ -129,16 +129,26 @@
         <label class="block text-sm font-semibold text-gray-700">
           Estimated Time <span class="text-red-500">*</span>
         </label>
-        <div class="relative">
+        <div class="flex gap-2">
           <input
             pInputText
-            formControlName="estimatedTime"
-            placeholder="e.g., 3 days, 1 week"
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
-            [class.border-red-300]="submitted && form.get('estimatedTime')?.invalid"
+            type="number"
+            min="1"
+            formControlName="estimatedTimeValue"
+            placeholder="e.g., 2"
+            class="w-2/5 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
+            [class.border-red-300]="submitted && form.get('estimatedTimeValue')?.invalid"
             [disabled]="isAddingService" />
+          <select
+            formControlName="estimatedTimeUnit"
+            class="w-3/5 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
+            [disabled]="isAddingService">
+            <option value="day(s)">day(s)</option>
+            <option value="week(s)">week(s)</option>
+            <option value="month(s)">month(s)</option>
+          </select>
         </div>
-        <div *ngIf="submitted && form.get('estimatedTime')?.invalid" class="text-red-500 text-xs">
+        <div *ngIf="submitted && (form.get('estimatedTimeValue')?.invalid || form.get('estimatedTimeUnit')?.invalid)" class="text-red-500 text-xs">
           Estimated time is required
         </div>
       </div>

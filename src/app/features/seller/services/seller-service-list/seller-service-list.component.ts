@@ -17,7 +17,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-service-list',
-  imports: [TableModule, ButtonModule, PaginatorModule, ToastModule, ConfirmDialogModule, ProgressSpinnerModule, TooltipModule, ServiceEditModalComponent, ServiceAddModalComponent, CommonModule, RouterModule],
+  imports: [TableModule, ButtonModule, PaginatorModule, ToastModule, ConfirmDialogModule, ProgressSpinnerModule, TooltipModule, ServiceEditModalComponent, ServiceAddModalComponent, CommonModule, RouterModule, ToastModule],
   templateUrl: './seller-service-list.component.html',
   providers: [MessageService, ConfirmationService]
 })
@@ -35,6 +35,8 @@ export class SellerServiceListComponent implements OnInit {
   size: number = 10; // Default page size - match first option in rowsPerPageOptions
   loading: boolean = false;
   selectedServiceForImage: any = null;
+  accountNotVerified: boolean = false;
+  initialized: boolean = false;
 
 
   // Computed property for table first position
@@ -81,13 +83,24 @@ export class SellerServiceListComponent implements OnInit {
           this.totalCount = 0;
         }
         this.loading = false;
+        this.initialized = true;
         this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('Error fetching services:', error);
+        console.error('Error fetching services:', error.error.Message);
         this.services = [];
         this.totalCount = 0;
         this.loading = false;
+        if (error?.error && error.error.Message.includes('Account is not verified by admin yet.')) {
+          this.accountNotVerified = true;
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Account Not Verified',
+            detail: 'Your account is not verified by admin yet. You cannot view or manage services until verification.',
+            life: 6000
+          });
+        }
+        this.initialized = true;
         this.cdr.detectChanges();
       }
     });
@@ -207,6 +220,15 @@ onPageChange(event: any) {
   }
 
   addService() {
+    if (this.accountNotVerified) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Account Not Verified',
+        detail: 'Your account is not verified by admin yet. You cannot add services until verification.',
+        life: 6000
+      });
+      return;
+    }
     this.addModalVisible = true;
   }
 
@@ -215,6 +237,10 @@ onPageChange(event: any) {
   }
 
   async handleAddModalSave(payload: { service: any, file: File | null }) {
+    if (this.accountNotVerified) {
+      this.addModalVisible = false;
+      return;
+    }
     this.isAddingService = true;
     if (payload.file) {
       this.serviceService.uploadImage(payload.file).subscribe({
@@ -224,11 +250,9 @@ onPageChange(event: any) {
             imageId: imgRes.fileId,
             imageUrl: imgRes.url
           };
-          console.log('Image uploaded successfully:', imgRes);
           this.serviceService.addService(serviceWithImage).subscribe({
             next: (data) => {
-              // Always reload the current page to get fresh data from server
-              this.totalCount++; // Update total count
+              this.totalCount++;
               this.loadSellerServices();
               this.handleAddModalClose();
               this.isAddingService = false;
@@ -241,6 +265,18 @@ onPageChange(event: any) {
             error: (error) => {
               this.isAddingService = false;
               const detail = error?.error || 'Failed to add service';
+              if (typeof detail === 'string' && detail.includes('not verified by admin')) {
+                this.accountNotVerified = true;
+                this.handleAddModalClose();
+                this.messageService.add({
+                  severity: 'warn',
+                  summary: 'Account Not Verified',
+                  detail: 'Your account is not verified by admin yet. You cannot add services until verification.',
+                  life: 6000
+                });
+                this.cdr.detectChanges();
+                return;
+              }
               this.messageService.add({
                 severity: 'error',
                 summary: 'Error',
@@ -264,8 +300,7 @@ onPageChange(event: any) {
     } else {
       this.serviceService.addService(payload.service).subscribe({
         next: (data) => {
-          // Always reload the current page to get fresh data from server
-          this.totalCount++; // Update total count
+          this.totalCount++;
           this.loadSellerServices();
           this.handleAddModalClose();
           this.isAddingService = false;
@@ -278,6 +313,18 @@ onPageChange(event: any) {
         error: (error) => {
           this.isAddingService = false;
           const detail = error?.error || 'Failed to add service';
+          if (typeof detail === 'string' && detail.includes('not verified by admin')) {
+            this.accountNotVerified = true;
+            this.handleAddModalClose();
+            this.messageService.add({
+              severity: 'warn',
+              summary: 'Account Not Verified',
+              detail: 'Your account is not verified by admin yet. You cannot add services until verification.',
+              life: 6000
+            });
+            this.cdr.detectChanges();
+            return;
+          }
           this.messageService.add({
             severity: 'error',
             summary: 'Error',

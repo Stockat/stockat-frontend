@@ -24,6 +24,7 @@ export class ServiceDetailsComponent {
   sellerIdFromQuery: string | null = null;
   isCheckingPendingRequest = true; // Add loading state for pending request check
   errorMessage: string | null = null;
+  requestErrorMessage: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -163,5 +164,17 @@ export class ServiceDetailsComponent {
     } else {
       this.router.navigate(['/services']);
     }
+  }
+
+  // Handler to show error from request modal and close modal
+  handleRequestError(errorMsg: string) {
+    this.isModalOpen = false;
+    this.requestErrorMessage = null;
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Request Error',
+      detail: errorMsg,
+      life: 4000
+    });
   }
 }

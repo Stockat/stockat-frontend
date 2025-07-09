@@ -20,7 +20,7 @@
   <!-- Main Content -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
-    <div *ngIf="loading && !errorMessage" class="text-center py-16">
+    <div *ngIf="loading" class="text-center py-16">
       <p-progressSpinner
         styleClass="w-16 h-16"
         strokeWidth="4"
@@ -30,20 +30,8 @@
       <p class="text-gray-600 font-semibold mt-4">Loading service details...</p>
     </div>
 
-    <!-- Error State -->
-    <div *ngIf="!loading && !service && errorMessage" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-red-50 to-red-100">
-      <div class="max-w-md w-full mx-auto bg-white rounded-2xl shadow-2xl border border-red-300 p-8 flex flex-col items-center">
-        <div class="bg-red-100 rounded-full p-4 mb-4">
-          <i class="pi pi-times-circle text-4xl text-red-500"></i>
-        </div>
-        <p class="text-red-700 font-bold text-2xl mb-2">Service Not Found</p>
-        <p class="text-gray-700 mb-6">{{ errorMessage }}</p>
-        <button pButton type="button" label="Back to Services" class="p-button-raised bg-blue-600 text-white px-6 py-3 rounded-xl shadow-lg hover:bg-blue-700 transition-all" (click)="goBack()"></button>
-      </div>
-    </div>
-
     <!-- Service Details -->
-    <div *ngIf="service && !loading && !errorMessage" class="space-y-8">
+    <div *ngIf="service && !loading" class="space-y-8">
       <!-- Service Info Card -->
       <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
         <div class="flex flex-col lg:flex-row">

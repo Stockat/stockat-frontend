@@ -28,7 +28,17 @@
     </div>
     <div>
       <label class="block font-medium mb-1">Estimated Time</label>
-      <input pInputText formControlName="estimatedTime" class="w-full" />
+      <div class="flex gap-2">
+        <input pInputText type="number" min="1" formControlName="estimatedTimeValue" class="w-2/5" />
+        <select formControlName="estimatedTimeUnit" class="w-3/5">
+          <option value="day(s)">day(s)</option>
+          <option value="week(s)">week(s)</option>
+          <option value="month(s)">month(s)</option>
+        </select>
+      </div>
+      <div *ngIf="form.get('estimatedTimeValue')?.invalid && form.get('estimatedTimeValue')?.touched" class="text-red-500 text-xs">
+        Estimated time is required
+      </div>
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="close.emit()"></button>

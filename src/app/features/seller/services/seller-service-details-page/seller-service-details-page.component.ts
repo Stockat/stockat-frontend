@@ -41,7 +41,6 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   offerLoading = false;
   offerError = '';
   offerSuccess = '';
-  errorMessage: string | null = null;
 
   // For status dropdown
   requestStatusOptions = [
@@ -104,11 +103,9 @@ export class SellerServiceDetailsPageComponent implements OnInit {
       this.serviceService.getServiceById(+id).subscribe({
         next: (service) => {
           this.service = service;
-          this.errorMessage = null;
         },
-        error: (error) => {
+        error: () => {
           this.service = null;
-          this.errorMessage = error?.error || 'Service not found.';
         }
       });
       this.fetchRequestsWithUpdates(+id);
