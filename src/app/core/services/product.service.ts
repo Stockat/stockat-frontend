@@ -76,8 +76,16 @@ export class ProductService {
   //* Change product Status
   changeProductStatus(id: number, chosenStatus: ProductStatus): Observable<GenericRequestModel<string>> {
 
-    const body = { id, chosenStatus };
+    const body = { id, chosenStatus,  };
     return this.http.post<GenericRequestModel<string>>(`${this.apiUrl}/${id}`, body);
+  }
+  changeProductStatusWithReason(id: number, chosenStatus: ProductStatus, reason: string): Observable<GenericRequestModel<string>> {
+
+    const body = {
+      chosenStatus: chosenStatus,
+      reason: reason
+    };
+    return this.http.post<GenericRequestModel<string>>(`${this.apiUrl}/reason/${id}`, body);
   }
 
   //* Delete Product
