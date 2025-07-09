@@ -215,7 +215,7 @@
                 <span class="font-semibold text-green-600">{{ product.price | currency: 'USD' }}</span>
               </td>
               <td class="p-4">
-                <p-tag [value]="product.productStatus" [severity]="getSeverity(product.productStatus)"
+                <p-tag  pTooltip="{{product.reason}}"  [value]="product.productStatus" [severity]="getSeverity(product.productStatus)"
                   class="text-xs" />
               </td>
               <td class="p-4">
@@ -238,10 +238,10 @@
                   }
 
                   <p-button label="Add Stock" variant="text" [raised]="true" severity="info" class="text-xs"
-                  (click)="addStock(product.id)" />
+                    (click)="addStock(product.id)" />
 
                   <p-button icon="pi pi-pen-to-square" [rounded]="true" severity="success" [outlined]="true"
-                    class="text-xs" (click)="updateProduct(product.id)"  />
+                    class="text-xs" (click)="updateProduct(product.id)" />
                   <p-button icon="pi pi-times" [rounded]="true" severity="danger" [outlined]="true"
                     (onClick)="confirmDelete($event,product.id)" class="text-xs" />
                 </div>

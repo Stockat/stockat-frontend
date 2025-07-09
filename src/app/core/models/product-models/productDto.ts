@@ -9,6 +9,7 @@ export interface ProductDto {
   minQuantity: number;
   sellerId: string;
   images: string[];
+  rejectionReason?: string;
 }
 
 

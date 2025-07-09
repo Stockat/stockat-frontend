@@ -252,8 +252,12 @@
                 @if (product.isDeleted) {
                 <p-tag value="Deleted" severity="danger" class="text-xs" />
                 } @else {
-                <p-tag [value]="product.productStatus" [severity]="getSeverity(product.productStatus)"
-                  class="text-xs" />
+                <div
+                  [pTooltip]="product.productStatus === 'Rejected' && product.rejectionReason ? product.rejectionReason : ''"
+                  tooltipPosition="top" class="inline-block">
+                  <p-tag [value]="product.productStatus" [severity]="getSeverity(product.productStatus)"
+                    class="text-xs" />
+                </div>
                 }
               </td>
               <td class="p-4">
@@ -267,7 +271,7 @@
                   <p-button label="Accept" icon="pi pi-check" variant="text" [raised]="true" severity="success"
                     class="text-xs" (onClick)="confirmAccept($event, product.id)" />
                   <p-button label="Reject" icon="pi pi-ban" variant="text" [raised]="true" severity="danger"
-                    class="text-xs" (onClick)="confirmReject($event, product.id)" />
+                    class="text-xs" (onClick)="setFormVisible(product.id)" />
                   }
 
                   <!-- All Status - Show Delete button -->
@@ -277,7 +281,9 @@
                 } @else {
                 <div class="text-gray-400 text-sm italic">No actions available</div>
                 }
+
               </td>
+
             </tr>
           </ng-template>
 
@@ -288,7 +294,9 @@
               </td>
             </tr>
           </ng-template>
+
         </p-table>
+
         }
       </div>
     </div>
@@ -314,3 +322,30 @@
     </div>
   </div>
 </div>
+
+<p-toast></p-toast>
+<p-dialog header="Rejection Reason" [modal]="true" [(visible)]="isVisibleRejectionForm" [style]="{ width: '30rem' }"
+  styleClass="rounded-2xl shadow-2xl border-0" contentStyleClass="bg-gray-50 p-6 rounded-b-2xl">
+  <form [formGroup]="rejectionForm" (ngSubmit)="confirmReject()" class="space-y-6">
+    <div class="space-y-4">
+      <p-floatlabel>
+        <textarea pTextarea id="rejection_reason" formControlName="reason" rows="5" cols="30" style="resize: none"
+          class="w-full min-h-[120px] p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 placeholder-gray-400 bg-white"
+          placeholder="Enter rejection reason...">
+      </textarea>
+      </p-floatlabel>
+    </div>
+
+    <div *ngIf="rejectionForm.get('reason')?.touched && rejectionForm.get('reason')?.errors?.['required']"
+      class="text-red-500 text-xs mt-1 flex items-center">
+      <i class="pi pi-exclamation-triangle mr-1"></i>
+      Rejection reason is required.
+    </div>
+
+    <div class="flex justify-end pt-4">
+      <p-button label="Confirm Rejection" icon="pi pi-check" severity="danger"
+        class="px-6 py-2 rounded-lg font-semibold" type="submit">
+      </p-button>
+    </div>
+  </form>
+</p-dialog>

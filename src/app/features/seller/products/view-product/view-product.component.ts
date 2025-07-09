@@ -17,7 +17,7 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-
+import { Tooltip } from 'primeng/tooltip';
 //* Services
 import { CategoryService } from '../../../../core/services/category.service';
 import { TagService } from '../../../../core/services/tag.service';
@@ -46,6 +46,7 @@ import { ProductStatus } from '../../../../core/models/product-models/productDto
     ToggleSwitch,
     ConfirmDialog,
     ToastModule,
+    Tooltip,
   ],
   templateUrl: './view-product.component.html',
   styleUrl: './view-product.component.css',
@@ -149,6 +150,7 @@ export class ViewProductComponent {
     this.isLoading = true;
     this.productServ.getAllSellerProducts(this.filters).subscribe({
       next: (res) => {
+        console.log("res", res)
         this.products = res.data.paginatedData;
         this.first = res.data.page;
         this.totalRecords = res.data.count;
@@ -431,6 +433,4 @@ export class ViewProductComponent {
     this.router.navigate(['/seller/stocks/add', productId]);
     console.log('productId', productId);
   }
-
-
 }
