@@ -14,6 +14,10 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./products/manageproducts/manageproducts.component').then(m => m.ManageproductsComponent)
     },
     {
+        path: 'product-details/:id',
+        loadComponent: () => import('./products/product-details/product-details.component').then(m => m.ProductDetailsComponent)
+    },
+    {
         path: 'categories',
         loadComponent: () => import('./category/category-management.component').then(m => m.CategoryManagementComponent)
     },
@@ -32,6 +36,18 @@ export const adminRoutes: Routes = [
       {
         path: 'punishments',
         loadComponent: () => import('./user/user-punishment.component').then(m => m.UserPunishmentComponent)
+      },
+      {
+        path: 'services',
+        loadComponent: () => import('./services/pending-services/pending-services.component').then(m => m.PendingServicesComponent)
+      },
+      {
+        path: 'service-edit-requests',
+        loadComponent: () => import('./services/service-edit-requests/service-edit-requests.component').then(m => m.ServiceEditRequestsComponent)
+      },
+      {
+        path: 'service-requests',
+        loadComponent: () => import('./services/service-requests/service-requests.component').then(m => m.ServiceRequestsComponent)
       },
       {
         path: '',

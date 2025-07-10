@@ -93,7 +93,8 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   ) {
     this.offerForm = this.fb.group({
       pricePerProduct: [null, [Validators.required, Validators.min(1)]],
-      estimatedTime: ['', Validators.required]
+      estimatedTimeValue: [null, [Validators.required, Validators.min(1)]],
+      estimatedTimeUnit: ['day(s)', Validators.required]
     });
   }
 
@@ -113,13 +114,10 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   }
 
   fetchRequestsWithUpdates(serviceId: number) {
-    console.log('Fetching requests for service:', serviceId);
     this.serviceRequestService.getSellerRequestsByServiceId(serviceId).subscribe({
       next: (requests) => {
-        console.log('Received requests:', requests);
         if (requests && requests.data && requests.data.paginatedData) {
           this.requests = requests.data.paginatedData.map((req: any) => ({ ...req, _newStatus: req.serviceStatus }));
-          console.log('Processed requests:', this.requests);
 
           // Initialize updates for all requests
           this.requests.forEach((req: any) => {
@@ -138,7 +136,6 @@ export class SellerServiceDetailsPageComponent implements OnInit {
           approvedRequests.forEach((req: any) => {
             this.serviceRequestUpdateService.getUpdatesByRequestId(req.id).subscribe({
               next: (updates: any) => {
-                console.log('Updates for request', req.id, ':', updates);
                 // Handle different response formats
                 if (updates && updates.data && updates.data.paginatedData) {
                   req.updates = updates.data.paginatedData;
@@ -147,11 +144,9 @@ export class SellerServiceDetailsPageComponent implements OnInit {
                 } else {
                   req.updates = [];
                 }
-                console.log('Processed updates for request', req.id, ':', req.updates);
                 pendingUpdates--;
                 if (pendingUpdates === 0) {
                   this.loading = false;
-                  console.log('All updates loaded, loading complete');
                 }
               },
               error: (error) => {
@@ -160,13 +155,11 @@ export class SellerServiceDetailsPageComponent implements OnInit {
                 pendingUpdates--;
                 if (pendingUpdates === 0) {
                   this.loading = false;
-                  console.log('All updates loaded (with errors), loading complete');
                 }
               }
             });
           });
         } else {
-          console.log('No requests data found');
           this.requests = [];
           this.loading = false;
         }
@@ -235,33 +228,28 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   }
 
   submitOffer() {
-    if (this.offerForm.invalid || !this.selectedRequest) return;
+    if (this.offerForm.invalid) {
+      this.offerForm.markAllAsTouched();
+      return;
+    }
     this.offerLoading = true;
     this.offerError = '';
     this.offerSuccess = '';
-    const offer = this.offerForm.value;
-    this.serviceRequestService.setSellerOffer(this.selectedRequest.id, offer).subscribe({
-      next: () => {
+    const value = this.offerForm.value;
+    const estimatedTime = `${value.estimatedTimeValue} ${value.estimatedTimeUnit}`;
+    const offerPayload = {
+      pricePerProduct: value.pricePerProduct,
+      estimatedTime: estimatedTime
+    };
+    this.serviceRequestService.setSellerOffer(this.selectedRequest.id, offerPayload).subscribe({
+      next: (res: any) => {
         this.offerSuccess = 'Offer sent successfully!';
-        // Refresh requests to show updated offer immediately
-        this.serviceRequestService.getSellerRequestsByServiceId(this.service.id).subscribe({
-          next: (requests) => {
-            this.requests = requests.data.paginatedData;
-            this.offerLoading = false;
-            setTimeout(() => {
-              this.closeOfferModal();
-            }, 1000);
-          },
-          error: () => {
-            this.offerLoading = false;
-            setTimeout(() => {
-              this.closeOfferModal();
-            }, 1000);
-          }
-        });
+        this.offerLoading = false;
+        this.closeOfferModal();
+        this.fetchRequestsWithUpdates(this.service.id);
       },
-      error: (err) => {
-        this.offerError = 'Failed to send offer.';
+      error: (err: any) => {
+        this.offerError = err?.error?.message || 'Failed to send offer.';
         this.offerLoading = false;
       }
     });
@@ -295,7 +283,6 @@ export class SellerServiceDetailsPageComponent implements OnInit {
         if (this.selectedUpdatesRequest) {
           this.serviceRequestUpdateService.getUpdatesByRequestId(this.selectedUpdatesRequest.id).subscribe({
             next: (updates: any) => {
-              console.log('Updates response after reject:', updates);
               this.selectedUpdatesRequest.updates = updates?.data?.paginatedData || [];
             }
           });
@@ -315,7 +302,6 @@ export class SellerServiceDetailsPageComponent implements OnInit {
     this.selectedUpdatesRequest.updatesLoading = true;
     this.serviceRequestUpdateService.getUpdatesByRequestId(request.id).subscribe({
       next: (updates: any) => {
-        console.log('Updates response in modal:', updates);
         this.selectedUpdatesRequest.updates = updates?.data?.paginatedData || [];
         this.selectedUpdatesRequest.updatesLoading = false;
       },
@@ -381,14 +367,10 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   }
 
   getPendingUpdatesCount(request: any): number {
-    console.log('Getting pending updates count for request:', request.id);
-    console.log('Request updates:', request.updates);
     if (!request || !request.updates || !Array.isArray(request.updates)) {
-      console.log('No updates array found, returning 0');
       return 0;
     }
     const pendingCount = request.updates.filter((update: any) => update.status === 'Pending').length;
-    console.log('Pending updates count:', pendingCount);
     return pendingCount;
   }
 
@@ -465,7 +447,6 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   }
 
     filteredRequests(): any[] {
-    console.log('Filtering requests. Total:', this.requests?.length || 0);
     let filtered = this.requests || [];
 
     // Apply search filter
@@ -474,22 +455,18 @@ export class SellerServiceDetailsPageComponent implements OnInit {
       filtered = filtered.filter(request =>
         request.buyerName && request.buyerName.toLowerCase().includes(searchLower)
       );
-      console.log('After search filter:', filtered.length);
     }
 
     // Apply status filter
     if (this.statusFilter) {
       filtered = filtered.filter(request => request.serviceStatus === this.statusFilter);
-      console.log('After status filter:', filtered.length);
     }
 
     // Apply approval filter
     if (this.approvalFilter) {
       filtered = filtered.filter(request => request.buyerApprovalStatus === this.approvalFilter);
-      console.log('After approval filter:', filtered.length);
     }
 
-    console.log('Final filtered count:', filtered.length);
     return filtered;
   }
 

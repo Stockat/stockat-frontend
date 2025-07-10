@@ -569,6 +569,9 @@ export class ManageproductsComponent {
   }
 
   //* View Details
+  viewProductDetails(productId: number) {
+    this.router.navigate(['/admin/product-details', productId]);
+  }
   viewDetails(productId: number) {
     this.router.navigate(['/product-stocks', productId]);
   }

@@ -22,8 +22,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
   allServices: Service[] = []; // Store all services for searching
   filteredServices: Service[] = [];
   searchTerm: string = '';
-  sellerFilter: string = '';
-  sellerNames: string[] = [];
+  priceRange: [number, number] = [0, 10000]; // [min, max] price range
   @Input() sellerId?: string;
 
   // Pagination state
@@ -49,10 +48,6 @@ export class ServiceListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.setupSearchDebounce();
     this.loadServices();
-    // Load seller names separately if not filtering by seller
-    if (!this.sellerId) {
-      this.loadSellerNames();
-    }
   }
 
   ngOnDestroy() {
@@ -117,12 +112,10 @@ export class ServiceListComponent implements OnInit, OnDestroy {
       );
     }
 
-    // Apply seller filter
-    if (this.sellerFilter && this.sellerFilter.trim()) {
-      filtered = filtered.filter(service =>
-        service.sellerName === this.sellerFilter
-      );
-    }
+    // Apply price range filter
+    filtered = filtered.filter(service =>
+      service.pricePerProduct >= this.priceRange[0] && service.pricePerProduct <= this.priceRange[1]
+    );
 
     this.totalFilteredRecords = filtered.length;
 
@@ -132,19 +125,7 @@ export class ServiceListComponent implements OnInit, OnDestroy {
     this.filteredServices = filtered.slice(startIndex, endIndex);
   }
 
-  loadSellerNames() {
-    // Load all services without pagination to get seller names
-    this.serviceService.getAllServices(1, 1000).subscribe({
-      next: (response: GenericRequestModel<PaginationDto<Service>>) => {
-        if (response.status === 200) {
-          this.sellerNames = Array.from(new Set(response.data.paginatedData.map(s => s.sellerName)));
-        }
-      },
-      error: (error) => {
-        console.error('Error fetching seller names:', error);
-      }
-    });
-  }
+
 
   onPageChange(event: any) {
     this.currentPage = event.page + 1; // PrimeNG uses 0-based indexing

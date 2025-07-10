@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 import { Tooltip } from 'primeng/tooltip';
 import { InputTextModule } from 'primeng/inputtext';
 import { TagModule } from 'primeng/tag';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
 
 const ADMIN_STATUSES = [
   { label: 'Processing', value: 'Processing' },
@@ -39,6 +40,7 @@ const ADMIN_STATUSES = [
     Tooltip,
     InputTextModule,
     TagModule,
+    OverlayPanelModule,
   ],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.css',
@@ -46,12 +48,22 @@ const ADMIN_STATUSES = [
 })
 export class AdminOrdersComponent implements OnInit {
   @ViewChild('dt') dt!: Table;
+  @ViewChild('op') op: any;
 
   orders: AdminOrder[] = [];
   loading = false;
   statusFilter: string = '';
   orderTypeFilter: string = '';
   globalFilter: string = '';
+
+  // Properties for overlay panel
+  selectedStockId: number = 0;
+  selectedProductName: string = '';
+  selectedQuantity: number = 0;
+  selectedPrice: number = 0;
+  selectedOrderType: string = '';
+  selectedStatus: string = '';
+  selectedDescription: string = '';
 
   statusOptions = [
     { label: 'All Status', value: '' },
@@ -250,5 +262,16 @@ export class AdminOrdersComponent implements OnInit {
       default:
         return 'info';
     }
+  }
+
+  showStockFeatures(order: AdminOrder, event: Event) {
+    this.selectedStockId = order.stockId;
+    this.selectedProductName = order.productName;
+    this.selectedQuantity = order.quantity;
+    this.selectedPrice = order.price;
+    this.selectedOrderType = order.orderType;
+    this.selectedStatus = order.status;
+    this.selectedDescription = order.description;
+    this.op.toggle(event);
   }
 }

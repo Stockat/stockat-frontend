@@ -52,7 +52,8 @@ export class ServiceRequestDetailsComponent implements OnInit {
     this.updateForm = this.fb.group({
       additionalPrice: [null],
       additionalQuantity: [null],
-      additionalTime: [''],
+      additionalTimeValue: [1],
+      additionalTimeUnit: ['day(s)'],
       additionalNote: ['']
     });
   }
@@ -115,8 +116,8 @@ export class ServiceRequestDetailsComponent implements OnInit {
   }
 
   canUpdate() {
-    const { additionalPrice, additionalQuantity, additionalTime } = this.updateForm.value;
-    return additionalPrice || additionalQuantity || additionalTime;
+    const { additionalPrice, additionalQuantity, additionalTimeValue } = this.updateForm.value;
+    return additionalPrice || additionalQuantity || additionalTimeValue;
   }
 
   openUpdateModal() {
@@ -138,11 +139,11 @@ export class ServiceRequestDetailsComponent implements OnInit {
     this.updateLoading = true;
     this.updateError = '';
     this.updateSuccess = '';
+    const { additionalTimeValue, additionalTimeUnit, ...rest } = this.updateForm.value;
+    const additionalTime = additionalTimeValue ? `${additionalTimeValue} ${additionalTimeUnit}` : '';
     const payload = {
-      additionalPrice: this.updateForm.value.additionalPrice,
-      additionalQuantity: this.updateForm.value.additionalQuantity,
-      additionalTime: this.updateForm.value.additionalTime,
-      additionalNote: this.updateForm.value.additionalNote
+      ...rest,
+      additionalTime
     };
     this.requestUpdateService.createUpdate(this.request.id, payload).subscribe({
       next: () => {

@@ -14,10 +14,12 @@ import { ServiceRequestService } from '../../../../core/services/service-request
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { FormsModule } from '@angular/forms';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 
 @Component({
   selector: 'app-service-list',
-  imports: [TableModule, ButtonModule, PaginatorModule, ToastModule, ConfirmDialogModule, ProgressSpinnerModule, TooltipModule, ServiceEditModalComponent, ServiceAddModalComponent, CommonModule, RouterModule],
+  imports: [TableModule, ButtonModule, PaginatorModule, ToastModule, ConfirmDialogModule, ProgressSpinnerModule, TooltipModule, ServiceEditModalComponent, ServiceAddModalComponent, CommonModule, RouterModule, ToastModule, FormsModule],
   templateUrl: './seller-service-list.component.html',
   providers: [MessageService, ConfirmationService]
 })
@@ -34,7 +36,11 @@ export class SellerServiceListComponent implements OnInit {
   page: number = 0; // PrimeNG pages are 0-based
   size: number = 10; // Default page size - match first option in rowsPerPageOptions
   loading: boolean = false;
-
+  selectedServiceForImage: any = null;
+  accountNotVerified: boolean = false;
+  initialized: boolean = false;
+  // Remove showDeletedServices flag
+  // showDeletedServices: boolean = false;
 
 
   // Computed property for table first position
@@ -52,13 +58,33 @@ export class SellerServiceListComponent implements OnInit {
     return average.toFixed(2);
   }
 
+  // Remove getFilteredServices method
+  // getFilteredServices(): any[] {
+  //   if (this.showDeletedServices) {
+  //     return this.services;
+  //   }
+  //   return this.services.filter(service => !service.isDeleted);
+  // }
+
+  // Remove getActiveServicesCount method
+  // getActiveServicesCount(): number {
+  //   return this.services.filter(service => !service.isDeleted).length;
+  // }
+
+  // Truncate text to specified length
+  truncateText(text: string, maxLength: number): string {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength) : text;
+  }
+
   constructor(
     private serviceService: ServiceService,
     private serviceRequestService: ServiceRequestService,
     private cdr: ChangeDetectorRef,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private router: Router
+    private router: Router,
+    private errorHandler: ErrorHandlerService
   ) {}
 
   ngOnInit() {
@@ -71,23 +97,46 @@ export class SellerServiceListComponent implements OnInit {
     this.loading = true;
     const apiPage = this.page;
 
-    this.serviceService.getSellerServices(this.sellerId, apiPage, this.size).subscribe({
+    this.serviceService.getMyServices(apiPage, this.size).subscribe({
       next: (response) => {
         if (response && response.data && response.data.paginatedData) {
-          this.services = response.data.paginatedData;
-          this.totalCount = response.data.count || 0;
+          // Only count non-deleted services for pagination
+          const allServices = response.data.paginatedData;
+          this.services = allServices.filter((service: any) => !service.isDeleted);
+          // If the backend count includes deleted, recalculate for paginator
+          const nonDeletedCount = response.data.count && Array.isArray(allServices)
+            ? allServices.filter((service: any) => !service.isDeleted).length
+            : this.services.length;
+          this.totalCount = nonDeletedCount;
+          // If after delete, current page is empty and not first, go back one page
+          if (this.services.length === 0 && this.page > 0) {
+            this.page--;
+            this.loadSellerServices();
+            return;
+          }
         } else {
           this.services = [];
           this.totalCount = 0;
         }
         this.loading = false;
+        this.initialized = true;
         this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('Error fetching services:', error);
+        console.error('Error fetching services:', error.error.Message);
         this.services = [];
         this.totalCount = 0;
         this.loading = false;
+        if (error?.error && error.error.Message.includes('Account is not verified by admin yet.')) {
+          this.accountNotVerified = true;
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Account Not Verified',
+            detail: 'Your account is not verified by admin yet. You cannot view or manage services until verification.',
+            life: 6000
+          });
+        }
+        this.initialized = true;
         this.cdr.detectChanges();
       }
     });
@@ -103,13 +152,13 @@ onPageChange(event: any) {
 
   deleteService(service: any) {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete this service?',
+      message: 'Are you sure you want to delete this service? This action can be undone.',
       header: 'Delete Confirmation',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.serviceService.deleteService(service.id).subscribe({
           next: () => {
-            this.services = this.services.filter(s => s.id !== service.id);
+            this.loadSellerServices();
             this.messageService.add({
               severity: 'success',
               summary: 'Success',
@@ -117,10 +166,11 @@ onPageChange(event: any) {
             });
           },
           error: (error) => {
+            const detail = error?.error || 'Failed to delete service';
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'Failed to delete service'
+              detail
             });
             console.error('Error deleting service:', error);
           }
@@ -129,9 +179,44 @@ onPageChange(event: any) {
     });
   }
 
+  // Remove restoreService method
+  // restoreService(service: any) {
+  //   this.confirmationService.confirm({
+  //     message: 'Are you sure you want to restore this service?',
+  //     header: 'Restore Confirmation',
+  //     icon: 'pi pi-question-circle',
+  //     accept: () => {
+  //       this.serviceService.restoreService(service.id).subscribe({
+  //         next: () => {
+  //           this.loadSellerServices(); // Reload to get updated list
+  //           this.messageService.add({
+  //             severity: 'success',
+  //             summary: 'Success',
+  //             detail: 'Service has been restored successfully'
+  //           });
+  //         },
+  //         error: (error) => {
+  //           const detail = error?.error || 'Failed to restore service';
+  //           this.messageService.add({
+  //             severity: 'error',
+  //             summary: 'Error',
+  //             detail
+  //           });
+  //           console.error('Error restoring service:', error);
+  //         }
+  //       });
+  //     }
+  //   });
+  // }
+
   editService(service: any) {
     this.selectedService = service;
     this.editModalVisible = true;
+  }
+
+  reactivateService(service: any) {
+    this.selectedService = service;
+    this.editModalVisible = true; // Reuse the same modal for reactivation
   }
 
   handleEditModalClose() {
@@ -139,29 +224,101 @@ onPageChange(event: any) {
     this.selectedService = null;
   }
 
-  handleEditModalSave(updatedService: any) {
-    this.serviceService.updateService(updatedService).subscribe({
-      next: (data) => {
-        this.services = this.services.map(s => s.id === data.id ? data : s);
-        this.handleEditModalClose();
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Service updated successfully'
-        });
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to update service'
-        });
-        console.error('Error updating service:', error);
+  handleEditModalSave(payload: any) {
+    const serviceId = payload.id;
+    const isReactivation = this.selectedService.isApproved === 'Rejected';
+
+    // Map frontend fields to backend DTO fields
+    const request = {
+      EditedName: payload.name,
+      EditedDescription: payload.description,
+      EditedMinQuantity: payload.minQuantity,
+      EditedPricePerProduct: payload.pricePerProduct,
+      EditedEstimatedTime: payload.estimatedTime,
+      EditedImageId: payload.EditedImageId || this.selectedService.imageId || '',
+      EditedImageUrl: payload.EditedImageUrl || this.selectedService.imageUrl || ''
+    };
+
+    const submitRequest = (requestData: any) => {
+      if (isReactivation) {
+        return this.serviceService.submitReactivationRequest(serviceId, requestData);
+      } else {
+        return this.serviceService.submitEditRequest(serviceId, requestData);
       }
-    });
+    };
+
+    const successMessage = isReactivation
+      ? 'Reactivation request submitted successfully'
+      : 'Edit request submitted successfully';
+
+    if (payload.file) {
+      this.serviceService.uploadServiceImage(payload.file, serviceId).subscribe({
+        next: (imgRes) => {
+          request.EditedImageId = imgRes.fileId;
+          request.EditedImageUrl = imgRes.url;
+          submitRequest(request).subscribe({
+            next: () => {
+              this.handleEditModalClose();
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: successMessage
+              });
+            },
+            error: (error) => {
+              const errorMessage = this.errorHandler.extractErrorMessage(error);
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: errorMessage
+              });
+              console.error('Error submitting request:', error);
+            }
+          });
+        },
+        error: (error) => {
+          const errorMessage = this.errorHandler.extractErrorMessage(error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: errorMessage
+          });
+          console.error('Error uploading image:', error);
+        }
+      });
+    } else {
+      submitRequest(request).subscribe({
+        next: () => {
+          this.handleEditModalClose();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: successMessage
+          });
+        },
+        error: (error) => {
+          const errorMessage = this.errorHandler.extractErrorMessage(error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: errorMessage
+          });
+          console.error('Error submitting request:', error);
+        }
+      });
+    }
   }
 
   addService() {
+    if (this.accountNotVerified) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Account Not Verified',
+        detail: 'Your account is not verified by admin yet. You cannot add services until verification.',
+        life: 6000
+      });
+      return;
+    }
     this.addModalVisible = true;
   }
 
@@ -170,6 +327,10 @@ onPageChange(event: any) {
   }
 
   async handleAddModalSave(payload: { service: any, file: File | null }) {
+    if (this.accountNotVerified) {
+      this.addModalVisible = false;
+      return;
+    }
     this.isAddingService = true;
     if (payload.file) {
       this.serviceService.uploadImage(payload.file).subscribe({
@@ -179,11 +340,9 @@ onPageChange(event: any) {
             imageId: imgRes.fileId,
             imageUrl: imgRes.url
           };
-          console.log('Image uploaded successfully:', imgRes);
           this.serviceService.addService(serviceWithImage).subscribe({
             next: (data) => {
-              // Always reload the current page to get fresh data from server
-              this.totalCount++; // Update total count
+              this.totalCount++;
               this.loadSellerServices();
               this.handleAddModalClose();
               this.isAddingService = false;
@@ -195,10 +354,23 @@ onPageChange(event: any) {
             },
             error: (error) => {
               this.isAddingService = false;
+              const errorMessage = this.errorHandler.extractErrorMessage(error);
+              if (typeof errorMessage === 'string' && errorMessage.includes('not verified by admin')) {
+                this.accountNotVerified = true;
+                this.handleAddModalClose();
+                this.messageService.add({
+                  severity: 'warn',
+                  summary: 'Account Not Verified',
+                  detail: 'Your account is not verified by admin yet. You cannot add services until verification.',
+                  life: 6000
+                });
+                this.cdr.detectChanges();
+                return;
+              }
               this.messageService.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Failed to add service'
+                detail: errorMessage
               });
               console.error('Error adding service:', error);
             }
@@ -206,10 +378,11 @@ onPageChange(event: any) {
         },
         error: (error) => {
           this.isAddingService = false;
+          const errorMessage = this.errorHandler.extractErrorMessage(error);
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to upload image'
+            detail: errorMessage
           });
           console.error('Error uploading image:', error);
         }
@@ -217,8 +390,7 @@ onPageChange(event: any) {
     } else {
       this.serviceService.addService(payload.service).subscribe({
         next: (data) => {
-          // Always reload the current page to get fresh data from server
-          this.totalCount++; // Update total count
+          this.totalCount++;
           this.loadSellerServices();
           this.handleAddModalClose();
           this.isAddingService = false;
@@ -230,10 +402,23 @@ onPageChange(event: any) {
         },
         error: (error) => {
           this.isAddingService = false;
+          const errorMessage = this.errorHandler.extractErrorMessage(error);
+          if (typeof errorMessage === 'string' && errorMessage.includes('not verified by admin')) {
+            this.accountNotVerified = true;
+            this.handleAddModalClose();
+            this.messageService.add({
+              severity: 'warn',
+              summary: 'Account Not Verified',
+              detail: 'Your account is not verified by admin yet. You cannot add services until verification.',
+              life: 6000
+            });
+            this.cdr.detectChanges();
+            return;
+          }
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to add service'
+            detail: errorMessage
           });
           console.error('Error adding service:', error);
         }
@@ -249,6 +434,40 @@ onPageChange(event: any) {
     this.serviceDetailsModalVisible = false;
     this.selectedService = null;
     this.selectedServiceRequests = [];
+  }
+
+  // Add this method to trigger file input
+  triggerImageEdit(service: any) {
+    this.selectedServiceForImage = service;
+    const fileInput = document.getElementById('service-image-input-' + service.id) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
+  }
+
+  // Handle file input change
+  onServiceImageSelected(event: any, service: any) {
+    const file: File = event.target.files[0];
+    if (file && this.sellerId) {
+      this.serviceService.uploadServiceImage(file, service.id).subscribe({
+        next: (res) => {
+          service.imageUrl = res.url;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Service image updated successfully'
+          });
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update service image'
+          });
+        }
+      });
+    }
   }
 
 

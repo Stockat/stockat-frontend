@@ -64,6 +64,18 @@
 
           <!-- Service Details -->
           <div class="lg:w-2/3 p-8">
+            <div class="mb-4">
+              <span class="font-semibold text-gray-700">Status:</span>
+              <span *ngIf="service.isApproved === 'Approved'" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800 ml-2">
+                <i class="pi pi-check-circle mr-1"></i> Approved
+              </span>
+              <span *ngIf="service.isApproved === 'Rejected'" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-800 ml-2">
+                <i class="pi pi-times-circle mr-1"></i> Rejected
+              </span>
+              <span *ngIf="service.isApproved === 'Pending' || service.isApproved === null" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-800 ml-2">
+                <i class="pi pi-clock mr-1"></i> Pending (awaiting admin approval)
+              </span>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200">
                 <div class="flex items-center gap-3 mb-2">
@@ -126,7 +138,7 @@
       </div>
 
       <!-- Buyer Requests Section -->
-      <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+      <div *ngIf="service.isApproved !== 'Rejected'" class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
         <div class="p-8 border-b border-gray-100">
           <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
@@ -169,7 +181,7 @@
         </div>
 
         <!-- Requests Table -->
-        <div class="overflow-x-auto">
+        <div *ngIf="service.isApproved === 'Approved'; else noRequestsForPending" class="overflow-x-auto">
           <p-table
             [value]="filteredRequests()"
             [paginator]="true"
@@ -266,15 +278,31 @@
               </tr>
             </ng-template>
           </p-table>
-        </div>
-
-        <!-- Empty State -->
-        <div *ngIf="!loading && (!requests || requests.length === 0)" class="text-center py-16">
-          <div class="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i class="pi pi-users text-white text-3xl"></i>
+          <!-- Empty State for No Requests -->
+          <div *ngIf="!loading && filteredRequests().length === 0" class="text-center py-12">
+            <i class="pi pi-users text-3xl text-gray-300 mb-4"></i>
+            <h4 class="text-lg font-semibold text-gray-700 mb-2">No buyer requests yet</h4>
+            <p class="text-gray-500">Once a buyer requests this service, you'll see their requests here.</p>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-2">No Buyer Requests</h3>
-          <p class="text-gray-600">No buyer requests for this service yet.</p>
+        </div>
+        <ng-template #noRequestsForPending>
+          <div class="text-center py-12">
+            <i class="pi pi-info-circle text-3xl text-yellow-400 mb-4"></i>
+            <h4 class="text-lg font-semibold text-gray-700 mb-2">No requests available for pending services</h4>
+            <p class="text-gray-500">Once this service is approved by an admin, buyer requests will appear here.</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Rejected Service Message -->
+      <div *ngIf="service.isApproved === 'Rejected'" class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+        <div class="text-center py-12">
+          <div class="w-20 h-20 bg-gradient-to-r from-red-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="pi pi-times-circle text-white text-3xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-4">Service Rejected</h3>
+          <p class="text-gray-600 text-lg mb-6">This service has been rejected by an administrator and is not available for buyer requests.</p>
+
         </div>
       </div>
     </div>
@@ -335,15 +363,26 @@
           <label class="block text-sm font-semibold text-gray-700">
             Estimated Time <span class="text-red-500">*</span>
           </label>
-          <input
-            pInputText
-            type="text"
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
-            formControlName="estimatedTime"
-            placeholder="e.g. 3 days"
-            [disabled]="offerLoading" />
-          <div *ngIf="offerForm.get('estimatedTime')?.invalid && offerForm.get('estimatedTime')?.touched" class="text-red-500 text-xs">
-            Required.
+          <div class="flex gap-2">
+            <input
+              pInputText
+              type="number"
+              min="1"
+              class="w-2/5 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
+              formControlName="estimatedTimeValue"
+              placeholder="Value"
+              [disabled]="offerLoading" />
+            <select
+              formControlName="estimatedTimeUnit"
+              class="w-3/5 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
+              [disabled]="offerLoading">
+              <option value="day(s)">day(s)</option>
+              <option value="week(s)">week(s)</option>
+              <option value="month(s)">month(s)</option>
+            </select>
+          </div>
+          <div *ngIf="(offerForm.get('estimatedTimeValue')?.invalid && offerForm.get('estimatedTimeValue')?.touched) || (offerForm.get('estimatedTimeUnit')?.invalid && offerForm.get('estimatedTimeUnit')?.touched)" class="text-red-500 text-xs">
+            Required and must be positive.
           </div>
         </div>
 
@@ -683,15 +722,15 @@
                 <p class="text-green-600 text-sm">Your offered price for each item</p>
               </div>
             </div>
-            <div *ngIf="selectedRequestDetails.pricePerProduct != null && selectedRequestDetails.pricePerProduct !== 0; else notSetPrice" class="mt-4">
+            <div *ngIf="selectedRequestDetails.servicePricePerProductSnapshot != null && selectedRequestDetails.servicePricePerProductSnapshot !== 0; else notSetPrice" class="mt-4">
               <div class="flex items-baseline gap-2">
-                <span class="text-3xl font-bold text-green-700">${{ selectedRequestDetails.pricePerProduct }}</span>
+                <span class="text-3xl font-bold text-green-700">${{ selectedRequestDetails.servicePricePerProductSnapshot }}</span>
                 <span class="text-green-600 text-sm">per item</span>
               </div>
             </div>
             <ng-template #notSetPrice>
               <div class="mt-4">
-                <p class="text-gray-400 italic text-lg">No price set yet</p>
+                <p class="text-gray-400 italic text-lg">Not set yet</p>
                 <p class="text-gray-500 text-sm">Click "Set Offer" to add pricing</p>
               </div>
             </ng-template>
@@ -709,13 +748,13 @@
                   <p class="text-green-600 text-sm">Total for all items</p>
                 </div>
               </div>
-              <div *ngIf="selectedRequestDetails.pricePerProduct != null && selectedRequestDetails.pricePerProduct !== 0 && selectedRequestDetails.requestedQuantity != null && selectedRequestDetails.requestedQuantity !== 0; else notSetTotal" class="mt-4">
+              <div *ngIf="selectedRequestDetails.servicePricePerProductSnapshot != null && selectedRequestDetails.servicePricePerProductSnapshot !== 0 && selectedRequestDetails.requestedQuantity != null && selectedRequestDetails.requestedQuantity !== 0; else notSetTotal" class="mt-4">
                 <div class="flex items-baseline gap-2">
-                  <span class="text-3xl font-bold text-green-700">${{ (selectedRequestDetails.pricePerProduct * selectedRequestDetails.requestedQuantity) | number:'1.2-2' }}</span>
+                  <span class="text-3xl font-bold text-green-700">${{ selectedRequestDetails.totalPrice }}</span>
                   <span class="text-green-600 text-sm">total</span>
                 </div>
                 <p class="text-green-600 text-sm mt-1">
-                  {{ selectedRequestDetails.requestedQuantity }} items × ${{ selectedRequestDetails.pricePerProduct }}
+                  {{ selectedRequestDetails.requestedQuantity }} items × ${{ selectedRequestDetails.servicePricePerProductSnapshot }}
                 </p>
               </div>
               <ng-template #notSetTotal>
@@ -736,12 +775,12 @@
                   <p class="text-green-600 text-sm">Delivery timeline</p>
                 </div>
               </div>
-              <div *ngIf="selectedRequestDetails.estimatedTime; else notSetTime" class="mt-4">
-                <p class="text-2xl font-bold text-green-700">{{ selectedRequestDetails.estimatedTime }}</p>
+              <div *ngIf="selectedRequestDetails.serviceEstimatedTimeSnapshot; else notSetTime" class="mt-4">
+                <p class="text-2xl font-bold text-green-700">{{ selectedRequestDetails.serviceEstimatedTimeSnapshot }}</p>
               </div>
               <ng-template #notSetTime>
                 <div class="mt-4">
-                  <p class="text-gray-400 italic text-lg">Not set</p>
+                  <p class="text-gray-400 italic text-lg">Not set yet</p>
                   <p class="text-gray-500 text-sm">Add delivery time</p>
                 </div>
               </ng-template>
