@@ -158,4 +158,11 @@
         </div>
       </div>
     </div>
+    <!-- Review Section -->
+    <app-review-section
+      *ngIf="product"
+      [itemId]="product.id"
+      itemType="product"
+      (reviewSubmitted)="onReviewSubmitted()">
+    </app-review-section>
   </div>

@@ -169,6 +169,14 @@
         </div>
       </div>
     </div>
+
+    <!-- Review Section -->
+    <app-review-section
+      *ngIf="service"
+      [itemId]="service.id"
+      itemType="service"
+      (reviewSubmitted)="onReviewSubmitted()">
+    </app-review-section>
   </div>
 
   <!-- Loading State for Service -->

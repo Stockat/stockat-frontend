@@ -9,11 +9,12 @@ import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { ReviewSectionComponent } from '../../shared/review-section/review-section.component';
 
 @Component({
   selector: 'app-service-details',
   templateUrl: './service-details.component.html',
-  imports: [CommonModule, RequestModalComponent, DialogModule, ButtonModule, RouterLink, ToastModule],
+  imports: [CommonModule, RequestModalComponent, DialogModule, ButtonModule, RouterLink, ToastModule, ReviewSectionComponent],
   providers: [MessageService]
 })
 
@@ -156,6 +157,10 @@ export class ServiceDetailsComponent {
       summary: 'Request Submitted',
       detail: 'Your service request has been submitted successfully!'
     });
+  }
+
+  onReviewSubmitted() {
+    // Optionally reload service details or reviews if needed
   }
 
   goBackToServices() {

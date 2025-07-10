@@ -11,10 +11,11 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { ProductService } from '../../../core/services/product.service';
 import { ProductDetailsDto } from '../../../core/models/product-models/ProductDetails';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ReviewSectionComponent } from '../../shared/review-section/review-section.component';
 
 @Component({
   selector: 'app-product-details',
-  imports: [GalleriaModule, CardModule, ButtonModule, FloatLabelModule, RouterModule],
+  imports: [GalleriaModule, CardModule, ButtonModule, FloatLabelModule, RouterModule, ReviewSectionComponent],
   templateUrl: './product-details.component.html',
   styleUrl: './product-details.component.css',
 })
@@ -76,6 +77,10 @@ export class ProductDetailsComponent {
     if (this.product) {
       this.router.navigate(['/request', this.product.id]);
     }
+  }
+
+  onReviewSubmitted() {
+    // Optionally reload product details or reviews if needed
   }
 
   //! End Of Component
