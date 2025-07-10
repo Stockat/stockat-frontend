@@ -15,108 +15,124 @@ export class AdminLayoutComponent {
 
   items: MenuItem[] = [];
 
-  ngOnInit() {
-    this.items = [
-      {
-        label: 'Orders',
-        icon: 'ti ti-list-check',
-        items: [
-          {
-            label: 'Orders',
-            icon: 'ti ti-list-check',
-            route: '/admin/orders',
-          },
-          {
-            label: 'Compose',
-            icon: 'pi pi-file-edit',
-            shortcut: '⌘+N',
-          },
-          {
-            label: 'Inbox',
-            icon: 'pi pi-inbox',
-            badge: '5',
-          },
-          {
-            label: 'Sent',
-            icon: 'pi pi-send',
-            shortcut: '⌘+S',
-          },
-          {
-            label: 'Trash',
-            icon: 'pi pi-trash',
-            shortcut: '⌘+T',
-          },
-        ],
-      },
-      {
-        label: 'Users',
-        icon: 'pi pi-users',
-        items: [
-          {
-            label: 'User Management',
-            icon: 'pi pi-user-edit',
-            routerLink: '/admin/users',
-          },
-          {
-            label: 'Verification Requests',
-            icon: 'pi pi-file-edit',
-            routerLink: '/admin/verifications',
-          },
-          {
-            label: 'Punishments',
-            icon: 'pi pi-shield',
-            routerLink: '/admin/punishments',
-          },
-        ],
-      },
-      {
-        label: 'Reports',
-        icon: 'pi pi-chart-bar',
-        shortcut: '⌘+R',
-        items: [
-          {
-            label: 'Sales',
-            icon: 'pi pi-chart-line',
-            badge: '3',
-          },
-          {
-            label: 'Products',
-            icon: 'pi pi-list',
-            badge: '6',
-          },
-        ],
-      },
-      {
-        label: 'Profile',
-        icon: 'pi pi-user',
-        shortcut: '⌘+W',
-        items: [
-          {
-            label: 'Settings',
-            icon: 'pi pi-cog',
-            shortcut: '⌘+O',
-          },
-          {
-            label: 'Privacy',
-            icon: 'pi pi-shield',
-            shortcut: '⌘+P',
-          },
-        ],
-      },
-      {
-        label: 'AI Assistant',
-        icon: 'pi pi-robot',
-        items: [
-          {
-            label: 'Chat with AI',
-            icon: 'pi pi-comments',
-            route: '/chatbot',
-            routerLink: '/chatbot',
-          },
-        ],
-      },
-    ];
-  }
+    ngOnInit() {
+        this.items = [
+            {
+                label: 'Orders',
+                icon: 'ti ti-list-check',
+                items: [
+                     {
+                        label: 'Orders',
+                        icon: 'ti ti-list-check',
+                        route: '/admin/orders'
+                    },
+                    {
+                        label: 'Compose',
+                        icon: 'pi pi-file-edit',
+                        shortcut: '⌘+N'
+                    },
+                    {
+                        label: 'Inbox',
+                        icon: 'pi pi-inbox',
+                        badge: '5'
+                    },
+                    {
+                        label: 'Sent',
+                        icon: 'pi pi-send',
+                        shortcut: '⌘+S'
+                    },
+                    {
+                        label: 'Trash',
+                        icon: 'pi pi-trash',
+                        shortcut: '⌘+T'
+                    }
+                ]
+            },
+            {
+                label: 'Users',
+                icon: 'pi pi-users',
+                items: [
+                    {
+                        label: 'User Management',
+                        icon: 'pi pi-user-edit',
+                        routerLink: '/admin/users'
+                    },
+                    {
+                        label: 'Verification Requests',
+                        icon: 'pi pi-file-edit',
+                        routerLink: '/admin/verifications'
+                    },
+                    {
+                        label: 'Punishments',
+                        icon: 'pi pi-shield',
+                        routerLink: '/admin/punishments'
+                    }
+                ]
+            },
+            {
+                label: 'Services',
+                icon: 'pi pi-briefcase',
+                items: [
+                    {
+                        label: 'Service Management',
+                        icon: 'pi pi-clock',
+                        routerLink: '/admin/services'
+                    },
+                    {
+                        label: 'Service Edit Requests',
+                        icon: 'pi pi-pencil',
+                        routerLink: '/admin/service-edit-requests'
+                    }
+                ]
+            },
+            {
+                label: 'Reports',
+                icon: 'pi pi-chart-bar',
+                shortcut: '⌘+R',
+                items: [
+                    {
+                        label: 'Sales',
+                        icon: 'pi pi-chart-line',
+                        badge: '3'
+                    },
+                    {
+                        label: 'Products',
+                        icon: 'pi pi-list',
+                        badge: '6'
+                    }
+                ]
+            },
+            {
+                label: 'Profile',
+                icon: 'pi pi-user',
+                shortcut: '⌘+W',
+                items: [
+                    {
+                        label: 'Settings',
+                        icon: 'pi pi-cog',
+                        shortcut: '⌘+O'
+                    },
+                    {
+                        label: 'Privacy',
+                        icon: 'pi pi-shield',
+                        shortcut: '⌘+P'
+                    }
+                ]
+            },
+            {
+                label: 'AI Assistant',
+                icon: 'pi pi-robot',
+                items: [
+                    {
+                        label: 'Chat with AI',
+                        icon: 'pi pi-comments',
+                        route: '/chatbot',
+                        routerLink: '/chatbot'
+                    }
+                ]
+            }
+        ];
+    }
 
   toggleSidebar() {
     this.SidebarVisible = !this.SidebarVisible;

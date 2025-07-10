@@ -1,4 +1,5 @@
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+<div *ngIf="initialized" class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+  <p-toast></p-toast>
   <!-- Hero Section -->
   <div class="bg-white/70 backdrop-blur-sm border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -7,7 +8,7 @@
           <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">My Services</h1>
           <p class="text-gray-600 text-lg">Manage and organize your service offerings</p>
         </div>
-        <div class="mt-6 lg:mt-0">
+        <div class="mt-6 lg:mt-0" *ngIf="!accountNotVerified">
           <button
             pButton
             label="Add New Service"
@@ -43,7 +44,7 @@
           </div>
           <div>
             <p class="text-sm text-gray-500">Active Services</p>
-            <p class="text-2xl font-bold text-gray-900">{{ services?.length || 0 }}</p>
+            <!-- <p class="text-2xl font-bold text-gray-900">{{ getActiveServicesCount() }}</p> -->
           </div>
         </div>
       </div>
@@ -63,8 +64,16 @@
 
     <!-- Services Table -->
     <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+      <!-- Show account not verified message -->
+      <div *ngIf="accountNotVerified" class="text-center py-16">
+        <div class="w-24 h-24 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="pi pi-exclamation-triangle text-white text-4xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-yellow-800 mb-2">Account Not Verified</h3>
+        <p class="text-yellow-700 mb-6">Your account is not verified by admin yet. You cannot view or manage services until verification.</p>
+      </div>
       <!-- Loading State -->
-      <div *ngIf="loading" class="text-center py-16">
+      <div *ngIf="loading && !accountNotVerified" class="text-center py-16">
         <p-progressSpinner
           styleClass="w-16 h-16"
           strokeWidth="4"
@@ -73,15 +82,15 @@
         </p-progressSpinner>
         <p class="text-gray-600 font-semibold mt-4">Loading your services...</p>
       </div>
-
       <!-- Empty State -->
-      <div *ngIf="!loading && (!services || services.length === 0)" class="text-center py-16">
+      <div *ngIf="!loading && !accountNotVerified && (!services || services.length === 0)" class="text-center py-16">
         <div class="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
           <i class="pi pi-briefcase text-white text-3xl"></i>
         </div>
         <h3 class="text-2xl font-bold text-gray-900 mb-2">No Services Yet</h3>
         <p class="text-gray-600 mb-6">Start by adding your first service to showcase your offerings</p>
         <button
+          *ngIf="!accountNotVerified"
           pButton
           label="Add Your First Service"
           icon="pi pi-plus"
@@ -89,41 +98,65 @@
           (click)="addService()">
         </button>
       </div>
-
       <!-- Services Table -->
-      <div *ngIf="!loading && services && services.length > 0" class="overflow-x-auto">
+      <div *ngIf="!loading && !accountNotVerified && services && services.length > 0" class="overflow-x-auto">
+        <!-- Removed filter toggle and deleted services UI -->
         <p-table
           [value]="services"
           styleClass="p-datatable-lg"
-          class="modern-table">
+          class="modern-table"
+          [scrollable]="true"
+          scrollHeight="600px">
           <ng-template pTemplate="header">
             <tr class="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-              <th class="px-6 py-4 text-left font-semibold text-sm">Service Name</th>
-              <th class="px-6 py-4 text-left font-semibold text-sm">Description</th>
-              <th class="px-6 py-4 text-left font-semibold text-sm">Price</th>
-              <th class="px-6 py-4 text-left font-semibold text-sm">Min Qty</th>
-              <th class="px-6 py-4 text-left font-semibold text-sm">Est. Time</th>
-              <th class="px-6 py-4 text-left font-semibold text-sm">Actions</th>
+              <th class="px-6 py-4 text-left font-semibold text-sm" style="width: 200px; min-width: 200px;">Service Name</th>
+              <th class="px-6 py-4 text-left font-semibold text-sm" style="width: 300px; min-width: 300px;">Description</th>
+              <th class="px-6 py-4 text-left font-semibold text-sm" style="width: 100px; min-width: 100px;">Price</th>
+              <th class="px-6 py-4 text-left font-semibold text-sm" style="width: 100px; min-width: 100px;">Min Qty</th>
+              <th class="px-6 py-4 text-left font-semibold text-sm" style="width: 120px; min-width: 120px;">Est. Time</th>
+              <th class="px-6 py-4 text-left font-semibold text-sm" style="width: 120px; min-width: 120px;">Status</th>
+              <th class="px-6 py-4 text-left font-semibold text-sm" style="width: 150px; min-width: 150px;">Actions</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-service>
-            <tr class="border-b border-gray-100 hover:bg-blue-50/50 transition-all duration-200">
+            <tr class="border-b border-gray-100 hover:bg-blue-50/50 transition-all duration-200" [class.opacity-50]="service.isDeleted" [class.bg-red-50]="service.isDeleted">
               <td class="px-6 py-4">
-                <div class="font-semibold text-gray-900 text-sm">{{ service.name }}</div>
-              </td>
-              <td class="px-6 py-4">
-                <div class="text-gray-700 text-sm max-w-xs truncate" [pTooltip]="service.description">
-                  {{ service.description }}
+                <div class="font-semibold text-gray-900 text-sm truncate max-w-[180px]" [class.line-through]="service.isDeleted" [pTooltip]="service.name">
+                  {{ service.name.length > 30 ? (service.name | slice:0:30) + '...' : service.name }}
+                </div>
+                <div *ngIf="service.isDeleted" class="text-xs text-red-600 mt-1">
+                  <i class="pi pi-trash mr-1"></i>Deleted
                 </div>
               </td>
               <td class="px-6 py-4">
-                <div class="text-green-700 font-bold text-sm">${{ service.pricePerProduct }}</div>
+                <div class="text-gray-700 text-sm truncate max-w-[280px]" [pTooltip]="service.description" [class.line-through]="service.isDeleted">
+                  {{ service.description.length > 50 ? (service.description | slice:0:50) + '...' : service.description }}
+                </div>
               </td>
               <td class="px-6 py-4">
-                <div class="text-gray-700 text-sm">{{ service.minQuantity }}</div>
+                <div class="text-green-700 font-bold text-sm" [class.line-through]="service.isDeleted">${{ service.pricePerProduct }}</div>
               </td>
               <td class="px-6 py-4">
-                <div class="text-gray-700 text-sm">{{ service.estimatedTime }}</div>
+                <div class="text-gray-700 text-sm" [class.line-through]="service.isDeleted">{{ service.minQuantity }}</div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="text-gray-700 text-sm" [class.line-through]="service.isDeleted">{{ service.estimatedTime }}</div>
+              </td>
+              <td class="px-6 py-4">
+                <ng-container [ngSwitch]="service.isApproved">
+                  <span *ngSwitchCase="'Pending'" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-800">
+                    <i class="pi pi-clock mr-1"></i> Pending
+                  </span>
+                  <span *ngSwitchCase="'Approved'" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800">
+                    <i class="pi pi-check-circle mr-1"></i> Approved
+                  </span>
+                  <span *ngSwitchCase="'Rejected'" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-800">
+                    <i class="pi pi-times-circle mr-1"></i> Rejected
+                  </span>
+                  <span *ngSwitchDefault class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-800">
+                    <i class="pi pi-question-circle mr-1"></i> Unknown
+                  </span>
+                </ng-container>
               </td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
@@ -134,20 +167,33 @@
                     (click)="viewServiceDetails(service)"
                     pTooltip="View Details">
                   </button>
+                  <!-- Edit button for approved services -->
                   <button
+                    *ngIf="!service.isDeleted && service.isApproved === 'Approved'"
                     pButton
                     icon="pi pi-pencil"
                     class="p-button-sm p-button-rounded p-button-outlined p-button-warning"
                     (click)="editService(service)"
                     pTooltip="Edit Service">
                   </button>
+                  <!-- Reactivate button for rejected services -->
                   <button
+                    *ngIf="!service.isDeleted && service.isApproved === 'Rejected'"
+                    pButton
+                    icon="pi pi-refresh"
+                    class="p-button-sm p-button-rounded p-button-outlined p-button-purple"
+                    (click)="reactivateService(service)"
+                    pTooltip="Reactivate Service">
+                  </button>
+                  <button
+                    *ngIf="!service.isDeleted"
                     pButton
                     icon="pi pi-trash"
                     class="p-button-sm p-button-rounded p-button-outlined p-button-danger"
                     (click)="deleteService(service)"
                     pTooltip="Delete Service">
                   </button>
+                  <!-- Restore button removed -->
                 </div>
               </td>
             </tr>
@@ -190,6 +236,5 @@
   </app-service-add-modal>
 
   <!-- Toast and ConfirmDialog -->
-  <p-toast></p-toast>
   <p-confirmDialog></p-confirmDialog>
 </div>

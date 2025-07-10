@@ -198,7 +198,8 @@
     [minQuantity]="service.minQuantity"
     [service]="service"
     (close)="isModalOpen = false"
-    (requestSubmitted)="onRequestSubmitted()">
+    (requestSubmitted)="onRequestSubmitted()"
+    (error)="handleRequestError($event)">
   </app-request-modal>
 </p-dialog>
 

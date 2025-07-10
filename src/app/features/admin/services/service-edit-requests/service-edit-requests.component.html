@@ -1,0 +1,587 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Toast Notifications -->
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Header Section -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Service Edit Requests</h1>
+        <p class="text-gray-600 mt-2">Review and manage service edit requests from sellers</p>
+      </div>
+      <!-- Test Deferred Edits Button -->
+      <div class="flex gap-2">
+        <button
+          pButton
+          type="button"
+          label="Test Deferred Edits"
+          icon="pi pi-cog"
+          class="p-button-info p-button-outlined"
+          (click)="testDeferredEdits()"
+        ></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-yellow-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-yellow-100">
+          <i class="pi pi-clock text-yellow-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Pending Requests</p>
+          <p class="text-2xl font-bold text-gray-900">{{ stats.pending }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-green-100">
+          <i class="pi pi-check-circle text-green-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Approved Requests</p>
+          <p class="text-2xl font-bold text-gray-900">{{ stats.approved }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-red-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-red-100">
+          <i class="pi pi-times text-red-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Rejected Requests</p>
+          <p class="text-2xl font-bold text-gray-900">{{ stats.rejected }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="bg-white rounded-lg shadow-sm mb-6">
+    <div class="border-b border-gray-200">
+      <nav class="flex px-6" aria-label="Tabs">
+        <button
+          (click)="onTabChange('pending')"
+          [class]="selectedTab === 'pending' ? 'border-blue-500 text-blue-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-semibold'"
+          class="flex-1 whitespace-nowrap py-4 px-1 border-b-2 text-sm text-center"
+        >
+          Pending Requests ({{ stats.pending }})
+        </button>
+        <button
+          (click)="onTabChange('approved')"
+          [class]="selectedTab === 'approved' ? 'border-blue-500 text-blue-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-semibold'"
+          class="flex-1 whitespace-nowrap py-4 px-1 border-b-2 text-sm text-center"
+        >
+          Approved Requests ({{ stats.approved }})
+        </button>
+        <button
+          (click)="onTabChange('rejected')"
+          [class]="selectedTab === 'rejected' ? 'border-blue-500 text-blue-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-semibold'"
+          class="flex-1 whitespace-nowrap py-4 px-1 border-b-2 text-sm text-center"
+        >
+          Rejected Requests ({{ stats.rejected }})
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+      <div class="md:col-span-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Search Requests</label>
+        <input
+          pInputText
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchTermChange()"
+          [placeholder]="'Search by service name or description...'"
+          class="w-full pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+      </div>
+      <!-- Bulk Actions -->
+      <div class="md:col-span-2" *ngIf="selectedRequests.length > 0 && selectedTab === 'pending'">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Bulk Actions</label>
+        <div class="flex gap-2">
+          <button
+            pButton
+            type="button"
+            label="Approve Selected"
+            icon="pi pi-check"
+            class="p-button-success p-button-sm"
+            (click)="approveSelectedRequests()"
+            [disabled]="selectedRequests.length === 0"
+          ></button>
+          <button
+            pButton
+            type="button"
+            label="Reject Selected"
+            icon="pi pi-times"
+            class="p-button-danger p-button-sm p-button-outlined"
+            (click)="rejectSelectedRequests()"
+            [disabled]="selectedRequests.length === 0"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">
+        {{ selectedTab === 'pending' ? 'Pending' : selectedTab === 'approved' ? 'Approved' : 'Rejected' }} Edit Requests
+      </h3>
+    </div>
+    <div class="relative">
+      <p-table
+        [value]="filteredRequests"
+        [loading]="loading"
+        class="w-full"
+        responsiveLayout="scroll"
+        styleClass="p-datatable-sm"
+        [(selection)]="selectedRequests"
+        dataKey="id"
+      >
+        <ng-template pTemplate="header">
+          <tr class="bg-gray-50">
+            <th class="py-3 px-2" *ngIf="selectedTab === 'pending'">
+              <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+            </th>
+            <th class="py-3 px-2">Request ID</th>
+            <th class="py-3 px-2">Service ID</th>
+            <th class="py-3 px-2">Service Name</th>
+            <th class="py-3 px-2">New Price</th>
+            <th class="py-3 px-2">Status</th>
+            <th class="py-3 px-2">Created</th>
+            <th class="py-3 px-2">Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-request>
+          <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+            <td class="py-2 px-2" *ngIf="selectedTab === 'pending'">
+              <p-tableCheckbox [value]="request"></p-tableCheckbox>
+            </td>
+            <td class="py-2 px-2 font-semibold">{{ request.id }}</td>
+            <td class="py-2 px-2">{{ request.serviceId }}</td>
+            <td class="py-2 px-2 max-w-xs truncate text-blue-600 font-medium" [title]="request.editedName">{{ request.editedName }}</td>
+            <td class="py-2 px-2 text-green-700 font-medium">${{ request.editedPricePerProduct }}</td>
+            <td class="py-2 px-2">
+              <div class="flex flex-col gap-1">
+                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold" [class]="getStatusBadgeClass(request.approvalStatus)">
+                  <i class="pi pi-clock mr-1" *ngIf="request.approvalStatus === 'Pending'"></i>
+                  <i class="pi pi-check mr-1" *ngIf="request.approvalStatus === 'Approved'"></i>
+                  <i class="pi pi-times mr-1" *ngIf="request.approvalStatus === 'Rejected'"></i>
+                  {{ request.approvalStatus }}
+                </span>
+                <span *ngIf="request.isReactivationRequest" class="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                  <i class="pi pi-refresh mr-1"></i>
+                  Reactivation
+                </span>
+              </div>
+            </td>
+            <td class="py-2 px-2 text-sm text-gray-500">{{ request.createdAt | date:'short' }}</td>
+            <td class="py-2 px-2">
+              <div class="flex gap-2 justify-center">
+                <button pButton type="button" icon="pi pi-eye" class="p-button-info p-button-sm rounded-full shadow-md hover:scale-105 transition-transform" (click)="viewDetails(request)" title="View Details" pTooltip="View Details"></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td [attr.colspan]="selectedTab === 'pending' ? 8 : 7" class="text-center p-8">
+              <div class="flex flex-col items-center">
+                <i class="pi pi-edit text-4xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">No {{ selectedTab === 'pending' ? 'pending' : selectedTab === 'approved' ? 'approved' : 'rejected' }} edit requests found</p>
+                <p class="text-gray-400 text-sm">Try adjusting your search criteria</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="mt-6" *ngIf="totalCount > 0">
+    <p-paginator
+      [rows]="size"
+      [totalRecords]="totalCount"
+      [first]="(page - 1) * size"
+      [rowsPerPageOptions]="[5, 10, 20, 50]"
+      (onPageChange)="onPageChange($event)"
+      [showCurrentPageReport]="true"
+      [currentPageReportTemplate]="'Showing {first} to {last} of {totalRecords} ' + (selectedTab === 'pending' ? 'pending' : selectedTab === 'approved' ? 'approved' : 'rejected') + ' requests'"
+      styleClass="bg-white rounded-lg shadow-sm p-4"
+    ></p-paginator>
+  </div>
+
+  <!-- Image Preview Modal -->
+  <p-dialog
+    [(visible)]="imageModalOpen"
+    [modal]="true"
+    [closable]="true"
+    [draggable]="false"
+    [resizable]="false"
+    styleClass="p-dialog-xl image-preview-modal"
+    header="Image Preview"
+    (onHide)="closeImageModal()"
+  >
+    <div class="flex flex-col items-center space-y-4">
+      <div class="relative group w-full">
+        <div *ngIf="imageLoading" class="flex justify-center items-center h-64">
+          <p-progressSpinner strokeWidth="4" animationDuration=".5s"></p-progressSpinner>
+        </div>
+        <img
+          *ngIf="selectedImageUrl && !imageLoading"
+          [src]="selectedImageUrl"
+          alt="Service Image"
+          class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl transition-all duration-300 hover:scale-105"
+          (load)="onImageLoad($event)"
+          (error)="onImageError($event)"
+          style="display: block;"
+        />
+        <div *ngIf="imageError" class="flex flex-col items-center justify-center h-64 text-gray-500">
+          <i class="pi pi-image text-4xl mb-2"></i>
+          <p class="text-sm">Failed to load image</p>
+          <button
+            pButton
+            type="button"
+            label="Open in New Tab"
+            icon="pi pi-external-link"
+            class="p-button-outlined p-button-sm mt-2"
+            (click)="openImageInNewTab(selectedImageUrl!)"
+          ></button>
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-lg flex items-center justify-center">
+          <button
+            pButton
+            type="button"
+            icon="pi pi-external-link"
+            class="p-button-rounded p-button-text p-button-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            (click)="openImageInNewTab(selectedImageUrl!)"
+            title="Open in new tab"
+          ></button>
+        </div>
+      </div>
+      <div class="text-sm text-gray-500 text-center">
+        Click outside or press ESC to close
+      </div>
+    </div>
+  </p-dialog>
+
+  <!-- Details Modal -->
+  <p-dialog
+    [(visible)]="detailsModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [draggable]="false"
+    [resizable]="false"
+    styleClass="p-dialog-xl"
+    [header]="selectedRequestForDetails?.isReactivationRequest ? 'Service Reactivation Request' : 'Edit Request Details'"
+    (onHide)="closeDetailsModal()"
+  >
+    <div class="space-y-8 modal-content" *ngIf="selectedRequestForDetails">
+      <!-- Reactivation Notice -->
+      <div *ngIf="selectedRequestForDetails.isReactivationRequest" class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <i class="pi pi-refresh text-purple-400 text-xl"></i>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-purple-800">Service Reactivation Request</h3>
+            <div class="mt-2 text-sm text-purple-700">
+              <p>This is a reactivation request for a previously rejected service. Approving this request will reactivate the service and apply the new changes.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header Info with improved design -->
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="space-y-2">
+            <p class="text-sm font-medium text-blue-600">Request ID</p>
+            <p class="text-lg font-bold text-gray-900">{{ selectedRequestForDetails.id }}</p>
+          </div>
+          <div class="space-y-2">
+            <p class="text-sm font-medium text-blue-600">Service ID</p>
+            <p class="text-lg font-bold text-gray-900">{{ selectedRequestForDetails.serviceId }}</p>
+          </div>
+          <div class="space-y-2">
+            <p class="text-sm font-medium text-blue-600">Created</p>
+            <p class="text-lg font-bold text-gray-900">{{ selectedRequestForDetails.createdAt | date:'medium' }}</p>
+          </div>
+          <div class="space-y-2">
+            <p class="text-sm font-medium text-blue-600">Status</p>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold shadow-sm status-badge" [class]="getStatusBadgeClass(selectedRequestForDetails.approvalStatus)">
+              <i class="pi pi-clock mr-2" *ngIf="selectedRequestForDetails.approvalStatus === 'Pending'"></i>
+              <i class="pi pi-check mr-2" *ngIf="selectedRequestForDetails.approvalStatus === 'Approved'"></i>
+              <i class="pi pi-times mr-2" *ngIf="selectedRequestForDetails.approvalStatus === 'Rejected'"></i>
+              {{ selectedRequestForDetails.approvalStatus }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced Comparison Table -->
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900">Changes Comparison</h3>
+          <p class="text-sm text-gray-600 mt-1">Review the proposed changes to the service</p>
+        </div>
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Field</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Current Value</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">New Value</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 font-medium text-gray-900">Service Name</td>
+                <td class="px-6 py-4 text-gray-600">{{ selectedRequestForDetails.currentName }}</td>
+                <td class="px-6 py-4 text-blue-600 font-medium">{{ selectedRequestForDetails.editedName }}</td>
+                <td class="px-6 py-4">
+                  <span *ngIf="nameChangeStatus" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" [class]="nameChangeStatus.class">
+                    <i [class]="nameChangeStatus.icon + ' mr-1'"></i>
+                    {{ nameChangeStatus.type }}
+                  </span>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 font-medium text-gray-900">Description</td>
+                <td class="px-6 py-4 text-gray-600">
+                  <div class="max-w-xs max-h-24 overflow-y-auto text-sm custom-scrollbar">
+                    {{ selectedRequestForDetails.currentDescription }}
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-blue-600 font-medium">
+                  <div class="max-w-xs max-h-24 overflow-y-auto text-sm custom-scrollbar">
+                    {{ selectedRequestForDetails.editedDescription }}
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <span *ngIf="descriptionChangeStatus" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" [class]="descriptionChangeStatus.class">
+                    <i [class]="descriptionChangeStatus.icon + ' mr-1'"></i>
+                    {{ descriptionChangeStatus.type }}
+                  </span>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 font-medium text-gray-900">Price</td>
+                <td class="px-6 py-4 text-gray-600">${{ selectedRequestForDetails.currentPricePerProduct }}</td>
+                <td class="px-6 py-4 text-green-600 font-medium">${{ selectedRequestForDetails.editedPricePerProduct }}</td>
+                <td class="px-6 py-4">
+                  <span *ngIf="priceChangeStatus" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" [class]="priceChangeStatus.class">
+                    <i [class]="priceChangeStatus.icon + ' mr-1'"></i>
+                    {{ priceChangeStatus.type }}
+                  </span>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 font-medium text-gray-900">Minimum Quantity</td>
+                <td class="px-6 py-4 text-gray-600">{{ selectedRequestForDetails.currentMinQuantity }}</td>
+                <td class="px-6 py-4 text-blue-600 font-medium">{{ selectedRequestForDetails.editedMinQuantity }}</td>
+                <td class="px-6 py-4">
+                  <span *ngIf="minQuantityChangeStatus" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" [class]="minQuantityChangeStatus.class">
+                    <i [class]="minQuantityChangeStatus.icon + ' mr-1'"></i>
+                    {{ minQuantityChangeStatus.type }}
+                  </span>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 font-medium text-gray-900">Estimated Time</td>
+                <td class="px-6 py-4 text-gray-600">{{ selectedRequestForDetails.currentEstimatedTime }}</td>
+                <td class="px-6 py-4 text-blue-600 font-medium">{{ selectedRequestForDetails.editedEstimatedTime }}</td>
+                <td class="px-6 py-4">
+                  <span *ngIf="estimatedTimeChangeStatus" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" [class]="estimatedTimeChangeStatus.class">
+                    <i [class]="estimatedTimeChangeStatus.icon + ' mr-1'"></i>
+                    {{ estimatedTimeChangeStatus.type }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Enhanced Image Comparison -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Current Image -->
+        <div *ngIf="selectedRequestForDetails.currentImageUrl" class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="text-lg font-semibold text-gray-900">Current Image</h4>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+              <i class="pi pi-image mr-1"></i>Current
+            </span>
+          </div>
+          <div class="flex justify-center">
+            <div class="relative group cursor-pointer image-container" (click)="openImageModal(selectedRequestForDetails.currentImageUrl)">
+              <div class="image-fallback flex items-center justify-center h-32 bg-gray-100 rounded-lg">
+                <i class="pi pi-image text-4xl text-gray-400"></i>
+              </div>
+              <img
+                *ngIf="selectedRequestForDetails.currentImageUrl"
+                [src]="selectedRequestForDetails.currentImageUrl"
+                alt="Current Service Image"
+                class="max-w-full max-h-64 object-contain rounded-lg border-2 border-gray-200 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105"
+                (error)="onDetailsImageError($event)"
+                (load)="onDetailsImageLoad($event)"
+                style="display: none;"
+              />
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-lg flex items-center justify-center">
+                <i class="pi pi-eye text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New Image -->
+        <div *ngIf="selectedRequestForDetails.editedImageUrl" class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="text-lg font-semibold text-gray-900">New Image</h4>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <i class="pi pi-image mr-1"></i>Proposed
+            </span>
+          </div>
+          <div class="flex justify-center">
+            <div class="relative group cursor-pointer image-container" (click)="openImageModal(selectedRequestForDetails.editedImageUrl)">
+              <div class="image-fallback flex items-center justify-center h-32 bg-gray-100 rounded-lg">
+                <i class="pi pi-image text-4xl text-gray-400"></i>
+              </div>
+              <img
+                *ngIf="selectedRequestForDetails.editedImageUrl"
+                [src]="selectedRequestForDetails.editedImageUrl"
+                alt="New Service Image"
+                class="max-w-full max-h-64 object-contain rounded-lg border-2 border-blue-200 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105"
+                (error)="onDetailsImageError($event)"
+                (load)="onDetailsImageLoad($event)"
+                style="display: none;"
+              />
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-lg flex items-center justify-center">
+                <i class="pi pi-eye text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end gap-3">
+        <!-- Only show approve/reject buttons for pending requests -->
+        <ng-container *ngIf="selectedTab === 'pending'">
+          <button
+            pButton
+            type="button"
+            label="Approve"
+            icon="pi pi-check"
+            class="p-button-success"
+            (click)="approveRequest(selectedRequestForDetails!)"
+          ></button>
+          <button
+            pButton
+            type="button"
+            label="Reject"
+            icon="pi pi-times"
+            class="p-button-danger p-button-outlined"
+            (click)="rejectRequest(selectedRequestForDetails!)"
+          ></button>
+        </ng-container>
+        <button
+          pButton
+          type="button"
+          label="Close"
+          icon="pi pi-times"
+          class="p-button-secondary p-button-outlined"
+          (click)="closeDetailsModal()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Enhanced Rejection Modal -->
+  <p-dialog
+    [(visible)]="rejectModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [draggable]="false"
+    [resizable]="false"
+    styleClass="p-dialog-md"
+    header="Reject Edit Request"
+    (onHide)="cancelRejection()"
+  >
+    <div class="space-y-6">
+      <!-- Warning Alert -->
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <i class="pi pi-exclamation-triangle text-red-400 text-xl"></i>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Reject Edit Request</h3>
+            <div class="mt-2 text-sm text-red-700">
+              <p>Are you sure you want to reject the edit request for service #{{ selectedRequestForRejection?.serviceId }}?</p>
+              <p class="mt-1">This action cannot be undone and the seller will be notified.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rejection Form -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Reason for Rejection <span class="text-red-500">*</span>
+          </label>
+          <textarea
+            [(ngModel)]="rejectionNote"
+            rows="4"
+            placeholder="Please provide a clear and constructive reason for rejecting this edit request. This will be shared with the seller..."
+            class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none transition-colors"
+            [class.border-red-500]="showRejectionError"
+          ></textarea>
+          <div *ngIf="showRejectionError" class="mt-2 text-sm text-red-600">
+            <i class="pi pi-exclamation-circle mr-1"></i>
+            Please provide a reason for rejection.
+          </div>
+        </div>
+
+        <!-- Character Counter -->
+        <div class="flex justify-between items-center text-sm text-gray-500">
+          <span>Provide constructive feedback to help the seller improve</span>
+          <span>{{ rejectionNote.length }}/500</span>
+        </div>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end gap-3">
+        <button
+          pButton
+          type="button"
+          label="Cancel"
+          icon="pi pi-times"
+          class="p-button-secondary p-button-outlined"
+          (click)="cancelRejection()"
+        ></button>
+        <button
+          pButton
+          type="button"
+          label="Reject Request"
+          icon="pi pi-times"
+          class="p-button-danger"
+          (click)="confirmRejection()"
+          [disabled]="!rejectionNote.trim()"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+</div>

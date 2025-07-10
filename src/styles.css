@@ -22,3 +22,29 @@ html {
 .animate-fade-in-up {
   animation: fadeInUp 0.3s ease-out forwards;
 }
+
+/* Prettier PrimeNG ProgressSpinner */
+.p-progress-spinner {
+  width: 4rem !important;
+  height: 4rem !important;
+  display: inline-block;
+  filter: drop-shadow(0 2px 8px rgba(80, 80, 180, 0.15));
+}
+.p-progress-spinner svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+.p-progress-spinner-circle {
+  stroke: url(#spinner-gradient);
+  stroke-width: 6;
+}
+
+/* Add a gradient definition for the spinner */
+.p-progress-spinner svg defs {
+  /* This is a hack: you may need to add the gradient directly in the component if PrimeNG doesn't support it */
+}
+
+/* Fallback: use a nice blue if gradient doesn't work */
+.p-progress-spinner-circle {
+  stroke: #6366f1;
+}

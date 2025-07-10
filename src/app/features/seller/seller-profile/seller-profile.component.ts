@@ -10,12 +10,15 @@ import { Paginator, PaginatorModule } from 'primeng/paginator';
 import { TableModule } from 'primeng/table';
 import { PaginatorState } from 'primeng/paginator';
 import { TabViewModule } from 'primeng/tabview';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 
 @Component({
   selector: 'app-seller-profile',
   templateUrl: './seller-profile.component.html',
-  imports: [CommonModule, RouterLink, CardModule, ButtonModule, Paginator, PaginatorModule, TableModule, TabViewModule],
+  imports: [CommonModule, RouterLink, CardModule, ButtonModule, Paginator, PaginatorModule, TableModule, TabViewModule, ToastModule],
+  providers: [MessageService]
 })
 export class SellerProfileComponent implements OnInit {
   sellerId!: string;
@@ -30,7 +33,8 @@ export class SellerProfileComponent implements OnInit {
     private route: ActivatedRoute,
     private userService: UserService,
     private serviceService: ServiceService,
-    private location: Location
+    private location: Location,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -54,6 +58,14 @@ export class SellerProfileComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error fetching seller services:', error);
+        if (error?.error && typeof error.error === 'string' && error.error.includes('Account is not verified by admin yet.')) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Account Not Verified',
+            detail: 'This seller account is not verified by admin yet. Services are not available for public view.',
+            life: 6000
+          });
+        }
       }
     });
   }

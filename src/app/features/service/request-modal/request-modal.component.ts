@@ -23,6 +23,7 @@ export class RequestModalComponent {
   @Input() service!: Service; // Pass the service from parent instead of fetching it
   @Output() close = new EventEmitter<void>();
   @Output() requestSubmitted = new EventEmitter<void>();
+  @Output() error = new EventEmitter<string>();
   requestForm!: FormGroup;
   isSubmitting = false; // Add loading state for submission
 
@@ -71,12 +72,23 @@ export class RequestModalComponent {
       },
       error: (err: any) => {
         this.isSubmitting = false;
+        let errorMsg = 'An error occurred. Please try again.';
+        if (err?.error) {
+          if (typeof err.error === 'string') {
+            errorMsg = err.error;
+          } else if (err.error.message) {
+            errorMsg = err.error.message;
+          }
+        } else if (err?.message) {
+          errorMsg = err.message;
+        }
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: err?.error || 'An error occurred. Please try again.'
+          detail: errorMsg
         });
-        this.close.emit(); // Close modal after error
+        this.error.emit(errorMsg);
+        // Do not close the modal here; parent will handle it
       }
     });
   }
