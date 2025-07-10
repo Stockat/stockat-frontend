@@ -15,4 +15,12 @@ export interface ServiceRequestDto {
   imageUrl?: string;
   sellerOfferAttempts:number;
   createdAt: Date;
+
+  // SNAPSHOT FIELDS
+  serviceNameSnapshot: string;
+  serviceDescriptionSnapshot?: string;
+  serviceMinQuantitySnapshot: number;
+  servicePricePerProductSnapshot: number;
+  serviceEstimatedTimeSnapshot?: string;
+  serviceImageUrlSnapshot?: string;
 }

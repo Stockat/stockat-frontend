@@ -100,8 +100,20 @@ export class SellerServiceListComponent implements OnInit {
     this.serviceService.getMyServices(apiPage, this.size).subscribe({
       next: (response) => {
         if (response && response.data && response.data.paginatedData) {
-          this.services = response.data.paginatedData.filter((service: any) => !service.isDeleted);
-          this.totalCount = response.data.count || 0;
+          // Only count non-deleted services for pagination
+          const allServices = response.data.paginatedData;
+          this.services = allServices.filter((service: any) => !service.isDeleted);
+          // If the backend count includes deleted, recalculate for paginator
+          const nonDeletedCount = response.data.count && Array.isArray(allServices)
+            ? allServices.filter((service: any) => !service.isDeleted).length
+            : this.services.length;
+          this.totalCount = nonDeletedCount;
+          // If after delete, current page is empty and not first, go back one page
+          if (this.services.length === 0 && this.page > 0) {
+            this.page--;
+            this.loadSellerServices();
+            return;
+          }
         } else {
           this.services = [];
           this.totalCount = 0;
@@ -146,7 +158,7 @@ onPageChange(event: any) {
       accept: () => {
         this.serviceService.deleteService(service.id).subscribe({
           next: () => {
-            this.services = this.services.filter(s => s.id !== service.id);
+            this.loadSellerServices();
             this.messageService.add({
               severity: 'success',
               summary: 'Success',

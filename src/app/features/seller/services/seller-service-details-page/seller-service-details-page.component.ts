@@ -93,7 +93,8 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   ) {
     this.offerForm = this.fb.group({
       pricePerProduct: [null, [Validators.required, Validators.min(1)]],
-      estimatedTime: ['', Validators.required]
+      estimatedTimeValue: [null, [Validators.required, Validators.min(1)]],
+      estimatedTimeUnit: ['day(s)', Validators.required]
     });
   }
 
@@ -227,33 +228,28 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   }
 
   submitOffer() {
-    if (this.offerForm.invalid || !this.selectedRequest) return;
+    if (this.offerForm.invalid) {
+      this.offerForm.markAllAsTouched();
+      return;
+    }
     this.offerLoading = true;
     this.offerError = '';
     this.offerSuccess = '';
-    const offer = this.offerForm.value;
-    this.serviceRequestService.setSellerOffer(this.selectedRequest.id, offer).subscribe({
-      next: () => {
+    const value = this.offerForm.value;
+    const estimatedTime = `${value.estimatedTimeValue} ${value.estimatedTimeUnit}`;
+    const offerPayload = {
+      pricePerProduct: value.pricePerProduct,
+      estimatedTime: estimatedTime
+    };
+    this.serviceRequestService.setSellerOffer(this.selectedRequest.id, offerPayload).subscribe({
+      next: (res: any) => {
         this.offerSuccess = 'Offer sent successfully!';
-        // Refresh requests to show updated offer immediately
-        this.serviceRequestService.getSellerRequestsByServiceId(this.service.id).subscribe({
-          next: (requests) => {
-            this.requests = requests.data.paginatedData;
-            this.offerLoading = false;
-            setTimeout(() => {
-              this.closeOfferModal();
-            }, 1000);
-          },
-          error: () => {
-            this.offerLoading = false;
-            setTimeout(() => {
-              this.closeOfferModal();
-            }, 1000);
-          }
-        });
+        this.offerLoading = false;
+        this.closeOfferModal();
+        this.fetchRequestsWithUpdates(this.service.id);
       },
-      error: (err) => {
-        this.offerError = 'Failed to send offer.';
+      error: (err: any) => {
+        this.offerError = err?.error?.message || 'Failed to send offer.';
         this.offerLoading = false;
       }
     });
