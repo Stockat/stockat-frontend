@@ -23,6 +23,25 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   private shouldScroll = false;
   isOpen: boolean = false; // Controls open/close state
 
+  // Rotating welcome messages
+  private welcomeMessages: string[] = [
+    "Hello! 👋 I'm your **Stockat AI assistant**. How can I help you today?",
+    "Hi there! 🤖 Need help finding products or services?",
+    "Welcome! 🏭 Ask me anything about our platform.",
+    "Hey! 👋 Looking for something specific? I'm here to help.",
+    "Hi! 😊 Want to know about auctions, sellers, or products?"
+  ];
+
+  // Proactive follow-up prompts
+  private followUpPrompts: string[] = [
+    "Is there anything else you'd like to know? 😊",
+    "Feel free to ask me about products, sellers, or services!",
+    "I'm here if you have more questions! 🤗",
+    "Let me know if you want to explore more features.",
+    "Don't hesitate to ask for help or suggestions! 💡"
+  ];
+  private followUpTimeout: any;
+
     // Quick suggestions for new users
   quickSuggestions: string[] = [
     'Show me top sellers',
@@ -75,6 +94,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
    */
   async sendMessage(): Promise<void> {
     if (!this.newMessage.trim() || this.isLoading) return;
+    this.clearFollowUp(); // Clear any previous follow-up
 
     const userMessage: ChatBotMessage = {
       content: this.newMessage.trim(),
@@ -106,6 +126,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
 
       this.messages.push(assistantMessage);
       this.shouldScroll = true;
+      this.setFollowUp(); // Set a new follow-up after bot replies
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage: ChatBotMessage = {
@@ -116,6 +137,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
       };
       this.messages.push(errorMessage);
       this.shouldScroll = true;
+      this.setFollowUp(); // Still set follow-up on error
     } finally {
       this.isLoading = false;
     }
@@ -234,8 +256,9 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
    * Add welcome message
    */
   private addWelcomeMessage(): void {
+    const randomIndex = Math.floor(Math.random() * this.welcomeMessages.length);
     this.messages = [{
-      content: 'Hello! 👋 I\'m your **Stockat AI assistant**. I can help you find information about products, services, sellers, auctions, and more on our B2B manufacturing platform. What would you like to know?',
+      content: this.welcomeMessages[randomIndex],
       senderId: 'system',
       timestamp: new Date(),
       role: 'assistant'
@@ -295,10 +318,35 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
     if (this.isOpen && this.messages.length === 0) {
       this.loadChatHistory();
     }
+    if (!this.isOpen) {
+      this.clearFollowUp();
+    }
   }
 
   closeChatbot(): void {
     this.isOpen = false;
+    this.clearFollowUp();
+  }
+
+  private setFollowUp() {
+    this.clearFollowUp();
+    this.followUpTimeout = setTimeout(() => {
+      const randomIndex = Math.floor(Math.random() * this.followUpPrompts.length);
+      this.messages.push({
+        content: this.followUpPrompts[randomIndex],
+        senderId: 'system',
+        timestamp: new Date(),
+        role: 'assistant'
+      });
+      this.shouldScroll = true;
+    }, 20000); // 20 seconds
+  }
+
+  private clearFollowUp() {
+    if (this.followUpTimeout) {
+      clearTimeout(this.followUpTimeout);
+      this.followUpTimeout = null;
+    }
   }
 
 }

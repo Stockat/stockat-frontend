@@ -184,21 +184,13 @@
 <p-toast></p-toast>
 
 <!-- Modal -->
-<p-dialog
-  header="Request Service"
-  [(visible)]="isModalOpen"
-  [modal]="true"
-  [style]="{width: '500px'}"
-  [closable]="true"
-  (onHide)="isModalOpen = false"
-  styleClass="modern-dialog">
-  <app-request-modal
-    *ngIf="service"
-    [serviceId]="service.id"
-    [minQuantity]="service.minQuantity"
-    [service]="service"
-    (close)="isModalOpen = false"
-    (requestSubmitted)="onRequestSubmitted()">
-  </app-request-modal>
-</p-dialog>
+<app-request-modal
+  *ngIf="isModalOpen && service"
+  [serviceId]="service.id"
+  [minQuantity]="service.minQuantity"
+  [service]="service"
+  (close)="isModalOpen = false"
+  (requestSubmitted)="onRequestSubmitted()"
+  (error)="handleRequestError($event)">
+</app-request-modal>
 

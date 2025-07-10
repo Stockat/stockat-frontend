@@ -29,7 +29,8 @@ export class ServiceAddModalComponent {
       description: ['', [Validators.required, Validators.maxLength(1000)]],
       pricePerProduct: [0.01, [Validators.required, Validators.min(0.01)]],
       minQuantity: [1, [Validators.required, Validators.min(1)]],
-      estimatedTime: ['', Validators.required],
+      estimatedTimeValue: [1, [Validators.required, Validators.min(1)]],
+      estimatedTimeUnit: ['day(s)', Validators.required],
     });
   }
 
@@ -85,7 +86,9 @@ export class ServiceAddModalComponent {
   submit() {
     this.submitted = true;
     if (this.form.valid && !this.isAddingService && this.selectedFile) {
-      this.save.emit({ service: this.form.value, file: this.selectedFile });
+      const { estimatedTimeValue, estimatedTimeUnit, ...rest } = this.form.value;
+      const estimatedTime = `${estimatedTimeValue} ${estimatedTimeUnit}`;
+      this.save.emit({ service: { ...rest, estimatedTime }, file: this.selectedFile });
     }
   }
 
@@ -97,7 +100,9 @@ export class ServiceAddModalComponent {
   resetForm() {
     this.form.reset({
       pricePerProduct: 0.01,
-      minQuantity: 1
+      minQuantity: 1,
+      estimatedTimeValue: 1,
+      estimatedTimeUnit: 'day(s)'
     });
     this.selectedFile = null;
     this.submitted = false;

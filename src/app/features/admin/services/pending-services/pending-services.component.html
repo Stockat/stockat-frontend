@@ -1,0 +1,224 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Header Section -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Services Management</h1>
+        <p class="text-gray-600 mt-2">Review and manage all services</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-blue-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-blue-100">
+          <i class="pi pi-clock text-blue-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Pending Services</p>
+          <p class="text-2xl font-bold text-gray-900">{{ stats.pending }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-green-100">
+          <i class="pi pi-check-circle text-green-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Approved Services</p>
+          <p class="text-2xl font-bold text-gray-900">{{ stats.approved }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-red-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-red-100">
+          <i class="pi pi-times text-red-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Rejected Services</p>
+          <p class="text-2xl font-bold text-gray-900">{{ stats.rejected }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="bg-white rounded-lg shadow-sm mb-6">
+    <div class="border-b border-gray-200">
+      <nav class="flex px-6" aria-label="Tabs">
+        <button
+          (click)="onTabChange('pending')"
+          [class]="selectedTab === 'pending' ? 'border-blue-500 text-blue-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-semibold'"
+          class="flex-1 whitespace-nowrap py-4 px-1 border-b-2 text-sm text-center"
+        >
+          Pending Services
+          <span *ngIf="stats.pending > 0" class="ml-2 bg-blue-100 text-blue-600 py-0.5 px-2.5 rounded-full text-xs font-medium">{{ stats.pending }}</span>
+        </button>
+        <button
+          (click)="onTabChange('approved')"
+          [class]="selectedTab === 'approved' ? 'border-blue-500 text-blue-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-semibold'"
+          class="flex-1 whitespace-nowrap py-4 px-1 border-b-2 text-sm text-center"
+        >
+          Approved Services
+          <span *ngIf="stats.approved > 0" class="ml-2 bg-green-100 text-green-600 py-0.5 px-2.5 rounded-full text-xs font-medium">{{ stats.approved }}</span>
+        </button>
+        <button
+          (click)="onTabChange('rejected')"
+          [class]="selectedTab === 'rejected' ? 'border-blue-500 text-blue-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-semibold'"
+          class="flex-1 whitespace-nowrap py-4 px-1 border-b-2 text-sm text-center"
+        >
+          Rejected Services
+          <span *ngIf="stats.rejected > 0" class="ml-2 bg-red-100 text-red-600 py-0.5 px-2.5 rounded-full text-xs font-medium">{{ stats.rejected }}</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+      <div class="md:col-span-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Search Services</label>
+        <input
+          pInputText
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchTermChange()"
+          placeholder="Search by name, seller, or description..."
+          class="w-full pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+      </div>
+      <!-- Removed checkboxes for deleted services, blocked sellers, and deleted sellers -->
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">
+        {{ selectedTab === 'pending' ? 'Pending' : selectedTab === 'approved' ? 'Approved' : 'Rejected' }} Services List
+      </h3>
+    </div>
+    <div class="relative">
+      <p-table
+        [value]="filteredServices"
+        [loading]="loading"
+        class="w-full"
+        *ngIf="true"
+        responsiveLayout="scroll"
+        styleClass="p-datatable-sm"
+      >
+        <ng-template pTemplate="header">
+          <tr class="bg-gray-50">
+            <th class="py-3 px-2">ID</th>
+            <th class="py-3 px-2">Name</th>
+            <th class="py-3 px-2">Description</th>
+            <th class="py-3 px-2">Min Qty</th>
+            <th class="py-3 px-2">Price</th>
+            <th class="py-3 px-2">Estimated Time</th>
+            <th class="py-3 px-2">Image</th>
+            <th class="py-3 px-2">Seller</th>
+            <th class="py-3 px-2">Seller Status</th>
+            <th class="py-3 px-2">Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-service>
+          <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors" [class.opacity-50]="service.isDeleted" [class.bg-red-50]="service.isDeleted">
+            <td class="py-2 px-2 font-semibold" [class.line-through]="service.isDeleted">{{ service.id }}</td>
+            <td class="py-2 px-2" [class.line-through]="service.isDeleted">{{ service.name }}</td>
+            <td class="py-2 px-2 max-w-xs truncate" [title]="service.description" [class.line-through]="service.isDeleted">{{ service.description }}</td>
+            <td class="py-2 px-2 text-center" [class.line-through]="service.isDeleted">{{ service.minQuantity }}</td>
+            <td class="py-2 px-2 text-green-700 font-medium" [class.line-through]="service.isDeleted">{{ service.pricePerProduct | currency }}</td>
+            <td class="py-2 px-2" [class.line-through]="service.isDeleted">{{ service.estimatedTime }}</td>
+            <td class="py-2 px-2">
+              <img *ngIf="service.imageUrl" [src]="service.imageUrl" alt="Service Image" class="w-14 h-14 object-cover rounded border-2 border-gray-200 shadow cursor-pointer hover:scale-110 transition-transform" (click)="openImageModal(service.imageUrl)" />
+            </td>
+            <td class="py-2 px-2" [class.line-through]="service.isDeleted">{{ service.sellerName }}</td>
+            <td class="py-2 px-2">
+              <!-- Seller Status Indicators -->
+              <div class="flex flex-col gap-1">
+                <span *ngIf="service.sellerIsBlocked" class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
+                  <i class="pi pi-ban mr-1"></i>Blocked
+                </span>
+                <span *ngIf="service.sellerIsDeleted" class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                  <i class="pi pi-trash mr-1"></i>Deleted
+                </span>
+                <span *ngIf="!service.sellerIsBlocked && !service.sellerIsDeleted" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                  <i class="pi pi-check mr-1"></i>Active
+                </span>
+              </div>
+            </td>
+            <td class="py-2 px-2">
+              <div class="flex gap-2 justify-center">
+                <!-- Deleted Services Actions -->
+                <ng-container *ngIf="service.isDeleted">
+                  <button pButton type="button" icon="pi pi-refresh" class="p-button-success p-button-sm rounded-full shadow-md hover:scale-105 transition-transform" (click)="restoreService(service)" title="Restore"></button>
+                </ng-container>
+                <!-- Pending Services Actions -->
+                <ng-container *ngIf="selectedTab === 'pending' && !service.isDeleted">
+                  <button pButton type="button" icon="pi pi-check" class="p-button-success p-button-sm rounded-full shadow-md hover:scale-105 transition-transform" (click)="acceptService(service)" title="Approve"></button>
+                  <button pButton type="button" icon="pi pi-times" class="p-button-danger p-button-sm rounded-full shadow-md hover:scale-105 transition-transform" (click)="rejectService(service)" title="Reject"></button>
+                </ng-container>
+                <!-- Approved Services Actions -->
+                <ng-container *ngIf="selectedTab === 'approved' && !service.isDeleted">
+                  <button pButton type="button" icon="pi pi-trash" class="p-button-danger p-button-sm rounded-full shadow-md hover:scale-105 transition-transform" (click)="deleteService(service)" title="Delete"></button>
+                </ng-container>
+                <!-- Rejected Services Actions -->
+                <ng-container *ngIf="selectedTab === 'rejected' && !service.isDeleted">
+                  <button pButton type="button" icon="pi pi-trash" class="p-button-danger p-button-sm rounded-full shadow-md hover:scale-105 transition-transform" (click)="deleteService(service)" title="Delete"></button>
+                </ng-container>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="10" class="text-center p-8">
+              <div class="flex flex-col items-center">
+                <i class="pi pi-briefcase text-4xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">No {{ selectedTab === 'pending' ? 'pending' : selectedTab === 'approved' ? 'approved' : 'rejected' }} services found</p>
+                <p class="text-gray-400 text-sm">Try adjusting your search or filters</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+      <p-paginator
+        [rows]="size"
+        [totalRecords]="totalCount"
+        [first]="(page - 1) * size"
+        [rowsPerPageOptions]="[5, 10, 20, 50]"
+        (onPageChange)="onPageChange($event)"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} services"
+        styleClass="mt-4"
+        *ngIf="totalCount > size"
+      ></p-paginator>
+    </div>
+  </div>
+
+  <!-- Image Modal (white, click outside to close) -->
+  <div *ngIf="imageModalOpen" class="fixed inset-0 z-50 flex items-center justify-center">
+    <div class="absolute inset-0 bg-transparent" (click)="closeImageModal()"></div>
+    <div class="bg-white rounded-xl shadow-2xl p-6 relative max-w-2xl w-full flex flex-col items-center border border-gray-200 z-10 animate-fade-in">
+      <button class="absolute top-2 right-2 text-gray-600 hover:text-black text-3xl font-bold" (click)="closeImageModal()" aria-label="Close">&times;</button>
+      <h3 class="text-lg font-semibold mb-4 text-gray-700">Service Image Preview</h3>
+      <img [src]="selectedImageUrl" alt="Full Service Image" class="max-h-[70vh] w-auto rounded shadow-lg border border-gray-300" />
+    </div>
+  </div>
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <style>
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.25s ease;
+  }
+  </style>
+</div>

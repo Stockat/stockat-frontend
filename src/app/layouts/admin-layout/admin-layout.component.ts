@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
-import { DashNavbarComponent } from "../../shared/components/dash-navbar/dash-navbar.component";
+import { DashNavbarComponent } from '../../shared/components/dash-navbar/dash-navbar.component';
 import { MenuItem } from 'primeng/api';
 import { RouterModule } from '@angular/router';
 
@@ -8,13 +8,12 @@ import { RouterModule } from '@angular/router';
   selector: 'app-admin-layout',
   imports: [SidebarComponent, DashNavbarComponent, RouterModule],
   templateUrl: './admin-layout.component.html',
-  styleUrl: './admin-layout.component.css'
+  styleUrl: './admin-layout.component.css',
 })
 export class AdminLayoutComponent {
+  SidebarVisible: boolean = false;
 
-    SidebarVisible: boolean = false;
-
-    items: MenuItem[] = [];
+  items: MenuItem[] = [];
 
     ngOnInit() {
         this.items = [
@@ -71,6 +70,27 @@ export class AdminLayoutComponent {
                 ]
             },
             {
+                label: 'Services',
+                icon: 'pi pi-briefcase',
+                items: [
+                    {
+                        label: 'Service Management',
+                        icon: 'pi pi-clock',
+                        routerLink: '/admin/services'
+                    },
+                    {
+                        label: 'Service Edit Requests',
+                        icon: 'pi pi-pencil',
+                        routerLink: '/admin/service-edit-requests'
+                    },
+                    {
+                        label: 'Service Requests',
+                        icon: 'pi pi-list',
+                        routerLink: '/admin/service-requests'
+                    }
+                ]
+            },
+            {
                 label: 'Reports',
                 icon: 'pi pi-chart-bar',
                 shortcut: '⌘+R',
@@ -119,8 +139,7 @@ export class AdminLayoutComponent {
         ];
     }
 
-    toggleSidebar() {
-        this.SidebarVisible = !this.SidebarVisible;
-    }
-
+  toggleSidebar() {
+    this.SidebarVisible = !this.SidebarVisible;
+  }
 }

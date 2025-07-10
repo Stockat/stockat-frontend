@@ -284,10 +284,10 @@
               </span>
               <span class="text-gray-400 text-sm">Created: {{ verification.createdAt ? (verification.createdAt | date:'medium') : 'N/A' }}</span>
               <span *ngIf="verification.updatedAt" class="text-gray-400 text-sm">Updated: {{ verification.updatedAt ? (verification.updatedAt | date:'medium') : 'N/A' }}</span>
-              
+
               <!-- Show delete button only if not approved -->
               <button *ngIf="verification.status !== 'Approved'" pButton type="button" label="Delete" class="mt-6 bg-red-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-red-700 transition-colors w-full" (click)="deleteUserVerification()" [loading]="verificationLoading" [disabled]="verificationLoading"></button>
-              
+
               <!-- Show upgrade to seller section if approved -->
               <div *ngIf="verification.status === 'Approved'" class="mt-6 w-full">
                 <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
@@ -326,7 +326,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- Update Form - Only show if not approved -->
             <form *ngIf="verification.status !== 'Approved'" [formGroup]="verifyForm" (ngSubmit)="updateUserVerification(verifyForm)" class="flex-1 flex flex-col gap-6 items-center">
               <div class="w-full flex flex-col items-center">
@@ -500,8 +500,8 @@
                   class="bg-white/80 backdrop-blur-sm rounded-xl p-4 mb-3 border border-white/20">
                   <div class="flex justify-between items-start mb-3">
                     <div class="flex-1">
-                      <h4 class="font-semibold text-gray-800 text-sm mb-1" [pTooltip]="req.serviceTitle">
-                        {{ req.serviceTitle }}
+                      <h4 class="font-semibold text-gray-800 text-sm mb-1" [pTooltip]="req.serviceNameSnapshot">
+                        {{ req.serviceNameSnapshot }}
                       </h4>
                       <p class="text-gray-600 text-xs mb-2">{{ req.sellerName || 'Unknown Seller' }}</p>
                     </div>
@@ -555,8 +555,8 @@
                   <ng-template pTemplate="body" let-req>
                     <tr class="border-b border-gray-100 hover:bg-pink-50/50 transition-all duration-200">
                       <td class="px-3 py-3">
-                        <div class="font-semibold text-gray-800 truncate" [pTooltip]="req.serviceTitle">
-                          {{ req.serviceTitle }}
+                        <div class="font-semibold text-gray-800 truncate" [pTooltip]="req.serviceNameSnapshot">
+                          {{ req.serviceNameSnapshot }}
                         </div>
                       </td>
                       <td class="px-3 py-3">
