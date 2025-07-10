@@ -1,0 +1,337 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Toasts and Confirm Dialogs (if needed) -->
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Header Section -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Service Requests</h1>
+        <p class="text-gray-600 mt-2">Review and manage all service requests in the system</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-blue-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-blue-100">
+          <i class="pi pi-list text-blue-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Total Requests</p>
+          <p class="text-2xl font-bold text-gray-900">{{ stats.total }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-yellow-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-yellow-100">
+          <i class="pi pi-clock text-yellow-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">In Progress</p>
+          <p class="text-2xl font-bold text-gray-900">{{ stats.inProgress }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-green-100">
+          <i class="pi pi-check-circle text-green-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Delivered</p>
+          <p class="text-2xl font-bold text-gray-900">{{ stats.delivered }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="bg-white rounded-lg shadow-sm mb-6">
+    <div class="border-b border-gray-200">
+      <nav class="flex px-6" aria-label="Tabs">
+        <button
+          (click)="onTabChange('all')"
+          [class]="activeTab === 'all' ? 'border-blue-500 text-blue-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-semibold'"
+          class="flex-1 whitespace-nowrap py-4 px-1 border-b-2 text-sm text-center"
+        >
+          All Requests ({{ stats.total }})
+        </button>
+        <button
+          (click)="onTabChange('inProgress')"
+          [class]="activeTab === 'inProgress' ? 'border-yellow-500 text-yellow-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-semibold'"
+          class="flex-1 whitespace-nowrap py-4 px-1 border-b-2 text-sm text-center"
+        >
+          In Progress ({{ stats.inProgress }})
+        </button>
+        <button
+          (click)="onTabChange('delivered')"
+          [class]="activeTab === 'delivered' ? 'border-green-500 text-green-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-semibold'"
+          class="flex-1 whitespace-nowrap py-4 px-1 border-b-2 text-sm text-center"
+        >
+          Delivered ({{ stats.delivered }})
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+    <label class="block text-sm font-medium text-gray-700 mb-2">Search Requests</label>
+    <input
+      pInputText
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="applyFilter()"
+      placeholder="Search by service, seller, or buyer..."
+      class="w-full pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    />
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
+    <p-table
+      [value]="filteredRequests"
+      [paginator]="true"
+      [rows]="size"
+      [totalRecords]="total"
+      [lazy]="true"
+      (onLazyLoad)="onPageChange($event)"
+      [loading]="loading"
+      [responsiveLayout]="'scroll'"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      class="p-datatable-sm border border-gray-200 rounded-lg"
+      styleClass="min-w-full"
+    >
+      <ng-template pTemplate="header">
+        <tr class="bg-gray-50 text-gray-700 text-sm">
+          <th class="px-4 py-3 font-semibold">ID</th>
+          <th class="px-4 py-3 font-semibold">Service</th>
+          <th class="px-4 py-3 font-semibold">Seller</th>
+          <th class="px-4 py-3 font-semibold">Buyer</th>
+          <th class="px-4 py-3 font-semibold text-center">Quantity</th>
+          <th class="px-4 py-3 font-semibold text-center">Status</th>
+          <th class="px-4 py-3 font-semibold">Created</th>
+          <th class="px-4 py-3 font-semibold text-center">View</th>
+          <th class="px-4 py-3 font-semibold text-left">Set Delivered</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-req>
+        <tr class="border-b border-gray-100 hover:bg-blue-50 transition-all duration-150 group text-sm">
+          <td class="px-4 py-2 font-semibold">{{ req.id }}</td>
+          <td class="px-4 py-2 max-w-xs truncate">
+            <span class="text-blue-700 font-medium group-hover:underline" [title]="req.serviceNameSnapshot">{{ req.serviceNameSnapshot }}</span>
+          </td>
+          <td class="px-4 py-2">
+            <button type="button" class="text-blue-700 hover:underline focus:outline-none bg-transparent cursor-pointer font-medium" (click)="showSellerModal(req.sellerId)">
+              {{ req.sellerName || '-' }}
+            </button>
+          </td>
+          <td class="px-4 py-2">
+            <button type="button" class="text-blue-700 hover:underline focus:outline-none bg-transparent cursor-pointer font-medium" (click)="showBuyerModal(req.buyerId)">
+              {{ req.buyerName || '-' }}
+            </button>
+          </td>
+          <td class="px-4 py-2 text-center">{{ req.requestedQuantity }}</td>
+          <td class="px-4 py-2 text-center">
+            <p-tag
+              [value]="req.serviceStatus"
+              [severity]="req.serviceStatus === 'InProgress' ? 'warning' : req.serviceStatus === 'Delivered' ? 'success' : req.serviceStatus === 'Pending' ? 'info' : req.serviceStatus === 'Cancelled' ? 'danger' : 'secondary'"
+              class="capitalize font-semibold"
+            ></p-tag>
+          </td>
+          <td class="px-4 py-2 text-gray-500">{{ req.createdAt | date:'short' }}</td>
+          <td class="px-4 py-2 text-center align-middle">
+            <button
+              pButton
+              type="button"
+              icon="pi pi-eye"
+              class="p-button-text p-button-sm"
+              (click)="showRequestDetails(req)"
+              title="View Details"
+            ></button>
+          </td>
+          <td class="px-4 py-2 text-left align-middle">
+            <div class="flex items-center justify-start min-h-[2rem]">
+              <button
+                *ngIf="req.serviceStatus === 'InProgress'"
+                pButton
+                type="button"
+                label="Mark as Delivered"
+                class="p-button-success p-button-sm text-xs font-medium whitespace-nowrap"
+                (click)="markAsDelivered(req)"
+              ></button>
+              <ng-container *ngIf="req.serviceStatus !== 'InProgress'">
+                <span *ngIf="req.serviceStatus === 'Delivered'" class="text-green-600 flex items-center" title="Already Delivered">
+                  <i class="pi pi-check-circle text-lg"></i>
+                </span>
+                <span *ngIf="req.serviceStatus === 'Pending'" class="text-gray-400 flex items-center" title="Pending">
+                  <i class="pi pi-clock text-lg"></i>
+                </span>
+                <span *ngIf="req.serviceStatus === 'Cancelled'" class="text-red-500 flex items-center" title="Cancelled">
+                  <i class="pi pi-times-circle text-lg"></i>
+                </span>
+                <span *ngIf="req.serviceStatus !== 'Delivered' && req.serviceStatus !== 'Pending' && req.serviceStatus !== 'Cancelled'" class="text-gray-400 flex items-center">-</span>
+              </ng-container>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8" class="text-center py-8">
+            <div class="flex flex-col items-center">
+              <i class="pi pi-list text-4xl text-gray-300 mb-4"></i>
+              <p class="text-gray-500 text-lg">No requests found.</p>
+              <p class="text-gray-400 text-sm">Try adjusting your search criteria</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Buyer Info Modal -->
+  <p-dialog [(visible)]="buyerModalVisible" [modal]="true" [closable]="true" [draggable]="false" [resizable]="false" [dismissableMask]="true" styleClass="p-dialog-md fixed-modal" header="Buyer Details" (onHide)="closeBuyerModal()">
+    <div *ngIf="buyerLoading" class="flex items-center justify-center min-h-[100px] text-gray-500">
+      <i class="pi pi-spin pi-spinner text-xl mr-2"></i> Loading buyer info...
+    </div>
+    <div *ngIf="!buyerLoading && buyerError" class="text-red-600 text-center py-4">
+      <i class="pi pi-times-circle mr-2"></i>{{ buyerError }}
+    </div>
+    <div *ngIf="!buyerLoading && !buyerError && buyerInfo">
+      <p-card class="w-full max-w-md mx-auto shadow-none border-none">
+        <div class="flex flex-col items-center space-y-4">
+          <p-avatar
+            [image]="buyerInfo.profileImageUrl || 'assets/img/unknown-user.png'"
+            shape="circle"
+            size="xlarge"
+            class="shadow border mb-2"
+          ></p-avatar>
+          <div class="text-xl font-bold text-gray-900 mb-1">{{ buyerInfo.fullName || buyerInfo.userName }}</div>
+          <div class="w-full grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            <div class="font-semibold text-gray-700">Username:</div>
+            <div>{{ buyerInfo.userName }}</div>
+            <div class="font-semibold text-gray-700">Email:</div>
+            <div>{{ buyerInfo.email }}</div>
+            <div class="font-semibold text-gray-700" *ngIf="buyerInfo.phoneNumber">Phone:</div>
+            <div *ngIf="buyerInfo.phoneNumber">{{ buyerInfo.phoneNumber }}</div>
+            <div class="font-semibold text-gray-700" *ngIf="buyerInfo.address">Address:</div>
+            <div *ngIf="buyerInfo.address">{{ buyerInfo.address }}</div>
+            <div class="font-semibold text-gray-700" *ngIf="buyerInfo.createdAt">Registered:</div>
+            <div *ngIf="buyerInfo.createdAt">{{ buyerInfo.createdAt | date:'medium' }}</div>
+            <div class="font-semibold text-gray-700" *ngIf="buyerInfo.isVerified !== undefined">Verified:</div>
+            <div *ngIf="buyerInfo.isVerified !== undefined">
+              <p-tag [severity]="buyerInfo.isVerified ? 'success' : 'danger'" [value]="buyerInfo.isVerified ? 'Yes' : 'No'"></p-tag>
+            </div>
+            <div class="font-semibold text-gray-700" *ngIf="buyerInfo.isActive !== undefined">Active:</div>
+            <div *ngIf="buyerInfo.isActive !== undefined">
+              <p-tag [severity]="buyerInfo.isActive ? 'success' : 'danger'" [value]="buyerInfo.isActive ? 'Yes' : 'No'"></p-tag>
+            </div>
+          </div>
+        </div>
+      </p-card>
+    </div>
+  </p-dialog>
+
+  <!-- Seller Info Modal -->
+  <p-dialog [(visible)]="sellerModalVisible" [modal]="true" [closable]="true" [draggable]="false" [resizable]="false" [dismissableMask]="true" styleClass="p-dialog-md fixed-modal" header="Seller Details" (onHide)="closeSellerModal()">
+    <div *ngIf="sellerLoading" class="flex items-center justify-center min-h-[100px] text-gray-500">
+      <i class="pi pi-spin pi-spinner text-xl mr-2"></i> Loading seller info...
+    </div>
+    <div *ngIf="!sellerLoading && sellerError" class="text-red-600 text-center py-4">
+      <i class="pi pi-times-circle mr-2"></i>{{ sellerError }}
+    </div>
+    <div *ngIf="!sellerLoading && !sellerError && sellerInfo">
+      <p-card class="w-full max-w-md mx-auto shadow-none border-none">
+        <div class="flex flex-col items-center space-y-4">
+          <p-avatar
+            [image]="sellerInfo.profileImageUrl || 'assets/img/unknown-user.png'"
+            shape="circle"
+            size="xlarge"
+            class="shadow border mb-2"
+          ></p-avatar>
+          <div class="text-xl font-bold text-gray-900 mb-1">{{ sellerInfo.fullName || sellerInfo.userName }}</div>
+          <div class="w-full grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            <div class="font-semibold text-gray-700">Username:</div>
+            <div>{{ sellerInfo.userName }}</div>
+            <div class="font-semibold text-gray-700">Email:</div>
+            <div>{{ sellerInfo.email }}</div>
+            <div class="font-semibold text-gray-700" *ngIf="sellerInfo.phoneNumber">Phone:</div>
+            <div *ngIf="sellerInfo.phoneNumber">{{ sellerInfo.phoneNumber }}</div>
+            <div class="font-semibold text-gray-700" *ngIf="sellerInfo.address">Address:</div>
+            <div *ngIf="sellerInfo.address">{{ sellerInfo.address }}</div>
+            <div class="font-semibold text-gray-700" *ngIf="sellerInfo.createdAt">Registered:</div>
+            <div *ngIf="sellerInfo.createdAt">{{ sellerInfo.createdAt | date:'medium' }}</div>
+            <div class="font-semibold text-gray-700" *ngIf="sellerInfo.isVerified !== undefined">Verified:</div>
+            <div *ngIf="sellerInfo.isVerified !== undefined">
+              <p-tag [severity]="sellerInfo.isVerified ? 'success' : 'danger'" [value]="sellerInfo.isVerified ? 'Yes' : 'No'"></p-tag>
+            </div>
+            <div class="font-semibold text-gray-700" *ngIf="sellerInfo.isActive !== undefined">Active:</div>
+            <div *ngIf="sellerInfo.isActive !== undefined">
+              <p-tag [severity]="sellerInfo.isActive ? 'success' : 'danger'" [value]="sellerInfo.isActive ? 'Yes' : 'No'"></p-tag>
+            </div>
+          </div>
+          <a [routerLink]="['/seller-profile', sellerInfo.id]" class="mt-4 p-button p-button-info p-button-sm text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition">View Public Profile</a>
+        </div>
+      </p-card>
+    </div>
+  </p-dialog>
+
+  <!-- Request Details Modal -->
+  <p-dialog
+    header="Service Request Details"
+    [(visible)]="requestDetailsModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [dismissableMask]="true"
+    styleClass="p-dialog-md fixed-modal max-w-2xl"
+    (onHide)="closeRequestDetailsModal()"
+  >
+    <ng-container *ngIf="selectedRequest">
+      <div class="space-y-6 bg-gray-50 rounded-lg p-4">
+        <!-- Main Info Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div class="bg-blue-50 rounded-lg p-4 flex flex-col items-center shadow-sm border">
+            <i class="pi pi-dollar text-blue-600 text-2xl mb-1"></i>
+            <div class="text-xs text-gray-500">Price per Product</div>
+            <div class="text-lg font-bold text-blue-800">{{ selectedRequest.pricePerProduct || selectedRequest.servicePricePerProductSnapshot || '-' }}</div>
+          </div>
+          <div class="bg-yellow-50 rounded-lg p-4 flex flex-col items-center shadow-sm border">
+            <i class="pi pi-clock text-yellow-600 text-2xl mb-1"></i>
+            <div class="text-xs text-gray-500">Estimated Time</div>
+            <div class="text-lg font-bold text-yellow-800">{{ selectedRequest.estimatedTime || selectedRequest.serviceEstimatedTimeSnapshot || '-' }}</div>
+          </div>
+          <div class="bg-green-50 rounded-lg p-4 flex flex-col items-center shadow-sm border">
+            <i class="pi pi-calculator text-green-600 text-2xl mb-1"></i>
+            <div class="text-xs text-gray-500">Total Price</div>
+            <div class="text-lg font-bold text-green-800">{{ selectedRequest.totalPrice || '-' }}</div>
+          </div>
+        </div>
+        <hr class="my-2 border-gray-200" />
+        <!-- Section: Request Info -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="text-lg font-bold text-blue-700 mb-4 flex items-center">
+            <i class="pi pi-info-circle mr-2 text-blue-500"></i>Request Information
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm">
+            <div><span class="font-semibold text-gray-700">Service Title:</span> <span class="text-gray-900">{{ selectedRequest.serviceTitle }}</span></div>
+            <div><span class="font-semibold text-gray-700">Requested Quantity:</span> <span class="text-gray-900">{{ selectedRequest.requestedQuantity }}</span></div>
+            <div class="md:col-span-2"><span class="font-semibold text-gray-700">Request Description:</span> <span class="text-gray-900 break-words">{{ selectedRequest.requestDescription }}</span></div>
+            <div><span class="font-semibold text-gray-700">Status:</span> <span class="capitalize text-gray-900">{{ selectedRequest.serviceStatus || '-' }}</span></div>
+            <div><span class="font-semibold text-gray-700">Payment Status:</span> <span class="text-gray-900">{{ selectedRequest.paymentStatus || '-' }}</span></div>
+            <div><span class="font-semibold text-gray-700">Seller Approval:</span> <span class="text-gray-900">{{ selectedRequest.sellerApprovalStatus || '-' }}</span></div>
+            <div><span class="font-semibold text-gray-700">Buyer Approval:</span> <span class="text-gray-900">{{ selectedRequest.buyerApprovalStatus || '-' }}</span></div>
+            <div><span class="font-semibold text-gray-700">Seller Offer Attempts:</span> <span class="text-gray-900">{{ selectedRequest.sellerOfferAttempts }}</span></div>
+            <div><span class="font-semibold text-gray-700">Created At:</span> <span class="text-gray-900">{{ selectedRequest.createdAt | date:'short' }}</span></div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </p-dialog>
+</div>

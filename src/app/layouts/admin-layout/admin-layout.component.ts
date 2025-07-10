@@ -82,6 +82,11 @@ export class AdminLayoutComponent {
                         label: 'Service Edit Requests',
                         icon: 'pi pi-pencil',
                         routerLink: '/admin/service-edit-requests'
+                    },
+                    {
+                        label: 'Service Requests',
+                        icon: 'pi pi-list',
+                        routerLink: '/admin/service-requests'
                     }
                 ]
             },

@@ -51,10 +51,10 @@ export class UserService {
 
   // Admin User Management Endpoints
   getAllUsers(
-    page: number = 1, 
-    size: number = 10, 
-    searchTerm?: string, 
-    isActive?: boolean, 
+    page: number = 1,
+    size: number = 10,
+    searchTerm?: string,
+    isActive?: boolean,
     isVerified?: boolean,
     isBlocked?: boolean
   ): Observable<GenericResponseDto<PaginatedDto<UserReadDto[]>>> {
@@ -63,7 +63,7 @@ export class UserService {
     if (isActive !== undefined) params += `&isActive=${isActive}`;
     if (isVerified !== undefined) params += `&isVerified=${isVerified}`;
     if (isBlocked !== undefined) params += `&isBlocked=${isBlocked}`;
-    
+
     return this.http.get<GenericResponseDto<PaginatedDto<UserReadDto[]>>>(`${this.apiUrl}/admin/all?${params}`);
   }
 
