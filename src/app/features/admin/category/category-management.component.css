@@ -1,0 +1,85 @@
+/* Custom styles for category management component */
+/* Most styling is handled by Tailwind CSS classes */
+
+/* Custom scrollbar for table */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Dialog animations */
+:host ::ng-deep .p-dialog {
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+:host ::ng-deep .p-dialog .p-dialog-header {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1.5rem;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-content {
+  padding: 0;
+}
+
+:host ::ng-deep .p-dialog .p-dialog-footer {
+  border-top: 1px solid #e5e7eb;
+  padding: 1.5rem;
+}
+
+/* Table styling enhancements */
+:host ::ng-deep .p-table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+:host ::ng-deep .p-table .p-table-thead > tr > th {
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #374151;
+}
+
+:host ::ng-deep .p-table .p-table-tbody > tr:hover {
+  background-color: #f9fafb;
+}
+
+/* Button styling */
+:host ::ng-deep .p-button.p-button-text {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+:host ::ng-deep .p-button.p-button-text:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Toast styling */
+:host ::ng-deep .p-toast .p-toast-message {
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Confirm dialog styling */
+:host ::ng-deep .p-confirmdialog .p-dialog {
+  border-radius: 12px;
+}
+
+:host ::ng-deep .p-confirmdialog .p-confirmdialog-message {
+  font-size: 1rem;
+  line-height: 1.5;
+}
