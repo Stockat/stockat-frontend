@@ -18,6 +18,10 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./category/category-management.component').then(m => m.CategoryManagementComponent)
     },
     {
+        path: 'tags',
+        loadComponent: () => import('./tag/tag-management.component').then(m => m.TagManagementComponent)
+    },
+    {
         path: 'users',
         loadComponent: () => import('./user/user-management.component').then(m => m.UserManagementComponent)
       },
