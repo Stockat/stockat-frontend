@@ -26,6 +26,8 @@ export class ServiceDetailsComponent {
   isCheckingPendingRequest = true; // Add loading state for pending request check
   errorMessage: string | null = null;
   requestErrorMessage: string | null = null;
+  deliveredRequestId: number | null = null;
+  deliveredRequestLoading: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -46,11 +48,35 @@ export class ServiceDetailsComponent {
         this.errorMessage = null;
         // Check for pending request for this service
         this.checkPendingRequest(id);
+        // Find delivered request for review
+        this.findDeliveredRequestForReview();
       },
       error: (error) => {
         console.error('Error loading service:', error);
         this.errorMessage = error?.error || 'Service not found.';
         this.isCheckingPendingRequest = false;
+      }
+    });
+  }
+
+  findDeliveredRequestForReview() {
+    if (!this.service) return;
+    this.deliveredRequestLoading = true;
+    this.requestService.getBuyerRequests(1, 100).subscribe({
+      next: (response: any) => {
+        if (response && response.data && response.data.paginatedData) {
+          const delivered = response.data.paginatedData.find(
+            (req: any) => req.serviceId === this.service!.id && req.serviceStatus === 'Delivered'
+          );
+          this.deliveredRequestId = delivered ? delivered.id : null;
+        } else {
+          this.deliveredRequestId = null;
+        }
+        this.deliveredRequestLoading = false;
+      },
+      error: (error) => {
+        this.deliveredRequestId = null;
+        this.deliveredRequestLoading = false;
       }
     });
   }

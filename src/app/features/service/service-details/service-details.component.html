@@ -171,12 +171,19 @@
     </div>
 
     <!-- Review Section -->
-    <app-review-section
-      *ngIf="service"
-      [itemId]="service.id"
-      itemType="service"
-      (reviewSubmitted)="onReviewSubmitted()">
-    </app-review-section>
+    <ng-container *ngIf="!deliveredRequestLoading">
+      <app-review-section
+        *ngIf="service"
+        [itemId]="service.id"
+        itemType="service"
+        [serviceRequestId]="deliveredRequestId !== null ? deliveredRequestId : undefined"
+        (reviewSubmitted)="onReviewSubmitted()">
+      </app-review-section>
+    </ng-container>
+    <div *ngIf="deliveredRequestLoading" class="flex items-center justify-center py-8">
+      <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      <span class="ml-4 text-blue-700 font-semibold">Checking review eligibility...</span>
+    </div>
   </div>
 
   <!-- Loading State for Service -->
