@@ -1,4 +1,5 @@
 export interface ServiceRequestDto {
+  id: number;
   serviceId: number;
   serviceTitle: string;
   requestedQuantity: number;
@@ -15,4 +16,14 @@ export interface ServiceRequestDto {
   imageUrl?: string;
   sellerOfferAttempts:number;
   createdAt: Date;
+  buyerName?: string;
+  buyerId?: string;
+
+  // SNAPSHOT FIELDS
+  serviceNameSnapshot: string;
+  serviceDescriptionSnapshot?: string;
+  serviceMinQuantitySnapshot: number;
+  servicePricePerProductSnapshot: number;
+  serviceEstimatedTimeSnapshot?: string;
+  serviceImageUrlSnapshot?: string;
 }

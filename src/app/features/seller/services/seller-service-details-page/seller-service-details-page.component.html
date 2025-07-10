@@ -363,15 +363,26 @@
           <label class="block text-sm font-semibold text-gray-700">
             Estimated Time <span class="text-red-500">*</span>
           </label>
-          <input
-            pInputText
-            type="text"
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
-            formControlName="estimatedTime"
-            placeholder="e.g. 3 days"
-            [disabled]="offerLoading" />
-          <div *ngIf="offerForm.get('estimatedTime')?.invalid && offerForm.get('estimatedTime')?.touched" class="text-red-500 text-xs">
-            Required.
+          <div class="flex gap-2">
+            <input
+              pInputText
+              type="number"
+              min="1"
+              class="w-2/5 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
+              formControlName="estimatedTimeValue"
+              placeholder="Value"
+              [disabled]="offerLoading" />
+            <select
+              formControlName="estimatedTimeUnit"
+              class="w-3/5 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
+              [disabled]="offerLoading">
+              <option value="day(s)">day(s)</option>
+              <option value="week(s)">week(s)</option>
+              <option value="month(s)">month(s)</option>
+            </select>
+          </div>
+          <div *ngIf="(offerForm.get('estimatedTimeValue')?.invalid && offerForm.get('estimatedTimeValue')?.touched) || (offerForm.get('estimatedTimeUnit')?.invalid && offerForm.get('estimatedTimeUnit')?.touched)" class="text-red-500 text-xs">
+            Required and must be positive.
           </div>
         </div>
 
@@ -711,15 +722,15 @@
                 <p class="text-green-600 text-sm">Your offered price for each item</p>
               </div>
             </div>
-            <div *ngIf="selectedRequestDetails.pricePerProduct != null && selectedRequestDetails.pricePerProduct !== 0; else notSetPrice" class="mt-4">
+            <div *ngIf="selectedRequestDetails.servicePricePerProductSnapshot != null && selectedRequestDetails.servicePricePerProductSnapshot !== 0; else notSetPrice" class="mt-4">
               <div class="flex items-baseline gap-2">
-                <span class="text-3xl font-bold text-green-700">${{ selectedRequestDetails.pricePerProduct }}</span>
+                <span class="text-3xl font-bold text-green-700">${{ selectedRequestDetails.servicePricePerProductSnapshot }}</span>
                 <span class="text-green-600 text-sm">per item</span>
               </div>
             </div>
             <ng-template #notSetPrice>
               <div class="mt-4">
-                <p class="text-gray-400 italic text-lg">No price set yet</p>
+                <p class="text-gray-400 italic text-lg">Not set yet</p>
                 <p class="text-gray-500 text-sm">Click "Set Offer" to add pricing</p>
               </div>
             </ng-template>
@@ -737,13 +748,13 @@
                   <p class="text-green-600 text-sm">Total for all items</p>
                 </div>
               </div>
-              <div *ngIf="selectedRequestDetails.pricePerProduct != null && selectedRequestDetails.pricePerProduct !== 0 && selectedRequestDetails.requestedQuantity != null && selectedRequestDetails.requestedQuantity !== 0; else notSetTotal" class="mt-4">
+              <div *ngIf="selectedRequestDetails.servicePricePerProductSnapshot != null && selectedRequestDetails.servicePricePerProductSnapshot !== 0 && selectedRequestDetails.requestedQuantity != null && selectedRequestDetails.requestedQuantity !== 0; else notSetTotal" class="mt-4">
                 <div class="flex items-baseline gap-2">
-                  <span class="text-3xl font-bold text-green-700">${{ (selectedRequestDetails.pricePerProduct * selectedRequestDetails.requestedQuantity) | number:'1.2-2' }}</span>
+                  <span class="text-3xl font-bold text-green-700">${{ selectedRequestDetails.totalPrice }}</span>
                   <span class="text-green-600 text-sm">total</span>
                 </div>
                 <p class="text-green-600 text-sm mt-1">
-                  {{ selectedRequestDetails.requestedQuantity }} items × ${{ selectedRequestDetails.pricePerProduct }}
+                  {{ selectedRequestDetails.requestedQuantity }} items × ${{ selectedRequestDetails.servicePricePerProductSnapshot }}
                 </p>
               </div>
               <ng-template #notSetTotal>
@@ -764,12 +775,12 @@
                   <p class="text-green-600 text-sm">Delivery timeline</p>
                 </div>
               </div>
-              <div *ngIf="selectedRequestDetails.estimatedTime; else notSetTime" class="mt-4">
-                <p class="text-2xl font-bold text-green-700">{{ selectedRequestDetails.estimatedTime }}</p>
+              <div *ngIf="selectedRequestDetails.serviceEstimatedTimeSnapshot; else notSetTime" class="mt-4">
+                <p class="text-2xl font-bold text-green-700">{{ selectedRequestDetails.serviceEstimatedTimeSnapshot }}</p>
               </div>
               <ng-template #notSetTime>
                 <div class="mt-4">
-                  <p class="text-gray-400 italic text-lg">Not set</p>
+                  <p class="text-gray-400 italic text-lg">Not set yet</p>
                   <p class="text-gray-500 text-sm">Add delivery time</p>
                 </div>
               </ng-template>

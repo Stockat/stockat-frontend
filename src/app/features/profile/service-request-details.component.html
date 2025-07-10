@@ -71,11 +71,11 @@
                 <div>
                   <h1 class="text-3xl font-bold text-gray-800">
                     <a *ngIf="request.serviceId" [routerLink]="['/services', request.serviceId]" class="hover:text-pink-600 transition-colors">
-                      {{ request.serviceTitle }}
+                      {{ request.serviceNameSnapshot }}
                     </a>
-                    <span *ngIf="!request.serviceId">{{ request.serviceTitle }}</span>
+                    <span *ngIf="!request.serviceId">{{ request.serviceNameSnapshot }}</span>
                   </h1>
-                  <p class="text-gray-600 mt-2">{{ request.requestDescription }}</p>
+                  <p class="text-gray-600 mt-2">{{ request.serviceDescriptionSnapshot }}</p>
                 </div>
               </div>
             </div>
@@ -112,8 +112,8 @@
                 <div>
                   <p class="text-xs text-gray-500">Seller Offer</p>
                   <p class="font-bold text-gray-800">
-                    <span *ngIf="request.pricePerProduct != null && request.pricePerProduct !== 0">${{ request.pricePerProduct }}</span>
-                    <span *ngIf="!request.pricePerProduct || request.pricePerProduct === 0" class="text-gray-400 italic">Not set yet</span>
+                    <span *ngIf="request.servicePricePerProductSnapshot != null && request.servicePricePerProductSnapshot !== 0">${{ request.servicePricePerProductSnapshot }}</span>
+                    <span *ngIf="!request.servicePricePerProductSnapshot || request.servicePricePerProductSnapshot === 0" class="text-gray-400 italic">Not set yet</span>
                   </p>
                 </div>
               </div>

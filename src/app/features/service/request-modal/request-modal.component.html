@@ -1,5 +1,15 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-white/40 to-blue-100/40 backdrop-blur-sm">
-  <div class="relative bg-white/80 backdrop-blur-xl border border-blue-100 shadow-2xl rounded-3xl w-full max-w-lg p-0 overflow-hidden animate-fade-in">
+<div class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
+  <div class="relative bg-white/90 border border-blue-100 shadow-2xl rounded-3xl w-full max-w-lg p-0 overflow-hidden animate-fade-in">
+    <!-- Add this at the top of the modal -->
+    <div class="bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 rounded mb-4 flex items-start">
+      <i class="pi pi-info-circle text-2xl mr-3 mt-1"></i>
+      <div>
+        <div class="font-semibold mb-1">How Service Requests Work</div>
+        <div>
+          After you submit your request, the seller will reply with an offer that includes the <span class="font-bold">price per product</span> and the <span class="font-bold">estimated time for completion</span>.
+        </div>
+      </div>
+    </div>
     <!-- Close Button -->
     <button class="absolute top-4 right-4 text-gray-400 hover:text-blue-600 text-2xl z-10" (click)="handleClose()" aria-label="Close">
       <i class="pi pi-times"></i>

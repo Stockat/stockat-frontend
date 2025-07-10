@@ -38,6 +38,10 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./services/service-edit-requests/service-edit-requests.component').then(m => m.ServiceEditRequestsComponent)
       },
       {
+        path: 'service-requests',
+        loadComponent: () => import('./services/service-requests/service-requests.component').then(m => m.ServiceRequestsComponent)
+      },
+      {
         path: '',
         redirectTo: 'users',
         pathMatch: 'full'
