@@ -44,7 +44,7 @@
           </div>
           <div>
             <p class="text-sm text-gray-500">Active Services</p>
-            <p class="text-2xl font-bold text-gray-900">{{ getActiveServicesCount() }}</p>
+            <!-- <p class="text-2xl font-bold text-gray-900">{{ getActiveServicesCount() }}</p> -->
           </div>
         </div>
       </div>
@@ -83,7 +83,7 @@
         <p class="text-gray-600 font-semibold mt-4">Loading your services...</p>
       </div>
       <!-- Empty State -->
-      <div *ngIf="!loading && !accountNotVerified && (!getFilteredServices() || getFilteredServices().length === 0)" class="text-center py-16">
+      <div *ngIf="!loading && !accountNotVerified && (!services || services.length === 0)" class="text-center py-16">
         <div class="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
           <i class="pi pi-briefcase text-white text-3xl"></i>
         </div>
@@ -99,26 +99,10 @@
         </button>
       </div>
       <!-- Services Table -->
-      <div *ngIf="!loading && !accountNotVerified && getFilteredServices() && getFilteredServices().length > 0" class="overflow-x-auto">
-        <!-- Filter Toggle -->
-        <div class="p-4 border-b border-gray-100 bg-gray-50">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  [(ngModel)]="showDeletedServices"
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                <span class="text-sm text-gray-700">Show deleted services</span>
-              </label>
-            </div>
-            <div class="text-sm text-gray-500">
-              Showing {{ getFilteredServices().length }} of {{ services.length }} services
-            </div>
-          </div>
-        </div>
+      <div *ngIf="!loading && !accountNotVerified && services && services.length > 0" class="overflow-x-auto">
+        <!-- Removed filter toggle and deleted services UI -->
         <p-table
-          [value]="getFilteredServices()"
+          [value]="services"
           styleClass="p-datatable-lg"
           class="modern-table"
           [scrollable]="true"
@@ -158,7 +142,6 @@
               <td class="px-6 py-4">
                 <div class="text-gray-700 text-sm" [class.line-through]="service.isDeleted">{{ service.estimatedTime }}</div>
               </td>
-
               <td class="px-6 py-4">
                 <ng-container [ngSwitch]="service.isApproved">
                   <span *ngSwitchCase="'Pending'" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-800">
@@ -184,13 +167,23 @@
                     (click)="viewServiceDetails(service)"
                     pTooltip="View Details">
                   </button>
+                  <!-- Edit button for approved services -->
                   <button
-                    *ngIf="!service.isDeleted"
+                    *ngIf="!service.isDeleted && service.isApproved === 'Approved'"
                     pButton
                     icon="pi pi-pencil"
                     class="p-button-sm p-button-rounded p-button-outlined p-button-warning"
                     (click)="editService(service)"
                     pTooltip="Edit Service">
+                  </button>
+                  <!-- Reactivate button for rejected services -->
+                  <button
+                    *ngIf="!service.isDeleted && service.isApproved === 'Rejected'"
+                    pButton
+                    icon="pi pi-refresh"
+                    class="p-button-sm p-button-rounded p-button-outlined p-button-purple"
+                    (click)="reactivateService(service)"
+                    pTooltip="Reactivate Service">
                   </button>
                   <button
                     *ngIf="!service.isDeleted"
@@ -200,14 +193,7 @@
                     (click)="deleteService(service)"
                     pTooltip="Delete Service">
                   </button>
-                  <button
-                    *ngIf="service.isDeleted"
-                    pButton
-                    icon="pi pi-refresh"
-                    class="p-button-sm p-button-rounded p-button-outlined p-button-success"
-                    (click)="restoreService(service)"
-                    pTooltip="Restore Service">
-                  </button>
+                  <!-- Restore button removed -->
                 </div>
               </td>
             </tr>

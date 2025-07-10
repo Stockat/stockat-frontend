@@ -1,8 +1,23 @@
 <p-dialog [(visible)]="visible" [modal]="true" [closable]="true" [style]="{width: '400px'}" (onHide)="close.emit()">
   <ng-template pTemplate="header">
-    <span>Edit Service</span>
+    <span>{{ isReactivation ? 'Reactivate Service' : 'Edit Service' }}</span>
   </ng-template>
   <form *ngIf="form" [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+    <!-- Reactivation Notice -->
+    <div *ngIf="isReactivation" class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <i class="pi pi-refresh text-purple-400 text-xl"></i>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-purple-800">Service Reactivation</h3>
+          <div class="mt-1 text-sm text-purple-700">
+            <p>This service was previously rejected. Please update the information to fix the issues before reactivating.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="flex flex-col items-center mb-2">
       <label class="block font-medium mb-1">Service Image</label>
       <img *ngIf="imagePreview" [src]="imagePreview" alt="Service Image Preview" class="w-24 h-24 object-cover rounded shadow border mb-2" />
@@ -42,7 +57,7 @@
     </div>
     <div class="flex justify-end gap-2 mt-4">
       <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="close.emit()"></button>
-      <button pButton type="submit" label="Save" class="p-button-success" [disabled]="form.invalid"></button>
+      <button pButton type="submit" [label]="isReactivation ? 'Reactivate' : 'Save'" class="p-button-success" [disabled]="form.invalid"></button>
     </div>
   </form>
 </p-dialog>

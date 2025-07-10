@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { FormsModule } from '@angular/forms';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 
 @Component({
   selector: 'app-service-list',
@@ -38,7 +39,8 @@ export class SellerServiceListComponent implements OnInit {
   selectedServiceForImage: any = null;
   accountNotVerified: boolean = false;
   initialized: boolean = false;
-  showDeletedServices: boolean = false;
+  // Remove showDeletedServices flag
+  // showDeletedServices: boolean = false;
 
 
   // Computed property for table first position
@@ -56,18 +58,18 @@ export class SellerServiceListComponent implements OnInit {
     return average.toFixed(2);
   }
 
-  // Get filtered services based on showDeletedServices flag
-  getFilteredServices(): any[] {
-    if (this.showDeletedServices) {
-      return this.services;
-    }
-    return this.services.filter(service => !service.isDeleted);
-  }
+  // Remove getFilteredServices method
+  // getFilteredServices(): any[] {
+  //   if (this.showDeletedServices) {
+  //     return this.services;
+  //   }
+  //   return this.services.filter(service => !service.isDeleted);
+  // }
 
-  // Get count of active (non-deleted) services
-  getActiveServicesCount(): number {
-    return this.services.filter(service => !service.isDeleted).length;
-  }
+  // Remove getActiveServicesCount method
+  // getActiveServicesCount(): number {
+  //   return this.services.filter(service => !service.isDeleted).length;
+  // }
 
   // Truncate text to specified length
   truncateText(text: string, maxLength: number): string {
@@ -81,7 +83,8 @@ export class SellerServiceListComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private router: Router
+    private router: Router,
+    private errorHandler: ErrorHandlerService
   ) {}
 
   ngOnInit() {
@@ -97,7 +100,7 @@ export class SellerServiceListComponent implements OnInit {
     this.serviceService.getMyServices(apiPage, this.size).subscribe({
       next: (response) => {
         if (response && response.data && response.data.paginatedData) {
-          this.services = response.data.paginatedData;
+          this.services = response.data.paginatedData.filter((service: any) => !service.isDeleted);
           this.totalCount = response.data.count || 0;
         } else {
           this.services = [];
@@ -164,38 +167,44 @@ onPageChange(event: any) {
     });
   }
 
-  restoreService(service: any) {
-    this.confirmationService.confirm({
-      message: 'Are you sure you want to restore this service?',
-      header: 'Restore Confirmation',
-      icon: 'pi pi-question-circle',
-      accept: () => {
-        this.serviceService.restoreService(service.id).subscribe({
-          next: () => {
-            this.loadSellerServices(); // Reload to get updated list
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Success',
-              detail: 'Service has been restored successfully'
-            });
-          },
-          error: (error) => {
-            const detail = error?.error || 'Failed to restore service';
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail
-            });
-            console.error('Error restoring service:', error);
-          }
-        });
-      }
-    });
-  }
+  // Remove restoreService method
+  // restoreService(service: any) {
+  //   this.confirmationService.confirm({
+  //     message: 'Are you sure you want to restore this service?',
+  //     header: 'Restore Confirmation',
+  //     icon: 'pi pi-question-circle',
+  //     accept: () => {
+  //       this.serviceService.restoreService(service.id).subscribe({
+  //         next: () => {
+  //           this.loadSellerServices(); // Reload to get updated list
+  //           this.messageService.add({
+  //             severity: 'success',
+  //             summary: 'Success',
+  //             detail: 'Service has been restored successfully'
+  //           });
+  //         },
+  //         error: (error) => {
+  //           const detail = error?.error || 'Failed to restore service';
+  //           this.messageService.add({
+  //             severity: 'error',
+  //             summary: 'Error',
+  //             detail
+  //           });
+  //           console.error('Error restoring service:', error);
+  //         }
+  //       });
+  //     }
+  //   });
+  // }
 
   editService(service: any) {
     this.selectedService = service;
     this.editModalVisible = true;
+  }
+
+  reactivateService(service: any) {
+    this.selectedService = service;
+    this.editModalVisible = true; // Reuse the same modal for reactivation
   }
 
   handleEditModalClose() {
@@ -205,65 +214,84 @@ onPageChange(event: any) {
 
   handleEditModalSave(payload: any) {
     const serviceId = payload.id;
+    const isReactivation = this.selectedService.isApproved === 'Rejected';
+
     // Map frontend fields to backend DTO fields
-    const editRequest = {
+    const request = {
       EditedName: payload.name,
       EditedDescription: payload.description,
       EditedMinQuantity: payload.minQuantity,
       EditedPricePerProduct: payload.pricePerProduct,
       EditedEstimatedTime: payload.estimatedTime,
-      EditedImageId: payload.EditedImageId || '',
-      EditedImageUrl: payload.EditedImageUrl || ''
+      EditedImageId: payload.EditedImageId || this.selectedService.imageId || '',
+      EditedImageUrl: payload.EditedImageUrl || this.selectedService.imageUrl || ''
     };
+
+    const submitRequest = (requestData: any) => {
+      if (isReactivation) {
+        return this.serviceService.submitReactivationRequest(serviceId, requestData);
+      } else {
+        return this.serviceService.submitEditRequest(serviceId, requestData);
+      }
+    };
+
+    const successMessage = isReactivation
+      ? 'Reactivation request submitted successfully'
+      : 'Edit request submitted successfully';
+
     if (payload.file) {
       this.serviceService.uploadServiceImage(payload.file, serviceId).subscribe({
         next: (imgRes) => {
-          editRequest.EditedImageId = imgRes.fileId;
-          editRequest.EditedImageUrl = imgRes.url;
-          this.serviceService.submitEditRequest(serviceId, editRequest).subscribe({
+          request.EditedImageId = imgRes.fileId;
+          request.EditedImageUrl = imgRes.url;
+          submitRequest(request).subscribe({
             next: () => {
               this.handleEditModalClose();
               this.messageService.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: 'Edit request submitted successfully'
+                detail: successMessage
               });
             },
             error: (error) => {
+              const errorMessage = this.errorHandler.extractErrorMessage(error);
               this.messageService.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Failed to submit edit request'
+                detail: errorMessage
               });
-              console.error('Error submitting edit request:', error);
+              console.error('Error submitting request:', error);
             }
           });
         },
         error: (error) => {
+          const errorMessage = this.errorHandler.extractErrorMessage(error);
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to upload image'
+            detail: errorMessage
           });
+          console.error('Error uploading image:', error);
         }
       });
     } else {
-      this.serviceService.submitEditRequest(serviceId, editRequest).subscribe({
+      submitRequest(request).subscribe({
         next: () => {
           this.handleEditModalClose();
           this.messageService.add({
             severity: 'success',
             summary: 'Success',
-            detail: 'Edit request submitted successfully'
+            detail: successMessage
           });
         },
         error: (error) => {
+          const errorMessage = this.errorHandler.extractErrorMessage(error);
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to submit edit request'
+            detail: errorMessage
           });
-          console.error('Error submitting edit request:', error);
+          console.error('Error submitting request:', error);
         }
       });
     }
@@ -314,8 +342,8 @@ onPageChange(event: any) {
             },
             error: (error) => {
               this.isAddingService = false;
-              const detail = error?.error || 'Failed to add service';
-              if (typeof detail === 'string' && detail.includes('not verified by admin')) {
+              const errorMessage = this.errorHandler.extractErrorMessage(error);
+              if (typeof errorMessage === 'string' && errorMessage.includes('not verified by admin')) {
                 this.accountNotVerified = true;
                 this.handleAddModalClose();
                 this.messageService.add({
@@ -330,7 +358,7 @@ onPageChange(event: any) {
               this.messageService.add({
                 severity: 'error',
                 summary: 'Error',
-                detail
+                detail: errorMessage
               });
               console.error('Error adding service:', error);
             }
@@ -338,11 +366,11 @@ onPageChange(event: any) {
         },
         error: (error) => {
           this.isAddingService = false;
-          const detail = error?.error || 'Failed to upload image';
+          const errorMessage = this.errorHandler.extractErrorMessage(error);
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail
+            detail: errorMessage
           });
           console.error('Error uploading image:', error);
         }
@@ -362,8 +390,8 @@ onPageChange(event: any) {
         },
         error: (error) => {
           this.isAddingService = false;
-          const detail = error?.error || 'Failed to add service';
-          if (typeof detail === 'string' && detail.includes('not verified by admin')) {
+          const errorMessage = this.errorHandler.extractErrorMessage(error);
+          if (typeof errorMessage === 'string' && errorMessage.includes('not verified by admin')) {
             this.accountNotVerified = true;
             this.handleAddModalClose();
             this.messageService.add({
@@ -378,7 +406,7 @@ onPageChange(event: any) {
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail
+            detail: errorMessage
           });
           console.error('Error adding service:', error);
         }

@@ -30,6 +30,10 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./services/pending-services/pending-services.component').then(m => m.PendingServicesComponent)
       },
       {
+        path: 'service-edit-requests',
+        loadComponent: () => import('./services/service-edit-requests/service-edit-requests.component').then(m => m.ServiceEditRequestsComponent)
+      },
+      {
         path: '',
         redirectTo: 'users',
         pathMatch: 'full'

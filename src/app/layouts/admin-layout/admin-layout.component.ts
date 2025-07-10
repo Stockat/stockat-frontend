@@ -75,12 +75,12 @@ export class AdminLayoutComponent {
                 icon: 'pi pi-briefcase',
                 items: [
                     {
-                        label: 'All Services',
+                        label: 'Service Management',
                         icon: 'pi pi-clock',
                         routerLink: '/admin/services'
                     },
                     {
-                        label: 'Edit Requests',
+                        label: 'Service Edit Requests',
                         icon: 'pi pi-pencil',
                         routerLink: '/admin/service-edit-requests'
                     }

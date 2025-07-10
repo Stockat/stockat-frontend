@@ -21,6 +21,10 @@ export class ServiceEditModalComponent {
   selectedFile: File | null = null;
   imagePreview: string | null = null;
 
+  get isReactivation(): boolean {
+    return this.service?.isApproved === 'Rejected';
+  }
+
   constructor(private fb: FormBuilder) {}
 
   ngOnChanges() {
@@ -71,7 +75,18 @@ export class ServiceEditModalComponent {
     if (this.form.valid) {
       const { estimatedTimeValue, estimatedTimeUnit, ...rest } = this.form.value;
       const estimatedTime = `${estimatedTimeValue} ${estimatedTimeUnit}`;
-      this.save.emit({ ...this.service, ...rest, estimatedTime, file: this.selectedFile });
+
+      // Include existing image information if no new file is selected
+      const payload = {
+        ...this.service,
+        ...rest,
+        estimatedTime,
+        file: this.selectedFile,
+        EditedImageId: this.selectedFile ? undefined : this.service.imageId,
+        EditedImageUrl: this.selectedFile ? undefined : this.service.imageUrl
+      };
+
+      this.save.emit(payload);
     }
   }
 }

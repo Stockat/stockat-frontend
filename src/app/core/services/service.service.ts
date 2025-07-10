@@ -64,6 +64,11 @@ export class ServiceService {
     return this.http.post<any>(`http://localhost:5250/api/ServiceEditRequest/${serviceId}`, editRequest);
   }
 
+  // Submit reactivation request for rejected services
+  submitReactivationRequest(serviceId: number, reactivationRequest: any): Observable<any> {
+    return this.http.post<any>(`http://localhost:5250/api/ServiceEditRequest/reactivate/${serviceId}`, reactivationRequest);
+  }
+
   deleteService(id: number): Observable<any> {
     return this.http.patch<any>(`${this.baseUrl}/${id}/delete`, {});
   }
