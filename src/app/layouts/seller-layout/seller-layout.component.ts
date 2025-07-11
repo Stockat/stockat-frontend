@@ -91,11 +91,6 @@ export class SellerLayoutComponent {
             route: '/seller/services',
             routerLink: '/seller/services',
             routerLinkActiveOptions: { endWith: '/seller/services' }
-          },
-          {
-            label: 'Privacy',
-            icon: 'pi pi-shield',
-            shortcut: '⌘+P'
           }
         ]
       },
@@ -127,7 +122,7 @@ export class SellerLayoutComponent {
             routerLink: '/seller/analysis',
             routerLinkActiveOptions: { exact: true }
           },
-          
+
         ]
       },
       {
