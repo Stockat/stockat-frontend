@@ -49,44 +49,7 @@
                   class="flex items-center gap-2 px-3 py-1 text-sm font-medium border rounded text-gray-700 border-gray-300 hover:bg-gray-100 transition">
                   <i class="pi pi-eye text-blue-600"></i>
                 </button>
-                
-                <!-- Pay Button (for buyer only) -->
-                <button *ngIf="userRole === 'Buyer' && showPayButton(order.status)"
-                        pButton pRipple
-                        icon="pi pi-dollar"
-                        label="Proceed/Pay"
-                        class="p-button-lg p-button-primary w-full mb-2"
-                        style="font-size: 1.1rem; font-weight: 600;"
-                        (click)="openAddressDialog(order)">
-                </button>
-                <button *ngIf="showMarkDeliveredButton(order.status)"
-                        pButton pRipple
-                        icon="pi pi-check"
-                        label="Mark as Delivered"
-                        class="p-button-sm p-button-info"
-                        (click)="markAsDelivered(order)">
-                </button>
-                <button *ngIf="showMarkCompletedButton(order.status)"
-                        pButton pRipple
-                        icon="pi pi-check-circle"
-                        label="Mark as Completed"
-                        class="p-button-sm p-button-success"
-                        (click)="markAsCompleted(order)">
-                </button>
-                
-                <!-- Status Dropdown -->
-                <p-dropdown [options]="getValidStatuses(order.status)" 
-                            [(ngModel)]="order.status" 
-                            [disabled]="statusChangeLoading"
-                            (onChange)="confirmStatusChange(order, $event.value)"
-                            appendTo="body">
-                  <ng-template pTemplate="dropdownicon">
-                    <i class="pi pi-cog"></i>
-                  </ng-template>
-                  <ng-template let-status pTemplate="item">
-                    <span [class]="getStatusClass(status)">{{ status }}</span>
-                  </ng-template>
-                </p-dropdown>
+                <!-- Status change actions moved to dialog -->
               </div>
             </td>
           </tr>
@@ -163,7 +126,7 @@
             <div class="bg-blue-50 p-3 rounded-lg" *ngIf="userRole !== 'Buyer'">
               <div class="flex justify-between items-center">
                 <label class="text-sm font-medium text-gray-500">Seller</label>
-                <span *ngIf="userRole === 'Seller'" class="text-xs text-gray-500">(You)</span>
+                <span *ngIf="isSellerOfThisOrder" class="text-xs text-gray-500">(You)</span>
               </div>
               <p class="font-semibold">{{ getSellerName(selectedOrder) }}</p>
               <p *ngIf="userRole === 'Admin' || userRole === 'Buyer'" class="text-xs text-gray-500 mt-1">
@@ -175,7 +138,7 @@
             <div class="bg-green-50 p-3 rounded-lg" *ngIf="userRole !== 'Seller'">
               <div class="flex justify-between items-center">
                 <label class="text-sm font-medium text-gray-500">Buyer</label>
-                <span *ngIf="userRole === 'Buyer'" class="text-xs text-gray-500">(You)</span>
+                <span *ngIf="isBuyerOfThisOrder" class="text-xs text-gray-500">(You)</span>
               </div>
               <p class="font-semibold">{{ getBuyerName(selectedOrder) }}</p>
               <p *ngIf="userRole === 'Admin' || userRole === 'Seller'" class="text-xs text-gray-500 mt-1">
@@ -183,6 +146,64 @@
               </p>
             </div>
           </div>
+        </div>
+      </div>
+      <!-- Status change actions: only show if user is seller or buyer of this order -->
+      <!-- && (isSellerOfThisOrder || isBuyerOfThisOrder) -->
+      <div *ngIf="selectedOrder " class="mt-6"> 
+        <!-- Seller actions -->
+        <div *ngIf="isSellerOfThisOrder || this.userRole === 'Admin'">
+          <label class="block text-sm font-semibold mb-1">Change Status ({{ isSellerOfThisOrder ? 'Seller' : 'Admin' }})</label>
+          <p-dropdown [options]="getValidStatuses(selectedOrder.status)" 
+                      [(ngModel)]="selectedOrder.status" 
+                      [disabled]="statusChangeLoading"
+                      (onChange)="confirmStatusChange(selectedOrder, $event.value)"
+                      appendTo="body">
+            <ng-template pTemplate="dropdownicon">
+              <i class="pi pi-cog"></i>
+            </ng-template>
+            <ng-template let-status pTemplate="item">
+              <span [class]="getStatusClass(status)">{{ status }}</span>
+            </ng-template>
+          </p-dropdown>
+        </div>
+        <!-- Buyer actions -->
+        <div *ngIf="isBuyerOfThisOrder ">
+          <p-button  
+            *ngIf="selectedOrder?.status === 'Pending' || selectedOrder?.status === 'PendingBuyer'"
+            icon="pi pi-dollar"
+            label="Proceed/Pay"
+            class="p-button-lg p-button-primary w-full mb-2"
+            [ngStyle]="{ 'font-size': '1.1rem', 'font-weight': 600 }"
+            (onClick)="openAddressDialog(selectedOrder)">
+          </p-button>
+          <p-button *ngIf="showMarkDeliveredButton(selectedOrder.status)"
+                  pButton pRipple
+                  icon="pi pi-check"
+                  label="Mark as Delivered"
+                  class="p-button-sm p-button-info"
+                  (click)="markAsDelivered(selectedOrder)">
+          </p-button>
+          <p-button *ngIf="showMarkCompletedButton(selectedOrder.status)"
+                  pButton pRipple
+                  icon="pi pi-check-circle"
+                  label="Mark as Completed"
+                  class="p-button-sm p-button-success"
+                  (click)="markAsCompleted(selectedOrder)">
+          </p-button>
+          <label class="block text-sm font-semibold mb-1 mt-4">Change Status (Buyer)</label>
+          <p-dropdown [options]="getValidStatuses(selectedOrder.status)" 
+                      [(ngModel)]="selectedOrder.status" 
+                      [disabled]="statusChangeLoading"
+                      (onChange)="confirmStatusChange(selectedOrder, $event.value)"
+                      appendTo="body">
+            <ng-template pTemplate="dropdownicon">
+              <i class="pi pi-cog"></i>
+            </ng-template>
+            <ng-template let-status pTemplate="item">
+              <span [class]="getStatusClass(status)">{{ status }}</span>
+            </ng-template>
+          </p-dropdown>
         </div>
       </div>
     </p-dialog>

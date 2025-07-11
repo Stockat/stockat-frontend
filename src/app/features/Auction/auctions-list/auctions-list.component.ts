@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { AuctionService } from '../../../core/services/auction.service';
 import { AuctionDetailsDto } from '../../../core/models/auction-models/auction-details-dto';
 import { RouterLink } from '@angular/router';
@@ -57,7 +57,9 @@ export class AuctionsListComponent implements OnInit, OnDestroy {
     private auctionService: AuctionService,
     private userService: UserService,
     private productService: ProductService,
-    private signalRService: AuctionSignalRService
+    private signalRService: AuctionSignalRService,
+    private cdRef: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -66,23 +68,35 @@ export class AuctionsListComponent implements OnInit, OnDestroy {
     // SignalR real-time updates
     this.signalRService.startConnection();
     this.signalRService.bidPlaced$.subscribe(data => {
-      if (data && data.Auction) {
-        this.updateAuctionInList(data.Auction);
-      }
+      this.ngZone.run(() => {
+        console.log('[SignalR] bidPlaced$ received:', data);
+        if (data && data.Auction) {
+          this.updateAuctionInList(data.Auction);
+        }
+        this.cdRef.detectChanges();
+      });
     });
     
     this.signalRService.auctionUpdate$.subscribe(data => {
-      if (data && data.Auction) {
-        this.updateAuctionInList(data.Auction);
-      }
+      this.ngZone.run(() => {
+        console.log('[SignalR] auctionUpdate$ received:', data);
+        if (data && data.Auction) {
+          this.updateAuctionInList(data.Auction);
+        }
+        this.cdRef.detectChanges();
+      });
     });
   }
 
   updateAuctionInList(updatedAuction: AuctionDetailsDto): void {
     const index = this.auctions.findIndex(a => a.id === updatedAuction.id);
     if (index !== -1) {
-      this.auctions[index] = updatedAuction;
+      this.auctions[index] = {
+        ...this.auctions[index],
+        ...updatedAuction
+      };
       this.applyFilters();
+      this.cdRef.detectChanges();
     }
   }
 

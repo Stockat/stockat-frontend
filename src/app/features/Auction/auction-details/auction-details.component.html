@@ -1,6 +1,6 @@
 <body ng-app="auctionApp" ng-controller="auctionCtrl">
   <div class="container">
-      <p-messages [(value)]="messages" [style.margin-bottom]="'1.5rem'"></p-messages>
+      
       <!-- <div class="auction-header">
           <div class="logo">ArtVenture</div>
           <div class="auction-actions">
@@ -90,10 +90,12 @@
                 Minimum bid: <span>{{ minBid | currency }}</span>
               </div>
             </div>
-      
+            
             <button class="place-bid-button" (click)="placeBid()">
               PLACE BID NOW
             </button>
+           <br> <br/>
+           <p-messages [(value)]="messages" [style.margin-bottom]="'1.5rem'"></p-messages>
           </div>
       
           <!-- Shipping Section -->

@@ -43,6 +43,8 @@ export class AuctionSignalRService {
       this.connectionStartedSource.next(false);
     });
 
+    
+
     this.hubConnection.on('BidPlaced', (data) => {
       console.log('[SignalR] BidPlaced event received:', data);
       this.bidPlacedSource.next(data);
@@ -73,6 +75,10 @@ export class AuctionSignalRService {
     });
 
     // Add more event handlers as needed
+  }
+
+  public get isConnected(): boolean {
+    return this.hubConnection?.state === signalR.HubConnectionState.Connected;
   }
 
   joinAuction(auctionId: number) {

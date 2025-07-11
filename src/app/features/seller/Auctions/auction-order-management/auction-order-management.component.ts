@@ -17,6 +17,7 @@ import { NgIf, NgFor, NgClass } from '@angular/common';
 import { UserReadDto } from '../../../../core/models/user-models/user-read.dto';
 import { Router } from '@angular/router';
 import { BidService } from '../../../../core/services/bid.service';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-auction-order-management',
@@ -27,7 +28,8 @@ import { BidService } from '../../../../core/services/bid.service';
     ConfirmDialogModule,
     ToastModule,
     CommonModule,
-    FormsModule
+    FormsModule,
+    ButtonModule
   ],
   templateUrl: './auction-order-management.component.html',
   styleUrls: ['./auction-order-management.component.css'],
@@ -39,6 +41,10 @@ export class AuctionOrderManagementComponent implements OnInit {
   userRole: string = 'Seller';
 
   userId: string = '';
+
+  order: AuctionOrderDto | null = null;
+  isSellerOfThisOrder: boolean = false;
+  isBuyerOfThisOrder: boolean = false;
   
   orders: AuctionOrderDto[] = [];
   loading = true;
@@ -53,27 +59,27 @@ export class AuctionOrderManagementComponent implements OnInit {
   statusTransitions = {
     Seller: {
       [OrderStatus.PendingSeller]: [OrderStatus.Processing, OrderStatus.Cancelled],
-      [OrderStatus.Processing]: [OrderStatus.Ready],
-      [OrderStatus.Ready]: [OrderStatus.Shipped],
-      [OrderStatus.Payed]: [OrderStatus.Processing],
-      [OrderStatus.Pending]: [OrderStatus.Processing, OrderStatus.Cancelled], // treat Pending as PendingSeller
+      [OrderStatus.Processing]: [OrderStatus.Ready, OrderStatus.Cancelled],
+      [OrderStatus.Ready]: [ OrderStatus.Cancelled],
+      [OrderStatus.Payed]: [OrderStatus.Processing,  OrderStatus.Cancelled],
+      [OrderStatus.Pending]: [ OrderStatus.Cancelled], // treat Pending as PendingSeller
+
     },
     Buyer: {
       [OrderStatus.PendingBuyer]: [OrderStatus.Payed, OrderStatus.Cancelled],
-      [OrderStatus.Shipped]: [OrderStatus.Delivered],
-      [OrderStatus.Delivered]: [OrderStatus.Completed],
+      [OrderStatus.Payed]: [OrderStatus.Cancelled],
       [OrderStatus.Pending]: [OrderStatus.Payed, OrderStatus.Cancelled], // treat Pending as PendingBuyer
     },
     Admin: {
-      [OrderStatus.PendingSeller]: [OrderStatus.Processing, OrderStatus.Cancelled],
-      [OrderStatus.Processing]: [OrderStatus.Ready, OrderStatus.Cancelled],
+      [OrderStatus.PendingSeller]: [ OrderStatus.Cancelled],
+      [OrderStatus.Processing]: [ OrderStatus.Cancelled],
       [OrderStatus.Ready]: [OrderStatus.Shipped, OrderStatus.Cancelled],
       [OrderStatus.Shipped]: [OrderStatus.Delivered, OrderStatus.Cancelled],
       [OrderStatus.Delivered]: [OrderStatus.Completed, OrderStatus.Cancelled],
-      [OrderStatus.PendingBuyer]: [OrderStatus.Payed, OrderStatus.Cancelled],
-      [OrderStatus.Payed]: [OrderStatus.Processing, OrderStatus.Cancelled],
+      [OrderStatus.PendingBuyer]: [ OrderStatus.Cancelled],
+      [OrderStatus.Payed]: [ OrderStatus.Cancelled],
       [OrderStatus.PaymentFailed]: [OrderStatus.Cancelled],
-      [OrderStatus.Pending]: [OrderStatus.Processing, OrderStatus.Ready, OrderStatus.Shipped, OrderStatus.Delivered, OrderStatus.Completed, OrderStatus.Cancelled, OrderStatus.PaymentFailed],
+      [OrderStatus.Pending]: [ OrderStatus.Cancelled],
     }
   };
 
@@ -96,6 +102,7 @@ export class AuctionOrderManagementComponent implements OnInit {
 
   ngOnInit() {
     this.initializeUserContext();
+   // this.loadOrderDetails();
   }
 
   initializeUserContext(): void {
@@ -122,6 +129,8 @@ export class AuctionOrderManagementComponent implements OnInit {
       }
     });
   }
+
+ 
   
   configureColumns(): void {
     this.cols = [
@@ -211,12 +220,29 @@ export class AuctionOrderManagementComponent implements OnInit {
     return `px-3 py-1 rounded-full text-xs font-medium ${statusClasses[status] || 'bg-gray-100 text-gray-800'}`;
   }
 
+  // Updated getValidStatuses to check for current order and role
   getValidStatuses(currentStatus: OrderStatus): OrderStatus[] {
+    if (!this.selectedOrder) return [];
+    if (this.isSellerOfThisOrder ) {
+      return (this.statusTransitions.Seller as any)[currentStatus] || [];
+    }
+    if (this.isBuyerOfThisOrder) {
+      return (this.statusTransitions.Buyer as any)[currentStatus] || [];
+    }
     if (this.userRole === 'Admin') {
-      // Admin can do any forward transition (not backward)
       return this.getAdminForwardTransitions(currentStatus);
     }
-    return (this.statusTransitions as any)[this.userRole][currentStatus] || [];
+    return [];
+
+    //// ✅ Apply additional logic to restrict transitions based on paymentStatus
+     //return transitions.filter(status => this.isTransitionAllowed(status, paymentStatus));
+    //  isTransitionAllowed(nextStatus: OrderStatus, paymentStatus: PaymentStatus): boolean {
+    //   // Example rules — customize based on your business logic
+    //   if (paymentStatus === 'Failed') {
+    //     // Don't allow transitioning to Completed if payment failed
+    //     return nextStatus !== OrderStatus.Completed;
+    //   }
+    // }
   }
 
   getAdminForwardTransitions(currentStatus: OrderStatus): OrderStatus[] {
@@ -232,17 +258,17 @@ export class AuctionOrderManagementComponent implements OnInit {
 
   // Buyer: Show Proceed/Pay button for PendingBuyer
   showPayButton(status: OrderStatus): boolean {
-    return this.userRole === 'Buyer' && (status === OrderStatus.PendingBuyer||status === OrderStatus.Pending);
+    return this.isBuyerOfThisOrder && (status === OrderStatus.PendingBuyer||status === OrderStatus.Pending);
   }
 
   // Buyer: Show Mark as Delivered for Shipped
   showMarkDeliveredButton(status: OrderStatus): boolean {
-    return this.userRole === 'Buyer' && status === OrderStatus.Shipped;
+    return this.userRole=='Admin' && status === OrderStatus.Shipped;
   }
 
   // Buyer: Show Mark as Completed for Delivered
   showMarkCompletedButton(status: OrderStatus): boolean {
-    return this.userRole === 'Buyer' && status === OrderStatus.Delivered;
+    return this.userRole=='Admin' && status === OrderStatus.Delivered;
   }
 
   // Buyer: Open address dialog
@@ -295,17 +321,27 @@ export class AuctionOrderManagementComponent implements OnInit {
     this.selectedOrder = order;
     this.orderDetailsVisible = true;
 
-    // if (order.winningBidId) {
-    //   this.bidService.(order.winningBidId).subscribe({
-    //     next: (bid) => {
-    //       this.selectedOrder['buyerId'] = bid.userId; // Not strongly typed, but works
-    //       this.selectedOrder['buyerName'] = bid.userName; // optional
-    //     },
-    //     error: () => {
-    //       this.selectedOrder['buyerId'] = 'Unknown';
-    //     }
-    //   });
-    // }
+
+  // Reset flags until resolved
+  this.isSellerOfThisOrder = false;
+  this.isBuyerOfThisOrder = false;
+
+  // Load full auction data to extract sellerId and buyerId
+  this.auctionService.getAuctionById(order.auctionId).subscribe({
+    next: (auction) => {
+      if (auction?.sellerId) {
+        this.isSellerOfThisOrder = auction.sellerId === this.userId;
+      }
+      if (auction?.buyerId) {
+        this.isBuyerOfThisOrder = auction.buyerId === this.userId;
+      }
+      console.log('is seller '+this.isSellerOfThisOrder);
+      console.log('is buyer '+this.isBuyerOfThisOrder);
+    },
+    error: (err) => {
+      console.error('Failed to load auction for order:', err);
+    }
+  });
   }
 
   // New: Handle row click to view auction

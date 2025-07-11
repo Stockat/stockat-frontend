@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef, NgZone } from '@angular/core';
 import { AuctionService } from '../../../../core/services/auction.service';
 import { ProductService } from '../../../../core/services/product.service';
 import { AuctionDetailsDto } from '../../../../core/models/auction-models/auction-details-dto';
@@ -16,6 +16,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { Router } from '@angular/router';
 import { AuctionSignalRService } from '../../../../core/services/auction-signalr.service';
 import { TooltipModule } from 'primeng/tooltip';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 
 @Component({
@@ -30,9 +32,11 @@ import { TooltipModule } from 'primeng/tooltip';
     ReactiveFormsModule,
     InputTextModule,
     TooltipModule,
+    ConfirmDialogModule,
+    ToastModule,
   ],
   styleUrls: ['./auctions-view.component.css'],
-  providers: [DialogService, ConfirmationService]
+  providers: [DialogService, ConfirmationService,MessageService]
 })
 export class AuctionsViewComponent implements OnInit {
   @ViewChild('auctionTable') auctionTable!: Table;
@@ -65,7 +69,9 @@ export class AuctionsViewComponent implements OnInit {
     private dialogService: DialogService,
     private confirmationService: ConfirmationService,
     private router: Router,
-    private signalRService: AuctionSignalRService
+    private signalRService: AuctionSignalRService,
+    private cdRef: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit() {
@@ -87,8 +93,23 @@ export class AuctionsViewComponent implements OnInit {
       });
     // SignalR real-time updates
     this.signalRService.startConnection();
-    this.signalRService.auctionUpdate$.subscribe(() => {
-      this.loadAuctions();
+    this.signalRService.bidPlaced$.subscribe(data => {
+      this.ngZone.run(() => {
+        console.log('[SignalR] bidPlaced$ received:', data);
+        if (data && data.Auction) {
+          this.updateAuctionInList(data.Auction);
+        }
+        this.cdRef.detectChanges();
+      });
+    });
+    this.signalRService.auctionUpdate$.subscribe(data => {
+      this.ngZone.run(() => {
+        console.log('[SignalR] auctionUpdate$ received:', data);
+        if (data && data.Auction) {
+          this.updateAuctionInList(data.Auction);
+        }
+        this.cdRef.detectChanges();
+      });
     });
     this.signalRService.auctionCreated$.subscribe(() => {
       this.loadAuctions();
@@ -276,6 +297,18 @@ export class AuctionsViewComponent implements OnInit {
 
   showAuctionDetails(auctionId: number) {
     this.router.navigate(['/seller/auctions', auctionId]);
+  }
+
+  updateAuctionInList(updatedAuction: AuctionDetailsDto) {
+    const idx = this.auctions.findIndex(a => a.id === updatedAuction.id);
+    if (idx !== -1) {
+      this.auctions[idx] = {
+        ...this.auctions[idx],
+        ...updatedAuction,
+        status: this.calculateStatus(updatedAuction)
+      };
+      this.cdRef.detectChanges();
+    }
   }
   
 }

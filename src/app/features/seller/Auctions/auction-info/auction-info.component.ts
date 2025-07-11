@@ -12,7 +12,7 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';     
 import { RippleModule } from 'primeng/ripple';    
 import { PaginatorModule } from 'primeng/paginator'; 
-import { ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, NgZone } from '@angular/core';
 import { Observable, catchError, forkJoin, map, of } from 'rxjs';
 import { AuctionSignalRService } from '../../../../core/services/auction-signalr.service';
 
@@ -74,7 +74,8 @@ export class AuctionInfoComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private bidService: BidService,
     private cdr: ChangeDetectorRef,
-    private signalRService: AuctionSignalRService
+    private signalRService: AuctionSignalRService,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit() {
@@ -87,39 +88,48 @@ export class AuctionInfoComponent implements OnInit, OnDestroy {
     this.signalRService.joinAuction(this.auctionId);
 
     this.signalRService.bidPlaced$.subscribe(data => {
-      if (data && data.Auction && data.Auction.id === this.auctionId) {
-        this.auction = data.Auction;
-        this.calculateStatus();
-        this.cdr.detectChanges();
-        
-        // Add the new bid to the bids array if it exists
-        if (data.Bid) {
-          const newBid = {
-            ...data.Bid,
-            bidderName: 'New Bidder' // Will be updated when we fetch user details
-          };
-          this.bids.unshift(newBid);
-          this.totalBids = this.bids.length;
-          this.updatePagedBids();
-        } else {
-          // Fallback: reload all bids
-          this.loadBids();
+      this.ngZone.run(() => {
+        console.log('[SignalR] BidPlaced event received:', data);
+        if (data && data.Auction && data.Auction.id === this.auctionId) {
+          this.auction = data.Auction;
+          this.calculateStatus();
+          this.cdr.detectChanges();
+          // Add the new bid to the bids array if it exists
+          if (data.Bid) {
+            const newBid = {
+              ...data.Bid,
+              bidderName: 'New Bidder' // Will be updated when we fetch user details
+            };
+            this.bids.unshift(newBid);
+            // Always sort by amount descending
+            this.bids = this.bids.sort((a, b) => b.bidAmount - a.bidAmount);
+            this.totalBids = this.bids.length;
+            this.updatePagedBids();
+          } else {
+            // Fallback: reload all bids
+            this.loadBids();
+          }
         }
-      }
+      });
     });
 
     this.signalRService.auctionUpdate$.subscribe(data => {
-      if (data && data.Auction && data.Auction.id === this.auctionId) {
-        this.auction = data.Auction;
-        this.calculateStatus();
-        this.cdr.detectChanges();
-        
-        if (data.Bids) {
-          this.bids = data.Bids;
-          this.totalBids = this.bids.length;
-          this.updatePagedBids();
+      this.ngZone.run(() => {
+        console.log('[SignalR] AuctionUpdate event received:', data);
+        if (data && data.Auction && data.Auction.id === this.auctionId) {
+          this.auction = data.Auction;
+          this.calculateStatus();
+          this.cdr.detectChanges();
+          if (data.Bids) {
+            // Always sort by amount descending
+           // this.bids = data.Bids.sort((a, b) => b.bidAmount - a.bidAmount);
+            this.bids = data.Bids.sort((a: { bidAmount: number }, b: { bidAmount: number }) => b.bidAmount - a.bidAmount);
+
+            this.totalBids = this.bids.length;
+            this.updatePagedBids();
+          }
         }
-      }
+      });
     });
   }
 
@@ -184,7 +194,9 @@ export class AuctionInfoComponent implements OnInit, OnDestroy {
   updatePagedBids() {
     const start = this.bidPage * this.bidPageSize;
     const end = start + this.bidPageSize;
+    // Always sort before slicing
     this.pagedBids = this.bids.slice(start, end);
+    this.cdr.detectChanges();
   }
   
 
