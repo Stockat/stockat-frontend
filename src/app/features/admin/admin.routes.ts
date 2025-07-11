@@ -8,5 +8,14 @@ export const adminRoutes: Routes = [
     {
         path: 'products',
         loadComponent: () => import('./products/manageproducts/manageproducts.component').then(m => m.ManageproductsComponent)
+    },
+    {
+        path: 'auctions',
+        loadComponent: () => import('../seller/Auctions/auctions-view/auctions-view.component').then(m => m.AuctionsViewComponent)
+    },
+    {
+        path: 'auctionorders',
+        loadComponent: () => import('../seller/Auctions/auction-order-management/auction-order-management.component').then(m => m.AuctionOrderManagementComponent)
     }
+
 ]
