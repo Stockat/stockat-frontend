@@ -17,6 +17,7 @@
                 (onChange)="dt1.filter(stockStatusFilter, 'stockStatus', 'equals')"
                 styleClass="w-40"
             ></p-dropdown>
+
         </div>
         <p-table #dt1 [value]="stockList" dataKey="id" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]"
             [loading]="loading" [paginator]="true" [globalFilterFields]="['prodcutName', 'quantity']" >
@@ -70,12 +71,25 @@
                         </p-popover>
                     </td>
                     <td>
-                        @if(stock.stockStatus == 'ForSale'){
+                        @if(stock.stockStatus == 'ForSale' && stock.quantity > 0){
                         <ng-container >
                             <p-button class="me-2" label="Edit" icon="ti ti-edit" (click)="navigateToUpdateStock(stock.id)"
                                 variant="text" [raised]="true" [rounded]="true" severity="help" />
                             <p-button icon="ti ti-trash" (click)="deleteStock(stock.id)" variant="text" [raised]="true"
                                 [rounded]="true" severity="danger" />
+                            <!--auction  -->
+                            <button 
+                                pButton 
+                                type="button" 
+                                icon="pi pi-gavel" 
+                                class="p-button-rounded p-button-success p-button-outlined" 
+                                (click)="openAuctionDialog(stock)" 
+                                pTooltip="Add Auction" 
+                                tooltipPosition="top"
+                                styleClass="p-button-sm">
+                                Add Auction
+                            </button>
+
                         </ng-container>
                     }
                     @else{
@@ -100,3 +114,13 @@
         </p-table>
     </p-card>
 </div>
+
+<!-- Auction Create Dialog -->
+<app-auction-create-dialog 
+    *ngIf="showAuctionDialog"
+    [visible]="showAuctionDialog"
+    [stock]="selectedStock"
+    [product]="selectedProduct"
+    (close)="closeAuctionDialog()"
+    (auctionCreated)="handleAuctionCreated()">
+</app-auction-create-dialog>

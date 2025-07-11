@@ -6,6 +6,7 @@ import { Observable, switchMap } from 'rxjs';
 import { AuthService } from './auth.service';
 import { AuctionUpdateDto } from '../models/auction-models/auction-update-dto';
 import { UserService } from './user.service';
+import { AuctionCreateDto } from '../models/auction-models/auction-create-dto';
 
 
 @Injectable({
@@ -51,6 +52,10 @@ updateAuction(auctionId: number, updateData: AuctionUpdateDto): Observable<any> 
 
 deleteAuction(auctionId: number): Observable<any> {
   return this.http.delete(`${this.baseUrl}/${auctionId}`);
+}
+
+createAuction(auctionData: AuctionCreateDto): Observable<any> {
+  return this.http.post(`${this.baseUrl}`, auctionData);
 }
 
   // auction.service.ts

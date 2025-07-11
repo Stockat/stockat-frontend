@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { AuctionDetailsDto } from '../../../../../app/core/models/auction-models/auction-details-dto';
@@ -39,7 +39,7 @@ import { AuctionUpdateDto } from '../../../../core/models/auction-models/auction
   styleUrls: ['./auction-edit-dialog.component.css'],
   providers: [DatePipe]
 })
-export class AuctionEditDialogComponent implements OnInit {
+export class AuctionEditDialogComponent implements OnInit, AfterViewInit {
   @ViewChild('startCalendar') startCalendar: Calendar | undefined;
   @ViewChild('endCalendar') endCalendar: Calendar | undefined;
   
@@ -109,6 +109,7 @@ createForm() {
 
   // Conditionally disable fields
   this.disableNonEditableFields();
+  this.setupDateValidators();
 }
 
 private disableNonEditableFields() {
@@ -317,6 +318,7 @@ private getValidators(field: string) {
     if (!this.auction.productId) {
       console.error('productId is missing or null!');
     }
+    
     // Recalculate auction status using ORIGINAL dates
     const now = new Date();
     const originalStart = new Date(this.auction.startTime);
@@ -337,23 +339,40 @@ private getValidators(field: string) {
     };
     
     const updatedData = this.editForm.getRawValue();
-    const filteredData: any = { id: this.auction.id };
   
-    // Only include editable fields in payload
+    // Only include fields that are actually enabled and have changed values
     editableFields.forEach(field => {
       const control = this.editForm.get(field);
       if (control && control.enabled && control.value !== undefined) {
+        const originalValue = this.auction[field as keyof AuctionDetailsDto];
+        let currentValue = control.value;
+    
+        // Check if field is a date field
         if (field.endsWith('Time')) {
-          payload[field] = this.datePipe.transform(control.value, 'yyyy-MM-ddTHH:mm:ss');
+          const isDateLike = (val: any): val is string | number | Date =>
+            typeof val === 'string' || typeof val === 'number' || val instanceof Date;
+    
+          const transformedCurrent = isDateLike(currentValue)
+            ? this.datePipe.transform(currentValue, 'yyyy-MM-ddTHH:mm:ss')
+            : null;
+    
+          const transformedOriginal = isDateLike(originalValue)
+            ? this.datePipe.transform(originalValue, 'yyyy-MM-ddTHH:mm:ss')
+            : null;
+    
+          if (transformedCurrent !== transformedOriginal) {
+            payload[field] = transformedCurrent;
+          }
         } else {
-          payload[field] = control.value;
+          if (currentValue !== originalValue) {
+            payload[field] = currentValue;
+          }
         }
       }
     });
-  
     console.log('Saving auction with payload:', payload);
     this.ref.close(payload);
-  }
+  }    
   
   
   private getEditableFieldsByStatus(status: string): string[] {

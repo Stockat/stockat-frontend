@@ -1,5 +1,6 @@
 <body ng-app="auctionApp" ng-controller="auctionCtrl">
   <div class="container">
+      
       <!-- <div class="auction-header">
           <div class="logo">ArtVenture</div>
           <div class="auction-actions">
@@ -9,7 +10,6 @@
       </div> -->
 
     <div *ngIf="auction; else loading">
-      <p-messages [(value)]="messages"></p-messages>
       <h1 class="auction-title">
         {{ auction?.name }}
       </h1>
@@ -63,13 +63,13 @@
             <div class="bid-section">
               <div class="bid-box">
                 <div class="current-bid-label">CURRENT BID</div>
-                <div class="current-bid">${{ auction?.currentBid }}</div>
-                <div class="bid-increment">Minimum increment: ${{ auction?.incrementUnit }}</div>
+                <div class="current-bid">{{ auction?.currentBid | currency }}</div>
+                <div class="bid-increment">Minimum increment: {{ auction?.incrementUnit | currency }}</div>
               </div>
       
               <div class="bid-box">
                 <div class="current-bid-label">STARTING BID</div>
-                <div class="current-bid">${{ auction?.startingPrice }}</div>
+                <div class="current-bid">{{ auction?.startingPrice | currency }}</div>
                 <div class="bid-increment">Opening price</div>
               </div>
             </div>
@@ -83,16 +83,19 @@
                   [(ngModel)]="bidAmount"
                   [min]="minBid"
                   class="bid-input"
+                  #bidInput
                 />
               </div>
               <div class="min-bid">
-                Minimum bid: <span>${{ minBid }}</span>
+                Minimum bid: <span>{{ minBid | currency }}</span>
               </div>
             </div>
-      
+            
             <button class="place-bid-button" (click)="placeBid()">
               PLACE BID NOW
             </button>
+           <br> <br/>
+           <p-messages [(value)]="messages" [style.margin-bottom]="'1.5rem'"></p-messages>
           </div>
       
           <!-- Shipping Section -->
@@ -112,7 +115,7 @@
       <div class="auction-meta">
           <div class="meta-item">
               <div class="meta-label">BIDS</div>
-              <div class="meta-value">{{ bids?.length || 0 }}</div>
+              <div class="meta-value">{{ bids?.length ? bids.length : 0 }}</div>
           </div>
           <div class="meta-item">
               <div class="meta-label">VIEWS</div>
@@ -154,7 +157,7 @@
           <div class="history-item" *ngFor="let bid of pagedBids">
             <div class="bidder-info">
               <div class="bidder-avatar">
-                {{ bid.bidderName?.charAt(0) }}
+                {{ bid.bidderName ? (bid.bidderName.charAt(0)) : '?' }}
               </div>
               <div>
                 <div class="bidder-name">{{ bid.bidderName }}</div>
