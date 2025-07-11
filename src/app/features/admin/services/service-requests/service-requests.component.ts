@@ -5,7 +5,7 @@ import { PaginationDto } from '../../../../core/models/pagination-Dto';
 import { GenericRequestModel } from '../../../../core/models/generic-request-Dto';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { TabMenuModule } from 'primeng/tabmenu';
 import { TableModule } from 'primeng/table';
@@ -39,13 +39,7 @@ export class ServiceRequestsComponent implements OnInit {
   statusFilter: string = '';
   stats = { total: 0, inProgress: 0, delivered: 0 };
   searchTerm: string = '';
-  // Remove tabItems and MenuItem usage
-  // tabItems: MenuItem[] = [
-  //   { label: 'All', id: '' },
-  //   { label: 'In Progress', id: 'InProgress' },
-  //   { label: 'Delivered', id: 'Delivered' }
-  // ];
-  // activeTab: MenuItem = this.tabItems[0];
+
   activeTab: string = 'all';
   buyerModalVisible = false;
   buyerInfo: any = null;
@@ -63,7 +57,8 @@ export class ServiceRequestsComponent implements OnInit {
   constructor(
     public serviceRequestService: ServiceRequestService,
     private userService: UserService,
-    private messageService: MessageService // Add MessageService for notifications
+    private messageService: MessageService, // Add MessageService for notifications
+    private router: Router // Add Router for navigation
   ) {}
 
   ngOnInit() {
@@ -154,6 +149,7 @@ export class ServiceRequestsComponent implements OnInit {
       next: (res) => {
         this.buyerInfo = res.data;
         this.buyerLoading = false;
+        console.log(this.buyerInfo);
       },
       error: (err) => {
         this.buyerError = 'Failed to load buyer info.';
@@ -202,5 +198,15 @@ export class ServiceRequestsComponent implements OnInit {
   closeRequestDetailsModal() {
     this.requestDetailsModalVisible = false;
     this.selectedRequest = null;
+  }
+
+  contactSeller(sellerInfo: any) {
+    // This could open a chat modal or redirect to chat
+    this.router.navigate(['/chat', sellerInfo.id]); // Navigate to chat with the seller's ID
+  }
+
+  contactBuyer(buyerInfo: any) {
+    // This could open a chat modal or redirect to chat
+    this.router.navigate(['/chat', buyerInfo.id]); // Navigate to chat with the buyer's ID
   }
 }

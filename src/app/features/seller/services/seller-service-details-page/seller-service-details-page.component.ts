@@ -46,7 +46,6 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   requestStatusOptions = [
     { label: 'Pending', value: 'Pending' },
     { label: 'InProgress', value: 'InProgress' },
-    { label: 'Delivered', value: 'Delivered' },
     { label: 'Cancelled', value: 'Cancelled' }
   ];
 
@@ -69,11 +68,11 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   searchText: string = '';
   statusFilter: string | null = null;
   approvalFilter: string | null = null;
+  paymentFilter: string | null = null;
   statusFilterOptions = [
     { label: 'All', value: null },
     { label: 'Pending', value: 'Pending' },
     { label: 'InProgress', value: 'InProgress' },
-    { label: 'Delivered', value: 'Delivered' },
     { label: 'Cancelled', value: 'Cancelled' }
   ];
   approvalFilterOptions = [
@@ -81,6 +80,13 @@ export class SellerServiceDetailsPageComponent implements OnInit {
     { label: 'Pending', value: 'Pending' },
     { label: 'Approved', value: 'Approved' },
     { label: 'Rejected', value: 'Rejected' }
+  ];
+  paymentFilterOptions = [
+    { label: 'All', value: null },
+    { label: 'Not Paid', value: 'Not Paid' },
+    { label: 'Pending Payment', value: 'Pending' },
+    { label: 'Paid', value: 'Paid' },
+    { label: 'Payment Failed', value: 'Failed' }
   ];
 
   constructor(
@@ -202,6 +208,24 @@ export class SellerServiceDetailsPageComponent implements OnInit {
       case 'Approved': return 'success';
       case 'Rejected': return 'danger';
       default: return 'secondary';
+    }
+  }
+
+  getPaymentStatusSeverity(status: string): string {
+    switch (status) {
+      case 'Paid': return 'success';
+      case 'Pending': return 'warning';
+      case 'Failed': return 'danger';
+      default: return 'secondary';
+    }
+  }
+
+  getPaymentStatusText(status: string): string {
+    switch (status) {
+      case 'Paid': return 'Paid';
+      case 'Pending': return 'Pending Payment';
+      case 'Failed': return 'Payment Failed';
+      default: return 'Not Paid';
     }
   }
 
@@ -465,6 +489,14 @@ export class SellerServiceDetailsPageComponent implements OnInit {
     // Apply approval filter
     if (this.approvalFilter) {
       filtered = filtered.filter(request => request.buyerApprovalStatus === this.approvalFilter);
+    }
+
+    // Apply payment filter
+    if (this.paymentFilter) {
+      filtered = filtered.filter(request => {
+        const paymentStatus = this.getPaymentStatusText(request.paymentStatus);
+        return paymentStatus === this.paymentFilter;
+      });
     }
 
     return filtered;
