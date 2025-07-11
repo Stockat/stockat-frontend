@@ -92,13 +92,21 @@
       <div *ngFor="let review of reviews" class="bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition-all duration-300">
         <div class="flex items-start justify-between mb-4">
           <div class="flex items-center gap-4">
-            <p-avatar 
-              [image]="review.reviewerImageUrl" 
-              [label]="review.reviewerName.charAt(0).toUpperCase()"
-              size="large"
-              shape="circle"
-              styleClass="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold">
-            </p-avatar>
+            <ng-container *ngIf="review.reviewerImageUrl; else fallbackAvatar">
+              <p-avatar 
+                [image]="review.reviewerImageUrl"
+                size="large"
+                shape="circle">
+              </p-avatar>
+            </ng-container>
+            <ng-template #fallbackAvatar>
+              <p-avatar 
+                [label]="review.reviewerName.charAt(0).toUpperCase()"
+                size="large"
+                shape="circle"
+                styleClass="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold">
+              </p-avatar>
+            </ng-template>
             <div>
               <div class="font-semibold text-gray-800">{{ review.reviewerName }}</div>
               <div class="text-sm text-gray-500">{{ formatDate(review.createdAt) }}</div>
@@ -139,6 +147,13 @@
         <div class="text-gray-700 leading-relaxed">
           {{ review.comment }}
         </div>
+      </div>
+      <!-- Page Size Selector -->
+      <div class="flex items-center gap-2 mb-4" *ngIf="reviewSummary && reviewSummary.totalReviews > 0">
+        <label for="pageSizeSelect" class="text-sm text-gray-700">Reviews per page:</label>
+        <select id="pageSizeSelect" class="p-1 border rounded" [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange($event)">
+          <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
+        </select>
       </div>
       <!-- Pagination Controls -->
       <div *ngIf="reviewSummary && reviewSummary.totalReviews > pageSize" class="flex justify-center items-center gap-2 mt-6">

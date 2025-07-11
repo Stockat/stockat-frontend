@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -33,7 +33,7 @@ import { ReviewDto, CreateReviewDto, UpdateReviewDto, ProductReviewSummaryDto, S
   templateUrl: './review-section.component.html',
   styleUrls: ['./review-section.component.css']
 })
-export class ReviewSectionComponent implements OnInit {
+export class ReviewSectionComponent implements OnInit, OnChanges {
   @Input() itemId!: number;
   @Input() itemType: 'product' | 'service' = 'product';
   @Input() orderProductId?: number;
@@ -44,6 +44,7 @@ export class ReviewSectionComponent implements OnInit {
   reviewSummary?: ProductReviewSummaryDto | ServiceReviewSummaryDto;
   currentPage = 1;
   pageSize = 5; // Default to 5 reviews per page
+  pageSizeOptions = [5, 10, 20, 50];
   totalReviews = 0;
   isLoading = false;
   isLoadingSummary = false;
@@ -75,6 +76,12 @@ export class ReviewSectionComponent implements OnInit {
     this.loadReviewSummary();
     this.loadReviews();
     this.checkUserReviewStatus();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['orderProductId'] || changes['serviceRequestId']) {
+      this.checkUserReviewStatus();
+    }
   }
 
   loadReviewSummary(): void {
@@ -378,6 +385,12 @@ export class ReviewSectionComponent implements OnInit {
   onPageChange(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
+    this.loadReviews();
+  }
+
+  onPageSizeChange(newSize: number) {
+    this.pageSize = newSize;
+    this.currentPage = 1;
     this.loadReviews();
   }
 
