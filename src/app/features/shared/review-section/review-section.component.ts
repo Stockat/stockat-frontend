@@ -43,7 +43,7 @@ export class ReviewSectionComponent implements OnInit {
   reviews: ReviewDto[] = [];
   reviewSummary?: ProductReviewSummaryDto | ServiceReviewSummaryDto;
   currentPage = 1;
-  pageSize = 10;
+  pageSize = 5; // Default to 5 reviews per page
   totalReviews = 0;
   isLoading = false;
   isLoadingSummary = false;
@@ -371,7 +371,12 @@ export class ReviewSectionComponent implements OnInit {
     });
   }
 
+  get totalPages(): number {
+    return this.reviewSummary ? Math.ceil(this.reviewSummary.totalReviews / this.pageSize) : 1;
+  }
+
   onPageChange(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
     this.loadReviews();
   }

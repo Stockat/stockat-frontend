@@ -172,11 +172,21 @@
 
     <!-- Review Section -->
     <ng-container *ngIf="!deliveredRequestLoading">
+      <div *ngIf="eligibleDeliveredRequests.length > 1" class="mb-4">
+        <label for="deliveredRequestSelect" class="block text-sm font-semibold text-gray-700 mb-2">Select Delivered Service Request to Review:</label>
+        <select id="deliveredRequestSelect" class="p-2 border rounded"
+                [(ngModel)]="selectedDeliveredRequestId"
+                (ngModelChange)="onDeliveredRequestChange($event)">
+          <option *ngFor="let req of eligibleDeliveredRequests" [ngValue]="req.id">
+            Request #{{ req.id }} - {{ req.createdAt | date:'mediumDate' }}
+          </option>
+        </select>
+      </div>
       <app-review-section
         *ngIf="service"
         [itemId]="service.id"
         itemType="service"
-        [serviceRequestId]="deliveredRequestId !== null ? deliveredRequestId : undefined"
+        [serviceRequestId]="selectedDeliveredRequestId"
         (reviewSubmitted)="onReviewSubmitted()">
       </app-review-section>
     </ng-container>

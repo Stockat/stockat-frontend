@@ -140,6 +140,26 @@
           {{ review.comment }}
         </div>
       </div>
+      <!-- Pagination Controls -->
+      <div *ngIf="reviewSummary && reviewSummary.totalReviews > pageSize" class="flex justify-center items-center gap-2 mt-6">
+        <button
+          pButton
+          type="button"
+          icon="pi pi-angle-left"
+          class="p-button-text"
+          [disabled]="currentPage === 1"
+          (click)="onPageChange(currentPage - 1)">
+        </button>
+        <span class="mx-2 text-gray-700">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button
+          pButton
+          type="button"
+          icon="pi pi-angle-right"
+          class="p-button-text"
+          [disabled]="currentPage === totalPages"
+          (click)="onPageChange(currentPage + 1)">
+        </button>
+      </div>
     </div>
 
     <!-- No Reviews -->

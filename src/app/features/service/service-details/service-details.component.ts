@@ -10,11 +10,13 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { ReviewSectionComponent } from '../../shared/review-section/review-section.component';
+import { ReviewService } from '../../../core/services/review.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-service-details',
   templateUrl: './service-details.component.html',
-  imports: [CommonModule, RequestModalComponent, DialogModule, ButtonModule, RouterLink, ToastModule, ReviewSectionComponent],
+  imports: [CommonModule, RequestModalComponent, DialogModule, ButtonModule, RouterLink, ToastModule, ReviewSectionComponent, FormsModule],
   providers: [MessageService]
 })
 
@@ -26,13 +28,16 @@ export class ServiceDetailsComponent {
   isCheckingPendingRequest = true; // Add loading state for pending request check
   errorMessage: string | null = null;
   requestErrorMessage: string | null = null;
-  deliveredRequestId: number | null = null;
+  deliveredRequestId: number | undefined = undefined;
   deliveredRequestLoading: boolean = false;
+  eligibleDeliveredRequests: any[] = [];
+  selectedDeliveredRequestId: number | undefined = undefined;
 
   constructor(
     private route: ActivatedRoute,
     private serviceService: ServiceService,
     private requestService: ServiceRequestService,
+    private reviewService: ReviewService,
     private router: Router,
     private messageService: MessageService
   ) {}
@@ -65,20 +70,50 @@ export class ServiceDetailsComponent {
     this.requestService.getBuyerRequests(1, 100).subscribe({
       next: (response: any) => {
         if (response && response.data && response.data.paginatedData) {
-          const delivered = response.data.paginatedData.find(
+          const deliveredRequests = response.data.paginatedData.filter(
             (req: any) => req.serviceId === this.service!.id && req.serviceStatus === 'Delivered'
           );
-          this.deliveredRequestId = delivered ? delivered.id : null;
+          this.eligibleDeliveredRequests = [];
+          if (deliveredRequests.length === 0) {
+            this.deliveredRequestId = undefined;
+            this.selectedDeliveredRequestId = undefined;
+            this.deliveredRequestLoading = false;
+            return;
+          }
+          const reviewChecks = deliveredRequests.map((req: any) =>
+            this.reviewService.hasReviewedService(req.id).toPromise().then((res: any) => ({
+              req,
+              hasReviewed: res?.data === true
+            }))
+          );
+          Promise.all(reviewChecks).then((results: any[]) => {
+            this.eligibleDeliveredRequests = results.filter((r: any) => !r.hasReviewed).map((r: any) => r.req);
+            this.selectedDeliveredRequestId = this.eligibleDeliveredRequests.length > 0 ? this.eligibleDeliveredRequests[0].id : undefined;
+            this.deliveredRequestId = this.selectedDeliveredRequestId;
+            this.deliveredRequestLoading = false;
+          }).catch(() => {
+            this.eligibleDeliveredRequests = [];
+            this.selectedDeliveredRequestId = undefined;
+            this.deliveredRequestId = undefined;
+            this.deliveredRequestLoading = false;
+          });
         } else {
-          this.deliveredRequestId = null;
+          this.deliveredRequestId = undefined;
+          this.selectedDeliveredRequestId = undefined;
+          this.deliveredRequestLoading = false;
         }
-        this.deliveredRequestLoading = false;
       },
-      error: (error) => {
-        this.deliveredRequestId = null;
+      error: () => {
+        this.deliveredRequestId = undefined;
+        this.selectedDeliveredRequestId = undefined;
         this.deliveredRequestLoading = false;
       }
     });
+  }
+
+  onDeliveredRequestChange(requestId: number | undefined) {
+    this.selectedDeliveredRequestId = requestId;
+    this.deliveredRequestId = requestId;
   }
 
     checkPendingRequest(serviceId: number) {

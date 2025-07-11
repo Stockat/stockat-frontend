@@ -160,11 +160,19 @@
     </div>
     <!-- Review Section -->
     <ng-container *ngIf="!deliveredOrderLoading">
+      <div *ngIf="eligibleDeliveredOrders.length > 1" class="mb-4">
+        <label for="deliveredOrderSelect" class="block text-sm font-semibold text-gray-700 mb-2">Select Delivered Order/Request to Review:</label>
+        <select id="deliveredOrderSelect" class="p-2 border rounded" [(ngModel)]="selectedDeliveredOrderId" (change)="onDeliveredOrderChange(selectedDeliveredOrderId)">
+          <option *ngFor="let order of eligibleDeliveredOrders" [value]="order.id">
+            Order #{{ order.id }} - {{ order.createdAt | date:'mediumDate' }}
+          </option>
+        </select>
+      </div>
       <app-review-section
         *ngIf="product"
         [itemId]="product.id"
         itemType="product"
-        [orderProductId]="deliveredOrderId !== null ? deliveredOrderId : undefined"
+        [orderProductId]="selectedDeliveredOrderId"
         (reviewSubmitted)="onReviewSubmitted()">
       </app-review-section>
     </ng-container>
