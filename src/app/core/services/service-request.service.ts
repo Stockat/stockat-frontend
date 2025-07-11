@@ -59,4 +59,8 @@ export class ServiceRequestService {
     }
     return this.http.get<GenericRequestModel<PaginationDto<ServiceRequestDto>>>(url);
   }
+
+  createStripeCheckoutSession(requestId: number): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/${requestId}/checkout`, {});
+  }
 }
