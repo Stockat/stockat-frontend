@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ServiceRequestService } from '../../core/services/service-request.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -35,6 +35,11 @@ export class ServiceRequestDetailsComponent implements OnInit {
   updates: any[] = [];
   hasPendingUpdate = false;
 
+  // Payment properties
+  paymentLoading = false;
+  paymentError = '';
+  showPaymentModal = false;
+
   // Pagination properties
   totalUpdates: number = 0;
   updatesPage: number = 0;
@@ -47,12 +52,14 @@ export class ServiceRequestDetailsComponent implements OnInit {
     private requestService: ServiceRequestService,
     private requestUpdateService: ServiceRequestUpdateService,
     private fb: FormBuilder,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private router: Router
   ) {
     this.updateForm = this.fb.group({
       additionalPrice: [null],
       additionalQuantity: [null],
-      additionalTime: [''],
+      additionalTimeValue: [1],
+      additionalTimeUnit: ['day(s)'],
       additionalNote: ['']
     });
   }
@@ -73,7 +80,7 @@ export class ServiceRequestDetailsComponent implements OnInit {
     }
   }
 
-    fetchUpdates() {
+  fetchUpdates() {
     if (!this.requestId) return;
 
     this.updatesLoading = true;
@@ -115,14 +122,20 @@ export class ServiceRequestDetailsComponent implements OnInit {
   }
 
   canUpdate() {
-    const { additionalPrice, additionalQuantity, additionalTime } = this.updateForm.value;
-    return additionalPrice || additionalQuantity || additionalTime;
+    const { additionalPrice, additionalQuantity, additionalTimeValue, additionalTimeUnit } = this.updateForm.value;
+    return additionalPrice || additionalQuantity || (additionalTimeValue && additionalTimeUnit);
   }
 
   openUpdateModal() {
     this.updateError = '';
     this.updateSuccess = '';
-    this.updateForm.reset();
+    this.updateForm.reset({
+      additionalPrice: null,
+      additionalQuantity: null,
+      additionalTimeValue: 1,
+      additionalTimeUnit: 'day(s)',
+      additionalNote: ''
+    });
     this.updateModalVisible = true;
   }
 
@@ -135,15 +148,31 @@ export class ServiceRequestDetailsComponent implements OnInit {
       this.updateError = 'Please provide at least one field to update.';
       return;
     }
+
     this.updateLoading = true;
     this.updateError = '';
     this.updateSuccess = '';
-    const payload = {
-      additionalPrice: this.updateForm.value.additionalPrice,
-      additionalQuantity: this.updateForm.value.additionalQuantity,
-      additionalTime: this.updateForm.value.additionalTime,
-      additionalNote: this.updateForm.value.additionalNote
-    };
+
+    const formValue = this.updateForm.value;
+    const payload: any = {};
+
+    // Only include fields that have values
+    if (formValue.additionalPrice) {
+      payload.additionalPrice = formValue.additionalPrice;
+    }
+
+    if (formValue.additionalQuantity) {
+      payload.additionalQuantity = formValue.additionalQuantity;
+    }
+
+    if (formValue.additionalTimeValue && formValue.additionalTimeUnit) {
+      payload.additionalTime = `${formValue.additionalTimeValue} ${formValue.additionalTimeUnit}`;
+    }
+
+    if (formValue.additionalNote) {
+      payload.additionalNote = formValue.additionalNote;
+    }
+
     this.requestUpdateService.createUpdate(this.request.id, payload).subscribe({
       next: () => {
         this.updateSuccess = 'Update request sent!';
@@ -257,4 +286,135 @@ acceptSellerOffer(request: any) {
   isNegotiationClosed(): boolean {
     return this.request && typeof this.request.sellerOfferAttempts === 'number' && this.request.sellerOfferAttempts >= 3 && this.request.buyerApprovalStatus === 'Rejected';
   }
+
+  // Payment Methods
+  canProceedToPayment(): boolean {
+    return this.request &&
+           this.request.sellerApprovalStatus === 'Approved' &&
+           this.request.buyerApprovalStatus === 'Approved' &&
+           this.request.serviceStatus === 'Pending' &&
+           this.request.paymentStatus !== 'Paid' &&
+           !this.hasPendingUpdate;
+  }
+
+  proceedToPayment() {
+    if (!this.canProceedToPayment()) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Cannot Proceed',
+        detail: 'Request is not ready for payment. Both parties must approve and no pending updates.'
+      });
+      return;
+    }
+
+    this.paymentLoading = true;
+    this.paymentError = '';
+
+    this.requestService.createStripeCheckoutSession(this.request.id).subscribe({
+      next: (response: any) => {
+        this.paymentLoading = false;
+
+        if (response.status === 201 && response.redirectUrl) {
+          // Redirect to Stripe checkout
+          window.location.href = response.redirectUrl;
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Payment Error',
+            detail: response.message || 'Failed to create payment session.'
+          });
+        }
+      },
+      error: (error) => {
+        this.paymentLoading = false;
+        this.paymentError = error?.error || 'Failed to create payment session.';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Payment Error',
+          detail: this.paymentError
+        });
+      }
+    });
+  }
+
+  downloadInvoice() {
+    if (!this.request || !this.request.paymentId) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'No Invoice',
+        detail: 'No payment found for this request.'
+      });
+      return;
+    }
+
+    // For now, we'll show a success message since the invoice is sent via email
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Invoice Sent',
+      detail: 'Invoice has been sent to your email address.'
+    });
+  }
+
+  getPaymentStatusColor(): string {
+    if (!this.request) return 'gray';
+
+    switch (this.request.paymentStatus) {
+      case 'Paid': return 'green';
+      case 'Pending': return 'yellow';
+      case 'Failed': return 'red';
+      default: return 'gray';
+    }
+  }
+
+  getPaymentStatusText(): string {
+    if (!this.request) return 'Unknown';
+
+    switch (this.request.paymentStatus) {
+      case 'Paid': return 'Paid';
+      case 'Pending': return 'Pending Payment';
+      case 'Failed': return 'Payment Failed';
+      default: return 'Not Paid';
+    }
+  }
+
+  cancelUpdate(updateId: number) {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to cancel this update request?',
+      header: 'Cancel Update',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.requestUpdateService.cancelUpdate(updateId).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Update Cancelled',
+              detail: 'Update request has been cancelled successfully.'
+            });
+            this.fetchUpdates();
+          },
+          error: (err) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to cancel update request.'
+            });
+          }
+        });
+      }
+    });
+  }
+
+  // Method to contact seller via chat
+  contactSeller() {
+    if (this.request && this.request.sellerId) {
+      this.router.navigate(['/chat', this.request.sellerId]);
+    } else {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Seller information not available.'
+      });
+    }
+  }
 }
+

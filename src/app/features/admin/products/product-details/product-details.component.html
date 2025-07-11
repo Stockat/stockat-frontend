@@ -1,0 +1,118 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Product Details Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-6">
+        <div class="flex space-x-2">
+          <ng-container *ngFor="let img of product?.images">
+            <img [src]="img" alt="Product Image" class="w-20 h-20 rounded-lg object-cover border border-gray-200" />
+          </ng-container>
+        </div>
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">{{ product?.name }}</h1>
+          <p class="text-gray-600 mt-2">{{ product?.description }}</p>
+          <div class="flex space-x-4 mt-2">
+            <span class="text-blue-600 font-semibold">${{ product?.price }}</span>
+            <span class="text-gray-500">Min Qty: {{ product?.minQuantity }}</span>
+            <span class="text-gray-500">Status: <span [ngClass]="{
+              'text-green-600': product?.productStatus === 'Approved',
+              'text-yellow-600': product?.productStatus === 'Pending',
+              'text-red-600': product?.productStatus === 'Rejected'
+            }">{{ product?.productStatus }}</span></span>
+            <span class="text-gray-500">Category: {{ product?.categoryName }}</span>
+            <span class="text-gray-500">Seller: {{ product?.sellerName }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col items-end">
+        <span *ngIf="product?.isDeleted" class="text-red-600 font-bold">Deleted</span>
+        <span *ngIf="!product?.canBeRequested" class="text-gray-400 text-xs">Cannot be requested</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stocks Table -->
+  <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">Stocks</h3>
+    </div>
+    <div class="relative">
+      <p-table [value]="stocks" [loading]="loading" [paginator]="false" responsiveLayout="scroll" class="w-full" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr class="bg-gray-50">
+            <th class="text-center p-4 font-medium text-gray-700">ID</th>
+            <th class="text-center p-4 font-medium text-gray-700">Quantity</th>
+            <th class="text-center p-4 font-medium text-gray-700">Status</th>
+            <th class="text-center p-4 font-medium text-gray-700">Features</th>
+            <th class="p-4 font-medium text-gray-700" style="min-width: 120px; text-align: center !important;">Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-stock>
+          <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+            <td class="p-4 text-center">{{ stock.id }}</td>
+            <td class="p-4 text-center">{{ stock.quantity }}</td>
+            <td class="p-4 text-center">
+              <p-tag [value]="stock.stockStatus" [severity]="stock.stockStatus === 'ForSale' ? 'success' : 'danger'" class="text-xs"></p-tag>
+            </td>
+            <td class="p-4 text-center">
+              <button
+                pButton
+                type="button"
+                icon="pi pi-star"
+                class="p-button-text p-button-sm"
+                pTooltip="Show Features"
+                (click)="stock._showFeatures = !stock._showFeatures"
+              ></button>
+              <div
+                *ngIf="stock._showFeatures"
+                class="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg p-4 mt-2"
+                style="min-width: 220px; right: 0;"
+              >
+                <div class="flex justify-between items-center mb-2">
+                  <span class="font-semibold text-gray-700">Features</span>
+                  <button
+                    type="button"
+                    class="p-button p-button-text p-button-sm"
+                    (click)="stock._showFeatures = false"
+                  >
+                    <i class="pi pi-times"></i>
+                  </button>
+                </div>
+                <div *ngIf="stock.stockFeatures?.length; else noFeatures">
+                  <div *ngFor="let feature of stock.stockFeatures">
+                    <p-chip
+                      label="{{ feature.name }}: {{ feature.value }}"
+                      class="mb-1"
+                      icon="pi pi-star"
+                    ></p-chip>
+                  </div>
+                </div>
+                <ng-template #noFeatures>
+                  <span class="text-gray-400 text-sm">No features</span>
+                </ng-template>
+              </div>
+            </td>
+            <td class="p-4 text-center" style="min-width: 120px;">
+              <button pButton icon="pi pi-trash" class="p-button-text p-button-sm p-button-danger" pTooltip="Delete Stock" (click)="confirmDeleteStock(stock.id)"></button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="text-center p-8">
+              <div class="flex flex-col items-center">
+                <i class="pi pi-box text-4xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">No stocks found</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+
+  <!-- Toast Messages -->
+  <p-toast></p-toast>
+  <!-- Confirmation Dialog -->
+  <p-confirmDialog></p-confirmDialog>
+</div>

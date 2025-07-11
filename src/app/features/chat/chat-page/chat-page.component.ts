@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { ChatService } from '../../../core/services/chat.service';
 import { ChatConversationDto, ChatMessageDto, UserChatInfoDto } from '../../../core/models/chatmodels/chat-models';
 import { ConversationListComponent } from '../conversation-list/conversation-list.component';
@@ -56,7 +57,8 @@ export class ChatPageComponent implements OnInit, AfterViewInit, OnDestroy {
     public chatService: ChatService,
     private authService: AuthService,
     private userService: UserService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
@@ -74,7 +76,44 @@ export class ChatPageComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    this.loadInitialConversations();
+    // Handle route parameter for starting chat with specific user FIRST
+    this.route.params.subscribe(params => {
+      const userId = params['userId'];
+      if (userId && userId !== this.currentUserId) {
+        // Get user info and start chat
+        this.userService.getUserById(userId).subscribe({
+          next: (res) => {
+            const userInfo: UserChatInfoDto = {
+              userId: res.data.id,
+              fullName: `${res.data.firstName} ${res.data.lastName}`,
+              profileImageUrl: res.data.profileImageUrl
+            };
+            // Load conversations first, then start chat with user
+            this.loadInitialConversations(false).then(() => {
+              this.startChatWithUser(userInfo);
+            });
+          },
+          error: (err) => {
+            console.error('Error fetching user info:', err);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to load user information.'
+            });
+            // Load conversations normally on error
+            this.loadInitialConversations();
+          }
+        });
+      } else {
+        // No specific user, load conversations normally
+        this.loadInitialConversations();
+      }
+    });
+
+    // If no route parameter, load conversations normally
+    if (!this.route.snapshot.params['userId']) {
+      this.loadInitialConversations();
+    }
 
     // Listen for new conversations created via SignalR
     this.chatService.getConversations$().subscribe(conversations => {
@@ -330,58 +369,83 @@ export class ChatPageComponent implements OnInit, AfterViewInit, OnDestroy {
   sendAnyMessage(event: { type: 'text' | 'image' | 'voice', content?: string, file?: File }) {
     if (!this.selectedConversation && this.selectedUserForNewChat) {
       this.isCreatingConversation = true;
-      this.chatService.createConversationSignalR(this.selectedUserForNewChat.userId);
-      const sub = this.chatService.getConversations$().subscribe(convs => {
-        const conv = convs.find(c =>
-          (c.user1Id === this.currentUserId && c.user2Id === this.selectedUserForNewChat!.userId) ||
-          (c.user2Id === this.currentUserId && c.user1Id === this.selectedUserForNewChat!.userId)
-        );
-        if (conv) {
-          this.selectedConversation = conv;
-          this.selectedUserForNewChat = null;
-          setTimeout(() => {
-            if (event.type === 'text') {
-              this.chatService.sendMessageSignalR({
-                conversationId: conv.conversationId,
-                messageText: event.content
-              });
-            } else if (event.type === 'image') {
-              this.chatService.sendImageMessage({
-                conversationId: conv.conversationId,
-                messageText: event.content,
-                image: event.file!
-              }).subscribe();
-            } else if (event.type === 'voice') {
-              this.chatService.sendVoiceMessage({
-                conversationId: conv.conversationId,
-                messageText: event.content,
-                voice: event.file!
-              }).subscribe();
-            }
-            sub.unsubscribe();
+
+      // First try to get the existing conversation one more time
+      this.chatService.getConversationWithUser(this.selectedUserForNewChat.userId).subscribe({
+        next: conv => {
+          if (conv) {
+            // Conversation exists, use it
+            this.selectedConversation = conv;
+            this.selectedUserForNewChat = null;
             this.isCreatingConversation = false;
-          }, 200);
+
+            // Join SignalR for real-time updates
+            this.chatService.joinConversation(conv.conversationId);
+
+            // Add to sidebar if not already present
+            if (!this.conversations.some(c => c.conversationId === conv.conversationId)) {
+              this.conversations = [conv, ...this.conversations];
+            }
+
+            // Now send the message
+            this.sendMessageToConversation(conv.conversationId, event);
+          } else {
+            // No conversation exists, create one via SignalR
+            this.createConversationAndSendMessage(event);
+          }
+        },
+        error: err => {
+          // If error, try to create conversation anyway
+          console.error('Error checking for existing conversation:', err);
+          this.createConversationAndSendMessage(event);
         }
       });
     } else if (this.selectedConversation) {
-      if (event.type === 'text') {
-        this.chatService.sendMessageSignalR({
-          conversationId: this.selectedConversation.conversationId,
-          messageText: event.content
-        });
-      } else if (event.type === 'image') {
-        this.chatService.sendImageMessage({
-          conversationId: this.selectedConversation.conversationId,
-          messageText: event.content,
-          image: event.file!
-        }).subscribe();
-      } else if (event.type === 'voice') {
-        this.chatService.sendVoiceMessage({
-          conversationId: this.selectedConversation.conversationId,
-          messageText: event.content,
-          voice: event.file!
-        }).subscribe();
+      this.sendMessageToConversation(this.selectedConversation.conversationId, event);
+    }
+  }
+
+  private createConversationAndSendMessage(event: { type: 'text' | 'image' | 'voice', content?: string, file?: File }) {
+    this.chatService.createConversationSignalR(this.selectedUserForNewChat!.userId);
+    const sub = this.chatService.getConversations$().subscribe(convs => {
+      const conv = convs.find(c =>
+        (c.user1Id === this.currentUserId && c.user2Id === this.selectedUserForNewChat!.userId) ||
+        (c.user2Id === this.currentUserId && c.user1Id === this.selectedUserForNewChat!.userId)
+      );
+      if (conv) {
+        this.selectedConversation = conv;
+        this.selectedUserForNewChat = null;
+        this.isCreatingConversation = false;
+
+        // Join SignalR for real-time updates
+        this.chatService.joinConversation(conv.conversationId);
+
+        setTimeout(() => {
+          this.sendMessageToConversation(conv.conversationId, event);
+          sub.unsubscribe();
+        }, 200);
       }
+    });
+  }
+
+  private sendMessageToConversation(conversationId: number, event: { type: 'text' | 'image' | 'voice', content?: string, file?: File }) {
+    if (event.type === 'text') {
+      this.chatService.sendMessageSignalR({
+        conversationId: conversationId,
+        messageText: event.content
+      });
+    } else if (event.type === 'image') {
+      this.chatService.sendImageMessage({
+        conversationId: conversationId,
+        messageText: event.content,
+        image: event.file!
+      }).subscribe();
+    } else if (event.type === 'voice') {
+      this.chatService.sendVoiceMessage({
+        conversationId: conversationId,
+        messageText: event.content,
+        voice: event.file!
+      }).subscribe();
     }
   }
 
@@ -430,6 +494,7 @@ export class ChatPageComponent implements OnInit, AfterViewInit, OnDestroy {
               setTimeout(() => this.scrollToBottom(), 0);
             });
           } else {
+            // No conversation exists, set up for new conversation
             this.selectedUserForNewChat = user;
             this.selectedConversation = null;
             this.messages = [];
@@ -442,8 +507,17 @@ export class ChatPageComponent implements OnInit, AfterViewInit, OnDestroy {
             this.selectedConversation = null;
             this.messages = [];
           } else {
-            // Optionally handle other errors (show a toast, etc.)
+            // Handle other errors
             console.error('Error fetching conversation:', err);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to load conversation. Please try again.'
+            });
+            // Still set up for new conversation as fallback
+            this.selectedUserForNewChat = user;
+            this.selectedConversation = null;
+            this.messages = [];
           }
         }
       });
@@ -518,20 +592,24 @@ export class ChatPageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sendMessage(event.content);
   }
 
-  loadInitialConversations() {
+  loadInitialConversations(autoSelectFirst: boolean = true): Promise<void> {
     this.conversationPage = 1;
     this.hasMoreConversations = true;
-    this.chatService.getConversations(this.conversationPage, this.conversationPageSize).subscribe(convs => {
-      this.conversations = convs;
-      for (const conv of convs) {
-        this.chatService.joinConversation(conv.conversationId);
-      }
-      if (this.conversations.length > 0) {
-        this.selectConversation(this.conversations[0]);
-      }
-      if (convs.length < this.conversationPageSize) {
-        this.hasMoreConversations = false;
-      }
+    return new Promise((resolve) => {
+      this.chatService.getConversations(this.conversationPage, this.conversationPageSize).subscribe(convs => {
+        this.conversations = convs;
+        for (const conv of convs) {
+          this.chatService.joinConversation(conv.conversationId);
+        }
+        // Only auto-select first conversation if requested and we don't have a specific user to chat with
+        if (this.conversations.length > 0 && autoSelectFirst && !this.selectedConversation && !this.selectedUserForNewChat) {
+          this.selectConversation(this.conversations[0]);
+        }
+        if (convs.length < this.conversationPageSize) {
+          this.hasMoreConversations = false;
+        }
+        resolve();
+      });
     });
   }
 

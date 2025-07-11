@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 //* PrimeNg Modules
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -16,7 +17,7 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-
+import { Tooltip } from 'primeng/tooltip';
 //* Services
 import { CategoryService } from '../../../../core/services/category.service';
 import { TagService } from '../../../../core/services/tag.service';
@@ -45,6 +46,7 @@ import { ProductStatus } from '../../../../core/models/product-models/productDto
     ToggleSwitch,
     ConfirmDialog,
     ToastModule,
+    Tooltip,
   ],
   templateUrl: './view-product.component.html',
   styleUrl: './view-product.component.css',
@@ -90,7 +92,8 @@ export class ViewProductComponent {
     private tagServ: TagService,
     private sharedServ: SharedService,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -147,6 +150,7 @@ export class ViewProductComponent {
     this.isLoading = true;
     this.productServ.getAllSellerProducts(this.filters).subscribe({
       next: (res) => {
+        console.log("res", res)
         this.products = res.data.paginatedData;
         this.first = res.data.page;
         this.totalRecords = res.data.count;
@@ -416,5 +420,17 @@ export class ViewProductComponent {
         this.confirmationService.close();
       },
     });
+  }
+
+  //* Routing To Update Product
+  updateProduct(productId: number) {
+    this.router.navigate(['/seller/edit-product', productId]);
+    console.log('productId', productId);
+  }
+
+  //* Routing To Add Stock
+  addStock(productId: number) {
+    this.router.navigate(['/seller/stocks/add', productId]);
+    console.log('productId', productId);
   }
 }

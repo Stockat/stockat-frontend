@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { UserService } from '../../../core/services/user.service';
 import { CommonModule, Location } from '@angular/common';
 import { Service } from '../../../core/models/service-models/service.dto';
@@ -10,17 +10,22 @@ import { Paginator, PaginatorModule } from 'primeng/paginator';
 import { TableModule } from 'primeng/table';
 import { PaginatorState } from 'primeng/paginator';
 import { TabViewModule } from 'primeng/tabview';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+import { AuthService } from '../../../core/services/auth.service';
 
 
 @Component({
   selector: 'app-seller-profile',
   templateUrl: './seller-profile.component.html',
-  imports: [CommonModule, RouterLink, CardModule, ButtonModule, Paginator, PaginatorModule, TableModule, TabViewModule],
+  imports: [CommonModule, RouterLink, CardModule, ButtonModule, Paginator, PaginatorModule, TableModule, TabViewModule, ToastModule],
+  providers: [MessageService]
 })
 export class SellerProfileComponent implements OnInit {
   sellerId!: string;
   seller: any;
   sellerServices: Service[] = [];
+  currentUserId: string | null = null;
   // pagination
   totalCount: number = 0;
   page: number = 0; // PrimeNG pages are 0-based
@@ -30,10 +35,14 @@ export class SellerProfileComponent implements OnInit {
     private route: ActivatedRoute,
     private userService: UserService,
     private serviceService: ServiceService,
-    private location: Location
+    private location: Location,
+    private messageService: MessageService,
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    this.currentUserId = this.authService.getCurrentUserId();
     this.sellerId = this.route.snapshot.paramMap.get('id')!;
     this.userService.getUserById(this.sellerId).subscribe(seller => {
       console.log('Seller data:', seller);
@@ -54,6 +63,14 @@ export class SellerProfileComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error fetching seller services:', error);
+        if (error?.error && typeof error.error === 'string' && error.error.includes('Account is not verified by admin yet.')) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Account Not Verified',
+            detail: 'This seller account is not verified by admin yet. Services are not available for public view.',
+            life: 6000
+          });
+        }
       }
     });
   }
@@ -66,5 +83,11 @@ export class SellerProfileComponent implements OnInit {
 
   goBack() {
     this.location.back();
+  }
+
+  contactSeller() {
+    if (this.seller?.data?.id) {
+      this.router.navigate(['/chat', this.seller.data.id]);
+    }
   }
 }

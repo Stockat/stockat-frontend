@@ -1,4 +1,4 @@
-import { ProductStatus } from "./productDto";
+import { ProductStatus } from './productDto';
 
 export interface viewSellerProductDto {
   id: number;
@@ -8,4 +8,5 @@ export interface viewSellerProductDto {
   sellerId: string;
   image: string[]; // List of image URLs
   canBeRequested: boolean; // List of image URLs
+  rejectionReason?: string;
 }

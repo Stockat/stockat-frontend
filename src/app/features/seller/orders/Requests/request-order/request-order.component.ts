@@ -8,11 +8,20 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { BadgeModule } from 'primeng/badge';
-import { FormsModule } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Tooltip } from 'primeng/tooltip';
 import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { CalendarModule } from 'primeng/calendar';
 import { TagModule } from 'primeng/tag';
+import { Dialog } from 'primeng/dialog';
 
 const SELLER_STATUSES = [
   { label: 'Processing', value: 'Processing' },
@@ -34,10 +43,14 @@ const SELLER_STATUSES = [
     CardModule,
     BadgeModule,
     FormsModule,
+    ReactiveFormsModule,
     CommonModule,
     Tooltip,
     InputTextModule,
+    InputNumberModule,
+    CalendarModule,
     TagModule,
+    Dialog,
   ],
   templateUrl: './request-order.component.html',
   providers: [MessageService],
@@ -48,13 +61,23 @@ export class RequestOrderComponent {
   loading = false;
   statusFilter: string = '';
   globalFilter: string = '';
+  visible = false;
+  orderForm: FormGroup;
+  minDate: Date = new Date();
+  selectedOrder: SellerOrder | null = null;
 
   searchValue: string | undefined;
 
   constructor(
     private orderService: OrderService,
-    private messageService: MessageService
-  ) {}
+    private messageService: MessageService,
+    private fb: FormBuilder
+  ) {
+    this.orderForm = this.fb.group({
+      price: [null, [Validators.required, Validators.min(0.01)]],
+      deliveryDate: [null, [Validators.required]],
+    });
+  }
 
   ngOnInit(): void {
     this.fetchOrders();
@@ -88,7 +111,7 @@ export class RequestOrderComponent {
     return order.status === 'PendingSeller';
   }
   canReject(order: SellerOrder) {
-    return order.status === 'PendingSeller' ;
+    return order.status === 'PendingSeller';
   }
   canSetReady(order: SellerOrder) {
     return order.status === 'Processing';
@@ -141,5 +164,60 @@ export class RequestOrderComponent {
       default:
         return 'info';
     }
+  }
+
+  showDialog(order: SellerOrder) {
+    this.selectedOrder = order;
+    this.visible = true;
+    this.orderForm.reset();
+  }
+
+  onDateSelect(event: any) {
+    const selectedDate = new Date(event);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate <= today) {
+      this.orderForm.get('deliveryDate')?.setErrors({ invalidDate: true });
+    } else {
+      this.orderForm.get('deliveryDate')?.setErrors(null);
+    }
+  }
+
+  isFormValid(): boolean {
+    return this.orderForm.valid;
+  }
+
+  confirmOrder() {
+    if (this.isFormValid()) {
+      const formValue = this.orderForm.value;
+      console.log('Form submitted:', formValue);
+
+      this.orderService.updateRequestOrder(this.selectedOrder!.id, formValue).subscribe({
+        next: (res) => {
+          console.log(res);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Order Request updated successfully.',
+          });
+          this.fetchOrders();
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update order request.',
+          });
+        },
+      });
+
+      this.visible = false;
+    }
+  }
+
+  closeDialog() {
+    this.visible = false;
+    this.orderForm.reset();
   }
 }

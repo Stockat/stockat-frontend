@@ -129,6 +129,18 @@ export class SellerLayoutComponent {
           },
           
         ]
+      },
+      {
+        label: 'AI Assistant',
+        icon: 'ti ti-robot',
+        items: [
+          {
+            label: 'Chat with AI',
+            icon: 'pi pi-comments',
+            route: '/chatbot',
+            routerLink: '/chatbot'
+          }
+        ]
       }
     ];
   }

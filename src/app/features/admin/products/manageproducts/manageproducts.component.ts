@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 //* PrimeNg Modules
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -16,7 +17,16 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-
+import { Dialog } from 'primeng/dialog';
+import { FloatLabel } from 'primeng/floatlabel';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { TooltipModule } from 'primeng/tooltip';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 //* Services
 import { CategoryService } from '../../../../core/services/category.service';
 import { TagService } from '../../../../core/services/tag.service';
@@ -49,15 +59,23 @@ import {
     ConfirmDialog,
     ToastModule,
     ConfirmDialogModule,
+    Dialog,
+    FloatLabel,
+    ReactiveFormsModule,
+    IftaLabelModule,
+    TooltipModule,
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './manageproducts.component.html',
   styleUrl: './manageproducts.component.css',
+  standalone: true,
 })
 export class ManageproductsComponent {
-  //! Testing
-  nameAsc: boolean = false;
-  //! end testing
+  //* RejectionForm Params
+  isVisibleRejectionForm: boolean = false;
+  rejectionForm!: FormGroup;
+  rejectingProductId: number | null = null;
+  selectedProductId: number | null = null;
   //* Filters Holders
   categories: any = [];
   tags: any = [];
@@ -112,7 +130,9 @@ export class ManageproductsComponent {
     private tagServ: TagService,
     private sharedServ: SharedService,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router,
+    private fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
@@ -120,6 +140,9 @@ export class ManageproductsComponent {
     this.getCategories();
     this.getTags();
     this.getProducts();
+    this.rejectionForm = this.fb.group({
+      reason: ['', Validators.required],
+    });
   }
 
   //* Status Style
@@ -505,54 +528,100 @@ export class ManageproductsComponent {
     });
   }
 
+  setFormVisible(productId: number) {
+    this.isVisibleRejectionForm = true;
+    this.selectedProductId = productId;
+  }
+
   //* Reject Product (Pending -> Rejected)
-  confirmReject(event: Event, productId: number) {
-    this.confirmationService.confirm({
-      target: event.target as EventTarget,
-      message: 'Do you want to Reject this Product?',
-      header: 'Reject Product',
-      icon: 'pi pi-ban',
-      rejectLabel: 'Cancel',
-      rejectButtonProps: {
-        label: 'Cancel',
-        severity: 'secondary',
-        outlined: true,
-      },
-      acceptButtonProps: {
-        label: 'Reject',
-        severity: 'danger',
-      },
-
-      accept: () => {
-        this.confirmationService.close();
-
-        this.productServ
-          .changeProductStatus(productId, ProductStatus.Rejected)
-          .subscribe({
-            next: (response) => {
-              console.log('Product rejected successfully:', response);
-              this.getProducts();
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Confirmed',
-                detail: response.message,
-                life: 3000,
-              });
-            },
-            error: (error) => {
-              console.error('Error rejecting product:', error);
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to reject product',
-                life: 3000,
-              });
-            },
+  confirmReject() {
+    console.log('Watch out id is :', this.selectedProductId);
+    const reason = this.rejectionForm.value.reason;
+    this.rejectingProductId = this.selectedProductId;
+    this.rejectionForm.reset();
+    this.productServ
+      .changeProductStatusWithReason(
+        this.selectedProductId!,
+        ProductStatus.Rejected,
+        reason
+      )
+      .subscribe({
+        next: (response) => {
+          console.log('Product rejected successfully:', response);
+          this.getProducts();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Confirmed',
+            detail: 'Product Updated Successfully',
+            life: 3000,
           });
-      },
-      reject: () => {
-        this.confirmationService.close();
-      },
-    });
+        },
+        error: (error) => {
+          console.error('Error rejecting product:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to reject product',
+            life: 3000,
+          });
+        },
+      });
+  }
+
+  //* View Details
+  viewProductDetails(productId: number) {
+    this.router.navigate(['/admin/product-details', productId]);
+  }
+  viewDetails(productId: number) {
+    this.router.navigate(['/product-stocks', productId]);
   }
 }
+/*
+this.confirmationService.confirm({
+  target: event.target as EventTarget,
+  message: 'Do you want to Reject this Product?',
+  header: 'Reject Product',
+  icon: 'pi pi-ban',
+  rejectLabel: 'Cancel',
+  rejectButtonProps: {
+    label: 'Cancel',
+    severity: 'secondary',
+    outlined: true,
+  },
+  acceptButtonProps: {
+    label: 'Reject',
+    severity: 'danger',
+  },
+
+  accept: () => {
+    this.confirmationService.close();
+
+    this.productServ
+      .changeProductStatus(productId, ProductStatus.Rejected)
+      .subscribe({
+        next: (response) => {
+          console.log('Product rejected successfully:', response);
+          this.getProducts();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Confirmed',
+            detail: response.message,
+            life: 3000,
+          });
+        },
+        error: (error) => {
+          console.error('Error rejecting product:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to reject product',
+            life: 3000,
+          });
+        },
+      });
+  },
+  reject: () => {
+    this.confirmationService.close();
+  },
+});
+*/

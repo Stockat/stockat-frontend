@@ -9,4 +9,5 @@ export interface OrderRequest {
   buyerId: string;
   paymentId: string;
   paymentStatus: string;
-} 
+  productName: string;
+}

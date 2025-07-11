@@ -107,15 +107,7 @@ export class LoginComponent implements OnInit {
                     icon: 'pi pi-exclamation-triangle',
                     accept: () => {
                       this.authService.setTokens(res.token);
-                      this.userService.toggleUserActivation().subscribe({
-                        next: () => {
-                          this.messageService.add({ severity: 'success', summary: 'Account Reactivated', detail: 'Welcome back!' });
-                          this.router.navigate(['/admin']);
-                        },
-                        error: () => {
-                          this.messageService.add({ severity: 'error', summary: 'Reactivation Failed', detail: 'Could not reactivate your account.' });
-                        }
-                      });
+                      this.navigateBasedOnRoleAndApproval(res.isApproved);
                     },
                     reject: () => {
                       this.messageService.add({
@@ -128,17 +120,27 @@ export class LoginComponent implements OnInit {
                 } else if (res.isAuthSuccessful) {
                   this.authService.setTokens(res.token);
                   this.messageService.add({ severity: 'success', summary: 'Google Login', detail: 'Login successful!' });
-                  this.router.navigate(['/admin']);
+                  this.navigateBasedOnRoleAndApproval(res.isApproved);
                 } else {
                   this.messageService.add({ severity: 'error', summary: 'Google Login', detail: 'Google login failed.' });
                 }
               },
               error: (err: any) => {
-                this.messageService.add({
-                  severity: 'error',
-                  summary: 'Google Login',
-                  detail: 'Google login failed: ' + (err.error?.title || err.statusText)
-                });
+                if (err.status === 403) {
+                  // Handle blocked user
+                  const detail = (typeof err.error === 'string' ? err.error : err.error?.message) || 'Account is blocked';
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: 'Account Blocked',
+                    detail: detail
+                  });
+                } else {
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: 'Google Login',
+                    detail: 'Google login failed: ' + (err.error?.title || err.statusText)
+                  });
+                }
               }
             });
           } else {
@@ -178,8 +180,9 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.invalid) return;
 
     this.loading = true;
+    const credentials = { ...this.loginForm.value };
 
-    this.authService.login(this.loginForm.value).subscribe({
+    this.authService.login(credentials).subscribe({
       next: (res) => {
         this.loading = false;
 
@@ -191,11 +194,19 @@ export class LoginComponent implements OnInit {
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
               this.authService.setTokens(res.token);
-
               this.userService.toggleUserActivation().subscribe({
                 next: () => {
-                  this.messageService.add({ severity: 'success', summary: 'Account Reactivated', detail: 'Welcome back!' });
-                  this.router.navigate(['/admin']);
+                  // After reactivation, re-login automatically
+                  this.authService.login(credentials).subscribe({
+                    next: (loginRes) => {
+                      this.authService.setTokens(loginRes.token);
+                      this.messageService.add({ severity: 'success', summary: 'Account Reactivated', detail: 'Welcome back!' });
+                      this.navigateBasedOnRoleAndApproval(loginRes.isApproved);
+                    },
+                    error: (loginErr) => {
+                      this.messageService.add({ severity: 'error', summary: 'Re-login Failed', detail: 'Could not log in after reactivation.' });
+                    }
+                  });
                 },
                 error: () => {
                   this.messageService.add({ severity: 'error', summary: 'Reactivation Failed', detail: 'Could not reactivate your account.' });
@@ -213,7 +224,7 @@ export class LoginComponent implements OnInit {
         } else {
           this.authService.setTokens(res.token);
           this.messageService.add({ severity: 'success', summary: 'Login Successful', detail: 'Welcome back!' });
-          this.router.navigate(['/admin']);
+          this.navigateBasedOnRoleAndApproval(res.isApproved);
         }
       },
       error: (err: any) => {
@@ -226,10 +237,35 @@ export class LoginComponent implements OnInit {
             summary: 'Email Not Confirmed',
             detail: 'Please check your inbox and confirm your email before logging in.'
           });
+        } else if (err.status === 403) {
+          // Handle blocked user
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: 'Account Blocked', 
+            detail: detail 
+          });
         } else {
           this.messageService.add({ severity: 'error', summary: 'Login Failed', detail });
         }
       }
     });
+  }
+
+  private navigateBasedOnRoleAndApproval(isApproved: boolean): void {
+    if (this.authService.isAdmin()) {
+      this.router.navigate(['/admin']);
+      return;
+    }
+    if (!isApproved) {
+      // Route to default page if not approved
+      this.router.navigate(['/']);
+      return;
+    }
+    if (this.authService.isSeller()) {
+      this.router.navigate(['/seller']);
+    } else {
+      // Default route for buyers or other roles
+      this.router.navigate(['/']);
+    }
   }
 }

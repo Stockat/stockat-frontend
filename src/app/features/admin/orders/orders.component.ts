@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 import { Tooltip } from 'primeng/tooltip';
 import { InputTextModule } from 'primeng/inputtext';
 import { TagModule } from 'primeng/tag';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
 
 const ADMIN_STATUSES = [
   { label: 'Processing', value: 'Processing' },
@@ -39,6 +40,7 @@ const ADMIN_STATUSES = [
     Tooltip,
     InputTextModule,
     TagModule,
+    OverlayPanelModule,
   ],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.css',
@@ -46,12 +48,51 @@ const ADMIN_STATUSES = [
 })
 export class AdminOrdersComponent implements OnInit {
   @ViewChild('dt') dt!: Table;
+  @ViewChild('op') op: any;
 
   orders: AdminOrder[] = [];
   loading = false;
   statusFilter: string = '';
   orderTypeFilter: string = '';
   globalFilter: string = '';
+
+  // Properties for overlay panel
+  selectedStockId: number = 0;
+  selectedProductName: string = '';
+  selectedQuantity: number = 0;
+  selectedPrice: number = 0;
+  selectedOrderType: string = '';
+  selectedStatus: string = '';
+  selectedDescription: string = '';
+
+  statusOptions = [
+    { label: 'All Status', value: '' },
+    { label: 'Pending', value: 'Pending' },
+    { label: 'Processing', value: 'Processing' },
+    { label: 'Shipped', value: 'Shipped' },
+    { label: 'Delivered', value: 'Delivered' },
+    { label: 'Cancelled', value: 'Cancelled' },
+    { label: 'Pending Seller', value: 'PendingSeller' },
+    { label: 'Pending Buyer', value: 'PendingBuyer' },
+  ];
+
+  private orderStatusOptions = [
+    { label: 'Pending', value: 'Pending' },
+    { label: 'Processing', value: 'Processing' },
+    { label: 'Shipped', value: 'Shipped' },
+    { label: 'Delivered', value: 'Delivered' },
+    { label: 'Cancelled', value: 'Cancelled' },
+  ];
+
+  private requestStatusOptions = [
+    { label: 'Pending Seller', value: 'PendingSeller' },
+    { label: 'Pending Buyer', value: 'PendingBuyer' },
+    { label: 'Pending', value: 'Pending' },
+    { label: 'Processing', value: 'Processing' },
+    { label: 'Shipped', value: 'Shipped' },
+    { label: 'Delivered', value: 'Delivered' },
+    { label: 'Cancelled', value: 'Cancelled' },
+  ];
 
   constructor(
     private orderService: OrderService,
@@ -60,6 +101,41 @@ export class AdminOrdersComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchOrders();
+    this.updateStatusOptions();
+  }
+
+  updateStatusOptions() {
+    if (this.orderTypeFilter === 'Order') {
+      this.statusOptions = [
+        { label: 'All Status', value: '' },
+        ...this.orderStatusOptions,
+      ];
+    } else if (this.orderTypeFilter === 'Request') {
+      this.statusOptions = [
+        { label: 'All Status', value: '' },
+        ...this.requestStatusOptions,
+      ];
+    } else {
+      // Union of both, no duplicates
+      const union = [
+        ...this.orderStatusOptions,
+        ...this.requestStatusOptions.filter(
+          (s) => !this.orderStatusOptions.some((os) => os.value === s.value)
+        ),
+      ];
+      this.statusOptions = [{ label: 'All Status', value: '' }, ...union];
+    }
+    // Reset status filter if current value is not in the new options
+    if (!this.statusOptions.some((opt) => opt.value === this.statusFilter)) {
+      this.statusFilter = '';
+    }
+  }
+
+  onOrderTypeChange() {
+    this.updateStatusOptions();
+    if (this.dt) {
+      this.dt.filter(this.orderTypeFilter, 'orderType', 'equals');
+    }
   }
 
   get pendingCount(): number {
@@ -98,6 +174,7 @@ export class AdminOrdersComponent implements OnInit {
     this.loading = true;
     this.orderService.getAdminOrders().subscribe({
       next: (res) => {
+        console.log(res);
         this.orders = res.data;
         this.loading = false;
       },
@@ -185,5 +262,16 @@ export class AdminOrdersComponent implements OnInit {
       default:
         return 'info';
     }
+  }
+
+  showStockFeatures(order: AdminOrder, event: Event) {
+    this.selectedStockId = order.stockId;
+    this.selectedProductName = order.productName;
+    this.selectedQuantity = order.quantity;
+    this.selectedPrice = order.price;
+    this.selectedOrderType = order.orderType;
+    this.selectedStatus = order.status;
+    this.selectedDescription = order.description;
+    this.op.toggle(event);
   }
 }

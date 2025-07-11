@@ -1,0 +1,441 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Header Section -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">User Punishment Management</h1>
+        <p class="text-gray-600 mt-2">Manage user punishments, warnings, and bans</p>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button 
+          pButton 
+          label="Create Punishment" 
+          icon="pi pi-plus"
+          class="p-button-primary"
+          (click)="openCreatePunishmentDialog()"
+        ></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-red-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-red-100">
+          <i class="pi pi-exclamation-triangle text-red-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Total Punishments</p>
+          <p class="text-2xl font-bold text-gray-900">{{ statistics.total }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-yellow-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-yellow-100">
+          <i class="pi pi-exclamation-circle text-yellow-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Warnings</p>
+          <p class="text-2xl font-bold text-gray-900">{{ statistics.warnings }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-orange-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-orange-100">
+          <i class="pi pi-clock text-orange-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Temporary Bans</p>
+          <p class="text-2xl font-bold text-gray-900">{{ statistics.temporaryBans }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-red-600">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-red-100">
+          <i class="pi pi-ban text-red-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Permanent Bans</p>
+          <p class="text-2xl font-bold text-gray-900">{{ statistics.permanentBans }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Statistics -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Active Bans</p>
+          <p class="text-2xl font-bold text-red-600">{{ statistics.activeBans }}</p>
+        </div>
+        <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+          <i class="pi pi-shield text-red-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Warning Rate</p>
+          <p class="text-2xl font-bold text-yellow-600">{{ statistics.warningPercentage | number:'1.1-1' }}%</p>
+        </div>
+        <div class="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center">
+          <i class="pi pi-chart-pie text-yellow-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Ban Rate</p>
+          <p class="text-2xl font-bold text-red-600">{{ statistics.banPercentage | number:'1.1-1' }}%</p>
+        </div>
+        <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+          <i class="pi pi-chart-bar text-red-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search (Unified) -->
+  <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="md:col-span-1">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+        <input
+          pInputText
+          [(ngModel)]="punishmentSearchTerm"
+          (ngModelChange)="onPunishmentSearchChange($event)"
+          placeholder="Search by name, email, or username..."
+          class="w-full pl-4 py-2 border border-gray-300 rounded-lg"
+        />
+      </div>
+      <div class="md:col-span-1">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Punishment Type</label>
+        <p-dropdown 
+          [(ngModel)]="typeFilter"
+          (onChange)="onFilterChange()"
+          [options]="[
+            {label: 'All Types', value: ''},
+            {label: 'Warning', value: 'Warning'},
+            {label: 'Temporary Ban', value: 'TemporaryBan'},
+            {label: 'Permanent Ban', value: 'PermanentBan'}
+          ]"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select Type"
+          class="w-full"
+        ></p-dropdown>
+      </div>
+      <div class="md:col-span-1">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+        <p-dropdown 
+          [(ngModel)]="statusFilter"
+          (onChange)="onFilterChange()"
+          [options]="[
+            {label: 'All Punishments', value: ''},
+            {label: 'Active Only', value: 'active'}
+          ]"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select Status"
+          class="w-full"
+        ></p-dropdown>
+      </div>
+    </div>
+  </div>
+
+  <!-- Punishments Table -->
+  <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">Punishments List</h3>
+    </div>
+
+    <div class="relative">
+      <p-table 
+        [value]="punishments" 
+        [loading]="loading"
+        [paginator]="false"
+        [rows]="pageSize"
+        [showCurrentPageReport]="false"
+        responsiveLayout="scroll"
+        class="w-full"
+        styleClass="p-datatable-sm"
+      >
+        <ng-template pTemplate="header">
+          <tr class="bg-gray-50">
+            <th class="text-left p-4 font-medium text-gray-700">User</th>
+            <th class="text-left p-4 font-medium text-gray-700">Type</th>
+            <th class="text-left p-4 font-medium text-gray-700">Reason</th>
+            <th class="text-left p-4 font-medium text-gray-700">Start Date</th>
+            <th class="text-left p-4 font-medium text-gray-700">End Date</th>
+            <th class="text-left p-4 font-medium text-gray-700">Status</th>
+            <th class="p-4 font-medium text-gray-700" style="min-width: 120px; text-align: center !important;">Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-punishment>
+          <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+            <!-- User Info -->
+            <td class="p-4">
+              <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                  <i class="pi pi-user text-gray-600"></i>
+                </div>
+                <div>
+                  <div class="font-medium text-gray-900">{{ punishment.userName }}</div>
+                  <div class="text-sm text-gray-500">{{ punishment.userEmail }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Type -->
+            <td class="p-4">
+              <p-tag 
+                [value]="punishment.type"
+                [severity]="getPunishmentSeverity(punishment.type)"
+                [icon]="getPunishmentIcon(punishment.type)"
+                class="text-xs"
+              ></p-tag>
+            </td>
+
+            <!-- Reason -->
+            <td class="p-4">
+              <div class="text-gray-900 max-w-xs truncate" [title]="punishment.reason">
+                {{ punishment.reason }}
+              </div>
+            </td>
+
+            <!-- Start Date -->
+            <td class="p-4">
+              <div class="text-gray-900">{{ formatDate(punishment.startDate) }}</div>
+            </td>
+
+            <!-- End Date -->
+            <td class="p-4">
+              <div class="text-gray-900">
+                {{ punishment.endDate ? formatDate(punishment.endDate) : 'Permanent' }}
+              </div>
+            </td>
+
+            <!-- Status -->
+            <td class="p-4">
+              <p-tag 
+                [value]="isPunishmentActive(punishment) ? 'Active' : 'Inactive'"
+                [severity]="isPunishmentActive(punishment) ? 'danger' : 'success'"
+                class="text-xs"
+              ></p-tag>
+            </td>
+
+            <!-- Actions -->
+            <td class="p-4 text-center" style="min-width: 120px;">
+              <div class="flex items-center justify-center space-x-2">
+                <button 
+                  pButton 
+                  icon="pi pi-eye" 
+                  class="p-button-text p-button-sm p-button-info"
+                  pTooltip="View Details"
+                  (click)="viewPunishmentDetails(punishment)"
+                ></button>
+
+                <button 
+                  pButton 
+                  icon="pi pi-trash" 
+                  class="p-button-text p-button-sm p-button-danger"
+                  pTooltip="Remove Punishment"
+                  (click)="removePunishment(punishment)"
+                ></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="text-center p-8">
+              <div class="flex flex-col items-center">
+                <i class="pi pi-shield text-4xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">No punishments found</p>
+                <p class="text-gray-400 text-sm">All users are currently in good standing</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="p-4 border-t border-gray-200">
+      <p-paginator 
+        [rows]="pageSize"
+        [totalRecords]="totalPunishments"
+        [rowsPerPageOptions]="[5, 10, 20, 50]"
+        (onPageChange)="onPageChange($event)"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} punishments"
+      ></p-paginator>
+    </div>
+  </div>
+
+  <!-- Punishment Details Dialog -->
+  <p-dialog 
+    [(visible)]="showPunishmentDetails" 
+    [modal]="true" 
+    [style]="{width: '50vw'}"
+    header="Punishment Details"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <div *ngIf="selectedPunishment" class="space-y-6">
+      <!-- User Information -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h4 class="font-medium text-gray-900 mb-3">User Information</h4>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Name</label>
+            <p class="text-gray-900">{{ selectedPunishment.userName }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Email</label>
+            <p class="text-gray-900">{{ selectedPunishment.userEmail }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Punishment Information -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h4 class="font-medium text-gray-900 mb-3">Punishment Information</h4>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Type</label>
+            <p-tag 
+              [value]="selectedPunishment.type"
+              [severity]="getPunishmentSeverity(selectedPunishment.type)"
+              [icon]="getPunishmentIcon(selectedPunishment.type)"
+            ></p-tag>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Status</label>
+            <p-tag 
+              [value]="isPunishmentActive(selectedPunishment) ? 'Active' : 'Inactive'"
+              [severity]="isPunishmentActive(selectedPunishment) ? 'danger' : 'success'"
+            ></p-tag>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Start Date</label>
+            <p class="text-gray-900">{{ formatDate(selectedPunishment.startDate) }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">End Date</label>
+            <p class="text-gray-900">
+              {{ selectedPunishment.endDate ? formatDate(selectedPunishment.endDate) : 'Permanent' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reason -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h4 class="font-medium text-gray-900 mb-3">Reason</h4>
+        <p class="text-gray-900 bg-white p-3 rounded border">{{ selectedPunishment.reason }}</p>
+      </div>
+    </div>
+  </p-dialog>
+
+  <!-- Create Punishment Dialog -->
+  <p-dialog 
+    [(visible)]="showCreatePunishmentDialog" 
+    [modal]="true" 
+    [style]="{width: '40vw'}"
+    header="Create New Punishment"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <form [formGroup]="createPunishmentForm" class="space-y-4">
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">User Email <span class="text-red-500">*</span></label>
+        <input
+          pInputText
+          formControlName="email"
+          type="email"
+          placeholder="Enter user email"
+          class="w-full"
+          required
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Punishment Type</label>
+        <p-dropdown 
+          formControlName="type"
+          [options]="punishmentTypes"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select punishment type"
+          (onChange)="onPunishmentTypeChange()"
+          class="w-full"
+        ></p-dropdown>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Reason</label>
+        <textarea 
+          pInputTextarea 
+          formControlName="reason"
+          rows="3"
+          placeholder="Enter the reason for this punishment..."
+          class="w-full"
+        ></textarea>
+      </div>
+
+      <div *ngIf="createPunishmentForm.get('type')?.value === 'TemporaryBan'">
+        <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+        <input 
+          type="date" 
+          formControlName="endDate" 
+          class="w-full border p-2 rounded text-lg"
+          [min]="getCurrentDate() | date:'yyyy-MM-dd'"
+        >
+        <small class="text-gray-500 block mt-1">Pick the end date</small>
+      </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end space-x-2">
+        <button 
+          pButton 
+          label="Cancel" 
+          class="p-button-text"
+          (click)="showCreatePunishmentDialog = false"
+        ></button>
+        <button 
+          pButton 
+          type="button"
+          class="p-button-danger"
+          [disabled]="!createPunishmentForm.valid || createPunishmentLoading"
+          (click)="submitPunishment()"
+        >
+          <i *ngIf="createPunishmentLoading" class="pi pi-spin pi-spinner mr-2"></i>
+          {{ createPunishmentLoading ? 'Creating...' : 'Create Punishment' }}
+        </button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Toast Messages -->
+  <p-toast></p-toast>
+  
+  <!-- Confirmation Dialog -->
+  <p-confirmDialog></p-confirmDialog>
+</div> 

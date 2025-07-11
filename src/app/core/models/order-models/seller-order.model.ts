@@ -8,6 +8,7 @@ export interface SellerOrder {
   paymentId: string;
   paymentStatus: string;
   productId: number;
+  productName: string;
   stockId: number;
   sellerId: string;
   sellerFirstName: string;
@@ -15,4 +16,4 @@ export interface SellerOrder {
   buyerId: string;
   buyerFirstName: string;
   buyerLastName: string;
-} 
+}

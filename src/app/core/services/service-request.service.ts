@@ -51,4 +51,16 @@ export class ServiceRequestService {
   cancelRequest(requestId: number): Observable<any> {
     return this.http.patch(`${this.baseUrl}/${requestId}/buyer-cancel`, {});
   }
+
+  getAllRequestsForAdmin(page: number = 1, size: number = 10, status?: string): Observable<GenericRequestModel<PaginationDto<ServiceRequestDto>>> {
+    let url = `${this.baseUrl}/admin/all?page=${page}&size=${size}`;
+    if (status !== undefined && status !== null && status !== '') {
+      url += `&status=${status}`;
+    }
+    return this.http.get<GenericRequestModel<PaginationDto<ServiceRequestDto>>>(url);
+  }
+
+  createStripeCheckoutSession(requestId: number): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/${requestId}/checkout`, {});
+  }
 }
