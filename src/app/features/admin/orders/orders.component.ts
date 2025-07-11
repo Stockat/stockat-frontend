@@ -14,6 +14,7 @@ import { Tooltip } from 'primeng/tooltip';
 import { InputTextModule } from 'primeng/inputtext';
 import { TagModule } from 'primeng/tag';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { DialogModule } from 'primeng/dialog';
 
 const ADMIN_STATUSES = [
   { label: 'Processing', value: 'Processing' },
@@ -41,6 +42,7 @@ const ADMIN_STATUSES = [
     InputTextModule,
     TagModule,
     OverlayPanelModule,
+    DialogModule,
   ],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.css',
@@ -65,10 +67,14 @@ export class AdminOrdersComponent implements OnInit {
   selectedStatus: string = '';
   selectedDescription: string = '';
 
+  showCancelConfirm = false;
+  orderToCancel: AdminOrder | null = null;
+
   statusOptions = [
     { label: 'All Status', value: '' },
     { label: 'Pending', value: 'Pending' },
     { label: 'Processing', value: 'Processing' },
+    { label: 'Ready', value: 'Ready' },
     { label: 'Shipped', value: 'Shipped' },
     { label: 'Delivered', value: 'Delivered' },
     { label: 'Cancelled', value: 'Cancelled' },
@@ -79,6 +85,7 @@ export class AdminOrdersComponent implements OnInit {
   private orderStatusOptions = [
     { label: 'Pending', value: 'Pending' },
     { label: 'Processing', value: 'Processing' },
+    { label: 'Ready', value: 'Ready' },
     { label: 'Shipped', value: 'Shipped' },
     { label: 'Delivered', value: 'Delivered' },
     { label: 'Cancelled', value: 'Cancelled' },
@@ -89,6 +96,7 @@ export class AdminOrdersComponent implements OnInit {
     { label: 'Pending Buyer', value: 'PendingBuyer' },
     { label: 'Pending', value: 'Pending' },
     { label: 'Processing', value: 'Processing' },
+    { label: 'Ready', value: 'Ready' },
     { label: 'Shipped', value: 'Shipped' },
     { label: 'Delivered', value: 'Delivered' },
     { label: 'Cancelled', value: 'Cancelled' },
@@ -273,5 +281,21 @@ export class AdminOrdersComponent implements OnInit {
     this.selectedStatus = order.status;
     this.selectedDescription = order.description;
     this.op.toggle(event);
+  }
+
+  confirmCancel(order: AdminOrder) {
+    this.orderToCancel = order;
+    this.showCancelConfirm = true;
+  }
+  handleCancelConfirmed() {
+    if (this.orderToCancel) {
+      this.updateStatus(this.orderToCancel, 'Cancelled');
+      this.orderToCancel = null;
+    }
+    this.showCancelConfirm = false;
+  }
+  handleCancelRejected() {
+    this.orderToCancel = null;
+    this.showCancelConfirm = false;
   }
 }

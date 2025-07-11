@@ -95,6 +95,20 @@
     <h3 class="text-xl font-bold text-gray-800 mb-2">No Orders</h3>
     <p class="text-gray-600">You haven't placed any orders yet.</p>
   </div>
+
+  <!-- No Orders Found After Filtering -->
+  <div *ngIf="!loading && orders && orders.length > 0 && filteredOrders && filteredOrders.length === 0" class="text-center py-12">
+    <div
+      class="w-20 h-20 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+      <i class="pi pi-search text-white text-2xl"></i>
+    </div>
+    <h3 class="text-xl font-bold text-gray-800 mb-2">No Orders Found</h3>
+    <p class="text-gray-600">No orders match your current filter criteria.</p>
+    <p-button label="Clear Filters" icon="pi pi-times"
+      (onClick)="clearFilters()"
+      styleClass="p-button-raised p-button-sm mt-4 bg-gradient-to-r from-pink-500 to-purple-600 border-0"></p-button>
+  </div>
+
   <!-- Orders Table -->
   <div *ngIf="!loading && filteredOrders && filteredOrders.length > 0"
     class="rounded-2xl border border-white/20 shadow-lg">

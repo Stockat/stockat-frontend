@@ -36,11 +36,14 @@ export class OrderRequestDetailsComponent implements OnInit {
   searchTerm: string = '';
   statusFilter: string = '';
   orderStatusOptions = [
-    { label: 'All Statuses', value: '' },
-    { label: 'Pending', value: 'Pending' },
-    { label: 'Completed', value: 'Completed' },
-    { label: 'Cancelled', value: 'Cancelled' },
+    { label: 'All Status', value: '' },
+    { label: 'Pending Seller', value: 'PendingSeller' },
+    { label: 'Pending Buyer', value: 'PendingBuyer' },
     { label: 'Processing', value: 'Processing' },
+    { label: 'Ready', value: 'Ready' },
+    { label: 'Shipped', value: 'Shipped' },
+    { label: 'Delivered', value: 'Delivered' },
+    { label: 'Cancelled', value: 'Cancelled' },
   ];
 
   // Pagination
@@ -93,6 +96,12 @@ export class OrderRequestDetailsComponent implements OnInit {
     this.pagedOrders = this.filteredOrders.slice(start, end);
   }
 
+  clearFilters() {
+    this.searchTerm = '';
+    this.statusFilter = '';
+    this.filterOrders();
+  }
+
   onPageChange(event: any) {
     this.page = event.page;
     this.rows = event.rows;
@@ -100,7 +109,7 @@ export class OrderRequestDetailsComponent implements OnInit {
   }
 
   get pendingOrdersCount(): number {
-    return this.orders.filter((o) => o.status === 'Pending').length;
+    return this.orders.filter((o) => o.status === 'Processing').length;
   }
   get completedOrdersCount(): number {
     return this.orders.filter((o) => o.status === 'Delivered').length;
@@ -148,13 +157,13 @@ export class OrderRequestDetailsComponent implements OnInit {
   }
 
   confirmOrder(order: SellerOrder) {
-      console.log(order);
-      this.orderService.UpdateRequestOrderWithStripe(order).subscribe({
-        next: (res) => {
-          console.log(res);
-          window.location.href=res.redirectUrl!;
-        },
-      });
+    console.log(order);
+    this.orderService.UpdateRequestOrderWithStripe(order).subscribe({
+      next: (res) => {
+        console.log(res);
+        window.location.href = res.redirectUrl!;
+      },
+    });
   }
 
   deleteOrder(order: SellerOrder) {

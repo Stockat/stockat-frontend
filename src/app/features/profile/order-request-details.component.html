@@ -23,7 +23,7 @@
             <i class="pi pi-clock text-yellow-600 text-sm md:text-base"></i>
           </div>
           <div>
-            <p class="text-xs text-gray-500">Pending</p>
+            <p class="text-xs text-gray-500">Processing</p>
             <p class="font-bold text-gray-800 text-sm md:text-base">{{ pendingOrdersCount }}</p>
           </div>
         </div>
@@ -95,6 +95,19 @@
     <h3 class="text-xl font-bold text-gray-800 mb-2">No Order Requests</h3>
     <p class="text-gray-600">You haven't placed any order requests yet.</p>
   </div>
+  <!-- No Orders Found After Filtering -->
+  <div *ngIf="!loading && orders && orders.length > 0 && filteredOrders && filteredOrders.length === 0"
+    class="text-center py-12">
+    <div
+      class="w-20 h-20 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+      <i class="pi pi-search text-white text-2xl"></i>
+    </div>
+    <h3 class="text-xl font-bold text-gray-800 mb-2">No Orders Found</h3>
+    <p class="text-gray-600">No orders match your current filter criteria.</p>
+    <p-button label="Clear Filters" icon="pi pi-times" (onClick)="clearFilters()"
+      styleClass="p-button-raised p-button-sm mt-4 bg-gradient-to-r from-pink-500 to-purple-600 border-0"></p-button>
+  </div>
+
   <!-- Orders Table -->
   <div *ngIf="!loading && filteredOrders && filteredOrders.length > 0"
     class="rounded-2xl border border-white/20 shadow-lg">
@@ -168,11 +181,9 @@
             </td>
             <td class="px-3 py-3">
               <div class="flex gap-2 flex-wrap">
-                <p-button *ngIf="showAcceptButton(order)" label="" icon="pi pi-check"
-                  (onClick)="confirmOrder(order)"
+                <p-button *ngIf="showAcceptButton(order)" label="" icon="pi pi-check" (onClick)="confirmOrder(order)"
                   styleClass="p-button-success p-button-sm"></p-button>
-                <p-button *ngIf="showDeleteButton(order)" label="" icon="pi pi-trash"
-                  (onClick)="deleteOrder(order)"
+                <p-button *ngIf="showDeleteButton(order)" label="" icon="pi pi-trash" (onClick)="deleteOrder(order)"
                   styleClass="p-button-danger p-button-sm"></p-button>
                 <p-button label="Details" icon="pi pi-eye" styleClass="p-button-raised p-button-sm"
                   class="bg-gradient-to-r from-pink-500 to-purple-600 border-0"></p-button>
