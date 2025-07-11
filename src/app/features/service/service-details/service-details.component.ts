@@ -9,11 +9,14 @@ import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { ReviewSectionComponent } from '../../shared/review-section/review-section.component';
+import { ReviewService } from '../../../core/services/review.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-service-details',
   templateUrl: './service-details.component.html',
-  imports: [CommonModule, RequestModalComponent, DialogModule, ButtonModule, RouterLink, ToastModule],
+  imports: [CommonModule, RequestModalComponent, DialogModule, ButtonModule, RouterLink, ToastModule, ReviewSectionComponent, FormsModule],
   providers: [MessageService]
 })
 
@@ -25,11 +28,16 @@ export class ServiceDetailsComponent {
   isCheckingPendingRequest = true; // Add loading state for pending request check
   errorMessage: string | null = null;
   requestErrorMessage: string | null = null;
+  deliveredRequestId: number | undefined = undefined;
+  deliveredRequestLoading: boolean = false;
+  eligibleDeliveredRequests: any[] = [];
+  selectedDeliveredRequestId: number | undefined = undefined;
 
   constructor(
     private route: ActivatedRoute,
     private serviceService: ServiceService,
     private requestService: ServiceRequestService,
+    private reviewService: ReviewService,
     private router: Router,
     private messageService: MessageService
   ) {}
@@ -45,6 +53,8 @@ export class ServiceDetailsComponent {
         this.errorMessage = null;
         // Check for pending request for this service
         this.checkPendingRequest(id);
+        // Find delivered request for review
+        this.findDeliveredRequestForReview();
       },
       error: (error) => {
         console.error('Error loading service:', error);
@@ -52,6 +62,58 @@ export class ServiceDetailsComponent {
         this.isCheckingPendingRequest = false;
       }
     });
+  }
+
+  findDeliveredRequestForReview() {
+    if (!this.service) return;
+    this.deliveredRequestLoading = true;
+    this.requestService.getBuyerRequests(1, 100).subscribe({
+      next: (response: any) => {
+        if (response && response.data && response.data.paginatedData) {
+          const deliveredRequests = response.data.paginatedData.filter(
+            (req: any) => req.serviceId === this.service!.id && req.serviceStatus === 'Delivered'
+          );
+          this.eligibleDeliveredRequests = [];
+          if (deliveredRequests.length === 0) {
+            this.deliveredRequestId = undefined;
+            this.selectedDeliveredRequestId = undefined;
+            this.deliveredRequestLoading = false;
+            return;
+          }
+          const reviewChecks = deliveredRequests.map((req: any) =>
+            this.reviewService.hasReviewedService(req.id).toPromise().then((res: any) => ({
+              req,
+              hasReviewed: res?.data === true
+            }))
+          );
+          Promise.all(reviewChecks).then((results: any[]) => {
+            this.eligibleDeliveredRequests = results.filter((r: any) => !r.hasReviewed).map((r: any) => r.req);
+            this.selectedDeliveredRequestId = this.eligibleDeliveredRequests.length > 0 ? this.eligibleDeliveredRequests[0].id : undefined;
+            this.deliveredRequestId = this.selectedDeliveredRequestId;
+            this.deliveredRequestLoading = false;
+          }).catch(() => {
+            this.eligibleDeliveredRequests = [];
+            this.selectedDeliveredRequestId = undefined;
+            this.deliveredRequestId = undefined;
+            this.deliveredRequestLoading = false;
+          });
+        } else {
+          this.deliveredRequestId = undefined;
+          this.selectedDeliveredRequestId = undefined;
+          this.deliveredRequestLoading = false;
+        }
+      },
+      error: () => {
+        this.deliveredRequestId = undefined;
+        this.selectedDeliveredRequestId = undefined;
+        this.deliveredRequestLoading = false;
+      }
+    });
+  }
+
+  onDeliveredRequestChange(requestId: number | undefined) {
+    this.selectedDeliveredRequestId = requestId;
+    this.deliveredRequestId = requestId;
   }
 
     checkPendingRequest(serviceId: number) {
@@ -156,6 +218,10 @@ export class ServiceDetailsComponent {
       summary: 'Request Submitted',
       detail: 'Your service request has been submitted successfully!'
     });
+  }
+
+  onReviewSubmitted() {
+    // Optionally reload service details or reviews if needed
   }
 
   goBackToServices() {
