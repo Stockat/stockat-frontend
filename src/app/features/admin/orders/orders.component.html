@@ -180,7 +180,7 @@
             Search
           </label>
           <input pInputText type="text" [(ngModel)]="globalFilter" (ngModelChange)="dt.filterGlobal($event, 'contains')"
-            placeholder="Search orders, buyers, sellers..."
+            placeholder="Search orders, products, buyers, sellers..."
             class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 hover:border-purple-400" />
         </div>
       </div>
@@ -203,7 +203,7 @@
       <div class="overflow-x-auto">
         <p-table #dt [value]="orders" [loading]="loading" [paginator]="true" [rows]="10"
           [rowsPerPageOptions]="[10, 25, 50]"
-          [globalFilterFields]="['buyerFirstName', 'buyerLastName', 'sellerFirstName', 'sellerLastName', 'status', 'orderType', 'productId', 'stockId']"
+          [globalFilterFields]="['buyerFirstName', 'buyerLastName', 'sellerFirstName', 'sellerLastName', 'status', 'orderType', 'productName', 'stockId']"
           [filters]="{ status: { value: statusFilter, matchMode: 'equals' }, orderType: { value: orderTypeFilter, matchMode: 'equals' } }"
           [tableStyle]="{ 'min-width': '80rem' }" class="w-full" styleClass="w-full">
           <ng-template #caption>
@@ -246,7 +246,7 @@
                   <div class="p-2 bg-blue-100 rounded-lg">
                     <i class="pi pi-box text-blue-600 text-sm"></i>
                   </div>
-                  <span class="font-semibold text-gray-900">#{{ order.productId }}</span>
+                  <span class="font-semibold text-gray-900">{{ order.productName }}</span>
                 </div>
               </td>
               <td class="p-4">
@@ -254,7 +254,13 @@
                   <div class="p-2 bg-green-100 rounded-lg">
                     <i class="pi pi-tag text-green-600 text-sm"></i>
                   </div>
-                  <span class="font-semibold text-gray-900">#{{ order.stockId }}</span>
+                  <button 
+                    type="button" 
+                    class="font-semibold text-gray-900 hover:text-green-600 transition-colors"
+                    (click)="showStockFeatures(order, $event)"
+                    pTooltip="Click to view stock features">
+                    #{{ order.stockId }}
+                  </button>
                 </div>
               </td>
               <td class="p-4">
@@ -337,3 +343,42 @@
 </div>
 
 <p-toast></p-toast>
+
+<!-- Stock Features Overlay Panel -->
+<p-overlayPanel #op>
+  <ng-template pTemplate>
+    <div class="p-4">
+      <h3 class="text-lg font-semibold text-gray-800 mb-3">Stock Features</h3>
+      <div class="space-y-2">
+        <div class="flex justify-between">
+          <span class="text-gray-600">Stock ID:</span>
+          <span class="font-medium">#{{ selectedStockId }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">Product:</span>
+          <span class="font-medium">{{ selectedProductName }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">Quantity:</span>
+          <span class="font-medium">{{ selectedQuantity }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">Price:</span>
+          <span class="font-medium text-green-600">{{ selectedPrice | currency }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">Order Type:</span>
+          <span class="font-medium">{{ selectedOrderType }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">Status:</span>
+          <span class="font-medium">{{ selectedStatus }}</span>
+        </div>
+        <div *ngIf="selectedDescription" class="mt-3 pt-3 border-t border-gray-200">
+          <span class="text-gray-600 block mb-1">Description:</span>
+          <span class="text-sm text-gray-700">{{ selectedDescription }}</span>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</p-overlayPanel>

@@ -277,6 +277,10 @@
                   <!-- All Status - Show Delete button -->
                   <p-button icon="pi pi-times" [rounded]="true" severity="danger" [outlined]="true"
                     (onClick)="confirmDelete($event, product.id)" class="text-xs" pTooltip="Delete Product" />
+
+                  <!-- All Status - Show Details button -->
+                  <p-button icon="pi pi-info-circle" [rounded]="true" severity="info" [outlined]="true"
+                    (onClick)="viewProductDetails(product.id)" class="text-xs" pTooltip="View Details" />
                 </div>
                 } @else {
                 <div class="text-gray-400 text-sm italic">No actions available</div>

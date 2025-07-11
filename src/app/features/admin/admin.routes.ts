@@ -14,8 +14,16 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./products/manageproducts/manageproducts.component').then(m => m.ManageproductsComponent)
     },
     {
+        path: 'product-details/:id',
+        loadComponent: () => import('./products/product-details/product-details.component').then(m => m.ProductDetailsComponent)
+    },
+    {
         path: 'categories',
         loadComponent: () => import('./category/category-management.component').then(m => m.CategoryManagementComponent)
+    },
+    {
+        path: 'tags',
+        loadComponent: () => import('./tag/tag-management.component').then(m => m.TagManagementComponent)
     },
     {
         path: 'users',

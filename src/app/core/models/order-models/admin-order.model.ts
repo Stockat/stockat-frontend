@@ -6,6 +6,7 @@ export interface AdminOrder {
   status: string;
   craetedAt: string;
   description: string;
+  productName: string;
   paymentId: string;
   paymentStatus: string;
   productId: number;
