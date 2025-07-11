@@ -91,19 +91,22 @@
         <ng-template pTemplate="body" let-bid>
           <tr (click)="viewAuction(bid.auction.id)" class="cursor-pointer hover:bg-gray-50">
             <td>
-              <div class="font-semibold">{{ bid.auction.title || 'Untitled Auction' }}</div>
+              <div class="font-semibold">{{ bid.auction.name || 'Untitled Auction' }}</div>
               <div class="text-xs text-gray-500">ID: {{ bid.auction.id | truncate:8 }}</div>
             </td>
-            <td class="font-semibold">${{ bid.amount | number:'1.2-2' }}</td>
+            <td class="font-semibold">${{ bid.bidAmount | number:'1.2-2' }}</td>
             <td>{{ bid.bidTime | date:'MMM d, y h:mm a' }}</td>
-            <td>{{ bid.auction.endDate | date:'MMM d, y' }}</td>
+            <td>{{ bid.auction.endTime | date:'MMM d, y' }}</td>
             <td>
               <span [ngClass]="{
-                'bg-green-100 text-green-800': bid.isWinning,
-                'bg-red-100 text-red-800': !bid.isWinning
+                'bg-green-100 text-green-800': bid.auction.buyerId===userId,
+                'bg-red-100 text-red-800': bid.auction.buyerId!==userId
               }" class="px-2 py-1 rounded text-xs">
-                {{ bid.isWinning ? 'Won' : 'Lost' }}
+                {{ bid.auction.buyerId==userId ? 'Won' : 'Lost' }}
               </span>
+              <div *ngIf="bid.auction?.buyerId === userId " class="text-xs text-gray-500">
+                <!-- Order ID: {{ bid?.auctionOrderId | truncate:8 || 'N/A' }}  --> {{bid?.auctionOrderId}}
+              </div>
             </td>
           </tr>
         </ng-template>

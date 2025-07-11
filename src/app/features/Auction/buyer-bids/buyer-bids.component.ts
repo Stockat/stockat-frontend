@@ -64,7 +64,7 @@ export class BuyerBidsComponent implements OnInit {
     this.bidService.GetBidsForUser(this.userId).subscribe({
       next: (bids) => {
         this.bids = bids;
-  
+        console.log(bids);
         const auctionIds = [...new Set(this.bids.map((b: AuctionBidRequestDto) => b.auctionId))]; // Unique IDs
   
         const auctionRequests = auctionIds.map(id =>
@@ -75,12 +75,16 @@ export class BuyerBidsComponent implements OnInit {
           const auctionMap = new Map<number, any>();
           auctionResults.forEach(auction => {
             if (auction) auctionMap.set(auction.id, auction);
+            
           });
   
           // Attach auction to each bid
           this.bids = this.bids.map(bid => ({
             ...bid,
-            auction: auctionMap.get(bid.auctionId)
+            auction: auctionMap.get(bid.auctionId),
+            
+           // iswinner: auction?.buyerId === this.userId
+
           }));
   
           this.categorizeBids();
