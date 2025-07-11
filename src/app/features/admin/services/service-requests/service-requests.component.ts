@@ -37,7 +37,7 @@ export class ServiceRequestsComponent implements OnInit {
   total: number = 0;
   loading: boolean = false;
   statusFilter: string = '';
-  stats = { total: 0, inProgress: 0, delivered: 0 };
+  stats = { total: 0, ready: 0, delivered: 0 };
   searchTerm: string = '';
 
   activeTab: string = 'all';
@@ -73,7 +73,7 @@ export class ServiceRequestsComponent implements OnInit {
         this.total = res.data.paginated.count;
         this.stats = {
           total: res.data.stats.total,
-          inProgress: res.data.stats.inProgress,
+          ready: res.data.stats.ready,
           delivered: res.data.stats.delivered
         };
         this.filteredRequests = this.requests;
@@ -93,10 +93,10 @@ export class ServiceRequestsComponent implements OnInit {
     this.activeTab = tab;
     if (tab === 'all') {
       this.statusFilter = '';
-    } else if (tab === 'inProgress') {
-      this.statusFilter = '1'; // InProgress
+    } else if (tab === 'ready') {
+      this.statusFilter = '2'; // Ready
     } else if (tab === 'delivered') {
-      this.statusFilter = '2'; // Delivered
+      this.statusFilter = '3'; // Delivered
     }
     this.page = 1;
     this.fetchRequests();
@@ -114,7 +114,14 @@ export class ServiceRequestsComponent implements OnInit {
   }
 
   markAsDelivered(request: ServiceRequestDto) {
-    if (request.serviceStatus !== 'InProgress') return;
+    if (request.serviceStatus !== 'Ready') {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Not Allowed',
+        detail: 'Only requests with status "Ready" can be marked as delivered.'
+      });
+      return;
+    }
     this.serviceRequestService.updateRequestStatus(request.id, 'Delivered').subscribe({
       next: () => {
         this.fetchRequests();

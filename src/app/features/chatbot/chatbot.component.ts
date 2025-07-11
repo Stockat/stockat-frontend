@@ -86,7 +86,8 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
            currentUrl.includes('/register') ||
            currentUrl.includes('/forgot-password') ||
            currentUrl.includes('/reset-password') ||
-           currentUrl.includes('/confirm-email')
+           currentUrl.includes('/confirm-email') ||
+           currentUrl.includes('/chat')
   }
 
   /**

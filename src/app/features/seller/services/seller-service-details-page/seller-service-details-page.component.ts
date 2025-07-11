@@ -46,6 +46,7 @@ export class SellerServiceDetailsPageComponent implements OnInit {
   requestStatusOptions = [
     { label: 'Pending', value: 'Pending' },
     { label: 'InProgress', value: 'InProgress' },
+    { label: 'Ready', value: 'Ready' },
     { label: 'Cancelled', value: 'Cancelled' }
   ];
 
@@ -123,12 +124,12 @@ export class SellerServiceDetailsPageComponent implements OnInit {
     this.serviceRequestService.getSellerRequestsByServiceId(serviceId).subscribe({
       next: (requests) => {
         if (requests && requests.data && requests.data.paginatedData) {
-          this.requests = requests.data.paginatedData.map((req: any) => ({ ...req, _newStatus: req.serviceStatus }));
+          this.requests = requests.data.paginatedData.map((req: any) => ({ ...req, _newStatus: req.serviceStatus || 'Pending' }));
 
           // Initialize updates for all requests
           this.requests.forEach((req: any) => {
             req.updates = [];
-            req._newStatus = req.serviceStatus; // Ensure status is initialized
+            req._newStatus = req.serviceStatus || 'Pending'; // Ensure status is initialized to current or Pending
           });
 
           // Load updates for approved requests
@@ -196,7 +197,7 @@ export class SellerServiceDetailsPageComponent implements OnInit {
     switch (status) {
       case 'Pending': return 'warning';
       case 'InProgress': return 'info';
-      case 'Delivered': return 'success';
+      case 'Ready': return 'success';
       case 'Cancelled': return 'danger';
       default: return 'secondary';
     }

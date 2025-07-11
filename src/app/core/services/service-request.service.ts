@@ -63,4 +63,40 @@ export class ServiceRequestService {
   createStripeCheckoutSession(requestId: number): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/${requestId}/checkout`, {});
   }
+
+  getSellerStatusBreakdown(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/status-breakdown`);
+  }
+
+  getSellerMonthlyTrend(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/monthly-trend`);
+  }
+
+  getSellerRevenue(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/revenue`);
+  }
+
+  getSellerTopServices(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/top-services`);
+  }
+
+  getSellerCustomerFeedback(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/customer-feedback`);
+  }
+
+  getSellerConversionFunnel(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/conversion-funnel`);
+  }
+
+  getSellerServiceReviews(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/service-reviews`);
+  }
+
+  getSellerTopCustomers(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/top-customers`);
+  }
+
+  getSellerCustomerDemographics(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/customer-demographics`);
+  }
 }

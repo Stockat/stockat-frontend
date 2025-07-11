@@ -276,7 +276,7 @@
                         [style]="{width: '120px'}"
                         [autoDisplayFirst]="false"
                         [showClear]="false"
-                        [disabled]="request.buyerApprovalStatus !== 'Approved'"
+                        [disabled]="request.buyerApprovalStatus !== 'Approved' || request.serviceStatus === 'Delivered'"
                         [appendTo]="'body'"
                         placeholder="Status">
                       </p-dropdown>
@@ -285,7 +285,7 @@
                         icon="pi pi-check"
                         class="p-button-sm p-button-rounded p-button-primary shadow-sm hover:shadow-md transition-all"
                         (click)="changeRequestStatus(request)"
-                        [disabled]="request._newStatus === request.serviceStatus || request.buyerApprovalStatus !== 'Approved'"
+                        [disabled]="request._newStatus === request.serviceStatus || request.buyerApprovalStatus !== 'Approved' || request.serviceStatus === 'Delivered'"
                         pTooltip="Save Status">
                       </button>
                     </div>
