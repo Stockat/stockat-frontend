@@ -91,6 +91,14 @@ export class SellerLayoutComponent {
             route: '/seller/services',
             routerLink: '/seller/services',
             routerLinkActiveOptions: { endWith: '/seller/services' }
+          },
+          {
+            label: 'Analytics',
+            icon: 'pi pi-chart-bar',
+            shortcut: '⌘+O',
+            route: '/seller/service-analytics',
+            routerLink: '/seller/service-analytics',
+            routerLinkActiveOptions: { endWith: '/seller/service-analytics' }
           }
         ]
       },

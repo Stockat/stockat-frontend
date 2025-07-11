@@ -12,6 +12,7 @@ import { UpdateProductComponent } from "./products/update-product/update-product
 import { ViewProductComponent } from "./products/view-product/view-product.component";
 import { AddStockComponent } from "./stocks/add-stock/add-stock.component";
 import { UpdateStockComponent } from "./stocks/update-stock/update-stock.component";
+import { ServiceAnalyticsComponent } from "./services/service-analytics/service-analytics.component";
 
 export const sellerRoutes: Routes = [
     {
@@ -52,6 +53,10 @@ export const sellerRoutes: Routes = [
       component: SellerServiceDetailsPageComponent
     },
     {
+      path: 'service-analytics',
+      component: ServiceAnalyticsComponent
+    },
+    {
       path: 'orders',
       loadComponent: () => import('./orders/orders.component').then(m => m.OrdersComponent)
     },
@@ -78,7 +83,7 @@ export const sellerRoutes: Routes = [
         path: 'auctionorders',
         component: AuctionOrderManagementComponent
     }
-        
+
 
 
 
