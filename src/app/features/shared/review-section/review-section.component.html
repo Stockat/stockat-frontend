@@ -1,0 +1,263 @@
+<!-- Review Section Component -->
+<div class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 mt-8">
+  
+  <!-- Review Summary Section -->
+  <div class="mb-8" *ngIf="!isLoadingSummary && reviewSummary">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center">
+        <i class="pi pi-star text-white text-xl"></i>
+      </div>
+      <h2 class="text-3xl font-bold text-gray-800">Customer Reviews</h2>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Overall Rating -->
+      <div class="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200">
+        <div class="text-4xl font-bold text-blue-600 mb-2">{{ reviewSummary.averageRating.toFixed(1) }}</div>
+        <div class="flex justify-center mb-2">
+          <p-rating 
+            [ngModel]="reviewSummary.averageRating" 
+            [readonly]="true" 
+            [stars]="5"
+            styleClass="text-2xl">
+          </p-rating>
+        </div>
+        <div class="text-sm text-gray-600">{{ reviewSummary.totalReviews }} reviews</div>
+      </div>
+
+      <!-- Rating Distribution -->
+      <div class="lg:col-span-2 space-y-3">
+        <div class="flex items-center gap-3" *ngFor="let rating of [5,4,3,2,1]">
+          <div class="flex items-center gap-2 w-16">
+            <span class="text-sm font-medium text-gray-700">{{ rating }}</span>
+            <i class="pi pi-star text-yellow-400"></i>
+          </div>
+          <div class="flex-1 bg-gray-200 rounded-full h-2">
+            <div 
+              class="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full transition-all duration-500"
+              [style.width.%]="getRatingDistribution(rating)">
+            </div>
+          </div>
+          <div class="w-12 text-right text-sm text-gray-600">
+            {{ getRatingCount(rating) }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review Action Button -->
+  <div class="mb-8" *ngIf="canReview && !hasReviewed">
+    <button
+      pButton
+      type="button"
+      label="Write a Review"
+      icon="pi pi-pencil"
+      class="p-button-success px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-semibold"
+      (click)="openReviewModal()">
+    </button>
+  </div>
+
+  <!-- Already Reviewed Message -->
+  <div class="mb-8" *ngIf="hasReviewed">
+    <div class="flex items-center gap-3 p-4 bg-green-50 rounded-2xl border border-green-200">
+      <i class="pi pi-check-circle text-green-600 text-xl"></i>
+      <span class="text-green-700 font-medium">You have already reviewed this {{ itemType }}.</span>
+    </div>
+  </div>
+
+  <!-- Reviews List -->
+  <div class="space-y-6">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6">Recent Reviews</h3>
+    
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="space-y-4">
+      <div *ngFor="let item of [1,2,3]" class="animate-pulse">
+        <div class="bg-gray-100 rounded-2xl p-6">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-12 h-12 bg-gray-200 rounded-full"></div>
+            <div class="flex-1">
+              <div class="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+              <div class="h-3 bg-gray-200 rounded w-1/4"></div>
+            </div>
+          </div>
+          <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+          <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews -->
+    <div *ngIf="!isLoading && reviews.length > 0" class="space-y-6">
+      <div *ngFor="let review of reviews" class="bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition-all duration-300">
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex items-center gap-4">
+            <ng-container *ngIf="review.reviewerImageUrl; else fallbackAvatar">
+              <p-avatar 
+                [image]="review.reviewerImageUrl"
+                size="large"
+                shape="circle">
+              </p-avatar>
+            </ng-container>
+            <ng-template #fallbackAvatar>
+              <p-avatar 
+                [label]="review.reviewerName.charAt(0).toUpperCase()"
+                size="large"
+                shape="circle"
+                styleClass="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold">
+              </p-avatar>
+            </ng-template>
+            <div>
+              <div class="font-semibold text-gray-800">{{ review.reviewerName }}</div>
+              <div class="text-sm text-gray-500">{{ formatDate(review.createdAt) }}</div>
+            </div>
+          </div>
+          
+          <!-- Review Actions (if user is the reviewer) -->
+          <div class="flex items-center gap-2" *ngIf="review.reviewerId === 'current-user-id'">
+            <button
+              pButton
+              type="button"
+              icon="pi pi-pencil"
+              class="p-button-text p-button-sm text-blue-600 hover:text-blue-800"
+              (click)="openEditModal(review)">
+            </button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-trash"
+              class="p-button-text p-button-sm text-red-600 hover:text-red-800"
+              (click)="deleteReview(review)">
+            </button>
+          </div>
+        </div>
+
+        <!-- Rating -->
+        <div class="flex items-center gap-2 mb-4">
+                     <p-rating 
+             [ngModel]="review.rating" 
+             [readonly]="true" 
+             [stars]="5"
+             styleClass="text-lg">
+           </p-rating>
+          <span class="text-sm text-gray-600">{{ review.rating }} out of 5</span>
+        </div>
+
+        <!-- Comment -->
+        <div class="text-gray-700 leading-relaxed">
+          {{ review.comment }}
+        </div>
+      </div>
+      <!-- Page Size Selector -->
+      <div class="flex items-center gap-2 mb-4" *ngIf="reviewSummary && reviewSummary.totalReviews > 0">
+        <label for="pageSizeSelect" class="text-sm text-gray-700">Reviews per page:</label>
+        <select id="pageSizeSelect" class="p-1 border rounded" [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange($event)">
+          <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
+        </select>
+      </div>
+      <!-- Pagination Controls -->
+      <div *ngIf="reviewSummary && reviewSummary.totalReviews > pageSize" class="flex justify-center items-center gap-2 mt-6">
+        <button
+          pButton
+          type="button"
+          icon="pi pi-angle-left"
+          class="p-button-text"
+          [disabled]="currentPage === 1"
+          (click)="onPageChange(currentPage - 1)">
+        </button>
+        <span class="mx-2 text-gray-700">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button
+          pButton
+          type="button"
+          icon="pi pi-angle-right"
+          class="p-button-text"
+          [disabled]="currentPage === totalPages"
+          (click)="onPageChange(currentPage + 1)">
+        </button>
+      </div>
+    </div>
+
+    <!-- No Reviews -->
+    <div *ngIf="!isLoading && reviews.length === 0" class="text-center py-12">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="pi pi-star text-gray-400 text-2xl"></i>
+      </div>
+      <h3 class="text-xl font-semibold text-gray-600 mb-2">No Reviews Yet</h3>
+      <p class="text-gray-500">Be the first to review this {{ itemType }}!</p>
+    </div>
+  </div>
+</div>
+
+<!-- Review Modal -->
+<p-dialog 
+  [(visible)]="isReviewModalVisible" 
+  [modal]="true" 
+  [style]="{width: '500px'}"
+  [draggable]="false"
+  [resizable]="false"
+  [header]="isEditMode ? 'Edit Review' : 'Write a Review'"
+  styleClass="rounded-2xl">
+  
+  <form [formGroup]="reviewForm" (ngSubmit)="submitReview()" class="space-y-6">
+    <!-- Rating -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-3">Rating</label>
+             <p-rating 
+         formControlName="rating"
+         [stars]="5"
+         styleClass="text-3xl">
+       </p-rating>
+      <div *ngIf="reviewForm.get('rating')?.invalid && reviewForm.get('rating')?.touched" 
+           class="text-red-500 text-sm mt-1">
+        Please select a rating
+      </div>
+    </div>
+
+    <!-- Comment -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-3">Your Review</label>
+      <textarea
+        pInputTextarea
+        formControlName="comment"
+        rows="5"
+        placeholder="Share your experience with this {{ itemType }}..."
+        class="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none">
+      </textarea>
+      <div *ngIf="reviewForm.get('comment')?.invalid && reviewForm.get('comment')?.touched" 
+           class="text-red-500 text-sm mt-1">
+        <div *ngIf="reviewForm.get('comment')?.errors?.['required']">Review comment is required</div>
+        <div *ngIf="reviewForm.get('comment')?.errors?.['minlength']">Review must be at least 10 characters</div>
+        <div *ngIf="reviewForm.get('comment')?.errors?.['maxlength']">Review cannot exceed 1000 characters</div>
+      </div>
+      <div class="text-sm text-gray-500 mt-1">
+        {{ reviewForm.get('comment')?.value?.length || 0 }}/1000 characters
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-3">
+      <button
+        pButton
+        type="button"
+        label="Cancel"
+        class="p-button-text"
+        (click)="isReviewModalVisible = false">
+      </button>
+      <button
+        pButton
+        type="button"
+        [label]="isEditMode ? 'Update Review' : 'Submit Review'"
+        [disabled]="reviewForm.invalid"
+        class="p-button-success px-6 py-3 rounded-xl"
+        (click)="submitReview()">
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Toast Messages -->
+<p-toast></p-toast>
+
+<!-- Confirmation Dialog -->
+<p-confirmDialog></p-confirmDialog> 

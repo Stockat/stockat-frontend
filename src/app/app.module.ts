@@ -6,6 +6,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { SocialLoginModule, SocialAuthServiceConfig } from '@abacritt/angularx-social-login';
 import { GoogleLoginProvider } from '@abacritt/angularx-social-login';
 import { RouteReuseStrategy, ActivatedRouteSnapshot, DetachedRouteHandle } from '@angular/router';
+import { ChartModule } from 'primeng/chart';
+// import { CompactNumberPipe } from './shared/pipes/compact-number.pipe';
 
 import { AppComponent } from './app.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
@@ -26,7 +28,8 @@ export class NoReuseStrategy implements RouteReuseStrategy {
     HttpClientModule,
     ReactiveFormsModule,
     SocialLoginModule,
-    ServiceModule
+    ServiceModule,
+    ChartModule
     // import your AuthModule or feature modules here if needed
   ],
   providers: [

@@ -117,6 +117,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'chat/:userId',
+    loadComponent: () =>
+      import('./features/chat/chat-page/chat-page.component').then(
+        (m) => m.ChatPageComponent
+      ),
+  },
+  {
     path: 'order-process',
     loadComponent: () => import('./features/order-process/order-process.component').then(m => m.OrderProcessComponent)
   },

@@ -93,9 +93,12 @@ export class SellerLayoutComponent {
             routerLinkActiveOptions: { endWith: '/seller/services' }
           },
           {
-            label: 'Privacy',
-            icon: 'pi pi-shield',
-            shortcut: '⌘+P'
+            label: 'Analytics',
+            icon: 'pi pi-chart-bar',
+            shortcut: '⌘+O',
+            route: '/seller/service-analytics',
+            routerLink: '/seller/service-analytics',
+            routerLinkActiveOptions: { endWith: '/seller/service-analytics' }
           }
         ]
       },
@@ -104,15 +107,30 @@ export class SellerLayoutComponent {
         icon: 'ti ti-gavel',
         items: [
           {
-            label: 'Settings',
-            icon: 'pi pi-cog',
-            shortcut: '⌘+O'
+            label: 'My Auctions',
+            icon: 'pi pi-briefcase',
+            // badge: '3',
+            route: '/seller/auctions',
+            routerLink: '/seller/auctions',
+            routerLinkActiveOptions: { exact: true }
           },
           {
-            label: 'Privacy',
-            icon: 'pi pi-shield',
-            shortcut: '⌘+P'
-          }
+            label: 'Auction Orders',
+            icon: 'pi pi-shopping-cart',
+            // badge: '3',
+            route: '/seller/auctionorders',
+            routerLink: '/seller/auctionorders',
+            routerLinkActiveOptions: { exact: true }
+          },
+          {
+            label: 'Analytics',
+            icon: 'pi pi-chart-bar',
+            // badge: '3',
+            route: '/seller/analysis',
+            routerLink: '/seller/analysis',
+            routerLinkActiveOptions: { exact: true }
+          },
+
         ]
       },
       {

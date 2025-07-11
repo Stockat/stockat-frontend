@@ -30,7 +30,7 @@ export class ChatService {
   public recording$ = this.recordingSubject.asObservable();
   private messageUpdateSubject = new Subject<ChatMessageDto>();
   public messageUpdate$ = this.messageUpdateSubject.asObservable();
-  
+
   // Track current conversation for typing events
   private currentConversationId: number = 0;
 
@@ -111,16 +111,16 @@ export class ChatService {
       .then(() => console.log('SignalR connected!'))
       .catch((err: any) => console.error('SignalR Connection Error:', err));
     this.registerSignalREvents();
-    
+
     // Handle connection state changes
     this.hubConnection.onclose((error) => {
       console.log('SignalR connection closed:', error);
     });
-    
+
     this.hubConnection.onreconnecting((error) => {
       console.log('SignalR reconnecting:', error);
     });
-    
+
     this.hubConnection.onreconnected((connectionId) => {
       console.log('SignalR reconnected:', connectionId);
     });
@@ -210,7 +210,7 @@ export class ChatService {
   // SignalR event handlers
   private registerSignalREvents() {
     if (!this.hubConnection) return;
-    
+
     this.hubConnection.on('ReceiveMessage', (message: ChatMessageDto) => {
       console.log('Received real-time message:', message);
       this.messageSubject.next(message);

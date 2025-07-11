@@ -1,65 +1,105 @@
-<div class="p-6">
-  <h2 class="text-xl font-bold mb-4 text-gray-800">Edit Auction</h2>
-  
-  <!-- auction-edit-dialog.component.html -->
-<form [formGroup]="editForm" class="space-y-4">
-  <!-- Name Field -->
-  <!-- Always show all fields, but conditionally disable -->
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Auction Name</label>
-    <input pInputText formControlName="name" class="w-full" [disabled]="isControlDisabled('name')">
-    <small *ngIf="editForm.get('name')?.invalid" class="text-red-500 block mt-1">
-      Name is required (max 100 characters)
-    </small>
-  </div>
-  
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-    <textarea pInputTextarea formControlName="description" rows="3" class="w-full"
-              [disabled]="isControlDisabled('description')"></textarea>
-  </div>
-  
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-    <p-calendar formControlName="startTime" [showTime]="true" [minDate]="minDate"
-                class="w-full" [disabled]="isControlDisabled('startTime')"></p-calendar>
-    <!-- Validation messages... -->
-  </div>
-  
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-    <p-calendar formControlName="endTime" [showTime]="true" [minDate]="minEndDate || minDate"
-                class="w-full" [disabled]="isControlDisabled('endTime')"></p-calendar>
-    <!-- Validation messages... -->
-  </div>
-  
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Starting Price</label>
-    <p-inputNumber formControlName="startingPrice" mode="currency" currency="USD" 
-                  [min]="0.01" class="w-full" [disabled]="isControlDisabled('startingPrice')"></p-inputNumber>
-    <!-- Validation messages... -->
-  </div>
+<div class="auction-edit-dialog">
+  <form [formGroup]="editForm" (ngSubmit)="save()">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Name Field -->
+      <div class="field">
+        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Auction Name</label>
+        <input id="name" type="text" pInputText formControlName="name" 
+               [disabled]="isNameDisabled()"
+               class="w-full" placeholder="Enter auction name">
+        <small *ngIf="editForm.get('name')?.invalid && editForm.get('name')?.touched" 
+               class="text-red-500">Name is required</small>
+      </div>
 
-  <!-- Add hidden field for productId -->
-<input type="hidden" formControlName="productId">
-<input type="hidden" formControlName="stockId">
-  
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-    <p-inputNumber formControlName="quantity" [min]="1" class="w-full" 
-                  [disabled]="isControlDisabled('quantity')"></p-inputNumber>
-    <!-- Validation messages... -->
-  </div>
-  
-  <!-- Form Actions -->
-  <div class="flex justify-end gap-3 pt-4">
-    <button pButton pRipple type="button" 
-            label="Cancel" class="p-button-outlined p-button-secondary"
-            (click)="close()"></button>
-    <button pButton pRipple type="button" 
-            label="Save Changes" class="p-button-primary"
-            [disabled]="editForm.invalid"
-            (click)="save()"></button>
-  </div>
-</form>
+      <!-- Description Field -->
+      <div class="field">
+        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <textarea id="description" pInputTextarea formControlName="description" 
+                  [disabled]="isDescriptionDisabled()"
+                  rows="3" class="w-full" placeholder="Enter auction description"></textarea>
+      </div>
+
+      <!-- Start Time Field -->
+      <div class="field">
+        <label for="startTime" class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+        <p-calendar #startCalendar id="startTime" formControlName="startTime" 
+                   [showIcon]="true" [minDate]="minDate"
+                   [disabled]="isStartTimeDisabled()"
+                   dateFormat="dd/mm/yy" [showTime]="true" hourFormat="24"
+                   [autoZIndex]="true" [baseZIndex]="10000"
+                   class="w-full"></p-calendar>
+        <small *ngIf="editForm.get('startTime')?.invalid && editForm.get('startTime')?.touched" 
+               class="text-red-500">Start time is required and must be in the future</small>
+      </div>
+
+      <!-- End Time Field -->
+      <div class="field">
+        <label for="endTime" class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+        <p-calendar #endCalendar id="endTime" formControlName="endTime" 
+                   [showIcon]="true" [minDate]="minEndDate || minDate"
+                   [disabled]="isEndTimeDisabled()"
+                   dateFormat="dd/mm/yy" [showTime]="true" hourFormat="24"
+                   [autoZIndex]="true" [baseZIndex]="10000"
+                   class="w-full"></p-calendar>
+        <small *ngIf="editForm.get('endTime')?.invalid && editForm.get('endTime')?.touched" 
+               class="text-red-500">End time is required and must be after start time</small>
+      </div>
+
+      <!-- Starting Price Field -->
+      <div class="field">
+        <label for="startingPrice" class="block text-sm font-medium text-gray-700 mb-1">Starting Price</label>
+        <p-inputNumber id="startingPrice" formControlName="startingPrice" 
+                      [disabled]="isStartingPriceDisabled()"
+                      mode="currency" currency="USD" [minFractionDigits]="2"
+                      class="w-full"></p-inputNumber>
+        <small *ngIf="editForm.get('startingPrice')?.invalid && editForm.get('startingPrice')?.touched" 
+               class="text-red-500">Starting price must be greater than 0</small>
+      </div>
+
+      <!-- Quantity Field -->
+      <div class="field">
+        <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+        <p-inputNumber id="quantity" formControlName="quantity" 
+                      [disabled]="isQuantityDisabled()"
+                      [min]="1" class="w-full"></p-inputNumber>
+        <small *ngIf="editForm.get('quantity')?.invalid && editForm.get('quantity')?.touched" 
+               class="text-red-500">Quantity must be at least 1</small>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-end gap-2 mt-6">
+      <button type="button" pButton pRipple label="Cancel" 
+              class="p-button-outlined" (click)="close()"></button>
+      <button type="submit" pButton pRipple label="Save" 
+              class="p-button-primary" [disabled]="editForm.invalid"></button>
+    </div>
+  </form>
 </div>
+
+<style>
+.auction-edit-dialog {
+  min-height: 400px;
+}
+
+/* Ensure calendar overlays are visible */
+:host ::ng-deep .p-calendar .p-calendar-w-btn .p-datepicker-trigger {
+  z-index: 10001;
+}
+
+:host ::ng-deep .p-calendar .p-datepicker {
+  z-index: 10002 !important;
+}
+
+:host ::ng-deep .p-calendar .p-datepicker-panel {
+  z-index: 10003 !important;
+}
+
+:host ::ng-deep .p-inputnumber {
+  width: 100%;
+}
+
+:host ::ng-deep .p-calendar {
+  width: 100%;
+}
+</style>

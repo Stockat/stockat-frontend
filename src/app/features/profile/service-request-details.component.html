@@ -68,7 +68,7 @@
                 <div class="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
                   <i class="pi pi-briefcase text-white text-xl"></i>
                 </div>
-                <div>
+                <div class="flex-1">
                   <h1 class="text-3xl font-bold text-gray-800">
                     <a *ngIf="request.serviceId" [routerLink]="['/services', request.serviceId]" class="hover:text-pink-600 transition-colors">
                       {{ request.serviceNameSnapshot }}
@@ -76,6 +76,17 @@
                     <span *ngIf="!request.serviceId">{{ request.serviceNameSnapshot }}</span>
                   </h1>
                   <p class="text-gray-600 mt-2">{{ request.serviceDescriptionSnapshot }}</p>
+                </div>
+                <!-- Chat with Seller Button -->
+                <div *ngIf="request && request.sellerId" class="flex-shrink-0">
+                  <button
+                    pButton
+                    type="button"
+                    class="p-button-raised bg-gradient-to-r from-blue-500 to-indigo-600 border-0 px-6 py-3 rounded-xl shadow-lg text-lg font-bold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300"
+                    (click)="contactSeller()">
+                    <i class="pi pi-comments mr-2"></i>
+                    Chat with Seller
+                  </button>
                 </div>
               </div>
             </div>
@@ -105,7 +116,7 @@
                 </div>
               </div>
 
-              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+              <div class="flex items-center gap-3 p-4 bg-green-100 rounded-xl">
                 <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                   <i class="pi pi-dollar text-green-600"></i>
                 </div>
@@ -118,7 +129,7 @@
                 </div>
               </div>
 
-              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+              <div class="flex items-center gap-3 p-4 bg-purple-100 rounded-xl">
                 <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                   <i class="pi pi-clock text-purple-600"></i>
                 </div>
@@ -131,7 +142,7 @@
                 </div>
               </div>
 
-              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+              <div class="flex items-center gap-3 p-4 bg-orange-100 rounded-xl">
                 <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
                   <i class="pi pi-dollar text-orange-600"></i>
                 </div>
@@ -144,7 +155,7 @@
                 </div>
               </div>
 
-              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+              <div class="flex items-center gap-3 p-4 bg-yellow-100 rounded-xl">
                 <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
                   <i class="pi pi-check-circle text-yellow-600"></i>
                 </div>
@@ -157,6 +168,25 @@
                       'bg-red-100 text-red-800': request.buyerApprovalStatus === 'Rejected'
                     }">
                     {{ request.buyerApprovalStatus || 'Pending' }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Payment Status -->
+              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                  <i class="pi pi-credit-card text-indigo-600"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">Payment Status</p>
+                  <span class="font-bold px-2 py-1 rounded-full text-xs"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': request.paymentStatus === 'Paid',
+                      'bg-yellow-100 text-yellow-800': request.paymentStatus === 'Pending',
+                      'bg-red-100 text-red-800': request.paymentStatus === 'Failed',
+                      'bg-gray-100 text-gray-800': !request.paymentStatus || request.paymentStatus === 'Not Paid'
+                    }">
+                    {{ getPaymentStatusText() }}
                   </span>
                 </div>
               </div>
@@ -186,49 +216,165 @@
       </div>
     </div>
 
-    <!-- Action Buttons Section -->
-    <div class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 mb-8">
-      <div class="space-y-6">
+            <!-- Action Buttons Section -->
+        <div class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 mb-8">
+          <div class="space-y-6">
 
         <!-- Request Update Button -->
-        <div *ngIf="request.buyerApprovalStatus === 'Approved' && !hasPendingUpdate && request.serviceStatus === 'Pending'" class="text-center">
-          <button
-            pButton
-            type="button"
-            label="Request Update"
-            class="p-button-raised bg-gradient-to-r from-pink-500 to-purple-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-pink-600 hover:to-purple-700 transition-all duration-300"
-            (click)="openUpdateModal()">
-          </button>
+        <div *ngIf="request.buyerApprovalStatus === 'Approved' && !hasPendingUpdate && request.serviceStatus === 'Pending' && request.paymentStatus !== 'Paid'" class="text-center">
+          <div class="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-6 border border-pink-100 mb-4">
+            <div class="flex items-center justify-center gap-3 mb-4">
+              <div class="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <i class="pi pi-edit text-white text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-800">Request Service Update</h3>
+                <p class="text-gray-600">Need changes to your service request?</p>
+              </div>
+            </div>
+            <button
+              pButton
+              type="button"
+              label="Request Update"
+              class="p-button-raised bg-gradient-to-r from-pink-500 to-purple-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-pink-600 hover:to-purple-700 transition-all duration-300"
+              (click)="openUpdateModal()">
+              <i class="pi pi-edit mr-2"></i>
+            </button>
+          </div>
         </div>
 
         <!-- Cancel Request Button -->
-        <div *ngIf="request.serviceStatus === 'Pending' && (!request.pricePerProduct || !request.estimatedTime)" class="text-center">
-          <button
-            pButton
-            type="button"
-            label="Cancel Request"
-            class="p-button-raised bg-gradient-to-r from-red-500 to-red-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-red-600 hover:to-red-700 transition-all duration-300"
-            [disabled]="updateLoading"
-            (click)="cancelRequest()">
-          </button>
+        <div *ngIf="request.serviceStatus === 'Pending' && (!request.pricePerProduct || !request.estimatedTime)" class="mb-4">
+          <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border border-red-100">
+            <div class="flex items-center justify-center gap-3 mb-4">
+              <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl flex items-center justify-center">
+                <i class="pi pi-times-circle text-white text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-800">Cancel Request</h3>
+                <p class="text-gray-600">You can cancel this request if needed</p>
+              </div>
+            </div>
+            <div class="text-center">
+              <button
+                pButton
+                type="button"
+                class="p-button-raised bg-gradient-to-r from-red-500 to-pink-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-red-600 hover:to-pink-700 transition-all duration-300"
+                [disabled]="updateLoading"
+                (click)="cancelRequest()">
+                <i class="pi pi-times-circle mr-2"></i>
+                Cancel Request
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Accept/Reject Offer Buttons -->
-        <div *ngIf="request.pricePerProduct && request.estimatedTime && request.buyerApprovalStatus === 'Pending' && request.serviceStatus !== 'Cancelled'" class="flex gap-4 justify-center">
-          <button
-            pButton
-            type="button"
-            label="Accept Offer"
-            class="p-button-raised bg-gradient-to-r from-green-500 to-green-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-green-600 hover:to-green-700 transition-all duration-300"
-            (click)="acceptSellerOffer(request)">
-          </button>
-          <button
-            pButton
-            type="button"
-            label="Reject Offer"
-            class="p-button-raised bg-gradient-to-r from-red-500 to-red-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-red-600 hover:to-red-700 transition-all duration-300"
-            (click)="rejectSellerOffer(request)">
-          </button>
+        <div *ngIf="request.pricePerProduct && request.estimatedTime && request.buyerApprovalStatus === 'Pending' && request.serviceStatus !== 'Cancelled'" class="text-center">
+          <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 border border-yellow-100 mb-4">
+            <div class="flex items-center justify-center gap-3 mb-4">
+              <div class="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center">
+                <i class="pi pi-check-circle text-white text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-800">Seller Offer</h3>
+                <p class="text-gray-600">Review and respond to the seller's offer</p>
+              </div>
+            </div>
+            <div class="flex gap-4 justify-center">
+              <button
+                pButton
+                type="button"
+                label="Accept Offer"
+                class="p-button-raised bg-gradient-to-r from-green-500 to-green-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-green-600 hover:to-green-700 transition-all duration-300"
+                (click)="acceptSellerOffer(request)">
+                <i class="pi pi-check mr-2"></i>
+                Accept Offer
+              </button>
+              <button
+                pButton
+                type="button"
+                label="Reject Offer"
+                class="p-button-raised bg-gradient-to-r from-red-500 to-red-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-red-600 hover:to-red-700 transition-all duration-300"
+                (click)="rejectSellerOffer(request)">
+                <i class="pi pi-times mr-2"></i>
+                Reject Offer
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Section -->
+        <div *ngIf="canProceedToPayment()" class="text-center">
+          <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100 mb-4">
+            <div class="flex items-center justify-center gap-3 mb-4">
+              <div class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <i class="pi pi-credit-card text-white text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-800">Ready for Payment</h3>
+                <p class="text-gray-600">Total Amount: ${{ request.totalPrice }}</p>
+              </div>
+            </div>
+            <button
+              pButton
+              type="button"
+              class="p-button-raised bg-gradient-to-r from-indigo-500 to-purple-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-indigo-600 hover:to-purple-700 transition-all duration-300"
+              [disabled]="paymentLoading"
+              (click)="proceedToPayment()">
+              <i *ngIf="paymentLoading" class="pi pi-spin pi-spinner mr-2"></i>
+              {{ paymentLoading ? 'Processing...' : 'Proceed to Payment' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Invoice Download Section -->
+        <div *ngIf="request.paymentStatus === 'Paid' && request.paymentId" class="text-center">
+          <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+            <div class="flex items-center justify-center gap-3 mb-4">
+              <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                <i class="pi pi-file-pdf text-white text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-800">Payment Complete</h3>
+                <p class="text-gray-600">Transaction ID: {{ request.paymentId }}</p>
+              </div>
+            </div>
+            <button
+              pButton
+              type="button"
+              label="Download Invoice"
+              class="p-button-raised bg-gradient-to-r from-green-500 to-emerald-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-green-600 hover:to-emerald-700 transition-all duration-300"
+              (click)="downloadInvoice()">
+              <i class="pi pi-download mr-2"></i>
+              Download Invoice
+            </button>
+          </div>
+        </div>
+
+        <!-- Payment Failed Section -->
+        <div *ngIf="request.paymentStatus === 'Failed'" class="text-center">
+          <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border border-red-100">
+            <div class="flex items-center justify-center gap-3 mb-4">
+              <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl flex items-center justify-center">
+                <i class="pi pi-exclamation-triangle text-white text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-800">Payment Failed</h3>
+                <p class="text-gray-600">Your payment was unsuccessful. You can try again.</p>
+              </div>
+            </div>
+            <button
+              pButton
+              type="button"
+              label="Retry Payment"
+              class="p-button-raised bg-gradient-to-r from-red-500 to-pink-600 border-0 px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:from-red-600 hover:to-pink-700 transition-all duration-300"
+              [disabled]="paymentLoading"
+              (click)="proceedToPayment()">
+              <i *ngIf="paymentLoading" class="pi pi-spin pi-spinner mr-2"></i>
+              {{ paymentLoading ? 'Processing...' : 'Retry Payment' }}
+            </button>
+          </div>
         </div>
 
         <!-- Negotiation Closed Message -->
@@ -287,16 +433,29 @@
               <i class="pi pi-calendar"></i>
               {{ update.createdAt | date:'medium' }}
             </span>
-            <span class="font-bold px-3 py-1 rounded-full text-sm"
-              [ngClass]="{
-                'bg-yellow-100 text-yellow-800': update.status === 'Pending',
-                'bg-blue-100 text-blue-800': update.status === 'InProgress',
-                'bg-green-100 text-green-800': update.status === 'Delivered',
-                'bg-red-100 text-red-800': update.status === 'Cancelled',
-                'bg-gray-100 text-gray-800': !['Pending','InProgress','Delivered','Cancelled'].includes(update.status)
-              }">
-              {{ update.status }}
-            </span>
+            <div class="flex items-center gap-3">
+              <span class="font-bold px-3 py-1 rounded-full text-sm"
+                [ngClass]="{
+                  'bg-yellow-100 text-yellow-800': update.status === 'Pending',
+                  'bg-blue-100 text-blue-800': update.status === 'InProgress',
+                  'bg-green-100 text-green-800': update.status === 'Delivered',
+                  'bg-red-100 text-red-800': update.status === 'Cancelled',
+                  'bg-gray-100 text-gray-800': !['Pending','InProgress','Delivered','Cancelled'].includes(update.status)
+                }">
+                {{ update.status }}
+              </span>
+              <!-- Cancel Button for Pending Updates -->
+              <button
+                *ngIf="update.status === 'Pending'"
+                pButton
+                type="button"
+                icon="pi pi-times"
+                class="p-button-rounded p-button-danger p-button-sm"
+                (click)="cancelUpdate(update.id)"
+                pTooltip="Cancel Update"
+                tooltipPosition="top">
+              </button>
+            </div>
           </div>
         </div>
       </div>
