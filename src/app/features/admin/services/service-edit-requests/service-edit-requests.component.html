@@ -425,20 +425,22 @@
             </span>
           </div>
           <div class="flex justify-center">
-            <div class="relative group cursor-pointer image-container" (click)="openImageModal(selectedRequestForDetails.currentImageUrl)">
-              <div class="image-fallback flex items-center justify-center h-32 bg-gray-100 rounded-lg">
-                <i class="pi pi-image text-4xl text-gray-400"></i>
-              </div>
-              <img
-                *ngIf="selectedRequestForDetails.currentImageUrl"
-                [src]="selectedRequestForDetails.currentImageUrl"
-                alt="Current Service Image"
-                class="max-w-full max-h-64 object-contain rounded-lg border-2 border-gray-200 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105"
-                (error)="onDetailsImageError($event)"
-                (load)="onDetailsImageLoad($event)"
-                style="display: none;"
-              />
-              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-lg flex items-center justify-center">
+            <div class="relative group cursor-pointer image-container h-32 w-full max-w-xs bg-white" (click)="openImageModal(selectedRequestForDetails.currentImageUrl)">
+              <ng-container *ngIf="selectedRequestForDetails.currentImageUrl && !currentImageError; else currentFallback">
+                <img
+                  [src]="selectedRequestForDetails.currentImageUrl"
+                  alt="Current Service Image"
+                  class="w-full h-full object-contain rounded-lg border-2 border-gray-200 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  (error)="currentImageError = true"
+                  style="background: white;"
+                />
+              </ng-container>
+              <ng-template #currentFallback>
+                <div class="flex items-center justify-center h-full w-full bg-gray-100 rounded-lg">
+                  <i class="pi pi-image text-4xl text-gray-400"></i>
+                </div>
+              </ng-template>
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-lg flex items-center justify-center pointer-events-none">
                 <i class="pi pi-eye text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
               </div>
             </div>
@@ -454,20 +456,22 @@
             </span>
           </div>
           <div class="flex justify-center">
-            <div class="relative group cursor-pointer image-container" (click)="openImageModal(selectedRequestForDetails.editedImageUrl)">
-              <div class="image-fallback flex items-center justify-center h-32 bg-gray-100 rounded-lg">
-                <i class="pi pi-image text-4xl text-gray-400"></i>
-              </div>
-              <img
-                *ngIf="selectedRequestForDetails.editedImageUrl"
-                [src]="selectedRequestForDetails.editedImageUrl"
-                alt="New Service Image"
-                class="max-w-full max-h-64 object-contain rounded-lg border-2 border-blue-200 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105"
-                (error)="onDetailsImageError($event)"
-                (load)="onDetailsImageLoad($event)"
-                style="display: none;"
-              />
-              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-lg flex items-center justify-center">
+            <div class="relative group cursor-pointer image-container h-32 w-full max-w-xs bg-white" (click)="openImageModal(selectedRequestForDetails.editedImageUrl)">
+              <ng-container *ngIf="selectedRequestForDetails.editedImageUrl && !editedImageError; else editedFallback">
+                <img
+                  [src]="selectedRequestForDetails.editedImageUrl"
+                  alt="New Service Image"
+                  class="w-full h-full object-contain rounded-lg border-2 border-blue-200 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  (error)="editedImageError = true"
+                  style="background: white;"
+                />
+              </ng-container>
+              <ng-template #editedFallback>
+                <div class="flex items-center justify-center h-full w-full bg-gray-100 rounded-lg">
+                  <i class="pi pi-image text-4xl text-gray-400"></i>
+                </div>
+              </ng-template>
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-lg flex items-center justify-center pointer-events-none">
                 <i class="pi pi-eye text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
               </div>
             </div>

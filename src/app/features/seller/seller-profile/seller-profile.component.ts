@@ -13,12 +13,15 @@ import { TabViewModule } from 'primeng/tabview';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { AuthService } from '../../../core/services/auth.service';
+import { ProductService } from '../../../core/services/product.service';
+import { viewSellerProductDto } from '../../../core/models/product-models/viewSellerProductDto';
+import { TagModule } from 'primeng/tag';
 
 
 @Component({
   selector: 'app-seller-profile',
   templateUrl: './seller-profile.component.html',
-  imports: [CommonModule, RouterLink, CardModule, ButtonModule, Paginator, PaginatorModule, TableModule, TabViewModule, ToastModule],
+  imports: [CommonModule, RouterLink, CardModule, ButtonModule, Paginator, PaginatorModule, TableModule, TabViewModule, ToastModule, TagModule],
   providers: [MessageService]
 })
 export class SellerProfileComponent implements OnInit {
@@ -30,6 +33,10 @@ export class SellerProfileComponent implements OnInit {
   totalCount: number = 0;
   page: number = 0; // PrimeNG pages are 0-based
   size: number = 9; // Default page size - works well with 3-column grid
+  sellerProducts: viewSellerProductDto[] = [];
+  totalProductsCount: number = 0;
+  productsPage: number = 0;
+  productsSize: number = 9;
 
   constructor(
     private route: ActivatedRoute,
@@ -38,7 +45,8 @@ export class SellerProfileComponent implements OnInit {
     private location: Location,
     private messageService: MessageService,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private productService: ProductService
   ) {}
 
   ngOnInit(): void {
@@ -50,6 +58,7 @@ export class SellerProfileComponent implements OnInit {
     });
 
     this.fetchSellerServices();
+    this.fetchSellerProducts();
   }
 
   fetchSellerServices(): void {
@@ -81,6 +90,42 @@ export class SellerProfileComponent implements OnInit {
     this.fetchSellerServices();
     }
 
+  fetchSellerProducts(): void {
+    const filters = {
+      location: '',
+      category: '',
+      tags: [],
+      minQuantity: 1,
+      minPrice: 1,
+      page: this.productsPage,
+      size: this.productsSize,
+      sortBy: null,
+      filterDirection: 'asc',
+      productStatus: 'Approved',
+      isDeleted: false,
+    } as any;
+
+    this.productService.getSpecificSellerProducts(filters, this.sellerId).subscribe({
+      next: (response) => {
+        this.sellerProducts = response.data.paginatedData;
+        this.totalProductsCount = response.data.count;
+        this.productsPage = response.data.page;
+        this.productsSize = response.data.size;
+      },
+      error: (error) => {
+        console.error('Error fetching seller products:', error);
+        this.sellerProducts = [];
+        this.totalProductsCount = 0;
+      }
+    });
+  }
+
+  onProductsPageChange(event: PaginatorState): void {
+    this.productsPage = event.page ?? 0;
+    this.productsSize = event.rows ?? 9;
+    this.fetchSellerProducts();
+  }
+
   goBack() {
     this.location.back();
   }
@@ -89,5 +134,19 @@ export class SellerProfileComponent implements OnInit {
     if (this.seller?.data?.id) {
       this.router.navigate(['/chat', this.seller.data.id]);
     }
+  }
+
+  getProductStatusSeverity(status: any): string {
+    if (typeof status === 'string') {
+      if (status === 'Approved') return 'success';
+      if (status === 'Pending') return 'info';
+      if (status === 'Rejected') return 'danger';
+      return 'secondary';
+    }
+    return 'secondary';
+  }
+
+  isProductRejected(product: any): boolean {
+    return (typeof product.productStatus === 'string' && product.productStatus === 'Rejected');
   }
 }
