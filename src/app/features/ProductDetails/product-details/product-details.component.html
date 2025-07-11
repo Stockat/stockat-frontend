@@ -159,10 +159,17 @@
       </div>
     </div>
     <!-- Review Section -->
-    <app-review-section
-      *ngIf="product"
-      [itemId]="product.id"
-      itemType="product"
-      (reviewSubmitted)="onReviewSubmitted()">
-    </app-review-section>
+    <ng-container *ngIf="!deliveredOrderLoading">
+      <app-review-section
+        *ngIf="product"
+        [itemId]="product.id"
+        itemType="product"
+        [orderProductId]="deliveredOrderId !== null ? deliveredOrderId : undefined"
+        (reviewSubmitted)="onReviewSubmitted()">
+      </app-review-section>
+    </ng-container>
+    <div *ngIf="deliveredOrderLoading" class="flex items-center justify-center py-8">
+      <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      <span class="ml-4 text-blue-700 font-semibold">Checking review eligibility...</span>
+    </div>
   </div>
