@@ -10,6 +10,8 @@ import { FormsModule } from '@angular/forms';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 import { PaginatorModule } from 'primeng/paginator';
+import { QRCodeComponent } from 'angularx-qrcode';
+import { DialogModule } from 'primeng/dialog';
 
 @Component({
   selector: 'app-order-request-details',
@@ -25,6 +27,8 @@ import { PaginatorModule } from 'primeng/paginator';
     TagModule,
     ButtonModule,
     PaginatorModule,
+    QRCodeComponent,
+    DialogModule
   ],
 })
 export class OrderRequestDetailsComponent implements OnInit {
@@ -51,6 +55,9 @@ export class OrderRequestDetailsComponent implements OnInit {
   rows: number = 10;
   totalRecords: number = 0;
   pagedOrders: SellerOrder[] = [];
+
+  selectedOrder: any = null;
+  showOrderDialog = false;
 
   constructor(private orderService: OrderService) {}
 
@@ -175,6 +182,25 @@ export class OrderRequestDetailsComponent implements OnInit {
         console.error('Failed to delete order:', err);
         this.error = 'Failed to delete order.';
       }
+    });
+  }
+
+  openOrderDialog(order: any) {
+    this.selectedOrder = order;
+    this.showOrderDialog = true;
+  }
+  closeOrderDialog() {
+    this.showOrderDialog = false;
+    this.selectedOrder = null;
+  }
+  getOrderQRData(order: any): string {
+    return JSON.stringify({
+      id: order.id,
+      seller: `${order.sellerFirstName} ${order.sellerLastName}`,
+      quantity: order.quantity,
+      price: order.price,
+      status: order.status,
+      payment: order.paymentStatus
     });
   }
 }
