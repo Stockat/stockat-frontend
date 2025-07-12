@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { AddStock } from '../models/stock-models/add-stock';
 import { Observable } from 'rxjs';
 import { GenericRequestModel } from '../models/generic-request-Dto';
@@ -9,7 +10,7 @@ import { StockModel } from '../models/stock-models/stock';
   providedIn: 'root'
 })
 export class StockService {
-  private apiUrl = 'http://localhost:5250/api/Stock';
+  private apiUrl = `${environment.apiUrl}/api/Stock`;
   
   constructor(private http: HttpClient) { }
 
