@@ -66,11 +66,6 @@ export class OrderProcessComponent implements OnInit {
     this.orderService.placeOrder(this.order).subscribe({
       next: (res) => {
         console.log('Order placed successfully:', res);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Order Placed',
-          detail: 'Your order has been placed successfully.',
-        });
         this.loading = false;
         window.location.href = res.redirectUrl;
         //setTimeout(() => this.router.navigate(['/']), 2000);

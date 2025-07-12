@@ -41,6 +41,14 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
     "Don't hesitate to ask for help or suggestions! 💡"
   ];
   private followUpTimeout: any;
+  private inactivityTimeout: any; // NEW: for user inactivity
+  private tipMessages: string[] = [
+    "Tip: You can ask me to show you the latest auctions!",
+    "Did you know? You can compare products by asking me for details.",
+    "Try asking about our top-rated sellers!",
+    "I can help you track your orders or service requests.",
+    "Ask me for platform statistics or trends!"
+  ];
 
     // Quick suggestions for new users
   quickSuggestions: string[] = [
@@ -79,7 +87,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
            currentUrl.includes('/forgot-password') ||
            currentUrl.includes('/reset-password') ||
            currentUrl.includes('/confirm-email') ||
-           currentUrl.includes('/admin')
+           currentUrl.includes('/chat')
   }
 
   /**
@@ -95,6 +103,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   async sendMessage(): Promise<void> {
     if (!this.newMessage.trim() || this.isLoading) return;
     this.clearFollowUp(); // Clear any previous follow-up
+    this.clearInactivity(); // Clear inactivity timer
 
     const userMessage: ChatBotMessage = {
       content: this.newMessage.trim(),
@@ -126,7 +135,21 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
 
       this.messages.push(assistantMessage);
       this.shouldScroll = true;
-      this.setFollowUp(); // Set a new follow-up after bot replies
+      this.setFollowUp(true); // Immediate follow-up
+      this.setInactivity(); // Start inactivity timer
+      // Occasionally add a tip or suggestion
+      if (Math.random() < 0.3) {
+        setTimeout(() => {
+          const tipIndex = Math.floor(Math.random() * this.tipMessages.length);
+          this.messages.push({
+            content: this.tipMessages[tipIndex],
+            senderId: 'system',
+            timestamp: new Date(),
+            role: 'assistant'
+          });
+          this.shouldScroll = true;
+        }, 1200);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage: ChatBotMessage = {
@@ -137,7 +160,8 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
       };
       this.messages.push(errorMessage);
       this.shouldScroll = true;
-      this.setFollowUp(); // Still set follow-up on error
+      this.setFollowUp(true); // Still set follow-up on error
+      this.setInactivity(); // Start inactivity timer
     } finally {
       this.isLoading = false;
     }
@@ -258,11 +282,27 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   private addWelcomeMessage(): void {
     const randomIndex = Math.floor(Math.random() * this.welcomeMessages.length);
     this.messages = [{
-      content: this.welcomeMessages[randomIndex],
+      content: this.welcomeMessages[randomIndex] +
+        '<br><br><em>Tip: Try asking me about auctions, sellers, or platform features!</em>',
       senderId: 'system',
       timestamp: new Date(),
       role: 'assistant'
     }];
+  }
+
+  /**
+   * Add a greeting message when opening existing chat
+   */
+  private addGreetingMessage(): void {
+    const randomIndex = Math.floor(Math.random() * this.welcomeMessages.length);
+    this.messages.push({
+      content: this.welcomeMessages[randomIndex] +
+        '<br><br><em>Tip: Try asking me about auctions, sellers, or platform features!</em>',
+      senderId: 'system',
+      timestamp: new Date(),
+      role: 'assistant'
+    });
+    this.shouldScroll = true;
   }
 
   /**
@@ -315,31 +355,71 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
 
   toggleChatbot(): void {
     this.isOpen = !this.isOpen;
-    if (this.isOpen && this.messages.length === 0) {
-      this.loadChatHistory();
+    if (this.isOpen) {
+      if (this.messages.length === 0) {
+        this.loadChatHistory();
+      } else {
+        // Add a greeting message when opening existing chat
+        this.addGreetingMessage();
+      }
     }
     if (!this.isOpen) {
       this.clearFollowUp();
+      this.clearInactivity();
     }
   }
 
   closeChatbot(): void {
     this.isOpen = false;
     this.clearFollowUp();
+    this.clearInactivity();
   }
 
-  private setFollowUp() {
+  private setFollowUp(immediate = false) {
     this.clearFollowUp();
-    this.followUpTimeout = setTimeout(() => {
-      const randomIndex = Math.floor(Math.random() * this.followUpPrompts.length);
+    const randomIndex = Math.floor(Math.random() * this.followUpPrompts.length);
+    const followUpMsg = this.followUpPrompts[randomIndex];
+    if (immediate) {
+      setTimeout(() => {
+        this.messages.push({
+          content: followUpMsg,
+          senderId: 'system',
+          timestamp: new Date(),
+          role: 'assistant'
+        });
+        this.shouldScroll = true;
+      }, 1000);
+    } else {
+      this.followUpTimeout = setTimeout(() => {
+        this.messages.push({
+          content: followUpMsg,
+          senderId: 'system',
+          timestamp: new Date(),
+          role: 'assistant'
+        });
+        this.shouldScroll = true;
+      }, 20000); // 20 seconds
+    }
+  }
+
+  private setInactivity() {
+    this.clearInactivity();
+    this.inactivityTimeout = setTimeout(() => {
       this.messages.push({
-        content: this.followUpPrompts[randomIndex],
+        content: "I'm still here if you need anything else! 😊",
         senderId: 'system',
         timestamp: new Date(),
         role: 'assistant'
       });
       this.shouldScroll = true;
-    }, 20000); // 20 seconds
+    }, 30000); // 30 seconds
+  }
+
+  private clearInactivity() {
+    if (this.inactivityTimeout) {
+      clearTimeout(this.inactivityTimeout);
+      this.inactivityTimeout = null;
+    }
   }
 
   private clearFollowUp() {

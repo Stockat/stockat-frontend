@@ -168,10 +168,12 @@
           }
         </div>
 
-        <!-- Submit Button -->
-        <div class="text-center">
-          <p-button label="Add Product" [disabled]="productForm.invalid"  [rounded]="true" severity="success" type="submit"
-            [raised]="true" class="px-8 py-3 text-lg font-semibold"
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <p-button label="View Products" icon="pi pi-list" severity="info" [outlined]="true" (onClick)="viewProducts()"
+            class="px-6 py-3 text-lg font-semibold" />
+          <p-button label="Add Product" [disabled]="productForm.invalid" [rounded]="true" severity="success"
+            type="submit" [raised]="true" class="px-8 py-3 text-lg font-semibold"
             styleClass="px-8 py-3 text-lg font-semibold bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 border-0 shadow-lg" />
         </div>
       </form>

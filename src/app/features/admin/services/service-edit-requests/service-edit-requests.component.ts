@@ -77,6 +77,8 @@ export class ServiceEditRequestsComponent implements OnInit {
   // Details modal state
   detailsModalVisible = false;
   selectedRequestForDetails: ServiceEditRequestDto | null = null;
+  currentImageError = false;
+  editedImageError = false;
 
   // Computed properties for change status
   get nameChangeStatus() {
@@ -354,6 +356,18 @@ export class ServiceEditRequestsComponent implements OnInit {
     this.imageModalOpen = true;
     this.imageLoading = true;
     this.imageError = false;
+
+    // Preload the image to ensure it loads properly
+    const img = new Image();
+    img.onload = () => {
+      this.imageLoading = false;
+      this.imageError = false;
+    };
+    img.onerror = () => {
+      this.imageLoading = false;
+      this.imageError = true;
+    };
+    img.src = imageUrl;
   }
 
   openImageInNewTab(imageUrl: string) {
@@ -369,6 +383,8 @@ export class ServiceEditRequestsComponent implements OnInit {
 
   viewDetails(request: ServiceEditRequestDto) {
     this.selectedRequestForDetails = request;
+    this.currentImageError = false;
+    this.editedImageError = false;
     console.log('Viewing details for request:', request);
     console.log('Current image URL:', request.currentImageUrl);
     console.log('Edited image URL:', request.editedImageUrl);
@@ -395,7 +411,7 @@ export class ServiceEditRequestsComponent implements OnInit {
   onDetailsImageLoad(event: any) {
     console.log('Details image loaded successfully:', event.target.src);
     // Show image and hide fallback when image loads successfully
-    event.target.style.display = 'block';
+    event.target.style.opacity = '1';
     const container = event.target.parentElement;
     if (container) {
       const fallback = container.querySelector('.image-fallback');
@@ -410,7 +426,7 @@ export class ServiceEditRequestsComponent implements OnInit {
     console.error('Details image failed to load:', event.target.src);
     console.error('Image error details:', event);
     // Hide image and show fallback when image fails to load
-    event.target.style.display = 'none';
+    event.target.style.opacity = '0';
     const container = event.target.parentElement;
     if (container) {
       const fallback = container.querySelector('.image-fallback');

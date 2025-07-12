@@ -44,6 +44,7 @@ const ADMIN_STATUSES = [
     TagModule,
     OverlayPanelModule,
     DialogModule,
+    DialogModule,
   ],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.css',
@@ -69,6 +70,9 @@ export class AdminOrdersComponent implements OnInit {
   selectedStatus: string = '';
   selectedDescription: string = '';
 
+  showCancelConfirm = false;
+  orderToCancel: AdminOrder | null = null;
+
   // Properties for driver assignment
   selectedOrderForDriver: AdminOrder | null = null;
   selectedDriverId: string = '';
@@ -78,6 +82,7 @@ export class AdminOrdersComponent implements OnInit {
     { label: 'All Status', value: '' },
     { label: 'Pending', value: 'Pending' },
     { label: 'Processing', value: 'Processing' },
+    { label: 'Ready', value: 'Ready' },
     { label: 'Shipped', value: 'Shipped' },
     { label: 'Delivered', value: 'Delivered' },
     { label: 'Cancelled', value: 'Cancelled' },
@@ -88,6 +93,7 @@ export class AdminOrdersComponent implements OnInit {
   private orderStatusOptions = [
     { label: 'Pending', value: 'Pending' },
     { label: 'Processing', value: 'Processing' },
+    { label: 'Ready', value: 'Ready' },
     { label: 'Shipped', value: 'Shipped' },
     { label: 'Delivered', value: 'Delivered' },
     { label: 'Cancelled', value: 'Cancelled' },
@@ -98,6 +104,7 @@ export class AdminOrdersComponent implements OnInit {
     { label: 'Pending Buyer', value: 'PendingBuyer' },
     { label: 'Pending', value: 'Pending' },
     { label: 'Processing', value: 'Processing' },
+    { label: 'Ready', value: 'Ready' },
     { label: 'Shipped', value: 'Shipped' },
     { label: 'Delivered', value: 'Delivered' },
     { label: 'Cancelled', value: 'Cancelled' },
@@ -355,5 +362,21 @@ export class AdminOrdersComponent implements OnInit {
     this.selectedStatus = order.status;
     this.selectedDescription = order.description;
     this.op.toggle(event);
+  }
+
+  confirmCancel(order: AdminOrder) {
+    this.orderToCancel = order;
+    this.showCancelConfirm = true;
+  }
+  handleCancelConfirmed() {
+    if (this.orderToCancel) {
+      this.updateStatus(this.orderToCancel, 'Cancelled');
+      this.orderToCancel = null;
+    }
+    this.showCancelConfirm = false;
+  }
+  handleCancelRejected() {
+    this.orderToCancel = null;
+    this.showCancelConfirm = false;
   }
 }

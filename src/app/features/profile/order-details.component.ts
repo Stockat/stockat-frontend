@@ -36,11 +36,13 @@ export class OrderDetailsComponent implements OnInit {
   searchTerm: string = '';
   statusFilter: string = '';
   orderStatusOptions = [
-    { label: 'All Statuses', value: '' },
+    { label: 'All Status', value: '' },
     { label: 'Pending', value: 'Pending' },
-    { label: 'Completed', value: 'Completed' },
-    { label: 'Cancelled', value: 'Cancelled' },
     { label: 'Processing', value: 'Processing' },
+    { label: 'Ready', value: 'Ready' },
+    { label: 'Shipped', value: 'Shipped' },
+    { label: 'Delivered', value: 'Delivered' },
+    { label: 'Cancelled', value: 'Cancelled' },
   ];
 
   // Pagination
@@ -90,6 +92,12 @@ export class OrderDetailsComponent implements OnInit {
     const start = this.page * this.rows;
     const end = start + this.rows;
     this.pagedOrders = this.filteredOrders.slice(start, end);
+  }
+
+  clearFilters() {
+    this.searchTerm = '';
+    this.statusFilter = '';
+    this.filterOrders();
   }
 
   onPageChange(event: any) {

@@ -1,0 +1,234 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Tag Management</h1>
+      <p class="text-gray-600">Manage product tags across the platform</p>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-xl font-semibold text-gray-800">Tag Summary</h2>
+        <p-button label="Add New Tag" icon="pi pi-plus" severity="success" (onClick)="showAddDialog()" />
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Total Tags -->
+        <div
+          class="bg-blue-50 p-6 rounded-xl border border-blue-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-blue-100 rounded-xl mr-4">
+              <i class="pi pi-tags text-blue-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-blue-600 font-medium">Total Tags</div>
+              <div class="text-2xl font-bold text-blue-800">{{ tags.length }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activated Tags -->
+        <div
+          class="bg-green-50 p-6 rounded-xl border border-green-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-green-100 rounded-xl mr-4">
+              <i class="pi pi-check-circle text-green-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-green-600 font-medium">Activated Tags</div>
+              <div class="text-2xl font-bold text-green-800">{{ activatedTagsCount }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deactivated Tags -->
+        <div
+          class="bg-red-50 p-6 rounded-xl border border-red-200 hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <div class="flex items-center">
+            <div class="p-3 bg-red-100 rounded-xl mr-4">
+              <i class="pi pi-times-circle text-red-600 text-xl"></i>
+            </div>
+            <div>
+              <div class="text-sm text-red-600 font-medium">Deactivated Tags</div>
+              <div class="text-2xl font-bold text-red-800">{{ deactivatedTagsCount }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold text-gray-800">Filter Tags</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Search -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            Search Tags
+          </label>
+          <input pInputText type="text" [(ngModel)]="globalFilter" (ngModelChange)="dt.filterGlobal($event, 'contains')"
+            placeholder="Search tags..."
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 hover:border-purple-400" />
+        </div>
+
+        <!-- Status Filter -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 flex items-center">
+            <svg class="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z">
+              </path>
+            </svg>
+            Status Filter
+          </label>
+          <select [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-blue-400">
+            <option value="all">All Tags</option>
+            <option value="activated">Activated Only</option>
+            <option value="deactivated">Deactivated Only</option>
+          </select>
+        </div>
+
+        <!-- Refresh Button -->
+        <div class="flex flex-col space-y-2">
+          <label class="text-sm font-semibold text-gray-700 opacity-0">Actions</label>
+          <p-button label="Refresh Data" icon="pi pi-refresh" variant="text" [raised]="true" severity="info"
+            (onClick)="refreshData()" class="w-full h-12 font-semibold" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Tags Table -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <p-table #dt [value]="filteredTags" [loading]="loading" [paginator]="true" [rows]="10"
+          [rowsPerPageOptions]="[10, 25, 50]" [globalFilterFields]="['id', 'name']"
+          [tableStyle]="{ 'min-width': '50rem' }" class="w-full" styleClass="w-full">
+          <ng-template #caption>
+            <div class="flex items-center justify-between p-6">
+              <span class="text-2xl font-bold text-gray-900">Tags List</span>
+              <span class="text-sm text-gray-600">Showing: {{ filteredTagsCount }} of {{ tags.length }}
+                tags</span>
+            </div>
+          </ng-template>
+
+          <ng-template pTemplate="header">
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="p-4 text-left font-semibold text-gray-700">ID</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Tag Name</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Status</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Actions</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-tag>
+            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="p-4">
+                <div class="font-medium text-gray-900">#{{ tag.id }}</div>
+              </td>
+              <td class="p-4">
+                <div class="flex items-center gap-3">
+                  <div class="p-2 rounded-lg" [ngClass]="tag.status === 'Deactivated' ? 'bg-gray-100' : 'bg-blue-100'">
+                    <i class="pi pi-tag text-sm"
+                      [ngClass]="tag.status === 'Deactivated' ? 'text-gray-400' : 'text-blue-600'"></i>
+                  </div>
+                  <span class="font-semibold"
+                    [ngClass]="tag.status === 'Deactivated' ? 'text-gray-400 line-through' : 'text-gray-900'">
+                    {{ tag.name }}
+                  </span>
+                </div>
+              </td>
+              <td class="p-4">
+                <p-tag [value]="tag.status" [severity]="tag.status === 'Activated' ? 'success' : 'danger'"
+                  class="text-xs"></p-tag>
+              </td>
+              <td class="p-4">
+                <div class="flex flex-wrap gap-2" *ngIf="tag.status !== 'Deactivated'">
+                  <p-button label="Edit" icon="pi pi-pencil" size="small" variant="text" [raised]="true" severity="info"
+                    (onClick)="showEditDialog(tag)" pTooltip="Edit tag" class="text-xs" />
+                  <p-button label="Deactivate" icon="pi pi-times" size="small" variant="text" [raised]="true"
+                    severity="danger" (onClick)="confirmDelete(tag)" pTooltip="Deactivate tag" class="text-xs" />
+                </div>
+                <div *ngIf="tag.status === 'Deactivated'" class="flex flex-wrap gap-2">
+                  <p-button label="Activate" icon="pi pi-check" size="small" variant="text" [raised]="true"
+                    severity="success" (onClick)="changeTagStatus(tag, TagStatus.Activated)" pTooltip="Activate tag"
+                    class="text-xs" />
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="4" class="p-8 text-center">
+                <div class="flex flex-col items-center space-y-4">
+                  <i class="pi pi-tags text-4xl text-gray-300"></i>
+                  <div class="text-gray-500">No tags found.</div>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="footer">
+            <tr class="bg-gray-50">
+              <td colspan="4" class="p-4 text-center text-gray-600">
+                Showing {{ filteredTagsCount }} of {{ tags.length }} tags
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Tag Dialog -->
+<p-dialog header="Add New Tag" [(visible)]="displayAddDialog" [modal]="true" [style]="{width: '400px'}"
+  [draggable]="false" [resizable]="false">
+  <div class="p-4">
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-2">Tag Name</label>
+      <input pInputText type="text" [(ngModel)]="newTagName" placeholder="Enter tag name"
+        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Cancel" icon="pi pi-times" variant="text" (onClick)="displayAddDialog = false" />
+      <p-button label="Add Tag" icon="pi pi-check" severity="success" (onClick)="addTag()" [loading]="loading" />
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Edit Tag Dialog -->
+<p-dialog header="Edit Tag" [(visible)]="displayEditDialog" [modal]="true" [style]="{width: '400px'}"
+  [draggable]="false" [resizable]="false">
+  <div class="p-4">
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-2">Tag Name</label>
+      <input pInputText type="text" [(ngModel)]="editTagName" placeholder="Enter tag name"
+        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Cancel" icon="pi pi-times" variant="text" (onClick)="displayEditDialog = false" />
+      <p-button label="Update Tag" icon="pi pi-check" severity="success" (onClick)="editTag()" [loading]="loading" />
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Toast Messages -->
+<p-toast></p-toast>
+
+<!-- Confirmation Dialog -->
+<p-confirmDialog></p-confirmDialog>

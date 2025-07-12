@@ -45,8 +45,11 @@ export class OrderService {
       }
     );
   }
-  updateRequestOrder(orderId: number, updateReqDto: UpdateReqDto): Observable<any> {
-    updateReqDto.id=orderId;
+  updateRequestOrder(
+    orderId: number,
+    updateReqDto: UpdateReqDto
+  ): Observable<any> {
+    updateReqDto.id = orderId;
     return this.http.put(
       `${this.orderUrl}/request/${orderId}`,
       JSON.stringify(updateReqDto),
@@ -101,6 +104,12 @@ export class OrderService {
     return this.http.get<GenericResponseDto<BarChartAnalysisDto>>(
       `${this.orderUrl}/analysis/OrdersVsStatus`,
       { params }
+    );
+  }
+
+  getOrderSummary(): Observable<GenericResponseDto<[string, number][]>> {
+    return this.http.get<GenericResponseDto<[string, number][]>>(
+      `${this.orderUrl}/analysis/OrderSummary`
     );
   }
 

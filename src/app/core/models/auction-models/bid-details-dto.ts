@@ -7,12 +7,14 @@ export interface AuctionBidRequestDto {
 
     //only for view 
     bidderName?: string;
+    iswinner?: boolean;
     auction?: {
         startTime: string;
         endTime: string;
         id?: number;
         name?: string;
         currentBid?: number;
+        buyerId?: string;
     };
 }
   

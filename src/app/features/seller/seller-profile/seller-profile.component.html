@@ -45,17 +45,31 @@
 
           <!-- Seller Info -->
           <div class="flex-1">
-            <div class="flex items-center gap-3 mb-4">
-              <h1 class="text-4xl font-bold text-gray-800">
-                {{ seller?.data.firstName }} {{ seller?.data.lastName }}
-              </h1>
-              <div class="flex gap-2">
-                <span *ngIf="seller?.data.isApproved" class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold border border-green-200">
-                  <i class="pi pi-check-circle mr-1"></i> Verified
-                </span>
-                <span *ngIf="seller?.data.needsVerification" class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold border border-yellow-200">
-                  <i class="pi pi-exclamation-triangle mr-1"></i> Pending Verification
-                </span>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <h1 class="text-4xl font-bold text-gray-800">
+                  {{ seller?.data.firstName }} {{ seller?.data.lastName }}
+                </h1>
+                <div class="flex gap-2">
+                  <span *ngIf="seller?.data.isApproved" class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold border border-green-200">
+                    <i class="pi pi-check-circle mr-1"></i> Verified
+                  </span>
+                  <span *ngIf="seller?.data.needsVerification" class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold border border-yellow-200">
+                    <i class="pi pi-exclamation-triangle mr-1"></i> Pending Verification
+                  </span>
+                </div>
+              </div>
+
+              <!-- Chat with Seller Button -->
+              <div *ngIf="seller?.data?.id !== currentUserId">
+                <button
+                  pButton
+                  type="button"
+                  class="p-button-raised bg-gradient-to-r from-green-500 to-emerald-600 border-0 px-6 py-3 rounded-xl shadow-lg text-lg font-bold text-white hover:from-green-600 hover:to-emerald-700 transition-all duration-300"
+                  (click)="contactSeller()">
+                  <i class="pi pi-comments mr-2"></i>
+                  Chat with Seller
+                </button>
               </div>
             </div>
 
@@ -227,16 +241,77 @@
                   <p class="text-gray-600">Physical products by {{ seller?.data.firstName }}</p>
                 </div>
               </div>
+              <div class="text-right">
+                <p class="text-2xl font-bold text-green-600">{{ totalProductsCount }}</p>
+                <p class="text-sm text-gray-500">Total Products</p>
+              </div>
             </div>
 
             <!-- Products Grid -->
-            <div class="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
-              <div class="text-center py-12">
-                <div class="w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <i class="pi pi-shopping-bag text-white text-2xl"></i>
+            <div *ngIf="sellerProducts?.length; else noProducts" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div *ngFor="let product of sellerProducts" class="group bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 overflow-hidden cursor-pointer flex flex-col">
+                <!-- Product Image -->
+                <div class="relative h-48 overflow-hidden flex-shrink-0">
+                  <img
+                    [src]="product.image && product.image.length > 0 ? product.image[0] : 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80'"
+                    alt="Product Image"
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                  <!-- Price Badge -->
+                  <div class="absolute top-4 right-4">
+                    <span class="bg-white/90 backdrop-blur-sm text-gray-800 font-bold px-3 py-1 rounded-full text-sm shadow-lg">
+                      ${{ product.price }}
+                    </span>
+                  </div>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-800 mb-2">Products Coming Soon</h3>
-                <p class="text-gray-600">Product catalog will be available here.</p>
+                <!-- Product Content -->
+                <div class="p-6 flex flex-col flex-grow">
+                  <!-- Product Title -->
+                  <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-green-600 transition-colors duration-200">
+                    {{ product.name }}
+                  </h3>
+                  <!-- Product Status -->
+                  <div class="mb-2">
+                    <p-tag [value]="product.productStatus + ''" [severity]="getProductStatusSeverity(product.productStatus)" class="text-xs"></p-tag>
+                    <span *ngIf="isProductRejected(product) && product.rejectionReason" class="text-xs text-red-500 ml-2">({{ product.rejectionReason }})</span>
+                  </div>
+                  <!-- Action Button -->
+                  <button
+                    [routerLink]="['/ProductDetails', product.id]"
+                    class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 transform hover:scale-105 shadow-lg mt-auto">
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- No Products Template -->
+            <ng-template #noProducts>
+              <div class="text-center py-20">
+                <div class="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-12 max-w-md mx-auto">
+                  <div class="w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="pi pi-shopping-bag text-white text-2xl"></i>
+                  </div>
+                  <h3 class="text-2xl font-bold text-gray-800 mb-2">No Products Yet</h3>
+                  <p class="text-gray-600">This seller hasn't added any products yet.</p>
+                </div>
+              </div>
+            </ng-template>
+            <!-- Pagination -->
+            <div *ngIf="totalProductsCount > 0" class="mt-12">
+              <div class="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
+                <p-paginator
+                  [rows]="productsSize"
+                  [totalRecords]="totalProductsCount"
+                  [first]="productsPage * productsSize"
+                  [rowsPerPageOptions]="[6, 9, 12, 18]"
+                  (onPageChange)="onProductsPageChange($event)"
+                  [showCurrentPageReport]="true"
+                  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+                  [showFirstLastIcon]="true"
+                  [showPageLinks]="true"
+                  styleClass="!bg-transparent !border-none !p-0">
+                </p-paginator>
               </div>
             </div>
           </div>

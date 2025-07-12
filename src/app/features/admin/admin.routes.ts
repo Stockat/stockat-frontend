@@ -22,6 +22,10 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./category/category-management.component').then(m => m.CategoryManagementComponent)
     },
     {
+        path: 'tags',
+        loadComponent: () => import('./tag/tag-management.component').then(m => m.TagManagementComponent)
+    },
+    {
         path: 'users',
         loadComponent: () => import('./user/user-management.component').then(m => m.UserManagementComponent)
       },
@@ -53,5 +57,14 @@ export const adminRoutes: Routes = [
         path: '',
         redirectTo: 'users',
         pathMatch: 'full'
-      }
+      },
+    {
+        path: 'auctions',
+        loadComponent: () => import('../seller/Auctions/auctions-view/auctions-view.component').then(m => m.AuctionsViewComponent)
+    },
+    {
+        path: 'auctionorders',
+        loadComponent: () => import('../seller/Auctions/auction-order-management/auction-order-management.component').then(m => m.AuctionOrderManagementComponent)
+    }
+
 ]

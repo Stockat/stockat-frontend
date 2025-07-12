@@ -110,6 +110,14 @@ export class ProductService {
     return this.http.get<GenericRequestModel<PaginationDto<ProductDto>>>(this.apiUrl+'/admin', { params });
   }
 
+  //* View Specific Seller Products
+  getSpecificSellerProducts(filters: ProductFilters, sellerId: string): Observable<GenericRequestModel<PaginationDto<viewSellerProductDto>>> {
+    // Remove sellerId from filters if present, to avoid duplication
+    const { sellerId: _, ...queryFilters } = filters as any;
+    const params = new HttpParams({ fromObject: queryFilters });
+    return this.http.get<GenericRequestModel<PaginationDto<viewSellerProductDto>>>(`${this.apiUrl}/${sellerId}`, { params });
+  }
+
 
 //! End Of Service
 }

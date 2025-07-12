@@ -11,6 +11,11 @@ export interface AuctionOrderDto {
     sellerName?: string;
     auctionTitle?: string;
     buyerName?: string;
+    // New fields for shipping/order info
+    shippingAddress?: string;
+    recipientName?: string;
+    phoneNumber?: string;
+    notes?: string;
 }
 
 

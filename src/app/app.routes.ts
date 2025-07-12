@@ -10,6 +10,7 @@ import { ProductDetailsComponent } from './features/ProductDetails/product-detai
 import { ServiceRequestDetailsComponent } from './features/profile/service-request-details.component';
 import { ProductStocksComponent } from './features/product-stocks/product-stocks.component';
 import { SellerProfileComponent } from './features/seller/seller-profile/seller-profile.component';
+import { RoleGuard } from './core/gaurds/RoleGuard';
 
 export const routes: Routes = [
   {
@@ -77,6 +78,8 @@ export const routes: Routes = [
     path: 'seller',
     component: SellerLayoutComponent,
     children: sellerRoutes,
+    canActivate: [RoleGuard],
+    data: { roles: ['Seller'] }
   },
   // End Seller
   // Admin
@@ -84,6 +87,8 @@ export const routes: Routes = [
     path: 'admin',
     component: AdminLayoutComponent,
     children: adminRoutes,
+    canActivate: [RoleGuard],
+    data: { roles: ['Admin'] }
   },
   // End Admin
   // Services
@@ -117,6 +122,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'chat/:userId',
+    loadComponent: () =>
+      import('./features/chat/chat-page/chat-page.component').then(
+        (m) => m.ChatPageComponent
+      ),
+  },
+  {
     path: 'order-process',
     loadComponent: () => import('./features/order-process/order-process.component').then(m => m.OrderProcessComponent)
   },
@@ -129,4 +141,8 @@ export const routes: Routes = [
     path: 'chatbot',
     loadComponent: () => import('./features/chatbot/chatbot.component').then(m => m.ChatbotComponent)
   },
+  {
+    path: 'unauthorized',
+    component: ProductCardComponent,
+  }
 ];

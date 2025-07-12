@@ -185,8 +185,12 @@
           <ng-template #caption>
             <div class="flex items-center justify-between p-6">
               <span class="text-2xl font-bold text-gray-900">Products List</span>
-              <span class="text-sm text-gray-600">Total: {{ products ? products.length : 0 }} out of
-                {{totalRecords}}</span>
+              <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-600">Total: {{ products ? products.length : 0 }} out of
+                  {{totalRecords}}</span>
+                <p-button label="Add Product" icon="pi pi-plus" severity="success" [raised]="true"
+                  (onClick)="addProduct()" class="font-semibold" />
+              </div>
             </div>
           </ng-template>
 
@@ -215,8 +219,8 @@
                 <span class="font-semibold text-green-600">{{ product.price | currency: 'USD' }}</span>
               </td>
               <td class="p-4">
-                <p-tag  pTooltip="{{product.reason}}"  [value]="product.productStatus" [severity]="getSeverity(product.productStatus)"
-                  class="text-xs" />
+                <p-tag pTooltip="{{product.reason}}" [value]="product.productStatus"
+                  [severity]="getSeverity(product.productStatus)" class="text-xs" />
               </td>
               <td class="p-4">
                 <p-button [label]="product.canBeRequested ? 'Activate' : 'Deactivate'" variant="text" [raised]="true"
