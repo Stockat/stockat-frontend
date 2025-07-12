@@ -51,10 +51,14 @@ export class AdminLayoutComponent {
             {
                 label: 'Auctions',
                 icon: 'ti ti-gavel',
-                route: '/admin/auctions',
-                routerLink: '/admin/auctions',
-                routerLinkActiveOptions: { exact: true },
                 items: [
+                  {
+                    label: 'All Auctions',
+                    icon: 'ti ti-gavel',
+                    route: '/admin/auctions',
+                    routerLink: '/admin/auctions',
+                    routerLinkActiveOptions: { exact: true },
+                  },
                     {
                         label: 'Orders',
                         icon: 'ti ti-list-check',

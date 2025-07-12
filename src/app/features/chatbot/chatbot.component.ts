@@ -291,6 +291,21 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   }
 
   /**
+   * Add a greeting message when opening existing chat
+   */
+  private addGreetingMessage(): void {
+    const randomIndex = Math.floor(Math.random() * this.welcomeMessages.length);
+    this.messages.push({
+      content: this.welcomeMessages[randomIndex] +
+        '<br><br><em>Tip: Try asking me about auctions, sellers, or platform features!</em>',
+      senderId: 'system',
+      timestamp: new Date(),
+      role: 'assistant'
+    });
+    this.shouldScroll = true;
+  }
+
+  /**
    * Use a quick suggestion
    */
   useSuggestion(suggestion: string): void {
@@ -340,8 +355,13 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
 
   toggleChatbot(): void {
     this.isOpen = !this.isOpen;
-    if (this.isOpen && this.messages.length === 0) {
-      this.loadChatHistory();
+    if (this.isOpen) {
+      if (this.messages.length === 0) {
+        this.loadChatHistory();
+      } else {
+        // Add a greeting message when opening existing chat
+        this.addGreetingMessage();
+      }
     }
     if (!this.isOpen) {
       this.clearFollowUp();
