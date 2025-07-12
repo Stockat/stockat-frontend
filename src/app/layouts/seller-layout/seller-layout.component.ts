@@ -87,7 +87,6 @@ export class SellerLayoutComponent {
           {
             label: 'All Services',
             icon: 'pi pi-cog',
-            shortcut: '⌘+O',
             route: '/seller/services',
             routerLink: '/seller/services',
             routerLinkActiveOptions: { endWith: '/seller/services' }
@@ -95,7 +94,6 @@ export class SellerLayoutComponent {
           {
             label: 'Analytics',
             icon: 'pi pi-chart-bar',
-            shortcut: '⌘+O',
             route: '/seller/service-analytics',
             routerLink: '/seller/service-analytics',
             routerLinkActiveOptions: { endWith: '/seller/service-analytics' }

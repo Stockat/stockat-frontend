@@ -356,6 +356,18 @@ export class ServiceEditRequestsComponent implements OnInit {
     this.imageModalOpen = true;
     this.imageLoading = true;
     this.imageError = false;
+
+    // Preload the image to ensure it loads properly
+    const img = new Image();
+    img.onload = () => {
+      this.imageLoading = false;
+      this.imageError = false;
+    };
+    img.onerror = () => {
+      this.imageLoading = false;
+      this.imageError = true;
+    };
+    img.src = imageUrl;
   }
 
   openImageInNewTab(imageUrl: string) {
