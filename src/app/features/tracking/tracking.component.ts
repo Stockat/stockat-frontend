@@ -2,6 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { environment } from '../../../environments/environment';
 import * as L from 'leaflet';
 import { ButtonModule } from 'primeng/button';
 
@@ -42,7 +43,7 @@ export class TrackingComponent implements OnDestroy {
     this.loading = true;
     this.error = null;
     this.http
-      .get<any>(`http://localhost:5250/api/Driver/${this.driverId}`)
+      .get<any>(`${environment.apiUrl}/api/Driver/${this.driverId}`)
       .subscribe({
         next: (res) => {
           this.driver = res.data;

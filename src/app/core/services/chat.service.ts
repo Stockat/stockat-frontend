@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import {
   UserChatInfoDto,
   SendMessageDto,
@@ -16,7 +17,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   public hubConnection: HubConnection | null = null;
-  private baseUrl = 'http://localhost:5250/api/chat';
+  private baseUrl = `${environment.apiUrl}/api/chat`;
 
   // Observables for real-time updates
   private conversations$ = new BehaviorSubject<ChatConversationDto[]>([]);
@@ -104,7 +105,7 @@ export class ChatService {
   // SignalR real-time methods
   startConnection(token: string) {
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl('http://localhost:5250/chathub', { accessTokenFactory: () => token })
+      .withUrl(`${environment.apiUrl}/chathub`, { accessTokenFactory: () => token })
       .withAutomaticReconnect()
       .build();
     this.hubConnection.start()

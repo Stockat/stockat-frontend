@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Service } from '../models/service-models/service.dto';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { ServiceRequestDto } from '../models/service-models/service-request.dto';
 import { PaginationDto } from '../models/pagination-Dto';
 import { GenericRequestModel } from '../models/generic-request-Dto';
@@ -11,7 +12,7 @@ import { GenericRequestModel } from '../models/generic-request-Dto';
 })
 
 export class ServiceRequestService {
-  private baseUrl = 'http://localhost:5250/api/ServiceRequest';
+  private baseUrl = `${environment.apiUrl}/api/ServiceRequest`;
 
   constructor(private http: HttpClient) { }
 

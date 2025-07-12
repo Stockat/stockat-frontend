@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { StockService } from '../../../../core/services/stock.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { environment } from '../../../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -48,7 +49,7 @@ export class ProductDetailsComponent implements OnInit {
 
   fetchProductDetails() {
     this.loading = true;
-    this.http.get<any>(`http://localhost:5250/api/Product/admin/product-with-stocks/${this.productId}`)
+    this.http.get<any>(`${environment.apiUrl}/api/Product/admin/product-with-stocks/${this.productId}`)
       .subscribe({
         next: (res) => {
           this.product = res.data;

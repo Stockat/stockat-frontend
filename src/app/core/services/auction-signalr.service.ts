@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -29,7 +30,7 @@ export class AuctionSignalRService {
   startConnection() {
     const token = this.authService.getAccessToken();
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5250/auctionHub', {
+      .withUrl(`${environment.apiUrl}/auctionHub`, {
         accessTokenFactory: () => token || ''
       })
       .withAutomaticReconnect()

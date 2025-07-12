@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { GenericRequestModel } from '../models/generic-request-Dto';
 import { ReviewDto, CreateReviewDto, UpdateReviewDto, ProductReviewSummaryDto, ServiceReviewSummaryDto } from '../models/review-models/review.dto';
 
@@ -8,7 +9,7 @@ import { ReviewDto, CreateReviewDto, UpdateReviewDto, ProductReviewSummaryDto, S
   providedIn: 'root',
 })
 export class ReviewService {
-  private apiUrl = 'http://localhost:5250/api/Review';
+  private apiUrl = `${environment.apiUrl}/api/Review`;
 
   constructor(private http: HttpClient) {}
 
