@@ -46,6 +46,10 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./services/service-requests/service-requests.component').then(m => m.ServiceRequestsComponent)
       },
       {
+        path: 'tracking',
+        loadComponent: () => import('../tracking/tracking.component').then(m => m.TrackingComponent)
+      },
+      {
         path: '',
         redirectTo: 'users',
         pathMatch: 'full'

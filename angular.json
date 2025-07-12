@@ -28,7 +28,8 @@
             ],
             "styles": [
               "src/styles.css",
-              "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+              "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css",
+              "node_modules/leaflet/dist/leaflet.css"
             ],
             "scripts": []
           },
@@ -87,7 +88,8 @@
             ],
             "styles": [
               "src/styles.css",
-              "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+              "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css",
+              "node_modules/leaflet/dist/leaflet.css"
             ],
             "scripts": []
           }
