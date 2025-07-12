@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ServiceEditRequestDto } from '../models/service-models/service-edit-request.dto';
+import { environment } from '../../../environments/environment';
 
 interface PaginatedDto<T> {
   page: number;
@@ -20,7 +21,7 @@ interface GenericResponseDto<T> {
   providedIn: 'root'
 })
 export class ServiceEditRequestService {
-  private baseUrl = 'http://localhost:5250/api/ServiceEditRequest';
+  private baseUrl = `${environment.apiUrl}/api/ServiceEditRequest`;
 
   constructor(private http: HttpClient) {}
 

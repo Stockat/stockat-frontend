@@ -3,13 +3,14 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SellerOrder } from '../models/order-models/seller-order.model';
 import { OrderRequest } from '../models/order-request.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RequestProductService {
 
-  private readonly orderUrl = 'http://localhost:5250/api/Order';
+  private readonly orderUrl = `${environment.apiUrl}/api/Order`;
 
   constructor(private http: HttpClient) {}
 

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { ProductFilters } from '../models/product-models/product-filters';
 import { ProductDto, ProductStatus } from '../models/product-models/productDto';
 import { Router } from '@angular/router';
@@ -19,7 +20,7 @@ import { ProductWithFeatures } from '../models/product-models/product-with-featu
   providedIn: 'root',
 })
 export class ProductService {
-  private apiUrl = 'http://localhost:5250/api/Product';
+  private apiUrl = `${environment.apiUrl}/api/Product`;
   constructor(private http: HttpClient, private router: Router) {}
 
 

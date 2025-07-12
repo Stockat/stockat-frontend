@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 import { UserForAuthenticationDto } from '../models/auth-models/user-for-authentication.dto';
 import { UserForRegistrationDto } from '../models/auth-models/user-for-registration.dto';
 import { AuthResponseDto, TokenDto } from '../models/auth-models/auth-response.dto';
@@ -12,8 +13,8 @@ import { jwtDecode } from 'jwt-decode';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://localhost:5250/api/authentication';
-  private tokenUrl = 'http://localhost:5250/api/token';
+  private apiUrl = `${environment.apiUrl}/api/authentication`;
+  private tokenUrl = `${environment.apiUrl}/api/token`;
 
   constructor(
     private http: HttpClient,
