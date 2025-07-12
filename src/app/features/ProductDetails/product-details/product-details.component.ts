@@ -54,6 +54,7 @@ export class ProductDetailsComponent {
     let selectedId = +(this.selectedProductId || 0); // Convert to number, default to 0 if null
     this.productServ.getProductsDetails(selectedId).subscribe({
       next: (response) => {
+        console.log('Product details response:', response);
         this.product = response.data; // Assuming 'data' contains the product details
         this.images = this.product!.imagesArr;
         this.isLoading = false;

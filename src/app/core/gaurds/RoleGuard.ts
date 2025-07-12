@@ -22,7 +22,7 @@ export class RoleGuard implements CanActivate {
     const userRole = this.authService.getCurrentUserRoles();
 
     if (!userRole) {
-      this.router.navigate(['/unauthorized']);
+      this.router.navigate(['/404NotFound']);
       return false;
     }
 
@@ -32,7 +32,7 @@ export class RoleGuard implements CanActivate {
         : expectedRoles.includes(userRole);
 
     if (!hasAccess) {
-      this.router.navigate(['/unauthorized']);
+      this.router.navigate(['/404NotFound']);
     }
 
     return hasAccess;

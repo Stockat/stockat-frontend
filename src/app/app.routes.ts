@@ -71,7 +71,9 @@ export const routes: Routes = [
       ),
     children: [
       { path: 'requests/:id', component: ServiceRequestDetailsComponent }
-    ]
+    ],
+    canActivate: [RoleGuard],
+    data: { roles: ['Buyer', 'Seller'] }
   },
   // End Auth
   // Seller
@@ -143,7 +145,7 @@ export const routes: Routes = [
     loadComponent: () => import('./features/chatbot/chatbot.component').then(m => m.ChatbotComponent)
   },
   {
-    path: 'unauthorized',
+    path: '404NotFound',
     component: NotFound404Component,
   }
 ];
