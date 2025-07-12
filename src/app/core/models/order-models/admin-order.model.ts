@@ -17,4 +17,5 @@ export interface AdminOrder {
   buyerId: string;
   buyerFirstName: string;
   buyerLastName: string;
+  driverId?: string;
 } 

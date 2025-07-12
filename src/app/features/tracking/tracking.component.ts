@@ -1,6 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule, DatePipe } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import * as L from 'leaflet';
 import { ButtonModule } from 'primeng/button';
 
@@ -16,12 +17,19 @@ export class TrackingComponent implements OnDestroy {
   driver: any = null;
   loading = false;
   error: string | null = null;
-  readonly driverId = '85f3bb1e-f44e-4b86-9472-f15950139915';
+  driverId: string = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
-    this.fetchDriver();
+    // Get driverId from query parameters
+    this.route.queryParams.subscribe(params => {
+      this.driverId = params['driverId'] || '85f3bb1e-f44e-4b86-9472-f15950139915';
+      this.fetchDriver();
+    });
   }
 
   ngOnDestroy() {

@@ -103,4 +103,15 @@ export class OrderService {
       { params }
     );
   }
+
+  //* Driver Management
+  getAllDrivers(): Observable<any> {
+    return this.http.get<any>('http://localhost:5250/api/Driver');
+  }
+
+  assignDriverToOrder(orderId: number, driverId: string): Observable<any> {
+    return this.http.put(`${this.orderUrl}/${orderId}/driver`, JSON.stringify(driverId), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 }
