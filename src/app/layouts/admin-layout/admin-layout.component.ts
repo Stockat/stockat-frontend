@@ -41,16 +41,24 @@ export class AdminLayoutComponent {
                 items: [
                     {
                         label: 'All Products',
-                        icon: 'pi pi-box',
+                        icon: 'ti ti-box',
                         route: '/admin/products',
                         routerLink: '/admin/products',
                         routerLinkActiveOptions: { exact: true }
                     },
                     {
-                        label: 'Add Product',
-                        icon: 'pi pi-plus',
-                        route: '/admin/add-product',
-                        routerLink: '/admin/add-product'
+                        label: 'Categories',
+                        icon: 'ti ti-category',
+                        route: '/admin/categories',
+                        routerLink: '/admin/categories',
+                        routerLinkActiveOptions: { exact: true }
+                    },
+                    {
+                        label: 'Tags',
+                        icon: 'ti ti-hash',
+                        route: '/admin/tags',
+                        routerLink: '/admin/tags',
+                        routerLinkActiveOptions: { exact: true }
                     }
                 ]
             },
@@ -62,26 +70,8 @@ export class AdminLayoutComponent {
                         label: 'Orders',
                         icon: 'ti ti-list-check',
                         route: '/admin/orders'
-                    },
-                    {
-                        label: 'Compose',
-                        icon: 'pi pi-file-edit',
-                        shortcut: '⌘+N'
-                    },
-                    {
-                        label: 'Inbox',
-                        icon: 'pi pi-inbox',
-                        badge: '5'
-                    },
-                    {
-                        label: 'Sent',
-                        icon: 'pi pi-send',
-                        shortcut: '⌘+S'
-                    },
-                    {
-                        label: 'Trash',
-                        icon: 'pi pi-trash',
-                        shortcut: '⌘+T'
+                        , routerLink: '/admin/orders',
+                        routerLinkActiveOptions: { exact: true }
                     }
                 ]
             },
