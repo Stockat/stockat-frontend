@@ -17,6 +17,7 @@
       <div class="flex-1">
         <h2 class="text-xl md:text-2xl font-semibold mb-2">Stockat AI Assistant</h2>
         <p class="text-blue-100 text-xs md:text-sm">Ask me about products, services, sellers, auctions, and more!</p>
+        <p class="text-blue-100 text-xs mt-1">{{ getOpenAIStatus() }}</p>
       </div>
       <div class="flex gap-2 items-center">
         <button *ngIf="!isChatEmpty()" (click)="clearChat()"
