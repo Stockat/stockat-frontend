@@ -320,8 +320,10 @@
               }
             </div>
 
-            <!-- Submit Button -->
-            <div class="text-center">
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <p-button label="View Products" icon="pi pi-list" severity="info" [outlined]="true"
+                (onClick)="viewProducts()" class="px-6 py-3 text-lg font-semibold" [disabled]="isUpdating" />
               <p-button [label]="isUpdating ? 'Updating...' : 'Update Product'"
                 [icon]="isUpdating ? 'pi pi-spinner pi-spin' : 'pi pi-check'"
                 [disabled]="productForm.invalid || isUpdating" [rounded]="true" severity="success" type="submit"

@@ -86,6 +86,8 @@ export class RequestOrderComponent {
   clear(table: Table) {
     table.clear();
     this.searchValue = '';
+    this.statusFilter = '';
+    this.globalFilter = '';
   }
 
   fetchOrders() {
@@ -193,24 +195,26 @@ export class RequestOrderComponent {
       const formValue = this.orderForm.value;
       console.log('Form submitted:', formValue);
 
-      this.orderService.updateRequestOrder(this.selectedOrder!.id, formValue).subscribe({
-        next: (res) => {
-          console.log(res);
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Order Request updated successfully.',
-          });
-          this.fetchOrders();
-        },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to update order request.',
-          });
-        },
-      });
+      this.orderService
+        .updateRequestOrder(this.selectedOrder!.id, formValue)
+        .subscribe({
+          next: (res) => {
+            console.log(res);
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: 'Order Request updated successfully.',
+            });
+            this.fetchOrders();
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to update order request.',
+            });
+          },
+        });
 
       this.visible = false;
     }

@@ -8,7 +8,7 @@ import { GalleriaModule } from 'primeng/galleria';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import {
   AbstractControl,
   FormArray,
@@ -72,7 +72,8 @@ export class UpdateProductComponent implements OnInit {
     private tagServ: TagService,
     private messageService: MessageService,
     private route: ActivatedRoute,
-    private authServ:AuthService
+    private authServ:AuthService,
+    private router: Router
   ) {
     this.productForm = new FormGroup({
       title: new FormControl('', [
@@ -371,5 +372,12 @@ export class UpdateProductComponent implements OnInit {
       return isValid ? null : { invalidFormat: true };
     };
   }
+
+  //* Routing To View Products
+  viewProducts() {
+    this.router.navigate(['/seller/view-product']);
+    console.log('Navigating to view products');
+  }
+
   //! End of component
 }
