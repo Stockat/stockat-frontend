@@ -48,3 +48,20 @@ html {
 .p-progress-spinner-circle {
   stroke: #6366f1;
 }
+
+.main{
+  
+}
+
+.fixed.main {
+  background: rgba(255, 255, 255, 0.541) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-bottom: 1px solid rgba(200,200,200,0.15);
+}
+
+.p-menubar.p-component {
+  background: rgba(255, 255, 255, 0) !important;
+  border: none !important;
+}

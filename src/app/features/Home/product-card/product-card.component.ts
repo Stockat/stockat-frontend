@@ -20,6 +20,7 @@ import { RouterOutlet } from '@angular/router';
 import { SharedService } from '../../../shared/utils/shared.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { TagService } from '../../../core/services/tag.service';
+import { HeroSectionComponent } from '../hero-animation/hero-animation.component';
 
 interface City {
   name: string;
@@ -43,6 +44,7 @@ interface ProductWithImageState extends ProductDto {
     PaginatorModule,
     CurrencyPipe,
     RouterModule,
+    HeroSectionComponent
   ],
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.css',

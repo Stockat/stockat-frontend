@@ -1,0 +1,324 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.hero-section {
+  position: relative;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: 'Arial', sans-serif;
+}
+
+.hero-content {
+  text-align: center;
+  color: white;
+  z-index: 10;
+  max-width: 800px;
+  padding: 2rem;
+}
+
+.hero-title {
+  font-size: 4rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  animation: fadeInUp 1s ease-out;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  animation: fadeInUp 1s ease-out 0.3s both;
+}
+
+.hero-button {
+  background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+  color: white;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  animation: fadeInUp 1s ease-out 0.6s both;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.road-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(to bottom, transparent 0%, #2c3e50 60%, #34495e 100%);
+  overflow: hidden;
+}
+
+.road {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: #2c3e50;
+  border-top: 3px solid #128ef3;
+}
+
+.road-lines {
+  position: absolute;
+  bottom: 32px;
+  left: 0;
+  width: 200%;
+  height: 2px;
+  background: repeating-linear-gradient(
+    to right,
+    transparent 0px,
+    transparent 20px,
+    #0f97f1 20px,
+    #0f97f1 40px
+  );
+  animation: roadMove 2s linear infinite;
+}
+
+.vehicle-left {
+  position: absolute;
+  bottom: 40px;
+  font-size: 2rem;
+  z-index: 5;
+}
+
+.vehicle-right {
+  position: absolute;
+  bottom: 13px;
+  font-size: 2rem;
+  z-index: 5;
+}
+
+.van-left {
+  animation: moveLeft 8s linear infinite;
+}
+
+.van-right {
+  animation: moveRight 10s linear infinite;
+}
+
+.truck-left {
+  animation: moveLeft 12s linear infinite;
+  animation-delay: -4s;
+}
+
+.truck-right {
+  animation: moveRight 15s linear infinite;
+  animation-delay: -7s;
+}
+
+.clouds {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.cloud {
+  position: absolute;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50px;
+  animation: cloudMove 20s linear infinite;
+
+  &:before {
+    content: '';
+    position: absolute;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50px;
+  }
+}
+
+.cloud1 {
+  width: 100px;
+  height: 40px;
+  top: 20%;
+  left: -100px;
+
+  &:before {
+    width: 50px;
+    height: 50px;
+    top: -25px;
+    left: 10px;
+  }
+}
+
+.cloud2 {
+  width: 80px;
+  height: 30px;
+  top: 40%;
+  left: -80px;
+  animation-delay: -10s;
+
+  &:before {
+    width: 40px;
+    height: 40px;
+    top: -20px;
+    left: 15px;
+  }
+}
+
+.cloud3 {
+  width: 120px;
+  height: 50px;
+  top: 60%;
+  left: -120px;
+  animation-delay: -15s;
+
+  &:before {
+    width: 60px;
+    height: 60px;
+    top: -30px;
+    left: 20px;
+  }
+}
+
+.stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 2s ease-in-out infinite alternate;
+}
+
+.star1 {
+  width: 2px;
+  height: 2px;
+  top: 10%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.star2 {
+  width: 3px;
+  height: 3px;
+  top: 15%;
+  left: 80%;
+  animation-delay: 0.5s;
+}
+
+.star3 {
+  width: 2px;
+  height: 2px;
+  top: 30%;
+  left: 60%;
+  animation-delay: 1s;
+}
+
+.star4 {
+  width: 1px;
+  height: 1px;
+  top: 25%;
+  left: 10%;
+  animation-delay: 1.5s;
+}
+
+.star5 {
+  width: 2px;
+  height: 2px;
+  top: 5%;
+  left: 40%;
+  animation-delay: 2s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes moveLeft {
+  from {
+    left: 100%;
+  }
+  to {
+    left: -100px;
+  }
+}
+
+@keyframes moveRight {
+  from {
+    right: 100%;
+  }
+  to {
+    right: -100px;
+  }
+}
+
+@keyframes roadMove {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-40px);
+  }
+}
+
+@keyframes cloudMove {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(100vw + 200px));
+  }
+}
+
+@keyframes twinkle {
+  from {
+    opacity: 0.3;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.2rem;
+  }
+  
+  .vehicle {
+    font-size: 1.5rem;
+  }
+}
