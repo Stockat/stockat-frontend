@@ -103,4 +103,8 @@ export class ServiceService {
     return this.http.patch<any>(`${this.baseUrl}/approve/${serviceId}`, false);
   }
 
+  getTopServices(): Observable<GenericRequestModel<PaginationDto<Service>>> {
+    return this.http.get<GenericRequestModel<PaginationDto<Service>>>(`${this.baseUrl}/top`);
+  }
+
 }
