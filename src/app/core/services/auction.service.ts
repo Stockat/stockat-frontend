@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuctionDetailsDto } from '../models/auction-models/auction-details-dto';
 import { PagedResponse } from '../models/auction-models/paged-response';
 import { Observable, switchMap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 import { AuctionUpdateDto } from '../models/auction-models/auction-update-dto';
 import { UserService } from './user.service';
@@ -18,7 +19,7 @@ export class AuctionService {
     private userService: UserService
   ) { }
 
-  private baseUrl = 'http://localhost:5250/api/auctions'; 
+  private baseUrl = `${environment.apiUrl}/api/auctions`; 
 
   getAllAuctions(): Observable<AuctionDetailsDto[]> {
     return this.http.get<AuctionDetailsDto[]>(this.baseUrl+'/GetAllAuctionsBasic');

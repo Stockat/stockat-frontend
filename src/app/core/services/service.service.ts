@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Service } from '../models/service-models/service.dto';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { GenericRequestModel } from '../models/generic-request-Dto';
 import { PaginationDto } from '../models/pagination-Dto';
 
@@ -10,7 +11,7 @@ import { PaginationDto } from '../models/pagination-Dto';
 })
 
 export class ServiceService {
-  private baseUrl = 'http://localhost:5250/api/service';
+  private baseUrl = `${environment.apiUrl}/api/service`;
   private services: Service[] = [];
 
   constructor(private http:HttpClient) { }
@@ -61,12 +62,12 @@ export class ServiceService {
 
   // Replace updateService with submitEditRequest
   submitEditRequest(serviceId: number, editRequest: any): Observable<any> {
-    return this.http.post<any>(`http://localhost:5250/api/ServiceEditRequest/${serviceId}`, editRequest);
+    return this.http.post<any>(`${environment.apiUrl}/api/ServiceEditRequest/${serviceId}`, editRequest);
   }
 
   // Submit reactivation request for rejected services
   submitReactivationRequest(serviceId: number, reactivationRequest: any): Observable<any> {
-    return this.http.post<any>(`http://localhost:5250/api/ServiceEditRequest/reactivate/${serviceId}`, reactivationRequest);
+    return this.http.post<any>(`${environment.apiUrl}/api/ServiceEditRequest/reactivate/${serviceId}`, reactivationRequest);
   }
 
   deleteService(id: number): Observable<any> {

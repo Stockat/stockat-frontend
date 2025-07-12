@@ -4,13 +4,14 @@ import { Observable } from 'rxjs';
 import { ServiceRequestUpdateDto } from '../models/service-models/service-request-update.dto';
 import { GenericRequestModel } from '../models/generic-request-Dto';
 import { PaginationDto } from '../models/pagination-Dto';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ServiceRequestUpdateService {
 
-  private baseUrl = 'http://localhost:5250/api/ServiceRequestUpdate';
+  private baseUrl = `${environment.apiUrl}/api/ServiceRequestUpdate`;
   constructor(private http:HttpClient) { }
 
   createUpdate(requestId: number, body: any):  Observable<any> {

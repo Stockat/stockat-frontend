@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { UserUpdateDto } from '../models/user-models/user-update.dto';
 import { ChangePasswordDto } from '../models/user-models/change-password.dto';
 import { UserReadDto } from '../models/user-models/user-read.dto';
@@ -16,9 +17,9 @@ import { GenericResponseDto } from '../models/user-models/generic-response.dto';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  private apiUrl = 'http://localhost:5250/api/User';
-  private verificationApiUrl = 'http://localhost:5250/api/UserVerification';
-  private punishmentApiUrl = 'http://localhost:5250/api/UserPunishment';
+  private apiUrl = `${environment.apiUrl}/api/User`;
+  private verificationApiUrl = `${environment.apiUrl}/api/UserVerification`;
+  private punishmentApiUrl = `${environment.apiUrl}/api/UserPunishment`;
 
   constructor(private http: HttpClient) {}
 

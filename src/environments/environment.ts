@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:5250'
+  apiUrl: 'https://stockat.runasp.net'
 };
