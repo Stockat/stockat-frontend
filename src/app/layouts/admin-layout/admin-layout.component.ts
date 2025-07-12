@@ -18,6 +18,43 @@ export class AdminLayoutComponent {
     ngOnInit() {
         this.items = [
             {
+                label: 'Dashboard',
+                icon: 'ti ti-home',
+                items: [
+                    {
+                        label: 'Statistics',
+                        icon: 'pi pi-chart-bar',
+                        route: '/admin/orders/analysis',
+                        routerLink: '/admin/orders/analysis'
+                    },
+                    {
+                        label: 'Audit Log',
+                        icon: 'ti ti-report-search',
+                        route: '/admin/audit',
+                        routerLink: '/admin/audit'
+                    }
+                ]
+            },
+            {
+                label: 'Products',
+                icon: 'pi pi-box',
+                items: [
+                    {
+                        label: 'All Products',
+                        icon: 'pi pi-box',
+                        route: '/admin/products',
+                        routerLink: '/admin/products',
+                        routerLinkActiveOptions: { exact: true }
+                    },
+                    {
+                        label: 'Add Product',
+                        icon: 'pi pi-plus',
+                        route: '/admin/add-product',
+                        routerLink: '/admin/add-product'
+                    }
+                ]
+            },
+            {
                 label: 'Orders',
                 icon: 'ti ti-list-check',
                 items: [
