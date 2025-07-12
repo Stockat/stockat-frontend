@@ -167,6 +167,14 @@ export class OrderRequestDetailsComponent implements OnInit {
   }
 
   deleteOrder(order: SellerOrder) {
-    console.log(order);
+    this.orderService.updateOrderStatus(order.id, 'Cancelled').subscribe({
+      next: () => {
+        this.updatePagedOrders();
+      },
+      error: (err) => {
+        console.error('Failed to delete order:', err);
+        this.error = 'Failed to delete order.';
+      }
+    });
   }
 }
