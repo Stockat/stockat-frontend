@@ -1,6 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
-@import "tailwindcss";
-@plugin "tailwindcss-primeui";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 @import "primeicons/primeicons.css";
 
 html {
@@ -47,4 +48,21 @@ html {
 /* Fallback: use a nice blue if gradient doesn't work */
 .p-progress-spinner-circle {
   stroke: #6366f1;
+}
+
+.main{
+  
+}
+
+.fixed.main {
+  background: rgba(255, 255, 255, 0.541) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-bottom: 1px solid rgba(200,200,200,0.15);
+}
+
+.p-menubar.p-component {
+  background: rgba(255, 255, 255, 0) !important;
+  border: none !important;
 }

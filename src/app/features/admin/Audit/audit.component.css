@@ -1,0 +1,827 @@
+/* Custom styles for audit component */
+.audit-table .p-datatable-thead > tr > th {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-bottom: 2px solid #e2e8f0;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+}
+
+/* Make User ID column wider */
+.audit-table .p-datatable-thead > tr > th:nth-child(3),
+.audit-table .p-datatable-tbody > tr > td:nth-child(3) {
+  min-width: 280px;
+  width: 280px;
+}
+
+/* Ensure User ID text is fully visible */
+.audit-table .p-datatable-tbody > tr > td:nth-child(3) .text-gray-600 {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
+  word-break: keep-all;
+}
+
+.audit-table .p-datatable-tbody > tr {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.audit-table .p-datatable-tbody > tr:hover {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.audit-table .p-datatable-tbody > tr > td {
+  padding: 1.5rem;
+  vertical-align: middle;
+}
+
+/* Custom button styling */
+.audit-action-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.audit-action-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.audit-action-btn:active {
+  transform: translateY(0);
+}
+
+/* Dialog styling */
+.p-dialog .p-dialog-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-bottom: 2px solid #e2e8f0;
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.p-dialog .p-dialog-content {
+  padding: 2rem;
+  border-radius: 0 0 0.75rem 0.75rem;
+}
+
+/* Progress spinner */
+.p-progressspinner {
+  width: 60px;
+  height: 60px;
+}
+
+.p-progressspinner .p-progress-spinner-circle {
+  stroke: #3b82f6;
+  stroke-width: 4;
+}
+
+/* Custom scrollbar */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
+/* Badge animations */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0);
+  }
+}
+
+.audit-table .p-datatable-tbody > tr:hover .bg-blue-100 {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Table header icons */
+.audit-table .p-datatable-thead > tr > th i {
+  transition: transform 0.3s ease;
+}
+
+.audit-table .p-datatable-tbody > tr:hover + tr .p-datatable-thead > tr > th i,
+.audit-table .p-datatable-tbody > tr:hover .p-datatable-thead > tr > th i {
+  transform: scale(1.1);
+}
+
+/* Filter section styling */
+.filter-section {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-bottom: 2px solid #e2e8f0;
+  position: relative;
+  z-index: 100;
+  overflow: visible;
+}
+
+/* Ensure calendar containers don't clip overlays */
+.filter-section .p-calendar,
+.filter-section .p-dropdown {
+  position: relative !important;
+  z-index: 1000 !important;
+  overflow: visible !important;
+}
+
+/* Override any parent overflow hidden */
+.filter-section * {
+  overflow: visible !important;
+}
+
+.filter-section .p-calendar {
+  width: 100%;
+}
+
+.filter-section .p-calendar input {
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.filter-section .p-calendar input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+.filter-section .p-inputtext {
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.filter-section .p-inputtext:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+/* Filter button animations */
+.filter-section .p-button {
+  transition: all 0.3s ease;
+}
+
+.filter-section .p-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Filter toggle animation */
+.filter-form {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced time filter styling */
+.filter-section .p-dropdown {
+  width: 100%;
+}
+
+.filter-section .p-dropdown .p-dropdown-label {
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+/* User ID input styling */
+.filter-section .p-inputtext {
+  border-radius: 0.75rem;
+  border: 2px solid #e5e7eb;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  color: #374151;
+  width: 100%;
+  height: 3rem;
+  line-height: 1.25;
+}
+
+.filter-section .p-inputtext:hover {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.filter-section .p-inputtext:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  outline: none;
+  background: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+}
+
+.filter-section .p-inputtext::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.filter-section .p-dropdown:not(.p-disabled):hover .p-dropdown-label {
+  border-color: #3b82f6;
+}
+
+.filter-section .p-dropdown.p-focus .p-dropdown-label {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Time range display styling */
+.time-range-display {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #93c5fd;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.time-range-display:hover {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.1);
+}
+
+/* Enhanced Calendar Styling */
+.filter-section .p-calendar {
+  width: 100%;
+  position: relative;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+}
+
+.filter-section .p-calendar .p-calendar-panel {
+  z-index: 10000 !important;
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  width: 100% !important;
+}
+
+.filter-section .p-calendar .p-inputtext {
+  border-radius: 0.75rem 0 0 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  color: #374151;
+  width: 100%;
+  height: 3rem;
+  line-height: 1.25;
+}
+
+.filter-section .p-calendar .p-inputtext:hover {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.filter-section .p-calendar .p-inputtext:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  outline: none;
+  background: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+}
+
+.filter-section .p-calendar .p-inputtext::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.filter-section .p-calendar .p-button {
+  border-radius: 0 0.75rem 0.75rem 0;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: 2px solid #3b82f6;
+  border-left: 1px solid #3b82f6;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 3.5rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.filter-section .p-calendar .p-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.filter-section .p-calendar .p-button:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.filter-section .p-calendar .p-button:hover::before {
+  left: 100%;
+}
+
+.filter-section .p-calendar .p-button:active {
+  transform: translateY(0);
+}
+
+.filter-section .p-calendar .p-button .p-button-icon {
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 600;
+  z-index: 1;
+  position: relative;
+}
+
+/* Calendar Overlay Styling */
+.p-calendar .p-datepicker {
+  border-radius: 1rem;
+  border: 2px solid #e5e7eb;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  padding: 1rem;
+  margin-top: 0.5rem;
+  z-index: 99999 !important;
+  position: fixed !important;
+  top: auto !important;
+  left: auto !important;
+  min-width: 320px;
+  max-width: 400px;
+  transform: none !important;
+}
+
+.p-calendar .p-datepicker .p-datepicker-header {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin: -1rem -1rem 1rem -1rem;
+  color: white;
+}
+
+.p-calendar .p-datepicker .p-datepicker-header .p-datepicker-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.p-calendar .p-datepicker .p-datepicker-header .p-datepicker-prev,
+.p-calendar .p-datepicker .p-datepicker-header .p-datepicker-next {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  transition: all 0.3s ease;
+}
+
+.p-calendar .p-datepicker .p-datepicker-header .p-datepicker-prev:hover,
+.p-calendar .p-datepicker .p-datepicker-header .p-datepicker-next:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.p-calendar .p-datepicker .p-datepicker-calendar {
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.p-calendar .p-datepicker .p-datepicker-calendar th {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #374151;
+  font-weight: 600;
+  padding: 0.75rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.p-calendar .p-datepicker .p-datepicker-calendar td {
+  padding: 0.5rem;
+}
+
+.p-calendar .p-datepicker .p-datepicker-calendar td > span {
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.p-calendar .p-datepicker .p-datepicker-calendar td > span:hover {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  color: #1d4ed8;
+  transform: scale(1.1);
+}
+
+.p-calendar .p-datepicker .p-datepicker-calendar td > span.p-highlight {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.p-calendar .p-datepicker .p-datepicker-calendar td > span.p-today {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  font-weight: 600;
+}
+
+/* Time Picker Styling */
+.p-calendar .p-timepicker {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-top: 0.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.p-calendar .p-timepicker .p-hour-picker,
+.p-calendar .p-timepicker .p-minute-picker,
+.p-calendar .p-timepicker .p-second-picker {
+  background: white;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem;
+  margin: 0 0.25rem;
+}
+
+.p-calendar .p-timepicker .p-hour-picker:hover,
+.p-calendar .p-timepicker .p-minute-picker:hover,
+.p-calendar .p-timepicker .p-second-picker:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+/* Button Bar Styling */
+.p-calendar .p-datepicker .p-datepicker-buttonbar {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin: 1rem -1rem -1rem -1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.p-calendar .p-datepicker .p-datepicker-buttonbar .p-button {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin: 0 0.25rem;
+}
+
+.p-calendar .p-datepicker .p-datepicker-buttonbar .p-button:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.p-calendar .p-datepicker .p-datepicker-buttonbar .p-button.p-button-secondary {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+}
+
+.p-calendar .p-datepicker .p-datepicker-buttonbar .p-button.p-button-secondary:hover {
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+}
+
+/* Filter section layout improvements */
+.filter-section .space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.filter-section .grid {
+  gap: 1rem;
+}
+
+/* Ensure table doesn't interfere with calendar */
+.overflow-x-auto {
+  position: relative;
+  z-index: 1;
+  overflow: visible !important;
+}
+
+/* Calendar container positioning */
+.p-calendar {
+  position: relative !important;
+  z-index: 1000 !important;
+  overflow: visible !important;
+}
+
+.p-calendar .p-component {
+  position: relative !important;
+  z-index: 1000 !important;
+  overflow: visible !important;
+}
+
+/* Override any container overflow issues */
+.p-calendar *,
+.p-dropdown * {
+  overflow: visible !important;
+}
+
+/* Ensure calendar overlays are positioned correctly */
+.p-calendar .p-overlay,
+.p-calendar .p-overlay-panel,
+.p-calendar .p-datepicker,
+.p-calendar .p-datepicker-panel {
+  position: fixed !important;
+  z-index: 99999 !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  overflow: visible !important;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .filter-section .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-section .md\\:grid-cols-2,
+  .filter-section .md\\:grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Global calendar overlay fixes */
+body {
+  overflow-x: hidden;
+}
+
+/* Ensure main containers don't clip overlays */
+.p-6,
+.max-w-7xl,
+.mx-auto,
+.bg-white,
+.rounded-xl,
+.shadow-lg,
+.border,
+.border-gray-200,
+.overflow-hidden {
+  overflow: visible !important;
+}
+
+/* Specific fixes for audit component containers */
+.audit-table,
+.p-datatable,
+.p-datatable-wrapper {
+  overflow: visible !important;
+}
+
+/* Force calendar overlays to be visible */
+.p-calendar .p-overlay-panel,
+.p-calendar .p-datepicker,
+.p-calendar .p-datepicker-panel,
+.p-calendar .p-overlay {
+  position: fixed !important;
+  z-index: 999999 !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  overflow: visible !important;
+  max-height: none !important;
+  min-height: auto !important;
+}
+
+/* Additional Calendar Enhancements */
+.filter-section .p-calendar {
+  position: relative;
+  overflow: visible;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.filter-section .p-calendar:hover {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
+}
+
+.filter-section .p-calendar:focus-within {
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Ensure calendar overlay is fully visible */
+.p-calendar .p-overlay-panel {
+  z-index: 99999 !important;
+  position: fixed !important;
+  top: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  max-width: 400px !important;
+  min-width: 320px !important;
+  transform: none !important;
+}
+
+/* Fix for PrimeNG calendar positioning */
+.p-calendar .p-datepicker-panel {
+  z-index: 99999 !important;
+  position: fixed !important;
+  top: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  max-width: 400px !important;
+  min-width: 320px !important;
+  transform: none !important;
+}
+
+.filter-section .p-calendar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(29, 78, 216, 0.05) 100%);
+  border-radius: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.filter-section .p-calendar:hover::before {
+  opacity: 1;
+}
+
+/* Calendar input placeholder styling */
+.filter-section .p-calendar .p-inputtext::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Date input label styling */
+.filter-section label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  letter-spacing: 0.025em;
+}
+
+.filter-section label i {
+  margin-right: 0.5rem;
+  font-size: 1rem;
+}
+
+/* Date input container styling */
+.filter-section .grid > div {
+  position: relative;
+}
+
+.filter-section .grid > div::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.filter-section .grid > div:focus-within::after {
+  opacity: 1;
+}
+
+/* Calendar focus ring animation */
+@keyframes calendarFocus {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+.filter-section .p-calendar .p-inputtext:focus {
+  animation: calendarFocus 0.6s ease-out;
+}
+
+/* Calendar dropdown arrow styling */
+.filter-section .p-calendar .p-button .p-button-icon {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Calendar overlay backdrop */
+.p-calendar .p-datepicker::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(4px);
+  z-index: 9998;
+}
+
+/* Calendar month/year navigation */
+.p-calendar .p-datepicker .p-datepicker-header .p-datepicker-title .p-datepicker-year,
+.p-calendar .p-datepicker .p-datepicker-header .p-datepicker-title .p-datepicker-month {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  margin: 0 0.25rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.p-calendar .p-datepicker .p-datepicker-header .p-datepicker-title .p-datepicker-year:hover,
+.p-calendar .p-datepicker .p-datepicker-header .p-datepicker-title .p-datepicker-month:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* Calendar day hover effects */
+.p-calendar .p-datepicker .p-datepicker-calendar td > span {
+  position: relative;
+  overflow: hidden;
+}
+
+.p-calendar .p-datepicker .p-datepicker-calendar td > span::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+}
+
+.p-calendar .p-datepicker .p-datepicker-calendar td > span:hover::before {
+  width: 100%;
+  height: 100%;
+}
+
+/* Calendar today indicator */
+.p-calendar .p-datepicker .p-datepicker-calendar td > span.p-today::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+}

@@ -11,6 +11,7 @@ import { ServiceRequestDetailsComponent } from './features/profile/service-reque
 import { ProductStocksComponent } from './features/product-stocks/product-stocks.component';
 import { SellerProfileComponent } from './features/seller/seller-profile/seller-profile.component';
 import { RoleGuard } from './core/gaurds/RoleGuard';
+import { NotFound404Component } from './features/not-found-404/not-found-404.component';
 
 export const routes: Routes = [
   {
@@ -143,6 +144,6 @@ export const routes: Routes = [
   },
   {
     path: 'unauthorized',
-    component: ProductCardComponent,
+    component: NotFound404Component,
   }
 ];

@@ -2,12 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AuctionBidRequestCreateDto } from '../models/auction-models/bid-request-auction-dto';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BidService {
-  private baseUrl = 'http://localhost:5250/api/AuctionBidRequest'; 
+  private baseUrl = `${environment.apiUrl}/api/AuctionBidRequest`;
 
   constructor(private http: HttpClient) {}
 
