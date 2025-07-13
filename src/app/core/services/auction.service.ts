@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { AuctionDetailsDto } from '../models/auction-models/auction-details-dto';
 import { PagedResponse } from '../models/auction-models/paged-response';
 import { Observable, switchMap } from 'rxjs';
@@ -56,6 +56,20 @@ deleteAuction(auctionId: number): Observable<any> {
 
 createAuction(auctionData: AuctionCreateDto): Observable<any> {
   return this.http.post(`${this.baseUrl}`, auctionData);
+}
+
+getAdminAuctions(
+  page: number, 
+  pageSize: number, 
+): Observable<PagedResponse<AuctionDetailsDto>> {
+  const params = new HttpParams()
+    .set('pageNumber', page.toString())
+    .set('pageSize', pageSize.toString())
+
+    return this.http.get<PagedResponse<AuctionDetailsDto>>(
+    `${this.baseUrl}/GetAllAuctions`, 
+    { params }
+  );
 }
 
   // auction.service.ts

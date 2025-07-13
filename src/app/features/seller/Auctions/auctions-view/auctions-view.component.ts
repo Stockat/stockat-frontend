@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef, NgZone, OnDestroy } from '@angular/core';
 import { AuctionService } from '../../../../core/services/auction.service';
 import { ProductService } from '../../../../core/services/product.service';
 import { AuctionDetailsDto } from '../../../../core/models/auction-models/auction-details-dto';
@@ -7,7 +7,7 @@ import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dy
 import { AuctionEditDialogComponent } from '../auction-edit-dialog/auction-edit-dialog.component';
 import { Table, TableModule } from 'primeng/table';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, finalize, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { ProductDetailsDto } from '../../../../core/models/product-models/ProductDetails';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CommonModule } from '@angular/common';
@@ -18,6 +18,11 @@ import { AuctionSignalRService } from '../../../../core/services/auction-signalr
 import { TooltipModule } from 'primeng/tooltip';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { UserService } from '../../../../core/services/user.service';
+import { UserReadDto } from '../../../../core/models/user-models/user-read.dto';
+import { PagedResponse } from '../../../../core/models/auction-models/paged-response';
+import { ButtonModule } from 'primeng/button';
+import { Observable, Subject, forkJoin, merge, of } from 'rxjs';
 
 
 @Component({
@@ -34,14 +39,15 @@ import { MessageService } from 'primeng/api';
     TooltipModule,
     ConfirmDialogModule,
     ToastModule,
+    ButtonModule
   ],
   styleUrls: ['./auctions-view.component.css'],
   providers: [DialogService, ConfirmationService,MessageService]
 })
-export class AuctionsViewComponent implements OnInit {
+export class AuctionsViewComponent implements OnInit, OnDestroy {
   @ViewChild('auctionTable') auctionTable!: Table;
   
-  auctions: (AuctionDetailsDto & { status: string, productImage?: string, productName?: string, stockId?: number })[] = [];
+  auctions: (AuctionDetailsDto & { status: string, productImage?: string, productName?: string, stockId?: number, sellerName?: string })[] = [];
   loading = true;
   totalRecords = 0;
   rows = 10;
@@ -49,7 +55,12 @@ export class AuctionsViewComponent implements OnInit {
   hoveredRow: number | null = null;
   productImages: { [auctionId: number]: string } = {};
   defaultImage = 'assets/default-product.png';
+  userRole: string = '';
+  userId: string = '';
   
+  private destroy$ = new Subject<void>();
+  private userRoleSet = new Subject<void>();
+  private isUserContextInitialized = false;
 
   statusOptions = [
     { label: 'All', value: 'all' },
@@ -71,59 +82,112 @@ export class AuctionsViewComponent implements OnInit {
     private router: Router,
     private signalRService: AuctionSignalRService,
     private cdRef: ChangeDetectorRef,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private userService: UserService,
+    private messageService: MessageService
   ) {}
 
   ngOnInit() {
-    this.loadAuctions();
-
-    this.statusFilter.valueChanges.subscribe(() => {
+    console.log('Initializing AuctionsViewComponent...');
+    this.initializeUserContext();
+    
+    // Setup auction loading after user context is ready
+    this.userRoleSet.pipe(
+      takeUntil(this.destroy$),
+      switchMap(() => {
+        // Initial load
+        this.loadAuctions();
+        
+        // Handle filter changes
+        return merge(
+          this.statusFilter.valueChanges,
+          this.searchControl.valueChanges.pipe(
+            debounceTime(300),
+            distinctUntilChanged()
+          )
+        );
+      })
+    ).subscribe(() => {
       this.first = 0;
       this.loadAuctions();
     });
 
-    this.searchControl.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged()
-      )
-      .subscribe(() => {
-        this.first = 0;
-        this.loadAuctions();
-      });
-    // SignalR real-time updates
+    // SignalR setup
     this.signalRService.startConnection();
-    this.signalRService.bidPlaced$.subscribe(data => {
+    this.setupSignalR();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    //this.signalRService.stopConnection();
+  }
+
+  private setupSignalR() {
+    this.signalRService.bidPlaced$.pipe(takeUntil(this.destroy$)).subscribe(data => {
       this.ngZone.run(() => {
-        console.log('[SignalR] bidPlaced$ received:', data);
-        if (data && data.Auction) {
+        if (data?.Auction) {
           this.updateAuctionInList(data.Auction);
         }
-        this.cdRef.detectChanges();
       });
     });
-    this.signalRService.auctionUpdate$.subscribe(data => {
+
+    this.signalRService.auctionUpdate$.pipe(takeUntil(this.destroy$)).subscribe(data => {
       this.ngZone.run(() => {
-        console.log('[SignalR] auctionUpdate$ received:', data);
-        if (data && data.Auction) {
+        if (data?.Auction) {
           this.updateAuctionInList(data.Auction);
         }
-        this.cdRef.detectChanges();
       });
     });
-    this.signalRService.auctionCreated$.subscribe(() => {
-      this.loadAuctions();
-    });
-    this.signalRService.auctionDeleted$.subscribe(() => {
-      this.loadAuctions();
+
+    this.signalRService.auctionCreated$.pipe(takeUntil(this.destroy$)).subscribe(() => this.loadAuctions());
+    this.signalRService.auctionDeleted$.pipe(takeUntil(this.destroy$)).subscribe(() => this.loadAuctions());
+  }
+
+  initializeUserContext(): void {
+    this.userService.getCurrentUser().subscribe({
+      next: (response) => {
+        const user: UserReadDto = response.data;
+        this.userId = user.id;
+        
+        // Determine user role
+        if (user.roles.includes('Admin')) {
+          this.userRole = 'Admin';
+          console.log('User role set to Admin');
+        } else if (user.roles.includes('Seller')) {
+          this.userRole = 'Seller';
+          console.log('User role set to Seller');
+        } else {
+          this.userRole = 'Buyer';
+          console.log('User role set to Buyer');
+        }
+
+        this.isUserContextInitialized = true;
+        this.userRoleSet.next();
+      },
+      error: (err) => {
+        console.error('Failed to initialize user context:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load user information'
+        });
+      }
     });
   }
 
   loadAuctions() {
+    if (!this.isUserContextInitialized) {
+      console.log('User context not initialized yet, skipping auction load');
+      return;
+    }
+    
     this.loading = true;
-    let status: string = this.statusFilter.value || '';
+    const status: string = this.statusFilter.value || '';
     const search = this.searchControl.value?.toLowerCase() || '';
     const page = Math.floor(this.first / this.rows) + 1;
+
+    console.log(`Loading auctions for ${this.userRole}, status: ${status}, page: ${page}`);
 
     // If status is not allowed, clear auctions and return
     if (status && !this.allowedStatusValues.includes(status)) {
@@ -133,36 +197,143 @@ export class AuctionsViewComponent implements OnInit {
       return;
     }
 
-    this.auctionService.getSellerAuctions(page, this.rows, status, '').pipe(finalize(() => this.loading = false)).subscribe(response => {
-      let auctions = response.data.map(auction => ({
-        ...auction,
-        status: this.calculateStatus(auction),
-        productName: '',
-        stockId: auction.stockId
-      }));
-
-      // Fetch product names for each auction
-      auctions.forEach((auction, idx) => {
-        this.productService.getProductsDetails(auction.productId).subscribe(response => {
-          const product = response.data;
-          const imageUrl = response.data?.imagesArr?.[0] || this.defaultImage;
-          this.productImages[auction.id] = imageUrl;
-          auctions[idx].productName = product?.name || '';
-        });
+    // Use different service method based on user role
+    if (this.userRole === 'Admin') {
+      this.loadAdminAuctions(page, search);
+    } else if (this.userRole === 'Seller') {
+      this.loadSellerAuctions(page, status, search);
+    } else {
+      // For buyers, we might not show any auctions or show different ones
+      this.loading = false;
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Information',
+        detail: 'Buyers cannot manage auctions'
       });
+      this.auctions = [];
+      this.totalRecords = 0;
+    }
+  }
 
-      // Filter auctions by search (name, productName, stockId)
-      if (search) {
-        auctions = auctions.filter(a =>
-          a.name?.toLowerCase().includes(search) ||
-          a.productName?.toLowerCase().includes(search) ||
-          (a.stockId && a.stockId.toString().includes(search))
+  private loadAdminAuctions(page: number, search: string) {
+    this.auctionService.getAdminAuctions(page, this.rows)
+      .pipe(
+        finalize(() => this.loading = false),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (response: PagedResponse<AuctionDetailsDto>) => {
+          this.processAuctions(response.data, response.totalCount, search, true);
+        },
+        error: (err) => this.handleAuctionError(err)
+      });
+  }
+
+  private loadSellerAuctions(page: number, status: string, search: string) {
+    this.auctionService.getSellerAuctions(page, this.rows, status, this.userId)
+      .pipe(
+        finalize(() => this.loading = false),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (response: PagedResponse<AuctionDetailsDto>) => {
+          this.processAuctions(response.data, response.totalCount, search, false);
+        },
+        error: (err) => this.handleAuctionError(err)
+      });
+  }
+
+  private processAuctions(
+    auctions: AuctionDetailsDto[], 
+    totalRecords: number,
+    search: string,
+    isAdmin: boolean
+  ) {
+    let processedAuctions = auctions.map(auction => ({
+      ...auction,
+      status: this.calculateStatus(auction),
+      productName: '',
+      stockId: auction.stockId,
+      sellerName: ''
+    }));
+
+    // Apply search filter if needed
+    if (search) {
+      processedAuctions = processedAuctions.filter(a =>
+        a.name?.toLowerCase().includes(search) ||
+        (a.productName && a.productName.toLowerCase().includes(search)) ||
+        (a.stockId && a.stockId.toString().includes(search))
+      );
+    }
+
+    // Prepare all fetch operations
+    const fetchOperations: Observable<any>[] = [];
+    
+    processedAuctions.forEach((auction, idx) => {
+      // Fetch product details
+      fetchOperations.push(
+        this.productService.getProductsDetails(auction.productId).pipe(
+          tap(response => {
+            const product = response.data;
+            const imageUrl = product?.imagesArr?.[0] || this.defaultImage;
+            this.productImages[auction.id] = imageUrl;
+            processedAuctions[idx].productName = product?.name || '';
+          }),
+          catchError(() => {
+            processedAuctions[idx].productName = 'Unknown Product';
+            return of(null);
+          })
+        )
+      );
+
+      // Fetch seller names only for admin
+      if (isAdmin && auction.sellerId) {
+        fetchOperations.push(
+          this.userService.getUserById(auction.sellerId).pipe(
+            tap(res => {
+              processedAuctions[idx].sellerName = 
+                `${res.data?.firstName || ''} ${res.data?.lastName || ''}`.trim();
+            }),
+            catchError(() => {
+              processedAuctions[idx].sellerName = 'Unknown Seller';
+              return of(null);
+            })
+          )
         );
       }
-
-      this.auctions = auctions;
-      this.totalRecords = auctions.length;
     });
+
+    // Wait for all fetch operations to complete or handle empty case
+    if (fetchOperations.length > 0) {
+      forkJoin(fetchOperations).subscribe(() => {
+        this.auctions = processedAuctions;
+        this.totalRecords = totalRecords;
+        this.cdRef.detectChanges();
+      });
+    } else {
+      this.auctions = processedAuctions;
+      this.totalRecords = totalRecords;
+    }
+  }
+
+  private handleAuctionError(err: any) {
+    console.error('Error loading auctions:', err);
+    
+    if (err.status === 404) {
+      this.auctions = [];
+      this.totalRecords = 0;
+      this.messageService.add({
+        severity: 'info',
+        summary: 'No Auctions Found',
+        detail: 'No auctions match your current filters'
+      });
+    } else {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to load auctions'
+      });
+    }
   }
 
   calculateStatus(auction: AuctionDetailsDto): string {
@@ -184,22 +355,15 @@ export class AuctionsViewComponent implements OnInit {
 
   editAuction(auction: any) {
     // Recalculate status using ORIGINAL dates
-    console.log('Original auction:', auction);
-  
     const now = new Date();
     const start = new Date(auction.startTime);
     const end = new Date(auction.endTime);
-    console.log('Current time:', now);
-    console.log('Start time:', start);
-    console.log('End time:', end);
   
     let currentStatus = 'Upcoming';
     if (now >= start && now <= end) currentStatus = 'Active';
     if (now > end) currentStatus = 'Closed';
-    console.log('Recalculated status:', currentStatus);
   
     const editableFields = this.getEditableFieldsByStatus(currentStatus);
-    console.log('Editable fields:', editableFields);
   
     this.ref = this.dialogService.open(AuctionEditDialogComponent, {
       header: 'Edit Auction',
@@ -222,7 +386,7 @@ export class AuctionsViewComponent implements OnInit {
   }
   
   private getEditableFieldsByStatus(status: string): string[] {
-    if (status === 'Upcoming') return ['name', 'description', 'startTime', 'endTime', 'startingPrice', 'quantity'];
+    if (status === 'Upcoming') return ['name', 'description', 'startTime', 'endTime', 'startingPrice'];
     if (status === 'Active') return ['name', 'description', 'endTime'];
     return ['name', 'description'];
   }
@@ -237,12 +401,23 @@ export class AuctionsViewComponent implements OnInit {
   }
 
   canDelete(auction: any): boolean {
+    if (this.userRole=='Admin')
+      return true;
     const now = new Date();
     const start = new Date(auction.startTime);
     const end = new Date(auction.endTime);
     
     // Can delete if auction is upcoming or closed
     return now < start || now > end;
+  }
+
+  canEndNow(auction: any): boolean {
+    const now = new Date();
+    const start = new Date(auction.startTime);
+    const end = new Date(auction.endTime);
+    
+    // Can end now if auction is active (started but not ended)
+    return now >= start && now <= end;
   }
 
   confirmDelete(auctionId: number) {
@@ -267,16 +442,61 @@ export class AuctionsViewComponent implements OnInit {
       header: 'Confirm Deletion',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        console.log('Delete auction with ID:', auctionId);
         this.auctionService.deleteAuction(auctionId).subscribe({
           next: () => {
             this.loadAuctions();
-            // Show success message
-            console.log('Auction deleted successfully');
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: 'Auction deleted successfully'
+            });
           },
           error: (err) => {
             console.error('Failed to delete auction:', err);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to delete auction'
+            });
           }
+        });
+      }
+    });
+  }
+
+  confirmEndNow(auction: any) {
+    this.confirmationService.confirm({
+      message: `Are you sure you want to end this auction now? This will immediately close the auction and process the winning bid.`,
+      header: 'Confirm End Auction',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.endAuctionNow(auction);
+      }
+    });
+  }
+
+  endAuctionNow(auction: any) {
+    const nowPlusOneMinute = new Date(Date.now() + 60 * 1000); // 60,000 ms = 1 minute
+
+    const updateData = {
+      endTime: nowPlusOneMinute.toISOString()
+    };
+
+    this.auctionService.updateAuction(auction.id, updateData).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Auction ended successfully'
+        });
+        this.loadAuctions();
+      },
+      error: (err) => {
+        console.error('Failed to end auction:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to end auction'
         });
       }
     });
@@ -310,5 +530,4 @@ export class AuctionsViewComponent implements OnInit {
       this.cdRef.detectChanges();
     }
   }
-  
 }
