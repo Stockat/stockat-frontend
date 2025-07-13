@@ -43,6 +43,18 @@
       <i class="pi pi-inbox text-xl"></i>
       My Order Requests
     </button>
+    <button (click)="switchTab('auctionOrders')"
+      [ngClass]="{'bg-primary text-white': activeTab === 'auctionOrders', 'bg-white text-gray-700': activeTab !== 'auctionOrders'}"
+      class="flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors">
+      <i class="pi pi-gavel text-xl"></i>
+      Auction Orders
+    </button>
+    <button (click)="switchTab('buyerBids')"
+      [ngClass]="{'bg-primary text-white': activeTab === 'buyerBids', 'bg-white text-gray-700': activeTab !== 'buyerBids'}"
+      class="flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors">
+      <i class="pi pi-money-bill text-xl"></i>
+      My Bids
+    </button>
   </div>
   <!-- Main Content -->
   <div class="flex-1 flex flex-col items-center justify-start p-4 lg:p-12 min-h-screen w-full">
@@ -614,6 +626,12 @@
       </div>
       <div *ngIf="activeTab === 'orderRequests'">
         <app-order-request-details></app-order-request-details>
+      </div>
+      <div *ngIf="activeTab === 'auctionOrders'">
+        <app-auction-order-management></app-auction-order-management>
+      </div>
+      <div *ngIf="activeTab === 'buyerBids'">
+        <app-buyer-bids></app-buyer-bids>
       </div>
     </div>
   </div>

@@ -190,6 +190,7 @@ export class ManageproductsComponent {
   //* Getting Products
   getProducts() {
     this.isLoading = true;
+    console.log('Filters', this.filters);
     this.productServ.getAllProductsPaginatedForAdmin(this.filters).subscribe({
       next: (res) => {
         this.products = res.data.paginatedData;
@@ -222,12 +223,11 @@ export class ManageproductsComponent {
     this.filters.size = 8;
 
     // Add status and isDeleted filters
-    if (this.selectedStatus) {
-      this.filters.productStatus = this.selectedStatus;
-    }
-    if (this.selectedIsDeleted) {
-      this.filters.isDeleted = this.selectedIsDeleted === 'true';
-    }
+    this.filters.productStatus =this.selectedStatus ;
+    this.filters.isDeleted =
+      this.selectedIsDeleted === ''
+        ? null
+        : this.selectedIsDeleted === 'true';
 
     console.log('-*****-', this.filters);
 
@@ -273,7 +273,7 @@ export class ManageproductsComponent {
     this.confirmationService.confirm({
       target: event.target as EventTarget,
       message: 'Do you want to delete this record?',
-      header: 'Danger Zone',
+      header: 'Delete Product',
       icon: 'pi pi-info-circle',
       rejectLabel: 'Cancel',
       rejectButtonProps: {
@@ -312,11 +312,6 @@ export class ManageproductsComponent {
         });
       },
       reject: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Rejected',
-          detail: 'You have rejected',
-        });
         this.confirmationService.close();
       },
     });

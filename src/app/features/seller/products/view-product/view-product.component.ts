@@ -150,7 +150,7 @@ export class ViewProductComponent {
     this.isLoading = true;
     this.productServ.getAllSellerProducts(this.filters).subscribe({
       next: (res) => {
-        console.log("res", res)
+        console.log('res', res);
         this.products = res.data.paginatedData;
         this.first = res.data.page;
         this.totalRecords = res.data.count;
@@ -218,7 +218,7 @@ export class ViewProductComponent {
     this.confirmationService.confirm({
       target: event.target as EventTarget,
       message: 'Do you want to delete this record?',
-      header: 'Danger Zone',
+      header: 'Delete Product',
       icon: 'pi pi-info-circle',
       rejectLabel: 'Cancel',
       rejectButtonProps: {
@@ -375,7 +375,7 @@ export class ViewProductComponent {
         canbeRequsted == true
           ? 'Do you want to Activate Requestable for this Product ?'
           : 'Do you want to Deactivate Requestable for this Product ?',
-      header: 'Danger Zone',
+      header: canbeRequsted == true ? 'Activate Requestable' : 'Deactivate Requestable',
       icon: 'pi pi-info-circle',
       rejectLabel: 'Cancel',
       rejectButtonProps: {
@@ -432,5 +432,11 @@ export class ViewProductComponent {
   addStock(productId: number) {
     this.router.navigate(['/seller/stocks/add', productId]);
     console.log('productId', productId);
+  }
+
+  //* Routing To Add Product
+  addProduct() {
+    this.router.navigate(['/seller/add-product']);
+    console.log('Navigating to add product');
   }
 }

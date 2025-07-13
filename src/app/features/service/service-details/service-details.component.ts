@@ -12,6 +12,7 @@ import { MessageService } from 'primeng/api';
 import { ReviewSectionComponent } from '../../shared/review-section/review-section.component';
 import { ReviewService } from '../../../core/services/review.service';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-service-details',
@@ -32,6 +33,7 @@ export class ServiceDetailsComponent {
   deliveredRequestLoading: boolean = false;
   eligibleDeliveredRequests: any[] = [];
   selectedDeliveredRequestId: number | undefined = undefined;
+  isLoggedIn = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -39,22 +41,27 @@ export class ServiceDetailsComponent {
     private requestService: ServiceRequestService,
     private reviewService: ReviewService,
     private router: Router,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private authService: AuthService // Inject AuthService
   ) {}
 
   ngOnInit() {
     const id = +this.route.snapshot.paramMap.get('id')!;
     this.sellerIdFromQuery = this.route.snapshot.queryParamMap.get('seller');
-    this.isCheckingPendingRequest = true; // Start loading state
+    this.isLoggedIn = !!this.authService.getAccessToken();
 
     this.serviceService.getServiceById(id).subscribe({
       next: (service) => {
         this.service = service;
         this.errorMessage = null;
-        // Check for pending request for this service
-        this.checkPendingRequest(id);
-        // Find delivered request for review
-        this.findDeliveredRequestForReview();
+        // Only check for pending/delivered requests if logged in
+        if (this.isLoggedIn) {
+          this.checkPendingRequest(id);
+          this.findDeliveredRequestForReview();
+        } else {
+          this.isCheckingPendingRequest = false;
+          this.deliveredRequestLoading = false;
+        }
       },
       error: (error) => {
         console.error('Error loading service:', error);
@@ -195,6 +202,18 @@ export class ServiceDetailsComponent {
   }
 
   openRequestModal() {
+    if (!this.isLoggedIn) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Login Required',
+        detail: 'Please login to request this service.',
+        life: 3000
+      });
+      setTimeout(() => {
+        this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+      }, 1000);
+      return;
+    }
     this.isModalOpen = true;
   }
 

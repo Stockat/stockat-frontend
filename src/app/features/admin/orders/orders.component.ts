@@ -14,6 +14,8 @@ import { Tooltip } from 'primeng/tooltip';
 import { InputTextModule } from 'primeng/inputtext';
 import { TagModule } from 'primeng/tag';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { Router } from '@angular/router';
+import { DialogModule } from 'primeng/dialog';
 
 const ADMIN_STATUSES = [
   { label: 'Processing', value: 'Processing' },
@@ -41,6 +43,8 @@ const ADMIN_STATUSES = [
     InputTextModule,
     TagModule,
     OverlayPanelModule,
+    DialogModule,
+    DialogModule,
   ],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.css',
@@ -51,6 +55,7 @@ export class AdminOrdersComponent implements OnInit {
   @ViewChild('op') op: any;
 
   orders: AdminOrder[] = [];
+  drivers: any[] = [];
   loading = false;
   statusFilter: string = '';
   orderTypeFilter: string = '';
@@ -65,10 +70,19 @@ export class AdminOrdersComponent implements OnInit {
   selectedStatus: string = '';
   selectedDescription: string = '';
 
+  showCancelConfirm = false;
+  orderToCancel: AdminOrder | null = null;
+
+  // Properties for driver assignment
+  selectedOrderForDriver: AdminOrder | null = null;
+  selectedDriverId: string = '';
+  showDriverSelection = false;
+
   statusOptions = [
     { label: 'All Status', value: '' },
     { label: 'Pending', value: 'Pending' },
     { label: 'Processing', value: 'Processing' },
+    { label: 'Ready', value: 'Ready' },
     { label: 'Shipped', value: 'Shipped' },
     { label: 'Delivered', value: 'Delivered' },
     { label: 'Cancelled', value: 'Cancelled' },
@@ -79,6 +93,7 @@ export class AdminOrdersComponent implements OnInit {
   private orderStatusOptions = [
     { label: 'Pending', value: 'Pending' },
     { label: 'Processing', value: 'Processing' },
+    { label: 'Ready', value: 'Ready' },
     { label: 'Shipped', value: 'Shipped' },
     { label: 'Delivered', value: 'Delivered' },
     { label: 'Cancelled', value: 'Cancelled' },
@@ -89,6 +104,7 @@ export class AdminOrdersComponent implements OnInit {
     { label: 'Pending Buyer', value: 'PendingBuyer' },
     { label: 'Pending', value: 'Pending' },
     { label: 'Processing', value: 'Processing' },
+    { label: 'Ready', value: 'Ready' },
     { label: 'Shipped', value: 'Shipped' },
     { label: 'Delivered', value: 'Delivered' },
     { label: 'Cancelled', value: 'Cancelled' },
@@ -96,11 +112,13 @@ export class AdminOrdersComponent implements OnInit {
 
   constructor(
     private orderService: OrderService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.fetchOrders();
+    this.fetchDrivers();
     this.updateStatusOptions();
   }
 
@@ -189,6 +207,22 @@ export class AdminOrdersComponent implements OnInit {
     });
   }
 
+  fetchDrivers() {
+    this.orderService.getAllDrivers().subscribe({
+      next: (res) => {
+        this.drivers = res.data;
+      },
+      error: (error) => {
+        console.error('Error fetching drivers:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to fetch drivers.',
+        });
+      },
+    });
+  }
+
   canCancel(order: AdminOrder) {
     return !['Delivered', 'Cancelled'].includes(order.status);
   }
@@ -225,6 +259,61 @@ export class AdminOrdersComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  canAssignDriver(order: AdminOrder): boolean {
+    return ['Ready'].includes(order.status) && !order.driverId;
+  }
+
+  canTrackOrder(order: AdminOrder): boolean {
+    return order.driverId != null && order.driverId !== ''  && order.status !== 'Cancelled' && order.status !== 'Delivered';
+  }
+
+  showDriverAssignment(order: AdminOrder) {
+    this.selectedOrderForDriver = order;
+    this.selectedDriverId = '';
+    this.showDriverSelection = true;
+  }
+
+  assignDriver() {
+    if (!this.selectedOrderForDriver || !this.selectedDriverId) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: 'Please select a driver.',
+      });
+      return;
+    }
+
+    this.loading = true;
+    this.orderService.assignDriverToOrder(this.selectedOrderForDriver.id, this.selectedDriverId).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Driver assigned successfully.',
+        });
+        this.showDriverSelection = false;
+        this.selectedOrderForDriver = null;
+        this.selectedDriverId = '';
+        this.fetchOrders(); // Refresh orders to get updated driver info
+        this.loading = false;
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to assign driver.',
+        });
+        this.loading = false;
+      },
+    });
+  }
+
+  trackOrder(order: AdminOrder) {
+    if (order.driverId) {
+      this.router.navigate(['/admin/tracking'], { queryParams: { driverId: order.driverId } });
+    }
   }
 
   clearFilters() {
@@ -273,5 +362,21 @@ export class AdminOrdersComponent implements OnInit {
     this.selectedStatus = order.status;
     this.selectedDescription = order.description;
     this.op.toggle(event);
+  }
+
+  confirmCancel(order: AdminOrder) {
+    this.orderToCancel = order;
+    this.showCancelConfirm = true;
+  }
+  handleCancelConfirmed() {
+    if (this.orderToCancel) {
+      this.updateStatus(this.orderToCancel, 'Cancelled');
+      this.orderToCancel = null;
+    }
+    this.showCancelConfirm = false;
+  }
+  handleCancelRejected() {
+    this.orderToCancel = null;
+    this.showCancelConfirm = false;
   }
 }

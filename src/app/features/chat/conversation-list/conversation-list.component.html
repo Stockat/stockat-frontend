@@ -20,16 +20,18 @@
   </div>
   <div class="flex flex-col gap-2 overflow-y-auto custom-scrollbar sidebar-bottom-padding" style="max-height: calc(100vh - 120px);" (scroll)="onScroll($event)">
     <div *ngFor="let conv of filteredConversations"
-         class="bg-white rounded-xl shadow p-2 cursor-pointer flex items-center gap-3"
+         class="bg-white rounded-xl shadow p-2 cursor-pointer conversation-row"
          [ngClass]="{'selected': conv.conversationId.toString() === selectedConversationId}"
          (click)="onSelect(conv)">
       <img [src]="getOtherUserProfileImage(conv)" class="w-10 h-10 rounded-full object-cover" alt="avatar" />
-      <div class="flex-1">
-        <div class="font-semibold text-gray-800 flex items-center gap-1">
-          {{ getOtherUserName(conv) }}
-          <i *ngIf="$any(conv).pinned" class="pi pi-thumbtack text-gray-400 ml-1 text-base" title="Pinned"></i>
+      <div class="conversation-main">
+        <div class="conversation-header">
+          <span class="conversation-name">{{ getOtherUserName(conv) }}</span>
+          <span class="conversation-date" *ngIf="conv.lastMessage?.sentAt">
+            {{ conv.lastMessage.sentAt | whatsappDate }}
+          </span>
         </div>
-        <div class="text-xs text-gray-500 truncate">
+        <div class="conversation-preview">
           <span *ngIf="isRecording(conv); else typingOrLastMsg">Recording...</span>
           <ng-template #typingOrLastMsg>
             <span *ngIf="isTyping(conv); else lastMsg">Typing...</span>
@@ -52,7 +54,6 @@
         </div>
       </div>
       <div class="flex flex-col items-end">
-        <span class="text-xs text-gray-400" *ngIf="conv.lastMessage?.sentAt">{{ conv.lastMessage.sentAt | whatsappDate }}</span>
         <span *ngIf="getUnreadCount(conv) > 0" class="bg-pink-600 text-white rounded-full px-2 py-0.5 text-xs mt-1">
           {{ getUnreadCount(conv) }}
         </span>

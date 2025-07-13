@@ -28,12 +28,12 @@
     </div>
     <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-yellow-500">
       <div class="flex items-center">
-        <div class="p-3 rounded-full bg-yellow-100">
-          <i class="pi pi-clock text-yellow-600 text-xl"></i>
+        <div class="p-3 rounded-full bg-cyan-100">
+          <i class="pi pi-bolt text-cyan-600 text-xl"></i>
         </div>
         <div class="ml-4">
-          <p class="text-sm font-medium text-gray-600">In Progress</p>
-          <p class="text-2xl font-bold text-gray-900">{{ stats.inProgress }}</p>
+          <p class="text-sm font-medium text-cyan-700">Ready</p>
+          <p class="text-2xl font-bold text-cyan-700">{{ stats.ready }}</p>
         </div>
       </div>
     </div>
@@ -62,11 +62,11 @@
           All Requests ({{ stats.total }})
         </button>
         <button
-          (click)="onTabChange('inProgress')"
-          [class]="activeTab === 'inProgress' ? 'border-yellow-500 text-yellow-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-semibold'"
+          (click)="onTabChange('ready')"
+          [class]="activeTab === 'ready' ? 'border-cyan-500 text-cyan-700 font-bold' : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 font-semibold'"
           class="flex-1 whitespace-nowrap py-4 px-1 border-b-2 text-sm text-center"
         >
-          In Progress ({{ stats.inProgress }})
+          <i class='pi pi-bolt mr-1'></i>Ready ({{ stats.ready }})
         </button>
         <button
           (click)="onTabChange('delivered')"
@@ -139,7 +139,8 @@
           <td class="px-4 py-2 text-center">
             <p-tag
               [value]="req.serviceStatus"
-              [severity]="req.serviceStatus === 'InProgress' ? 'warning' : req.serviceStatus === 'Delivered' ? 'success' : req.serviceStatus === 'Pending' ? 'info' : req.serviceStatus === 'Cancelled' ? 'danger' : 'secondary'"
+              [style]="req.serviceStatus === 'Ready' ? {'background-color': '#06b6d4', 'color': 'white', 'border': 'none'} : {}"
+              [severity]="req.serviceStatus === 'Ready' ? '' : req.serviceStatus === 'Delivered' ? 'success' : req.serviceStatus === 'Pending' ? 'info' : req.serviceStatus === 'Cancelled' ? 'danger' : 'secondary'"
               class="capitalize font-semibold"
             ></p-tag>
           </td>
@@ -157,24 +158,31 @@
           <td class="px-4 py-2 text-left align-middle">
             <div class="flex items-center justify-start min-h-[2rem]">
               <button
-                *ngIf="req.serviceStatus === 'InProgress'"
+                *ngIf="req.serviceStatus === 'Ready'"
                 pButton
                 type="button"
-                label="Mark as Delivered"
+                label="Delivered"
                 class="p-button-success p-button-sm text-xs font-medium whitespace-nowrap"
                 (click)="markAsDelivered(req)"
-              ></button>
-              <ng-container *ngIf="req.serviceStatus !== 'InProgress'">
-                <span *ngIf="req.serviceStatus === 'Delivered'" class="text-green-600 flex items-center" title="Already Delivered">
+                [disabled]="req.serviceStatus !== 'Ready'"
+              >
+              </button>
+              <ng-container *ngIf="req.serviceStatus === 'InProgress'">
+                <span class="text-blue-500 flex items-center ml-7" title="In Progress">
+                  <i class="pi pi-spinner pi-spin text-lg"></i>
+                </span>
+              </ng-container>
+              <ng-container *ngIf="req.serviceStatus !== 'Ready'">
+                <span *ngIf="req.serviceStatus === 'Delivered'" class="text-green-600 flex items-center ml-7" title="Already Delivered">
                   <i class="pi pi-check-circle text-lg"></i>
                 </span>
-                <span *ngIf="req.serviceStatus === 'Pending'" class="text-gray-400 flex items-center" title="Pending">
+                <span *ngIf="req.serviceStatus === 'Pending'" class="text-gray-400 flex items-center ml-7" title="Pending">
                   <i class="pi pi-clock text-lg"></i>
                 </span>
-                <span *ngIf="req.serviceStatus === 'Cancelled'" class="text-red-500 flex items-center" title="Cancelled">
+                <span *ngIf="req.serviceStatus === 'Cancelled'" class="text-red-500 flex items-center ml-7" title="Cancelled">
                   <i class="pi pi-times-circle text-lg"></i>
                 </span>
-                <span *ngIf="req.serviceStatus !== 'Delivered' && req.serviceStatus !== 'Pending' && req.serviceStatus !== 'Cancelled'" class="text-gray-400 flex items-center">-</span>
+                <span *ngIf="req.serviceStatus !== 'Delivered' && req.serviceStatus !== 'Pending' && req.serviceStatus !== 'Cancelled'" class="text-gray-400 flex items-center ml-3">-</span>
               </ng-container>
             </div>
           </td>
@@ -355,7 +363,7 @@
         <div class="flex items-center space-x-6">
           <div class="relative">
             <p-avatar
-              [image]="sellerInfo.profileImageUrl || 'assets/img/unknown-user.png'"
+              [image]="sellerInfo.profileImageUrl || 'https://imgs.search.brave.com/mDztPWayQWWrIPAy2Hm_FNfDjDVgayj73RTnUIZ15L0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzAyLzE1Lzg0LzQz/LzM2MF9GXzIxNTg0/NDMyNV90dFg5WWlJ/SXllYVI3TmU2RWFM/TGpNQW15NEd2UEM2/OS5qcGc'"
               shape="circle"
               size="xlarge"
               class="shadow-lg border-4 border-white"

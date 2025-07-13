@@ -136,6 +136,7 @@ export class OrderAnalysisComponent {
     this.initPaymentStatusDonut();
     this.initOrderTypeDonut();
     this.updateStatusOptions();
+    this.getOrderSummary();
   }
 
   updateStatusOptions() {
@@ -738,5 +739,26 @@ export class OrderAnalysisComponent {
       (opt) => opt.value === this.appliedStatus
     );
     return found ? found.label : this.appliedStatus;
+  }
+
+  getOrderSummary() {
+    this.orderServ.getOrderSummary().subscribe({
+      next: (res) => {
+        let summary: { [key: string]: number } = {};
+        if (Array.isArray(res.data)) {
+          summary = Object.fromEntries(res.data);
+        } else {
+          summary = res.data;
+        }
+        this.pendingCount = summary['Pending'] || 0;
+        this.processingCount = summary['Processing'] || 0;
+        this.readyCount = summary['Ready'] || 0;
+        this.shippedCount = summary['Shipped'] || 0;
+        this.deliveredCount = summary['Delivered'] || 0;
+        this.cancelledCount = summary['Cancelled'] || 0;
+        this.pendingSellerCount = summary['PendingSeller'] || 0;
+        this.pendingBuyerCount = summary['PendingBuyer'] || 0;
+      },
+    });
   }
 }

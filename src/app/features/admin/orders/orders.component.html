@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
-  <div class="max-w-7xl mx-auto">
+  <div class="max-w-full mx-auto">
     <!-- Header -->
     <div class="text-center mb-8">
       <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Admin Orders Management</h1>
@@ -225,6 +225,7 @@
               <th class="p-4 text-left font-semibold text-gray-700">Quantity</th>
               <th class="p-4 text-left font-semibold text-gray-700">Price</th>
               <th class="p-4 text-left font-semibold text-gray-700">Status</th>
+              <th class="p-4 text-left font-semibold text-gray-700">Driver</th>
               <th class="p-4 text-left font-semibold text-gray-700">Actions</th>
             </tr>
           </ng-template>
@@ -254,11 +255,8 @@
                   <div class="p-2 bg-green-100 rounded-lg">
                     <i class="pi pi-tag text-green-600 text-sm"></i>
                   </div>
-                  <button 
-                    type="button" 
-                    class="font-semibold text-gray-900 hover:text-green-600 transition-colors"
-                    (click)="showStockFeatures(order, $event)"
-                    pTooltip="Click to view stock features">
+                  <button type="button" class="font-semibold text-gray-900 hover:text-green-600 transition-colors"
+                    (click)="showStockFeatures(order, $event)" pTooltip="Click to view stock features">
                     #{{ order.stockId }}
                   </button>
                 </div>
@@ -295,6 +293,45 @@
                 <p-tag [value]="order.status" [severity]="getStatusSeverity(order.status)" class="text-xs" />
               </td>
               <td class="p-4">
+                <!-- Not ready for driver assignment -->
+                <div *ngIf="['Pending', 'Processing'].includes(order.status)" class="text-gray-400 text-sm italic">
+                  Not ready
+                </div>
+                
+                <!-- Can assign driver -->
+                <div *ngIf="canAssignDriver(order)" class="flex items-center">
+                  <p-button 
+                    label="Add Driver" 
+                    icon="pi pi-user-plus" 
+                    size="small" 
+                    variant="text" 
+                    [raised]="true" 
+                    severity="info"
+                    (onClick)="showDriverAssignment(order)" 
+                    pTooltip="Assign driver to this order"
+                    class="text-xs" />
+                </div>
+                
+                <!-- Has driver - show track button -->
+                <div *ngIf="canTrackOrder(order)" class="flex items-center">
+                  <p-button 
+                    label="Track Order" 
+                    icon="pi pi-map-marker" 
+                    size="small" 
+                    variant="text" 
+                    [raised]="true" 
+                    severity="success"
+                    (onClick)="trackOrder(order)" 
+                    pTooltip="Track this order"
+                    class="text-xs" />
+                </div>
+                
+                <!-- Completed orders -->
+                <div *ngIf="order.status === 'Completed'" class="text-gray-500 text-sm">
+                  Completed
+                </div>
+              </td>
+              <td class="p-4">
                 <div class="flex flex-wrap gap-2">
                   <ng-container *ngIf="canShip(order)">
                     <p-button label="Ship" icon="pi pi-send" size="small" variant="text" [raised]="true" severity="info"
@@ -307,8 +344,7 @@
                   </ng-container>
                   <ng-container *ngIf="canCancel(order)">
                     <p-button label="Cancel" icon="pi pi-ban" size="small" variant="text" [raised]="true"
-                      severity="danger" (onClick)="updateStatus(order, 'Cancelled')" pTooltip="Cancel order"
-                      class="text-xs" />
+                      severity="danger" (onClick)="confirmCancel(order)" pTooltip="Cancel order" class="text-xs" />
                   </ng-container>
                   <ng-container *ngIf="!canShip(order) && !canDeliver(order) && !canCancel(order)">
                     <span class="text-gray-400 text-sm">No Actions</span>
@@ -382,3 +418,80 @@
     </div>
   </ng-template>
 </p-overlayPanel>
+
+<!-- Cancel Confirmation Dialog -->
+<p-dialog header="" [(visible)]="showCancelConfirm" [modal]="true" [closable]="false"
+  [style]="{width: '400px', borderRadius: '1rem'}">
+  <div class="flex flex-col items-center justify-center p-6 bg-white rounded-2xl shadow-xl">
+    <div class="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
+      <i class="pi pi-exclamation-triangle text-4xl text-red-500"></i>
+    </div>
+    <h2 class="text-xl font-bold text-red-600 mb-2">Confirm Cancellation</h2>
+    <p class="text-base text-gray-700 mb-6 text-center">Are you sure you want to <span
+        class="font-semibold text-red-600">cancel</span> this order? This action cannot be undone.</p>
+    <div class="flex gap-4 w-full justify-center">
+      <button pButton type="button" label="Yes, Cancel"
+        class="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-lg shadow transition-all duration-150"
+        (click)="handleCancelConfirmed()"></button>
+      <button pButton type="button" label="No, Keep Order"
+        class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-6 py-2 rounded-lg shadow transition-all duration-150"
+        (click)="handleCancelRejected()"></button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- Driver Assignment Dialog -->
+<p-dialog 
+  [(visible)]="showDriverSelection" 
+  [modal]="true" 
+  [style]="{width: '30rem', height:'50rem'}"
+  header="Assign Driver to Order"
+  [draggable]="false"
+  [resizable]="true"
+  [closable]="true"
+>
+  <div *ngIf="selectedOrderForDriver" class="space-y-4">
+    <div class="bg-blue-50 p-4 rounded-lg">
+      <h4 class="font-semibold text-blue-900 mb-2">Order Details</h4>
+      <div class="text-sm text-blue-800">
+        <div><strong>Order #:</strong> {{ selectedOrderForDriver.id }}</div>
+        <div><strong>Product:</strong> {{ selectedOrderForDriver.productName }}</div>
+        <div><strong>Status:</strong> {{ selectedOrderForDriver.status }}</div>
+      </div>
+    </div>
+    
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Select Driver</label>
+      <p-dropdown 
+        [(ngModel)]="selectedDriverId"
+        [options]="drivers"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Choose a driver"
+        class="w-full"
+        [showClear]="true"
+      ></p-dropdown>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end space-x-2">
+      <button 
+        pButton 
+        label="Cancel" 
+        class="p-button-text"
+        (click)="showDriverSelection = false"
+      ></button>
+      <button 
+        pButton 
+        type="button"
+        class="p-button-info"
+        [disabled]="!selectedDriverId || loading"
+        (click)="assignDriver()"
+      >
+        <i *ngIf="loading" class="pi pi-spin pi-spinner mr-2"></i>
+        {{ loading ? 'Assigning...' : 'Assign Driver' }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

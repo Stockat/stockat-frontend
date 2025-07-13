@@ -11,6 +11,7 @@ import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, filter, switchMap, take } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { TokenDto } from '../models/auth-models/auth-response.dto';
+import { environment } from '../../../environments/environment';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -54,7 +55,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
       const tokenDto = { accessToken, refreshToken };
 
-      return this.http.post<TokenDto>('http://localhost:5250/api/token/refresh', tokenDto).pipe(
+      return this.http.post<TokenDto>(`${environment.apiUrl}/api/token/refresh`, tokenDto).pipe(
         switchMap((response) => {
           this.isRefreshing = false;
 

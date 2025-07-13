@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Service } from '../models/service-models/service.dto';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { ServiceRequestDto } from '../models/service-models/service-request.dto';
 import { PaginationDto } from '../models/pagination-Dto';
 import { GenericRequestModel } from '../models/generic-request-Dto';
@@ -11,7 +12,7 @@ import { GenericRequestModel } from '../models/generic-request-Dto';
 })
 
 export class ServiceRequestService {
-  private baseUrl = 'http://localhost:5250/api/ServiceRequest';
+  private baseUrl = `${environment.apiUrl}/api/ServiceRequest`;
 
   constructor(private http: HttpClient) { }
 
@@ -62,5 +63,41 @@ export class ServiceRequestService {
 
   createStripeCheckoutSession(requestId: number): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/${requestId}/checkout`, {});
+  }
+
+  getSellerStatusBreakdown(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/status-breakdown`);
+  }
+
+  getSellerMonthlyTrend(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/monthly-trend`);
+  }
+
+  getSellerRevenue(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/revenue`);
+  }
+
+  getSellerTopServices(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/top-services`);
+  }
+
+  getSellerCustomerFeedback(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/customer-feedback`);
+  }
+
+  getSellerConversionFunnel(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/conversion-funnel`);
+  }
+
+  getSellerServiceReviews(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/service-reviews`);
+  }
+
+  getSellerTopCustomers(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/top-customers`);
+  }
+
+  getSellerCustomerDemographics(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/seller/analytics/customer-demographics`);
   }
 }

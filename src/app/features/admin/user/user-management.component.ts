@@ -238,10 +238,12 @@ export class UserManagementComponent implements OnInit, OnDestroy {
             });
           },
           error: (error) => {
+            console.log(error);
             this.messageService.add({
+              
               severity: 'error',
-              summary: 'Error',
-              detail: user.isDeleted ? 'Failed to activate user' : 'Failed to deactivate user'
+              summary: 'Failed',
+              detail: user.isDeleted ?  'Failed to activate user' : error?.error?.Message || 'Failed to deactivate user'
             });
           }
         });

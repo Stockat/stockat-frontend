@@ -1,4 +1,36 @@
-<router-outlet></router-outlet>
+@if (!router.url.includes('admin')&&!router.url.includes('seller')) 
+{
+  <div style="padding-bottom: 4.5rem;">
+<p-menubar class="fixed top-0 left-0 w-full z-50 shadow main" [model]="[]">
+  <ng-template pTemplate="start">
+    <!-- Logo -->
+    <div class="flex items-center ml-4">
+      <a [routerLink]="['/']" class="flex items-center">
+        <img src="assets/full-H-dark.png" alt="Logo" class="h-8 " />
+      </a>
+    </div>     
+  </ng-template>
+  <ng-template pTemplate="end">
+    <div class="flex items-center space-x-4 mr-4">
+      <ng-container *ngIf="!isLoggedIn(); else loggedInBlock">
+        <button pButton type="button" label="Login" class="p-button-rounded p-button-text my-1" (click)="goToLogin()"></button>
+      </ng-container>
+      <ng-template #loggedInBlock>
+        <button pButton type="button" severity="info" label="Account" icon="ti ti-user" class="p-button-rounded  my-1" [raised]="false" (click)="goToAccount()"></button>
+        <button pButton type="button" severity="danger" label="Logout" icon="ti ti-logout" class="p-button-rounded p-button-outlined my-1" [raised]="false" (click)="onLogout()"></button>
+      </ng-template>
+    </div>
+  </ng-template>
+</p-menubar>
+</div>
+}
 
-<!-- Only render the chatbot component, let it handle its own floating button and panel -->
-<app-chatbot></app-chatbot>
+
+<div >
+  <router-outlet></router-outlet>
+  <!-- Only render the chatbot component, let it handle its own floating button and panel -->
+  <app-chatbot></app-chatbot>
+</div>
+<div class="mb-8 mr-24" [style]="{ position: 'fixed', right: 0, bottom: 0 }">
+  <p-button icon="ti ti-message-circle" [rounded]="true" [raised]="true" (onClick)="goToChat()" />
+</div>

@@ -39,6 +39,8 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { OrderDetailsComponent } from './order-details.component';
 import { OrderRequestDetailsComponent } from './order-request-details.component';
+import { AuctionOrderManagementComponent } from '../seller/Auctions/auction-order-management/auction-order-management.component';
+import { BuyerBidsComponent } from '../Auction/buyer-bids/buyer-bids.component';
 
 @Component({
   selector: 'app-profile',
@@ -61,6 +63,8 @@ import { OrderRequestDetailsComponent } from './order-request-details.component'
     TooltipModule,
     OrderDetailsComponent,
     OrderRequestDetailsComponent,
+    AuctionOrderManagementComponent,
+    BuyerBidsComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css'],
@@ -574,7 +578,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
             this.messageService.add({
               severity: 'error',
               summary: 'Failed',
-              detail: err?.error?.message || 'Failed to deactivate account.',
+              detail: err?.error?.Message || 'Failed to deactivate account.',
             });
             this.deactivateLoading = false;
           },

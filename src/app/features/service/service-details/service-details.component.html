@@ -128,8 +128,8 @@
           <button
             pButton
             type="button"
-            [label]="hasPendingRequest ? 'Request Pending' : 'Request This Service'"
-            [class]="hasPendingRequest ? 'p-button-secondary px-8 py-4 rounded-2xl shadow-lg text-xl font-bold opacity-60 cursor-not-allowed' : 'p-button-success px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:shadow-2xl transition-all duration-300'"
+            [label]="!isLoggedIn ? 'Login to Request' : (hasPendingRequest ? 'Request Pending' : 'Request This Service')"
+            [class]="!isLoggedIn ? 'p-button-warning px-8 py-4 rounded-2xl shadow-lg text-xl font-bold' : (hasPendingRequest ? 'p-button-secondary px-8 py-4 rounded-2xl shadow-lg text-xl font-bold opacity-60 cursor-not-allowed' : 'p-button-success px-8 py-4 rounded-2xl shadow-lg text-xl font-bold hover:shadow-2xl transition-all duration-300')"
             [disabled]="hasPendingRequest || isModalOpen"
             (click)="openRequestModal()">
           </button>

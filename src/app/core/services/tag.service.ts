@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { GenericRequestModel } from '../models/generic-request-Dto';
 import { tagdto } from '../models/tag-models/tagDto';
 import { TagStatus } from '../models/tag-models/tag-status.enum';
@@ -8,7 +9,7 @@ import { TagStatus } from '../models/tag-models/tag-status.enum';
   providedIn: 'root',
 })
 export class TagService {
-  private apiUrl = 'http://localhost:5250/api/Tag';
+  private apiUrl = `${environment.apiUrl}/api/Tag`;
 
   constructor(private http: HttpClient) {}
 

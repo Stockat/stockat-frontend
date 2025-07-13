@@ -20,6 +20,7 @@ import { RouterOutlet } from '@angular/router';
 import { SharedService } from '../../../shared/utils/shared.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { TagService } from '../../../core/services/tag.service';
+import { HeroSectionComponent } from '../hero-animation/hero-animation.component';
 
 interface City {
   name: string;
@@ -43,6 +44,7 @@ interface ProductWithImageState extends ProductDto {
     PaginatorModule,
     CurrencyPipe,
     RouterModule,
+    HeroSectionComponent
   ],
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.css',
@@ -111,9 +113,9 @@ export class ProductCardComponent {
 
   onPageChange(event: PaginatorState) {
     console.log('Paginator Event:', event);
-    this.first = event.page ?? 0;
-    console.log('PageNum', this.first);
-    this.setFilters();
+    this.first = event.first ?? 0; // event.first is the index of the first record
+    this.filters.page = event.page ?? 0; // event.page is the page number (zero-based)
+    this.setFilters(false); // pass false to avoid incrementing page again
   }
 
   getProducts() {
@@ -131,7 +133,7 @@ export class ProductCardComponent {
           });
         }
 
-        this.first = res.data.page;
+        this.first = res.data.page * this.filters.size; // set to record index
         this.totalRecords = res.data.count;
         this.isLoading = false;
       },
@@ -142,7 +144,7 @@ export class ProductCardComponent {
     });
   }
 
-  setFilters() {
+  setFilters(updatePage: boolean = true) {
     console.log('Location', this.selectedCity);
     console.log('category', this.selectedCategory);
     console.log('Tags', this.selectedTags);
@@ -154,7 +156,9 @@ export class ProductCardComponent {
     this.filters.tags = this.selectedTags;
     this.filters.minQuantity = this.SelectedMinQty;
     this.filters.minPrice = this.SelectedPrice;
-    this.filters.page = this.first;
+    if (updatePage) {
+      this.filters.page = Math.floor(this.first / this.filters.size); // calculate page from first
+    }
     this.filters.size = 8;
 
     console.log('-*****-', this.filters);

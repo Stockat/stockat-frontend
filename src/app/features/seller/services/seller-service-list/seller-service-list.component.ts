@@ -58,17 +58,24 @@ export class SellerServiceListComponent implements OnInit {
     return average.toFixed(2);
   }
 
+  // Get count of active (non-deleted) services
+  getActiveServicesCount(): number {
+    if (!this.services) return 0;
+    return this.services.filter(service => !service.isDeleted).length;
+  }
+
+  // Get count of approved services
+  getApprovedServicesCount(): number {
+    if (!this.services) return 0;
+    return this.services.filter(service => !service.isDeleted && service.isApproved === 'Approved').length;
+  }
+
   // Remove getFilteredServices method
   // getFilteredServices(): any[] {
   //   if (this.showDeletedServices) {
   //     return this.services;
   //   }
   //   return this.services.filter(service => !service.isDeleted);
-  // }
-
-  // Remove getActiveServicesCount method
-  // getActiveServicesCount(): number {
-  //   return this.services.filter(service => !service.isDeleted).length;
   // }
 
   // Truncate text to specified length

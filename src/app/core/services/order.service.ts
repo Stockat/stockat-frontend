@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { OrderRequest } from '../models/order-request.model';
 import { SellerOrder } from '../models/order-models/seller-order.model';
 import { AdminOrder } from '../models/order-models/admin-order.model';
@@ -14,7 +15,7 @@ import { UpdateReqDto } from '../models/order-models/UpdateReqDto';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
-  private readonly orderUrl = 'http://localhost:5250/api/Order';
+  private readonly orderUrl = `${environment.apiUrl}/api/Order`;
 
   constructor(private http: HttpClient) {}
 
@@ -45,8 +46,11 @@ export class OrderService {
       }
     );
   }
-  updateRequestOrder(orderId: number, updateReqDto: UpdateReqDto): Observable<any> {
-    updateReqDto.id=orderId;
+  updateRequestOrder(
+    orderId: number,
+    updateReqDto: UpdateReqDto
+  ): Observable<any> {
+    updateReqDto.id = orderId;
     return this.http.put(
       `${this.orderUrl}/request/${orderId}`,
       JSON.stringify(updateReqDto),
@@ -102,5 +106,22 @@ export class OrderService {
       `${this.orderUrl}/analysis/OrdersVsStatus`,
       { params }
     );
+  }
+
+  getOrderSummary(): Observable<GenericResponseDto<[string, number][]>> {
+    return this.http.get<GenericResponseDto<[string, number][]>>(
+      `${this.orderUrl}/analysis/OrderSummary`
+    );
+  }
+
+  //* Driver Management
+  getAllDrivers(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/api/Driver`);
+  }
+
+  assignDriverToOrder(orderId: number, driverId: string): Observable<any> {
+    return this.http.put(`${this.orderUrl}/${orderId}/driver`, JSON.stringify(driverId), {
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
