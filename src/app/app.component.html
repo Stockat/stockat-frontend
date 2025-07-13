@@ -1,7 +1,7 @@
 @if (!router.url.includes('admin')&&!router.url.includes('seller')) 
 {
   <div style="padding-bottom: 4.5rem;">
-<p-menubar class="fixed top-0 left-0 w-full z-50 shadow main" [model]="[]">
+<p-menubar class="fixed top-0 left-0 w-full z-50 shadow main" [model]="navMenuItems">
   <ng-template pTemplate="start">
     <!-- Logo -->
     <div class="flex items-center ml-4">

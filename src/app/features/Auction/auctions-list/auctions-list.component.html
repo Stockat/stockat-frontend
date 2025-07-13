@@ -1,9 +1,19 @@
-<div class="auctions-container">
-  <div class="header-section">
-    <h1>Live Auctions</h1>
-    <p>Browse our exclusive collection of rare items</p>
+<div class="relative overflow-hidden bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 mb-8">
+  <div class="absolute inset-0 bg-black/10"></div>
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center">
+      <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
+        Live Auctions
+      </h1>
+      <p class="text-xl text-blue-100 max-w-3xl mx-auto">
+        Browse our exclusive collection of rare items
+      </p>
+    </div>
   </div>
+</div>
 
+
+<div style="padding: 2rem;">
   <div class="filters-section">
     <div class="search-filter">
       <span class="p-input-icon-left">
@@ -167,9 +177,10 @@
       icon="pi pi-filter-slash"
       (click)="clearFilters()"
     ></p-button>
-  </div>
-</div>
+  </div>s
 <p-dialog header="Auction Result" [(visible)]="showDialog" [modal]="true" [closable]="true" [style]="{width: '350px'}">
   <p *ngIf="winnerName === 'No winner'">This auction had no winner.</p>
   <p *ngIf="winnerName !== 'No winner'">The winner is: <strong>{{ winnerName }}</strong></p>
 </p-dialog>
+
+</div>

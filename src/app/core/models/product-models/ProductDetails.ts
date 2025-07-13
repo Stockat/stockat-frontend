@@ -11,4 +11,5 @@ export interface ProductDetailsDto {
   sellerName: string;
   minQuantity: number;
   imagesArr: string[];
+  canBeRequested: boolean;
 }
