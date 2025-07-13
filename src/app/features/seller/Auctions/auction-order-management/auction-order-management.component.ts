@@ -4,10 +4,10 @@ import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
-import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AuctionService } from '../../../../core/services/auction.service';
-import { AuctionOrderDto, OrderStatus } from '../../../../core/models/auction-models/auction-order-dto';
+import { AuctionOrderDto, OrderStatus ,PaymentStatus} from '../../../../core/models/auction-models/auction-order-dto';
 import { AuctionOrderService } from '../../../../core/services/auction-order.service';
 import { UserService } from '../../../../core/services/user.service';
 import { switchMap } from 'rxjs';
@@ -36,79 +36,65 @@ import { ButtonModule } from 'primeng/button';
   providers: [ConfirmationService, MessageService]
 })
 export class AuctionOrderManagementComponent implements OnInit {
-  @Output() viewAuction = new EventEmitter<string>();
-  // userRole: 'Seller' | 'Admin' | 'Buyer' = 'Seller';
-  userRole: string = 'Seller';
-
-  userId: string = '';
-
-  order: AuctionOrderDto | null = null;
-  isSellerOfThisOrder: boolean = false;
-  isBuyerOfThisOrder: boolean = false;
-  
   orders: AuctionOrderDto[] = [];
-  loading = true;
-  statusOptions: any[] = [];
-  orderDetailsVisible = false;
   selectedOrder: AuctionOrderDto | null = null;
+  userId: string | null = null;
+  userRole: 'Admin' | 'Seller' | 'Buyer' = 'Buyer';
+  loading = false;
   statusChangeLoading = false;
+  orderDetailsVisible = false;
+  showAddressDialog = false;
+  addressOrderId: number | null = null;
+  addressForm: any = {};
+  isSellerOfThisOrder = false;
+  isBuyerOfThisOrder = false;
+  
+  cols: any[] = [];
   showSellerColumn = false;
   showBuyerColumn = false;
-  
-  // Updated valid status transitions (forward only)
-  statusTransitions = {
-    Seller: {
-      [OrderStatus.PendingSeller]: [OrderStatus.Processing, OrderStatus.Cancelled],
-      [OrderStatus.Processing]: [OrderStatus.Ready, OrderStatus.Cancelled],
-      [OrderStatus.Ready]: [ OrderStatus.Cancelled],
-      [OrderStatus.Payed]: [OrderStatus.Processing,  OrderStatus.Cancelled],
-      [OrderStatus.Pending]: [ OrderStatus.Cancelled], // treat Pending as PendingSeller
 
-    },
-    Buyer: {
-      [OrderStatus.PendingBuyer]: [OrderStatus.Payed, OrderStatus.Cancelled],
-      [OrderStatus.Payed]: [OrderStatus.Cancelled],
-      [OrderStatus.Pending]: [OrderStatus.Payed, OrderStatus.Cancelled], // treat Pending as PendingBuyer
-    },
+  statusTransitions = {
     Admin: {
       [OrderStatus.PendingSeller]: [ OrderStatus.Cancelled],
-      [OrderStatus.Processing]: [ OrderStatus.Cancelled],
-      [OrderStatus.Ready]: [OrderStatus.Shipped, OrderStatus.Cancelled],
-      [OrderStatus.Shipped]: [OrderStatus.Delivered, OrderStatus.Cancelled],
-      [OrderStatus.Delivered]: [OrderStatus.Completed, OrderStatus.Cancelled],
       [OrderStatus.PendingBuyer]: [ OrderStatus.Cancelled],
-      [OrderStatus.Payed]: [ OrderStatus.Cancelled],
-      [OrderStatus.PaymentFailed]: [OrderStatus.Cancelled],
+      [OrderStatus.Pending]: [OrderStatus.Cancelled],
+      [OrderStatus.Processing]: [OrderStatus.Shipped, OrderStatus.Cancelled],
+      [OrderStatus.Ready]: [ OrderStatus.Cancelled],
+      [OrderStatus.Shipped]: [OrderStatus.Delivered, OrderStatus.Cancelled],
+      [OrderStatus.Delivered]: [OrderStatus.Completed],
+      [OrderStatus.PaymentFailed]: [OrderStatus.Cancelled]
+    },
+    Seller: {
+      [OrderStatus.PendingSeller]: [OrderStatus.Processing, OrderStatus.Cancelled],
+      [OrderStatus.PendingBuyer]: [ OrderStatus.Cancelled],
       [OrderStatus.Pending]: [ OrderStatus.Cancelled],
+      [OrderStatus.Processing]: [OrderStatus.Ready, OrderStatus.Cancelled],
+      [OrderStatus.PaymentFailed]: [ OrderStatus.Cancelled]
+    },
+    Buyer: {
+      [OrderStatus.PendingBuyer]: [OrderStatus.Cancelled],
+      [OrderStatus.Pending]: [OrderStatus.Cancelled],
+      [OrderStatus.PaymentFailed]: [ OrderStatus.Cancelled]
     }
   };
 
-  // Dialog state for buyer address/info
-  showAddressDialog = false;
-  addressForm: Partial<AuctionOrderDto> = {};
-  addressOrderId: number | null = null;
-
-  cols: any[] = [];
-
   constructor(
-    private auctionService: AuctionService,
-    private confirmationService: ConfirmationService,
-    private messageService: MessageService,
     private auctionOrderService: AuctionOrderService,
     private userService: UserService,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService,
     private router: Router,
-    private bidService: BidService
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.initializeUserContext();
-   // this.loadOrderDetails();
   }
 
   initializeUserContext(): void {
     this.userService.getCurrentUser().subscribe({
       next: (response) => {
-        const user: UserReadDto = response.data;
+        const user = response.data;
         this.userId = user.id;
         
         // Determine user role
@@ -120,7 +106,6 @@ export class AuctionOrderManagementComponent implements OnInit {
           this.userRole = 'Buyer';
         }
 
-        // Configure columns based on role
         this.configureColumns();
         this.loadOrders();
       },
@@ -129,8 +114,6 @@ export class AuctionOrderManagementComponent implements OnInit {
       }
     });
   }
-
- 
   
   configureColumns(): void {
     this.cols = [
@@ -160,51 +143,30 @@ export class AuctionOrderManagementComponent implements OnInit {
 
   loadOrders() {
     this.loading = true;
-    const populateNames = (orders: AuctionOrderDto[]) => {
-      orders.forEach(order => {
-        if (!order.sellerName && order.sellerId) {
-          this.userService.getUserById(order.sellerId).subscribe(res => {
-            order.sellerName = res.data?.firstName + ' ' + res.data?.lastName;
-          });
-        }
-        if (!order.buyerName && order.winningBidId) {
-          // If you have buyerId, use it; otherwise, skip
-          // order.buyerId is not in the DTO, so skip unless you add it
-        }
-      });
-    };
-    if (this.userRole === 'Admin') {
-      this.auctionOrderService.getAllOrders().subscribe({
-        next: (orders) => {
-          populateNames(orders);
-          this.orders = orders;
-          this.loading = false;
-        },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to load orders'
-          });
-          this.loading = false;
-        }
-      });
-    } else {
-      this.auctionOrderService.getUserOrders(this.userId).subscribe({
-        next: (orders) => {
-          populateNames(orders);
-          this.orders = orders;
-          this.loading = false;
-        },
-        error: () => {
-          this.loading = false;
-        }
-      });
-    }
+    
+    const request = this.userRole === 'Admin' 
+      ? this.auctionOrderService.getAllOrders()
+      : this.auctionOrderService.getUserOrders(this.userId!);
+
+    request.subscribe({
+      next: (orders) => {
+        this.orders = orders;
+        this.loading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load orders'
+        });
+      }
+    });
   }
 
   getStatusClass(status: OrderStatus): string {
-    const statusClasses = {
+    const statusClasses: Record<OrderStatus, string> = {
       [OrderStatus.Completed]: 'bg-green-100 text-green-800',
       [OrderStatus.Ready]: 'bg-blue-100 text-blue-800',
       [OrderStatus.Shipped]: 'bg-indigo-100 text-indigo-800',
@@ -220,58 +182,37 @@ export class AuctionOrderManagementComponent implements OnInit {
     return `px-3 py-1 rounded-full text-xs font-medium ${statusClasses[status] || 'bg-gray-100 text-gray-800'}`;
   }
 
-  // Updated getValidStatuses to check for current order and role
   getValidStatuses(currentStatus: OrderStatus): OrderStatus[] {
     if (!this.selectedOrder) return [];
-    if (this.isSellerOfThisOrder ) {
+    
+    if (this.isSellerOfThisOrder) {
       return (this.statusTransitions.Seller as any)[currentStatus] || [];
     }
+    
     if (this.isBuyerOfThisOrder) {
       return (this.statusTransitions.Buyer as any)[currentStatus] || [];
     }
+    
     if (this.userRole === 'Admin') {
-      return this.getAdminForwardTransitions(currentStatus);
+      return (this.statusTransitions.Admin as any)[currentStatus] || [];
     }
+    
     return [];
-
-    //// ✅ Apply additional logic to restrict transitions based on paymentStatus
-     //return transitions.filter(status => this.isTransitionAllowed(status, paymentStatus));
-    //  isTransitionAllowed(nextStatus: OrderStatus, paymentStatus: PaymentStatus): boolean {
-    //   // Example rules — customize based on your business logic
-    //   if (paymentStatus === 'Failed') {
-    //     // Don't allow transitioning to Completed if payment failed
-    //     return nextStatus !== OrderStatus.Completed;
-    //   }
-    // }
   }
 
-  getAdminForwardTransitions(currentStatus: OrderStatus): OrderStatus[] {
-    // Only allow forward transitions from currentStatus
-    const adminTransitions = this.statusTransitions.Admin;
-
-  // Assert that currentStatus is a key of the Admin transitions object
-  const key = OrderStatus[currentStatus] as keyof typeof adminTransitions;
-
-  return adminTransitions[key] || [];
-   // return adminTransitions[currentStatus as any] || [];
-  }
-
-  // Buyer: Show Proceed/Pay button for PendingBuyer
   showPayButton(status: OrderStatus): boolean {
-    return this.isBuyerOfThisOrder && (status === OrderStatus.PendingBuyer||status === OrderStatus.Pending);
+    return this.isBuyerOfThisOrder && 
+           (status === OrderStatus.PendingBuyer || status === OrderStatus.Pending);
   }
 
-  // Buyer: Show Mark as Delivered for Shipped
   showMarkDeliveredButton(status: OrderStatus): boolean {
-    return this.userRole=='Admin' && status === OrderStatus.Shipped;
+    return this.userRole === 'Admin' && status === OrderStatus.Shipped;
   }
 
-  // Buyer: Show Mark as Completed for Delivered
   showMarkCompletedButton(status: OrderStatus): boolean {
-    return this.userRole=='Admin' && status === OrderStatus.Delivered;
+    return this.userRole === 'Admin' && status === OrderStatus.Delivered;
   }
 
-  // Buyer: Open address dialog
   openAddressDialog(order: AuctionOrderDto) {
     this.addressOrderId = order.id;
     this.addressForm = {
@@ -283,129 +224,155 @@ export class AuctionOrderManagementComponent implements OnInit {
     this.showAddressDialog = true;
   }
 
-  // Buyer: Save address info and set status to Payed
   saveAddressInfo() {
     if (!this.addressOrderId) return;
-    this.auctionOrderService.updateOrderAddressInfo(this.addressOrderId, this.addressForm).subscribe({
-      next: () => {
-        this.updateOrderStatusById(this.addressOrderId!, OrderStatus.Payed);
-        this.showAddressDialog = false;
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Order info saved. You can now proceed to payment.' });
-        this.loadOrders();
-      },
-      error: () => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to save order info.' });
-      }
-    });
-  }
+    
+    this.auctionOrderService.updateOrderAddressInfo(this.addressOrderId, this.addressForm)
+      .subscribe({
+        next: () => {
+          this.showAddressDialog = false;
+          this.messageService.add({ 
+            severity: 'success', 
+            summary: 'Success', 
+            detail: 'Shipping information saved' 
+          });
+          this.loadOrders();
 
-  // Helper to update order status by id
-  updateOrderStatusById(orderId: number, newStatus: OrderStatus) {
-    this.auctionOrderService.updateOrderStatus(orderId, newStatus).subscribe({
-      next: () => this.loadOrders(),
-      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update order status.' })
-    });
-  }
+          ////Buttons update here///////
+          this.selectedOrder = null; // Optional: deselect to trigger reset
 
-  // Mark as Delivered
-  markAsDelivered(order: AuctionOrderDto) {
-    this.updateOrderStatus(order, OrderStatus.Delivered);
-  }
-
-  // Mark as Completed
-  markAsCompleted(order: AuctionOrderDto) {
-    this.updateOrderStatus(order, OrderStatus.Completed);
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: 'Error', 
+            detail: 'Failed to save shipping information' 
+          });
+        }
+      });
   }
 
   showOrderDetails(order: AuctionOrderDto) {
     this.selectedOrder = order;
     this.orderDetailsVisible = true;
 
-
-  // Reset flags until resolved
-  this.isSellerOfThisOrder = false;
-  this.isBuyerOfThisOrder = false;
-
-  // Load full auction data to extract sellerId and buyerId
-  this.auctionService.getAuctionById(order.auctionId).subscribe({
-    next: (auction) => {
-      if (auction?.sellerId) {
-        this.isSellerOfThisOrder = auction.sellerId === this.userId;
-      }
-      if (auction?.buyerId) {
-        this.isBuyerOfThisOrder = auction.buyerId === this.userId;
-      }
-      console.log('is seller '+this.isSellerOfThisOrder);
-      console.log('is buyer '+this.isBuyerOfThisOrder);
-    },
-    error: (err) => {
-      console.error('Failed to load auction for order:', err);
-    }
-  });
+    console.log(this.selectedOrder);
+    
+    // Determine ownership using DTO data
+    this.isSellerOfThisOrder = this.userId === order.sellerId;
+    this.isBuyerOfThisOrder = this.userId === order.buyerId;
   }
 
-  // New: Handle row click to view auction
   onRowClick(order: AuctionOrderDto) {
     if (order.auctionId) {
-      this.router.navigate(['/seller/auctions', order.auctionId]);
+      this.router.navigate(['/auctions', order.auctionId]);
     }
-  }
-
-  // New: Payment initiation (mock)
-  initiatePayment(order: AuctionOrderDto) {
-    this.confirmationService.confirm({
-      message: `Initiate payment for order ${order.id}? (Mock operation)`,
-      header: 'Confirm Payment',
-      icon: 'pi pi-dollar',
-      accept: () => {
-        this.messageService.add({
-          severity: 'info',
-          summary: 'Payment Initiated',
-          detail: 'Payment functionality would be implemented here'
-        });
-      }
-    });
   }
 
   confirmStatusChange(order: AuctionOrderDto, newStatus: OrderStatus) {
     this.confirmationService.confirm({
-      message: `Are you sure you want to change order status to <strong>${newStatus}</strong>?`,
+      message: `Change status to <strong>${newStatus}</strong>?`,
       header: 'Confirm Status Change',
       icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.updateOrderStatus(order, newStatus);
-      }
+      accept: () => this.updateOrderStatus(order, newStatus)
     });
   }
 
   updateOrderStatus(order: AuctionOrderDto, newStatus: OrderStatus) {
     this.statusChangeLoading = true;
-    this.auctionOrderService.updateOrderStatus(order.id, newStatus).subscribe({
-      next: () => {
-        order.status = newStatus;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Order status updated'
-        });
-        this.statusChangeLoading = false;
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to update order status'
-        });
-        this.statusChangeLoading = false;
-      }
-    });
+    this.auctionOrderService.updateOrderStatus(order.id, newStatus)
+      .subscribe({
+        next: () => {
+          order.status = newStatus;
+          this.statusChangeLoading = false;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Status updated'
+          });
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.statusChangeLoading = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update status'
+          });
+        }
+      });
   }
 
-  // Helper to get display name for seller/buyer
-  getSellerName(order: AuctionOrderDto): string {
-    return order.sellerName || 'N/A';
+  markAsDelivered(order: AuctionOrderDto) {
+    this.updateOrderStatus(order, OrderStatus.Delivered);
   }
-  getBuyerName(order: AuctionOrderDto): string {
-    return order.buyerName || 'N/A';
+
+  markAsCompleted(order: AuctionOrderDto) {
+    this.updateOrderStatus(order, OrderStatus.Completed);
+  }
+
+  getStatusforPaymentClass(status: string): string {
+    switch (status) {
+      case 'Paid': return 'bg-green-100 text-green-800';
+      case 'Failed': return 'bg-red-100 text-red-800';
+      case 'Pending': return 'bg-yellow-100 text-yellow-800';
+      case 'Refunded': return 'bg-gray-100 text-gray-800';
+      default: return '';
+    }
+  }
+
+  canProceedToPayment(order: AuctionOrderDto): boolean {
+    // Convert string to enum value (if necessary)
+    const paymentStatusValue =
+      typeof order.paymentStatus === 'string'
+        ? PaymentStatus[order.paymentStatus as keyof typeof PaymentStatus]
+        : order.paymentStatus;
+  
+    const orderStatusValue =
+      typeof order.status === 'string'
+        ? OrderStatus[order.status as keyof typeof OrderStatus]
+        : order.status;
+  
+    return this.isBuyerOfThisOrder &&
+           paymentStatusValue === PaymentStatus.Pending &&
+           (orderStatusValue === OrderStatus.Pending || 
+            orderStatusValue === OrderStatus.PendingBuyer)&&
+            order.shippingAddress!=null;
+    }
+
+  isShippingInfoMissing(order: AuctionOrderDto): boolean {
+    return !order.shippingAddress || 
+           !order.recipientName || 
+           !order.phoneNumber;
+  }
+
+
+
+  proceedToPayment(order: AuctionOrderDto) {
+    if (!this.canProceedToPayment(order)) return;
+
+    this.auctionOrderService.createStripeCheckoutSession(order.id)
+      .subscribe({
+        next: (response) => {
+          if (response.redirectUrl) {
+            window.location.href = response.redirectUrl;
+          } else {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Payment Error',
+              detail: 'No redirect URL received from payment service'
+            });
+          }
+        },
+        error: (error) => {
+          console.error('Payment error:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Payment Error',
+            detail: error.error?.message || error.message || 'Failed to create payment session'
+          });
+        }
+      });
   }
 }

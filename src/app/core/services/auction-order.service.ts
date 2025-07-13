@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AuctionOrderDto, OrderStatus } from '../models/auction-models/auction-order-dto';
-import { Observable } from 'rxjs';
+import { Observable, catchError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -27,5 +27,18 @@ export class AuctionOrderService {
   // New: Update address/order info fields
   updateOrderAddressInfo(orderId: number, addressForm: any): Observable<any> {
     return this.http.put(`${this.baseUrl}/${orderId}/address-info`, addressForm);
+  }
+
+  // New: Create Stripe checkout session for auction order
+  createStripeCheckoutSession(orderId: number): Observable<any> {
+    return this.http.post<any>(
+      `${this.baseUrl}/${orderId}/checkout`, 
+      {}
+    ).pipe(
+      catchError(error => {
+        console.error('Payment error:', error);
+        throw error;
+      })
+    );
   }
 }
