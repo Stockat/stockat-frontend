@@ -28,6 +28,10 @@ export class SidebarComponent {
     this.router.navigate(['/profile']);
   }
 
+  goToHome() {
+    this.router.navigate(['/']);
+  }
+
   logout() {
     this.authService.logout().subscribe();
   }

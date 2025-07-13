@@ -71,6 +71,13 @@ export class SellerLayoutComponent {
             route: '/seller/orders',
             routerLink: '/seller/orders',
             routerLinkActiveOptions: { endWith: '/seller/orders' }
+          },
+          {
+            label: 'Requests',
+            icon: 'ti ti-file-pencil',
+            route: '/seller/orders/requests',
+            routerLink: '/seller/orders/requests',
+            routerLinkActiveOptions: { endWith: '/seller/orders/requests' }
           }
         ]
       },

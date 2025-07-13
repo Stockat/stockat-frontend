@@ -12,6 +12,12 @@
   </ng-template>
   <ng-template pTemplate="end">
     <div class="flex items-center space-x-4 mr-4">
+      <ng-container *ngIf="isAdmin()">
+        <button pButton type="button" label="Admin Dashboard" icon="pi pi-briefcase" class="p-button-rounded my-1" [raised]="false" (click)="goToAdminDashboard()"></button>
+      </ng-container>
+      <ng-container *ngIf="isSeller()">
+        <button pButton type="button" label="Seller Dashboard" icon="pi pi-chart-bar" class="p-button-rounded my-1" [raised]="false" (click)="goToSellerDashboard()"></button>
+      </ng-container>
       <ng-container *ngIf="!isLoggedIn(); else loggedInBlock">
         <button pButton type="button" label="Login" class="p-button-rounded p-button-text my-1" (click)="goToLogin()"></button>
       </ng-container>

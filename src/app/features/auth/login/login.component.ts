@@ -271,7 +271,7 @@ export class LoginComponent implements OnInit {
       return;
     }
     if (this.authService.isSeller()) {
-      this.router.navigate(['/seller']);
+      this.router.navigate(['/']);
     } else {
       // Default route for buyers or other roles
       this.router.navigate(['/']);

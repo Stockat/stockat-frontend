@@ -76,4 +76,20 @@ export class AppComponent {
     { label: 'Services', icon: 'ti ti-settings-bolt', routerLink: ['/services'] },
     { label: 'Auctions', icon: 'ti ti-gavel', routerLink: ['/auctions'] },
   ];
+
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
+
+  isSeller(): boolean {
+    return this.authService.isSeller();
+  }
+
+  goToAdminDashboard() {
+    this.router.navigate(['/admin']);
+  }
+
+  goToSellerDashboard() {
+    this.router.navigate(['/seller/orders']);
+  }
 }
