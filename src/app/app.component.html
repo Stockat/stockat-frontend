@@ -37,6 +37,6 @@
   <!-- Only render the chatbot component, let it handle its own floating button and panel -->
   <app-chatbot></app-chatbot>
 </div>
-<div class="mb-8 mr-24" [style]="{ position: 'fixed', right: 0, bottom: 0 }">
+<div *ngIf="isLoggedIn()" class="mb-8 mr-24" [style]="{ position: 'fixed', right: 0, bottom: 0 }">
   <p-button icon="ti ti-message-circle" [rounded]="true" [raised]="true" (onClick)="goToChat()" />
 </div>

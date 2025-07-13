@@ -79,7 +79,7 @@ export const routes: Routes = [
       { path: 'requests/:id', component: ServiceRequestDetailsComponent }
     ],
     canActivate: [RoleGuard],
-    data: { roles: ['Buyer', 'Seller'] }
+    data: { roles: ['Buyer', 'Seller', 'Admin'] }
   },
   // End Auth
   // Seller
