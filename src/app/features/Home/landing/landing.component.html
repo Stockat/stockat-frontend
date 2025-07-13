@@ -1,0 +1,264 @@
+<section class="relative bg-[url(/assets/1258.jpg)] bg-cover bg-center g:grid lg:h-screen lg:place-content-center ">
+  <div class="absolute inset-0 bg-gray-900/60 pointer-events-none"></div>
+  <div class="relative mx-auto w-screen max-w-screen-xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8 lg:py-32">
+    <div class="mx-auto max-w-prose text-center">
+      <h1 class="text-4xl font-bold text-gray-900 sm:text-5xl dark:text-white">
+        Discover New
+        <strong class="text-blue-500"> Opportunities </strong>
+        to Grow yous business
+      </h1>
+
+      <p class="mt-4 text-base text-pretty text-gray-700 sm:text-lg/relaxed dark:text-gray-200">
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eaque, nisi. Natus, provident
+        accusamus impedit minima harum corporis iusto.
+      </p>
+
+      
+    </div>
+  </div>
+  <app-hero-section></app-hero-section>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-20 bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5"></div>
+  <div class="absolute top-0 left-1/4 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl"></div>
+  <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl"></div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div class="text-center mb-16">
+      <div class="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full border border-blue-200 mb-6">
+        <span class="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+        <span class="text-blue-700 text-sm font-medium">Platform Features</span>
+      </div>
+      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+        Everything You Need for
+        <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">B2B Success</span>
+      </h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+        Our comprehensive platform provides all the tools and features you need to grow your business
+        and connect with the right partners.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div *ngFor="let feature of features; let i = index"
+           class="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-4 border border-white/50 relative overflow-hidden"
+           [style.animation-delay]="i * 0.1 + 's'">
+        <div class="absolute inset-0 bg-gradient-to-br from-transparent to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div class="relative z-10">
+          <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg"
+               [ngClass]="feature.color">
+            <i [class]="feature.icon" class="text-2xl text-white"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors duration-300">{{ feature.title }}</h3>
+          <p class="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">{{ feature.description }}</p>
+        </div>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="py-20 bg-white relative overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50"></div>
+  <div class="absolute top-1/2 left-0 w-64 h-64 bg-blue-400/5 rounded-full blur-3xl"></div>
+  <div class="absolute bottom-0 right-0 w-80 h-80 bg-purple-400/5 rounded-full blur-3xl"></div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div class="space-y-8">
+        <div>
+          <div class="inline-flex items-center px-4 py-2 bg-green-100 rounded-full border border-green-200 mb-6">
+            <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+            <span class="text-green-700 text-sm font-medium">About Our Platform</span>
+          </div>
+          <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            Empowering Business Growth Through
+            <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Innovation</span>
+          </h2>
+          <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+            Stockat is more than just a marketplace. We're a comprehensive B2B ecosystem designed to drive growth,
+            efficiency, and opportunity for small and medium manufacturers and business owners.
+          </p>
+        </div>
+        <div class="space-y-6">
+          <div class="group flex items-start space-x-4 p-4 rounded-xl hover:bg-white/50 transition-all duration-300">
+            <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <i class="pi pi-comments text-white text-lg"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors duration-300">Integrated Live Chat</h3>
+              <p class="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">Seamless communication between users and with platform administrators for real-time support and collaboration.</p>
+            </div>
+          </div>
+          <div class="group flex items-start space-x-4 p-4 rounded-xl hover:bg-white/50 transition-all duration-300">
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <i class="pi pi-cog text-white text-lg"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-300">AI-Powered Assistance</h3>
+              <p class="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">Intelligent tools and recommendations to optimize your business operations.</p>
+            </div>
+          </div>
+          <div class="group flex items-start space-x-4 p-4 rounded-xl hover:bg-white/50 transition-all duration-300">
+            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <i class="pi pi-rocket text-white text-lg"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors duration-300">Future-Ready Platform</h3>
+              <p class="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">Continuous innovation with a roadmap of powerful enhancements to keep you ahead.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="relative">
+        <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/50 relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5"></div>
+          <div class="relative z-10">
+            <div class="grid grid-cols-2 gap-6">
+              <div class="group text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl hover:from-blue-100 hover:to-blue-200 transition-all duration-300 transform hover:scale-105">
+                <div class="text-3xl font-bold text-blue-600 mb-2 group-hover:text-blue-700">{{ stats[0].number }}</div>
+                <div class="text-blue-800 font-semibold group-hover:text-blue-900">{{ stats[0].label }}</div>
+              </div>
+              <div class="group text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl hover:from-green-100 hover:to-green-200 transition-all duration-300 transform hover:scale-105">
+                <div class="text-3xl font-bold text-green-600 mb-2 group-hover:text-green-700">{{ stats[1].number }}</div>
+                <div class="text-green-800 font-semibold group-hover:text-green-900">{{ stats[1].label }}</div>
+              </div>
+              <div class="group text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl hover:from-purple-100 hover:to-purple-200 transition-all duration-300 transform hover:scale-105">
+                <div class="text-3xl font-bold text-purple-600 mb-2 group-hover:text-purple-700">{{ stats[2].number }}</div>
+                <div class="text-purple-800 font-semibold group-hover:text-purple-900">{{ stats[2].label }}</div>
+              </div>
+              <div class="group text-center p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl hover:from-orange-100 hover:to-orange-200 transition-all duration-300 transform hover:scale-105">
+                <div class="text-3xl font-bold text-orange-600 mb-2 group-hover:text-orange-700">{{ stats[3].number }}</div>
+                <div class="text-orange-800 font-semibold group-hover:text-orange-900">{{ stats[3].label }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="absolute -top-4 -right-4 bg-blue-500/10 backdrop-blur-sm rounded-2xl p-4 border border-blue-400/20 animate-float">
+          <div class="flex items-center">
+            <i class="pi pi-chart-line text-blue-500 mr-2"></i>
+            <span class="text-blue-700 text-sm font-medium">Growth</span>
+          </div>
+          <div class="text-xl font-bold text-blue-700 mt-1">+45%</div>
+        </div>
+        <div class="absolute -bottom-4 -left-4 bg-green-500/10 backdrop-blur-sm rounded-2xl p-4 border border-green-400/20 animate-float-delayed">
+          <div class="flex items-center">
+            <i class="pi pi-star text-green-500 mr-2"></i>
+            <span class="text-green-700 text-sm font-medium">Rating</span>
+          </div>
+          <div class="text-xl font-bold text-green-700 mt-1">4.9/5</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section id="testimonials" class="py-20 bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5"></div>
+  <div class="absolute top-0 right-1/4 w-64 h-64 bg-yellow-400/10 rounded-full blur-3xl"></div>
+  <div class="absolute bottom-0 left-1/4 w-80 h-80 bg-green-400/10 rounded-full blur-3xl"></div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div class="text-center mb-16">
+      <div class="inline-flex items-center px-4 py-2 bg-yellow-100 rounded-full border border-yellow-200 mb-6">
+        <span class="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+        <span class="text-yellow-700 text-sm font-medium">Customer Success</span>
+      </div>
+      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+        What Our Users
+        <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Say</span>
+      </h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+        Join thousands of satisfied businesses who have transformed their operations with Stockat.
+      </p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div *ngFor="let testimonial of testimonials"
+           class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center mb-6">
+          <img [src]="testimonial.avatar" [alt]="testimonial.name"
+               class="w-12 h-12 rounded-full object-cover mr-4">
+          <div>
+            <h4 class="font-semibold text-gray-900">{{ testimonial.name }}</h4>
+            <p class="text-blue-600 text-sm">{{ testimonial.company }}</p>
+          </div>
+        </div>
+        <p class="text-gray-700 leading-relaxed italic">"{{ testimonial.text }}"</p>
+        <div class="flex mt-4">
+          <i class="pi pi-star-fill text-yellow-400"></i>
+          <i class="pi pi-star-fill text-yellow-400"></i>
+          <i class="pi pi-star-fill text-yellow-400"></i>
+          <i class="pi pi-star-fill text-yellow-400"></i>
+          <i class="pi pi-star-fill text-yellow-400"></i>
+        </div>
+      </div>
+    </div>
+    <div class="mt-16 text-center">
+      <div class="inline-flex items-center space-x-8 bg-white/80 backdrop-blur-sm rounded-2xl px-8 py-4 border border-white/50">
+        <div class="flex items-center">
+          <i class="pi pi-users text-blue-500 mr-2"></i>
+          <span class="text-gray-700 font-medium">500+ Happy Customers</span>
+        </div>
+        <div class="flex items-center">
+          <i class="pi pi-star text-yellow-500 mr-2"></i>
+          <span class="text-gray-700 font-medium">4.9/5 Rating</span>
+        </div>
+        <div class="flex items-center">
+          <i class="pi pi-thumbs-up text-green-500 mr-2"></i>
+          <span class="text-gray-700 font-medium">98% Satisfaction</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 relative overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
+  <div class="absolute top-0 left-1/4 w-96 h-96 bg-green-400/10 rounded-full blur-3xl"></div>
+  <div class="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl"></div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+    <div class="mb-8">
+      <div class="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-6">
+        <span class="w-2 h-2 bg-green-400 rounded-full mr-3 animate-pulse"></span>
+        <span class="text-blue-100 text-sm font-medium">Join Thousands of Businesses</span>
+      </div>
+      <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+        Ready to Transform Your
+        <span class="bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
+          Business?
+        </span>
+      </h2>
+      <p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-4xl mx-auto leading-relaxed">
+        Join the future of B2B commerce and start growing your business today with our comprehensive marketplace platform.
+      </p>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-6 justify-center mb-12">
+      <p-button label="Get Started Now"
+                severity="success"
+                size="large"
+                class="text-lg px-10 py-5 shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300"
+                routerLink="/register">
+      </p-button>
+      <div class="flex items-center space-x-4 text-blue-200">
+        <div class="flex items-center">
+          <i class="pi pi-shield-check text-green-400 mr-2"></i>
+          <span class="text-sm">Free Setup</span>
+        </div>
+        <div class="flex items-center">
+          <i class="pi pi-clock text-blue-400 mr-2"></i>
+          <span class="text-sm">24/7 Support</span>
+        </div>
+        <div class="flex items-center">
+          <i class="pi pi-globe text-purple-400 mr-2"></i>
+          <span class="text-sm">Global Access</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

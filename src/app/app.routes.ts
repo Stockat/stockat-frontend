@@ -12,10 +12,16 @@ import { ProductStocksComponent } from './features/product-stocks/product-stocks
 import { SellerProfileComponent } from './features/seller/seller-profile/seller-profile.component';
 import { RoleGuard } from './core/gaurds/RoleGuard';
 import { NotFound404Component } from './features/not-found-404/not-found-404.component';
+import { LandingComponent } from './features/Home/landing/landing.component';
 
 export const routes: Routes = [
+  //Home
   {
     path: '',
+    component: LandingComponent,
+  },
+  {
+    path: 'Products',
     component: ProductCardComponent,
     children: [],
   },

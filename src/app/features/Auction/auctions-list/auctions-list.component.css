@@ -3,7 +3,7 @@
     display: block;
     background-color: #f8f9fa;
     min-height: 100vh;
-    padding: 2rem;
+    /*padding: 2rem;*/
   }
   
   .auctions-container {
@@ -11,21 +11,28 @@
     margin: 0 auto;
   }
   
-  .header-section {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-  
-  .header-section h1 {
-    font-size: 2.5rem;
-    color: #343a40;
-    margin-bottom: 0.5rem;
-  }
-  
-  .header-section p {
-    color: #6c757d;
-    font-size: 1.1rem;
-  }
+  /* Hero Section Styles (matching service-list) */
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, #2563eb 0%, #1e40af 100%);
+  color: #fff;
+  padding: 4rem 0;
+  text-align: center;
+}
+.hero-section h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+.hero-section p {
+  font-size: 1.25rem;
+  color: #dbeafe;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.header-section { display: none; }
   
   .filters-section {
     display: flex;
