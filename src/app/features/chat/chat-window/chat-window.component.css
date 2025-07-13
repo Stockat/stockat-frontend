@@ -31,3 +31,8 @@
 .read-indicator.read {
   color: #4fc3f7; /* WhatsApp blue */
 }
+.message-text {
+  overflow-wrap: anywhere;   /* Modern, WhatsApp-like */
+  word-break: break-word;    /* Fallback for older browsers */
+  white-space: pre-line;     /* Preserves line breaks, allows wrapping */
+}

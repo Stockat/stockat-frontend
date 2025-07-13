@@ -22,32 +22,27 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   isLoading: boolean = false;
   private shouldScroll = false;
   isOpen: boolean = false; // Controls open/close state
+  openAIAvailable: boolean = true; // Track OpenAI availability
 
-  // Rotating welcome messages
+  // Simple welcome messages (reduced since OpenAI handles conversation)
   private welcomeMessages: string[] = [
-    "Hello! 👋 I'm your **Stockat AI assistant**. How can I help you today?",
-    "Hi there! 🤖 Need help finding products or services?",
-    "Welcome! 🏭 Ask me anything about our platform.",
-    "Hey! 👋 Looking for something specific? I'm here to help.",
-    "Hi! 😊 Want to know about auctions, sellers, or products?"
+    "Hello! 👋 I'm your Stockat AI assistant. How can I help you today?",
+    "Hi! 🤖 I'm here to help with products, services, and platform questions.",
+    "Welcome! 🏭 Ask me anything about Stockat."
   ];
 
-  // Proactive follow-up prompts
+  // Minimal follow-up prompts (reduced frequency)
   private followUpPrompts: string[] = [
-    "Is there anything else you'd like to know? 😊",
-    "Feel free to ask me about products, sellers, or services!",
-    "I'm here if you have more questions! 🤗",
-    "Let me know if you want to explore more features.",
-    "Don't hesitate to ask for help or suggestions! 💡"
+    "Is there anything else you'd like to know?",
+    "Feel free to ask me more questions!",
+    "I'm here if you need anything else."
   ];
   private followUpTimeout: any;
-  private inactivityTimeout: any; // NEW: for user inactivity
+  private inactivityTimeout: any;
   private tipMessages: string[] = [
-    "Tip: You can ask me to show you the latest auctions!",
-    "Did you know? You can compare products by asking me for details.",
-    "Try asking about our top-rated sellers!",
-    "I can help you track your orders or service requests.",
-    "Ask me for platform statistics or trends!"
+    "Try asking about auctions, sellers, or products!",
+    "I can help with platform features and services.",
+    "Ask me about orders, tracking, or statistics!"
   ];
 
     // Quick suggestions for new users
@@ -55,9 +50,11 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
     'Show me top sellers',
     'What are the popular products?',
     'Are there any live auctions?',
-    'Tell me about available services',
+    'Tell me about top services',
     'Show platform statistics'
   ];
+
+
 
   constructor(
     private chatBotService: ChatBotService,
@@ -67,7 +64,8 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   ) {}
 
   ngOnInit(): void {
-    // Do not open or load chat until user clicks the icon
+    // Check OpenAI availability on component initialization
+    this.checkOpenAIAvailability();
   }
 
   ngAfterViewChecked(): void {
@@ -87,7 +85,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
            currentUrl.includes('/forgot-password') ||
            currentUrl.includes('/reset-password') ||
            currentUrl.includes('/confirm-email') ||
-           currentUrl.includes('/chat')
+           currentUrl.includes('/chat');
   }
 
   /**
@@ -135,10 +133,10 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
 
       this.messages.push(assistantMessage);
       this.shouldScroll = true;
-      this.setFollowUp(true); // Immediate follow-up
+      this.setFollowUp(true); // Immediate follow-up (reduced frequency)
       this.setInactivity(); // Start inactivity timer
-      // Occasionally add a tip or suggestion
-      if (Math.random() < 0.3) {
+      // Rarely add a tip (reduced from 30% to 10% chance)
+      if (Math.random() < 0.1) {
         setTimeout(() => {
           const tipIndex = Math.floor(Math.random() * this.tipMessages.length);
           this.messages.push({
@@ -148,7 +146,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
             role: 'assistant'
           });
           this.shouldScroll = true;
-        }, 1200);
+        }, 2000); // Increased delay
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -176,16 +174,23 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
 
       if (historyResponse.messages && historyResponse.messages.length > 0) {
         // Convert DTOs to component messages
-        this.messages = historyResponse.messages.map(dto =>
-          this.chatBotService.convertToChatBotMessage(dto)
-        ); // Show in chronological order (oldest to newest)
+        const convertedMessages = historyResponse.messages.map((dto) => {
+          return this.chatBotService.convertToChatBotMessage(dto);
+        });
+
+        // Reverse the messages since backend returns them in DESC order (newest first)
+        // but we want to display them in ASC order (oldest first)
+        this.messages = convertedMessages.reverse();
         this.shouldScroll = true;
       } else {
         this.addWelcomeMessage();
       }
     } catch (error) {
       console.error('Error loading chat history:', error);
-      this.addWelcomeMessage();
+      // Only add welcome message if we don't already have messages
+      if (this.messages.length === 0) {
+        this.addWelcomeMessage();
+      }
     }
   }
 
@@ -226,10 +231,27 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
    * Format message content for display (handles line breaks and formatting)
    */
   formatMessageContent(content: string): string {
-    return content
-      .replace(/\n/g, '<br>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>');
+    // First, handle line breaks
+    content = content.replace(/\n/g, '<br>');
+
+    // Add extra spacing before section headers (🏆, 🔥, 🔧, 📊, etc.)
+    content = content.replace(/(^|<br>)([🏆🔥🔧📊⚙️📈])/g, '$1<br><span class="chatbot-section-header">$2');
+
+    // Highlight rank lines (🥇, 🥈, 🥉, **1.**, etc.)
+    content = content.replace(/(^|<br>)(🥇|🥈|🥉|\*\*\d+\.\*\*)/g, '$1<span class="chatbot-rank">$2');
+
+    // Format seller information lines (📧, 📝, 📍, 📞, ✅)
+    content = content.replace(/(<br>)(\s*)([📧📝📍📞✅])([^<]*?)(<br>)/g, '$1<span class="chatbot-detail">$2$3$4</span>$5');
+
+    // Close spans at line end
+    content = content.replace(/(<span class="chatbot-section-header">[^<]*?)(<br>)/g, '$1</span>$2');
+    content = content.replace(/(<span class="chatbot-rank">[^<]*?)(<br>)/g, '$1</span>$2');
+
+    // Markdown formatting (bold and italic)
+    content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    content = content.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    return content;
   }
 
   /**
@@ -281,13 +303,13 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
    */
   private addWelcomeMessage(): void {
     const randomIndex = Math.floor(Math.random() * this.welcomeMessages.length);
-    this.messages = [{
-      content: this.welcomeMessages[randomIndex] +
-        '<br><br><em>Tip: Try asking me about auctions, sellers, or platform features!</em>',
+    const welcomeMessage: ChatBotMessage = {
+      content: this.welcomeMessages[randomIndex],
       senderId: 'system',
       timestamp: new Date(),
       role: 'assistant'
-    }];
+    };
+    this.messages = [welcomeMessage];
   }
 
   /**
@@ -295,17 +317,17 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
    */
   private addGreetingMessage(): void {
     const randomIndex = Math.floor(Math.random() * this.welcomeMessages.length);
-    this.messages.push({
-      content: this.welcomeMessages[randomIndex] +
-        '<br><br><em>Tip: Try asking me about auctions, sellers, or platform features!</em>',
+    const greetingMessage: ChatBotMessage = {
+      content: this.welcomeMessages[randomIndex],
       senderId: 'system',
       timestamp: new Date(),
       role: 'assistant'
-    });
+    };
+    this.messages.push(greetingMessage);
     this.shouldScroll = true;
   }
 
-  /**
+    /**
    * Use a quick suggestion
    */
   useSuggestion(suggestion: string): void {
@@ -355,14 +377,12 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
 
   toggleChatbot(): void {
     this.isOpen = !this.isOpen;
+
     if (this.isOpen) {
-      if (this.messages.length === 0) {
-        this.loadChatHistory();
-      } else {
-        // Add a greeting message when opening existing chat
-        this.addGreetingMessage();
-      }
+      // Always load chat history when opening, regardless of current messages
+      this.loadChatHistory();
     }
+
     if (!this.isOpen) {
       this.clearFollowUp();
       this.clearInactivity();
@@ -377,6 +397,9 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
 
   private setFollowUp(immediate = false) {
     this.clearFollowUp();
+    // Reduced frequency - only 30% chance of follow-up
+    if (Math.random() > 0.3) return;
+
     const randomIndex = Math.floor(Math.random() * this.followUpPrompts.length);
     const followUpMsg = this.followUpPrompts[randomIndex];
     if (immediate) {
@@ -388,7 +411,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
           role: 'assistant'
         });
         this.shouldScroll = true;
-      }, 1000);
+      }, 1500); // Increased delay
     } else {
       this.followUpTimeout = setTimeout(() => {
         this.messages.push({
@@ -398,21 +421,24 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
           role: 'assistant'
         });
         this.shouldScroll = true;
-      }, 20000); // 20 seconds
+      }, 30000); // Increased to 30 seconds
     }
   }
 
   private setInactivity() {
     this.clearInactivity();
+    // Reduced frequency - only 20% chance of inactivity message
+    if (Math.random() > 0.2) return;
+
     this.inactivityTimeout = setTimeout(() => {
       this.messages.push({
-        content: "I'm still here if you need anything else! 😊",
+        content: "I'm here if you need anything else.",
         senderId: 'system',
         timestamp: new Date(),
         role: 'assistant'
       });
       this.shouldScroll = true;
-    }, 30000); // 30 seconds
+    }, 60000); // Increased to 60 seconds
   }
 
   private clearInactivity() {
@@ -427,6 +453,25 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
       clearTimeout(this.followUpTimeout);
       this.followUpTimeout = null;
     }
+  }
+
+    /**
+   * Check if OpenAI is available and working
+   */
+  private async checkOpenAIAvailability(): Promise<void> {
+    try {
+      this.openAIAvailable = await firstValueFrom(this.chatBotService.isOpenAIAvailable());
+    } catch (error) {
+      console.warn('OpenAI not available:', error);
+      this.openAIAvailable = false;
+    }
+  }
+
+  /**
+   * Get OpenAI status for display
+   */
+  getOpenAIStatus(): string {
+    return this.openAIAvailable ? '🟢 OpenAI Available' : '🔴 OpenAI Unavailable';
   }
 
 }
