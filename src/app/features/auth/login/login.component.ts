@@ -106,8 +106,17 @@ export class LoginComponent implements OnInit {
                     header: 'Reactivate Account',
                     icon: 'pi pi-exclamation-triangle',
                     accept: () => {
-                      this.authService.setTokens(res.token);
-                      this.navigateBasedOnRoleAndApproval(res.isApproved);
+                      this.userService.toggleUserActivation().subscribe({
+                        next: () => {
+                          // After reactivation, re-login automatically
+                          this.authService.setTokens(res.token);
+                          this.messageService.add({ severity: 'success', summary: 'Account Reactivated', detail: 'Welcome back!' });
+                          this.navigateBasedOnRoleAndApproval(true);
+                        },
+                        error: () => {
+                          this.messageService.add({ severity: 'error', summary: 'Reactivation Failed', detail: 'Could not reactivate your account.' });
+                        }
+                      });
                     },
                     reject: () => {
                       this.messageService.add({
@@ -239,10 +248,10 @@ export class LoginComponent implements OnInit {
           });
         } else if (err.status === 403) {
           // Handle blocked user
-          this.messageService.add({ 
-            severity: 'error', 
-            summary: 'Account Blocked', 
-            detail: detail 
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Account Blocked',
+            detail: detail
           });
         } else {
           this.messageService.add({ severity: 'error', summary: 'Login Failed', detail });
