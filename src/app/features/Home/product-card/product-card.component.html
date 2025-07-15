@@ -167,7 +167,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       @for (product of products; track $index) {
       <div
-        class="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
+        class="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col h-full">
         <!-- Product Image -->
         <div class="relative h-48 overflow-hidden">
           <a [routerLink]="['/ProductDetails', product.id]" class="block">
@@ -195,34 +195,35 @@
         </div>
 
         <!-- Product Content -->
-        <div class="p-4">
+        <div class="p-4 flex flex-col flex-1">
           <!-- Product Title -->
           <h3 class="text-lg font-semibold text-gray-900 mb-2 truncate">{{product.name}}</h3>
 
           <!-- Product Description -->
-          <p class="text-gray-600 text-sm mb-4 line-clamp-2" [title]="product.description">
+          <p class="text-gray-600 text-sm mb-4 line-clamp-2 flex-1" [title]="product.description">
             {{product.description}}
           </p>
 
-          <!-- Product Details -->
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2">
-              <div class="p-2 bg-blue-100 rounded-lg">
-                <i class="pi pi-box text-blue-600 text-sm"></i>
+          <div class="mt-auto">
+            <!-- Product Details -->
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <div class="p-2 bg-blue-100 rounded-lg">
+                  <i class="pi pi-box text-blue-600 text-sm"></i>
+                </div>
+                <span class="text-sm text-gray-600">Min: {{product.minQuantity}}</span>
               </div>
-              <span class="text-sm text-gray-600">Min: {{product.minQuantity}}</span>
-            </div>
 
-            <div class="flex items-center gap-2">
-              <div class="p-2 bg-green-100 rounded-lg">
-                <i class="pi pi-tag text-green-600 text-sm"></i>
+              <div class="flex items-center gap-2">
+                <div class="p-2 bg-green-100 rounded-lg">
+                  <i class="pi pi-tag text-green-600 text-sm"></i>
+                </div>
+                <span class="text-sm text-gray-600">{{product.categoryName}}</span>
               </div>
-              <span class="text-sm text-gray-600">{{product.categoryName}}</span>
             </div>
+            <!-- Action Button -->
+            <p-button [routerLink]="['/ProductDetails', product.id]" label="View Details" class="w-full" styleClass="w-full h-12 font-semibold" />
           </div>
-
-          <!-- Action Button -->
-          <p-button [routerLink]="['/ProductDetails', product.id]" label="View Details" class="w-full" styleClass="w-full h-12 font-semibold" />
         </div>
       </div>
       }
