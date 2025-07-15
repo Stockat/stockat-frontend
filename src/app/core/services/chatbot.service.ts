@@ -38,10 +38,17 @@ export class ChatBotService {
    * Get chat history for the current user
    */
   getChatHistory(limit: number = 50): Observable<ChatBotHistoryResponseDto> {
+    console.log('Making API call to get chat history with limit:', limit);
     return this.http.get<ChatBotHistoryResponseDto>(`${this.baseUrl}/history?limit=${limit}`)
       .pipe(
         catchError(error => {
           console.error('Error fetching chat history:', error);
+          console.error('Error details:', {
+            status: error.status,
+            statusText: error.statusText,
+            message: error.message,
+            url: error.url
+          });
           return throwError(() => new Error('Unable to load chat history.'));
         })
       );
@@ -66,12 +73,15 @@ export class ChatBotService {
    * Convert ChatBotMessageDto to ChatBotMessage for component use
    */
   convertToChatBotMessage(dto: ChatBotMessageDto): any {
-    return {
+    console.log('Converting DTO to message:', dto);
+    const result = {
       content: dto.messageText,
       senderId: dto.senderId,
       timestamp: new Date(dto.sentAt),
       role: dto.role
     };
+    console.log('Converted result:', result);
+    return result;
   }
 
   /**
@@ -101,6 +111,7 @@ export class ChatBotService {
    * Test endpoint to check database status
    */
   testChatBot(): Observable<any> {
+    console.log('Making test API call to check database status');
     return this.http.get<any>(`${this.baseUrl}/test`)
       .pipe(
         catchError(error => {
