@@ -138,40 +138,6 @@ export class AdminLayoutComponent {
                 ]
             },
             {
-                label: 'Reports',
-                icon: 'pi pi-chart-bar',
-                shortcut: '⌘+R',
-                items: [
-                    {
-                        label: 'Sales',
-                        icon: 'pi pi-chart-line',
-                        badge: '3'
-                    },
-                    {
-                        label: 'Products',
-                        icon: 'pi pi-list',
-                        badge: '6'
-                    }
-                ]
-            },
-            {
-                label: 'Profile',
-                icon: 'pi pi-user',
-                shortcut: '⌘+W',
-                items: [
-                    {
-                        label: 'Settings',
-                        icon: 'pi pi-cog',
-                        shortcut: '⌘+O'
-                    },
-                    {
-                        label: 'Privacy',
-                        icon: 'pi pi-shield',
-                        shortcut: '⌘+P'
-                    }
-                ]
-            },
-            {
                 label: 'AI Assistant',
                 icon: 'pi pi-robot',
                 items: [
@@ -190,3 +156,5 @@ export class AdminLayoutComponent {
     this.SidebarVisible = !this.SidebarVisible;
   }
 }
+
+

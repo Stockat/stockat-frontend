@@ -12,6 +12,7 @@ import { ChipModule } from 'primeng/chip';
 import { TooltipModule } from 'primeng/tooltip';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-product-details',
@@ -27,16 +28,17 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     ChipModule,
     TooltipModule,
     ToastModule,
-    ConfirmDialogModule
-  ]
+    ConfirmDialogModule,
+  ],
 })
 export class ProductDetailsComponent implements OnInit {
-  productId = 5; // For now, hardcoded. Replace with route param if needed.
+  productId!: number; // Will be set from route param
   product: any = null;
   stocks: any[] = [];
   loading = false;
 
   constructor(
+    private route: ActivatedRoute,
     private http: HttpClient,
     private stockService: StockService,
     private messageService: MessageService,
@@ -44,12 +46,19 @@ export class ProductDetailsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.fetchProductDetails();
+    this.route.params.subscribe((params) => {
+      this.productId = +params['productId'] || +params['id']; // support both :productId and :id
+      this.fetchProductDetails();
+    });
   }
 
   fetchProductDetails() {
+    console.log('Product ID ------:', this.productId);
     this.loading = true;
-    this.http.get<any>(`${environment.apiUrl}/api/Product/admin/product-with-stocks/${this.productId}`)
+    this.http
+      .get<any>(
+        `${environment.apiUrl}/api/Product/admin/product-with-stocks/${this.productId}`
+      )
       .subscribe({
         next: (res) => {
           this.product = res.data;
@@ -58,15 +67,19 @@ export class ProductDetailsComponent implements OnInit {
         },
         error: () => {
           this.loading = false;
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load product details' });
-        }
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load product details',
+          });
+        },
       });
   }
 
   confirmDeleteStock(stockId: number) {
     this.confirmationService.confirm({
       message: 'Are you sure you want to delete this stock?',
-      accept: () => this.deleteStock(stockId)
+      accept: () => this.deleteStock(stockId),
     });
   }
 
@@ -74,14 +87,22 @@ export class ProductDetailsComponent implements OnInit {
     this.loading = true;
     this.stockService.deleteStock(stockId).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Stock deleted successfully' });
-        this.stocks = this.stocks.filter(s => s.id !== stockId);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Stock deleted successfully',
+        });
+        this.stocks = this.stocks.filter((s) => s.id !== stockId);
         this.loading = false;
       },
       error: () => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete stock' });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to delete stock',
+        });
         this.loading = false;
-      }
+      },
     });
   }
 }

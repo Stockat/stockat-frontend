@@ -223,11 +223,9 @@ export class ManageproductsComponent {
     this.filters.size = 8;
 
     // Add status and isDeleted filters
-    this.filters.productStatus =this.selectedStatus ;
+    this.filters.productStatus = this.selectedStatus;
     this.filters.isDeleted =
-      this.selectedIsDeleted === ''
-        ? null
-        : this.selectedIsDeleted === 'true';
+      this.selectedIsDeleted === '' ? null : this.selectedIsDeleted === 'true';
 
     console.log('-*****-', this.filters);
 
@@ -565,6 +563,7 @@ export class ManageproductsComponent {
 
   //* View Details
   viewProductDetails(productId: number) {
+    console.log('Product ID*******:', productId);
     this.router.navigate(['/admin/product-details', productId]);
   }
   viewDetails(productId: number) {

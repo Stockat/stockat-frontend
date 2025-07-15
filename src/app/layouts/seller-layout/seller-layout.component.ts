@@ -21,17 +21,6 @@ export class SellerLayoutComponent {
   ngOnInit() {
     this.items = [
       {
-        label: 'Dashboard',
-        icon: 'ti ti-home',
-        items: [
-          {
-            label: 'Dashboard',
-            icon: 'pi pi-home',
-            route: '/seller/dashboard'
-          }
-        ]
-      },
-      {
         label: 'Products',
         icon: 'ti ti-shopping-cart',
         badge: '5',
@@ -41,7 +30,7 @@ export class SellerLayoutComponent {
             icon: 'ti ti-plus',
             route: '/seller/add-product',
             routerLink: '/seller/add-product',
-            
+
           },
           {
             label: 'All Products',
