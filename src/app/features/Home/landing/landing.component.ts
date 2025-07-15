@@ -39,9 +39,9 @@ export class LandingComponent {
   ];
 
   stats = [
-    { number: '500+', label: 'Active Sellers', icon: 'pi pi-users' },
-    { number: '1000+', label: 'Products Listed', icon: 'pi pi-box' },
-    { number: '50+', label: 'Services Offered', icon: 'pi pi-briefcase' },
+    { number: '', label: 'Be among the first sellers', icon: 'pi pi-users' },
+    { number: '', label: 'Your product could be here', icon: 'pi pi-box' },
+    { number: '', label: 'Showcase your service', icon: 'pi pi-briefcase' },
     { number: '24/7', label: 'Support Available', icon: 'pi pi-headset' }
   ];
 
