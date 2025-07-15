@@ -80,19 +80,21 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
    */
   isOnAuthPage(): boolean {
     const currentUrl = this.router.url;
-    return currentUrl.includes('/login') ||
+    const isAuthPage = currentUrl.includes('/login') ||
            currentUrl.includes('/register') ||
            currentUrl.includes('/forgot-password') ||
            currentUrl.includes('/reset-password') ||
            currentUrl.includes('/confirm-email') ||
            currentUrl.includes('/chat');
+    return isAuthPage;
   }
 
   /**
    * Check if chatbot should be visible
    */
   shouldShowChatbot(): boolean {
-    return !this.isOnAuthPage();
+    const shouldShow = !this.isOnAuthPage();
+    return shouldShow;
   }
 
   /**
@@ -174,8 +176,9 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
 
       if (historyResponse.messages && historyResponse.messages.length > 0) {
         // Convert DTOs to component messages
-        const convertedMessages = historyResponse.messages.map((dto) => {
-          return this.chatBotService.convertToChatBotMessage(dto);
+        const convertedMessages = historyResponse.messages.map((dto, index) => {
+          const converted = this.chatBotService.convertToChatBotMessage(dto);
+          return converted;
         });
 
         // Reverse the messages since backend returns them in DESC order (newest first)
@@ -186,7 +189,6 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
         this.addWelcomeMessage();
       }
     } catch (error) {
-      console.error('Error loading chat history:', error);
       // Only add welcome message if we don't already have messages
       if (this.messages.length === 0) {
         this.addWelcomeMessage();
@@ -302,6 +304,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
    * Add welcome message
    */
   private addWelcomeMessage(): void {
+    console.log('👋 === ADDING WELCOME MESSAGE ===');
     const randomIndex = Math.floor(Math.random() * this.welcomeMessages.length);
     const welcomeMessage: ChatBotMessage = {
       content: this.welcomeMessages[randomIndex],
