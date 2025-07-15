@@ -1,4 +1,4 @@
-@if (!router.url.includes('admin')&&!router.url.includes('seller')) 
+@if (!router.url.includes('admin')&&!router.url.includes('seller'))
 {
   <div style="padding-bottom: 4.5rem;">
 <p-menubar class="fixed top-0 left-0 w-full z-50 shadow main" [model]="navMenuItems">
@@ -8,7 +8,7 @@
       <a [routerLink]="['/']" class="flex items-center">
         <img src="assets/full-H-dark.png" alt="Logo" class="h-8 " />
       </a>
-    </div>     
+    </div>
   </ng-template>
   <ng-template pTemplate="end">
     <div class="flex items-center space-x-4 mr-4">
@@ -37,6 +37,6 @@
   <!-- Only render the chatbot component, let it handle its own floating button and panel -->
   <app-chatbot></app-chatbot>
 </div>
-<div *ngIf="isLoggedIn()" class="mb-8 mr-24" [style]="{ position: 'fixed', right: 0, bottom: 0 }">
+<div *ngIf="isLoggedIn() && !router.url.startsWith('/chat')" class="mb-8 mr-24" [style]="{ position: 'fixed', right: 0, bottom: 0 }">
   <p-button icon="ti ti-message-circle" [rounded]="true" [raised]="true" (onClick)="goToChat()" />
 </div>

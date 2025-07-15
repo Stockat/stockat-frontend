@@ -66,12 +66,11 @@ export class AppComponent {
   }
 
   goToChat() {
-    // Logic to navigate to the chat page
-    // For example, you can use Angular's Router to navigate to a specific route
     this.router.navigate(['/chat']);
   }
 
   navMenuItems: MenuItem[] = [
+    { label: 'Home', icon: 'ti ti-home', routerLink: ['/'] },
     { label: 'Products', icon: 'ti ti-box', routerLink: ['/Products'] },
     { label: 'Services', icon: 'ti ti-settings-bolt', routerLink: ['/services'] },
     { label: 'Auctions', icon: 'ti ti-gavel', routerLink: ['/auctions'] },
