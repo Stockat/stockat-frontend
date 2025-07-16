@@ -106,10 +106,10 @@ export class LoginComponent implements OnInit {
                     header: 'Reactivate Account',
                     icon: 'pi pi-exclamation-triangle',
                     accept: () => {
+                      this.authService.setTokens(res.token);
                       this.userService.toggleUserActivation().subscribe({
                         next: () => {
                           // After reactivation, re-login automatically
-                          this.authService.setTokens(res.token);
                           this.messageService.add({ severity: 'success', summary: 'Account Reactivated', detail: 'Welcome back!' });
                           this.navigateBasedOnRoleAndApproval(true);
                         },
