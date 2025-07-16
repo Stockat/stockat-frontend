@@ -27,9 +27,12 @@
       </p-panelMenu>
       
       <ng-template #footer>
-          <div class="flex items-center gap-2">
-              <button pButton label="Account" icon="pi pi-user" class="w-full" outlined (click)="goToAccount()"></button>
-              <button pButton label="Logout" icon="pi pi-sign-out" class="w-full" severity="danger" text (click)="logout()"></button>
+          <div class="flex flex-col gap-2">
+              <button pButton label="Home" icon="pi pi-home" class="w-full mb-2" outlined (click)="goToHome()"></button>
+              <div class="flex items-center gap-2">
+                  <button pButton label="Account" icon="pi pi-user" class="w-full" outlined (click)="goToAccount()"></button>
+                  <button pButton label="Logout" icon="pi pi-sign-out" class="w-full" severity="danger" text (click)="logout()"></button>
+              </div>
           </div>
       </ng-template>
   </p-drawer>

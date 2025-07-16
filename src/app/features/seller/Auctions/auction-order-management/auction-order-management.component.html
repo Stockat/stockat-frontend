@@ -1,238 +1,306 @@
 <!-- auction-order-management.component.html -->
 <div class="bg-white rounded-xl shadow-md overflow-hidden">
-    <!-- Header -->
-    <div class="border-b border-gray-200 px-6 py-4">
-      <div class="flex justify-between items-center">
-        <h2 class="text-xl font-semibold">Auction Order Management</h2>
-        <div class="flex items-center space-x-2">
-          <span class="text-sm font-medium text-gray-500">Role:</span>
-          <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-medium capitalize">
-            {{ userRole }}
-          </span>
-        </div>
+  <!-- Header -->
+  <div class="border-b border-gray-200 px-6 py-4">
+    <div class="flex justify-between items-center">
+      <h2 class="text-xl font-semibold">Auction Order Management</h2>
+      <div class="flex items-center space-x-2">
+        <span class="text-sm font-medium text-gray-500">Role:</span>
+        <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-medium capitalize">
+          {{ userRole }}
+        </span>
       </div>
-      <p class="text-gray-500 mt-1">Manage and track auction order statuses</p>
     </div>
-  
-    <!-- Order Table -->
-    <div class="p-6">
-      <p-table [value]="orders" [loading]="loading" [rows]="10" [paginator]="true" 
-               [rowsPerPageOptions]="[5,10,20]" dataKey="id">
-        <ng-template pTemplate="header">
-          <tr>
-            <th *ngFor="let col of cols" [pSortableColumn]="col.field">
-              {{ col.header }}
-              <p-sortIcon [field]="col.field"></p-sortIcon>
-            </th>
-            <th style="width: 200px">Actions</th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-order>
-          <tr (click)="onRowClick(order)" class="cursor-pointer hover:bg-gray-50">
-            <td>{{ order.id }}</td>
-            <td>{{ order.orderDate | date:'mediumDate' }}</td>
-            <td>
-              <div class="font-medium truncate max-w-xs">{{ order.auctionTitle || order.auctionId || 'N/A' }}</div>
-            </td>
-            <td *ngIf="showSellerColumn">{{ getSellerName(order) }}</td>
-            <td *ngIf="showBuyerColumn">{{ getBuyerName(order) }}</td>
-            <td class="font-semibold">${{ order.amountPaid | number:'1.2-2' }}</td>
-            <td>
-              <span [class]="getStatusClass(order.status)">
-                {{ order.status }}
-              </span>
-            </td>
-            <td>
-              <div class="flex space-x-2" (click)="$event.stopPropagation()">
-                <button 
-                  (click)="showOrderDetails(order)"
-                  class="flex items-center gap-2 px-3 py-1 text-sm font-medium border rounded text-gray-700 border-gray-300 hover:bg-gray-100 transition">
-                  <i class="pi pi-eye text-blue-600"></i>
-                </button>
-                <!-- Status change actions moved to dialog -->
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td [attr.colspan]="cols.length + 1" class="text-center py-8">
-              <i class="pi pi-inbox text-3xl text-gray-300 mb-2"></i>
-              <p class="text-gray-500">No orders found</p>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </div>
-  
-    <!-- Order Detail Dialog -->
-    <p-dialog header="Order Details" [(visible)]="orderDetailsVisible" 
-              [style]="{ width: '600px' }" [modal]="true">
-      <div *ngIf="selectedOrder" class="grid grid-cols-2 gap-4">
-        <div class="space-y-2">
-          <div>
-            <label class="text-sm font-medium text-gray-500">Order ID</label>
-            <p class="font-semibold">{{ selectedOrder.id }}</p>
-          </div>
-          <div>
-            <label class="text-sm font-medium text-gray-500">Order Date</label>
-            <p>{{ selectedOrder.orderDate | date:'medium' }}</p>
-          </div>
-          <div>
-            <label class="text-sm font-medium text-gray-500">Auction</label>
-            <p class="font-semibold">{{ selectedOrder.auctionTitle }}</p>
-          </div>
-          <div>
-            <label class="text-sm font-medium text-gray-500">Winning Bid ID</label>
-            <p>{{ selectedOrder.winningBidId }}</p>
-          </div>
-        </div>
-        
-        <div class="space-y-2">
-          <div>
-            <label class="text-sm font-medium text-gray-500">Payment Status</label>
-            <p>
-              <span [ngClass]="{
-                'bg-green-100 text-green-800': selectedOrder.paymentStatus,
-                'bg-red-100 text-red-800': !selectedOrder.paymentStatus
-              }" class="px-2 py-1 rounded text-xs">
-                {{ selectedOrder.paymentStatus ? 'Success' : 'Failed' }}
-              </span>
-            </p>
-          </div>
-          <div>
-            <label class="text-sm font-medium text-gray-500">Transaction ID</label>
-            <p class="truncate">{{ selectedOrder.paymentTransactionId || 'N/A' }}</p>
-          </div>
-          <div>
-            <label class="text-sm font-medium text-gray-500">Amount Paid</label>
-            <p class="font-bold text-lg">${{ selectedOrder.amountPaid | number:'1.2-2' }}</p>
-          </div>
-          <div>
-            <label class="text-sm font-medium text-gray-500">Current Status</label>
-            <p>
-              <span [class]="getStatusClass(selectedOrder.status)">
-                {{ selectedOrder.status }}
-              </span>
-            </p>
-          </div>
-        </div>
-        
-        <!-- Parties Information -->
-        <div class="border-t pt-4 mt-4 col-span-2">
-          <h4 class="font-medium mb-2">Parties Information</h4>
-          <div class="grid grid-cols-2 gap-4">
-            <!-- Seller Info -->
-            <div class="bg-blue-50 p-3 rounded-lg" *ngIf="userRole !== 'Buyer'">
-              <div class="flex justify-between items-center">
-                <label class="text-sm font-medium text-gray-500">Seller</label>
-                <span *ngIf="isSellerOfThisOrder" class="text-xs text-gray-500">(You)</span>
-              </div>
-              <p class="font-semibold">{{ getSellerName(selectedOrder) }}</p>
-              <p *ngIf="userRole === 'Admin' || userRole === 'Buyer'" class="text-xs text-gray-500 mt-1">
-                ID: {{ selectedOrder.sellerId || 'N/A' }}
-              </p>
-            </div>
-            
-            <!-- Buyer Info -->
-            <div class="bg-green-50 p-3 rounded-lg" *ngIf="userRole !== 'Seller'">
-              <div class="flex justify-between items-center">
-                <label class="text-sm font-medium text-gray-500">Buyer</label>
-                <span *ngIf="isBuyerOfThisOrder" class="text-xs text-gray-500">(You)</span>
-              </div>
-              <p class="font-semibold">{{ getBuyerName(selectedOrder) }}</p>
-              <p *ngIf="userRole === 'Admin' || userRole === 'Seller'" class="text-xs text-gray-500 mt-1">
-                <!-- ID: {{ selectedOrder.buyerId || 'N/A' }} -->
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Status change actions: only show if user is seller or buyer of this order -->
-      <!-- && (isSellerOfThisOrder || isBuyerOfThisOrder) -->
-      <div *ngIf="selectedOrder " class="mt-6"> 
-        <!-- Seller actions -->
-        <div *ngIf="isSellerOfThisOrder || this.userRole === 'Admin'">
-          <label class="block text-sm font-semibold mb-1">Change Status ({{ isSellerOfThisOrder ? 'Seller' : 'Admin' }})</label>
-          <p-dropdown [options]="getValidStatuses(selectedOrder.status)" 
-                      [(ngModel)]="selectedOrder.status" 
-                      [disabled]="statusChangeLoading"
-                      (onChange)="confirmStatusChange(selectedOrder, $event.value)"
-                      appendTo="body">
-            <ng-template pTemplate="dropdownicon">
-              <i class="pi pi-cog"></i>
-            </ng-template>
-            <ng-template let-status pTemplate="item">
-              <span [class]="getStatusClass(status)">{{ status }}</span>
-            </ng-template>
-          </p-dropdown>
-        </div>
-        <!-- Buyer actions -->
-        <div *ngIf="isBuyerOfThisOrder ">
-          <p-button  
-            *ngIf="selectedOrder?.status === 'Pending' || selectedOrder?.status === 'PendingBuyer'"
-            icon="pi pi-dollar"
-            label="Proceed/Pay"
-            class="p-button-lg p-button-primary w-full mb-2"
-            [ngStyle]="{ 'font-size': '1.1rem', 'font-weight': 600 }"
-            (onClick)="openAddressDialog(selectedOrder)">
-          </p-button>
-          <p-button *ngIf="showMarkDeliveredButton(selectedOrder.status)"
-                  pButton pRipple
-                  icon="pi pi-check"
-                  label="Mark as Delivered"
-                  class="p-button-sm p-button-info"
-                  (click)="markAsDelivered(selectedOrder)">
-          </p-button>
-          <p-button *ngIf="showMarkCompletedButton(selectedOrder.status)"
-                  pButton pRipple
-                  icon="pi pi-check-circle"
-                  label="Mark as Completed"
-                  class="p-button-sm p-button-success"
-                  (click)="markAsCompleted(selectedOrder)">
-          </p-button>
-          <label class="block text-sm font-semibold mb-1 mt-4">Change Status (Buyer)</label>
-          <p-dropdown [options]="getValidStatuses(selectedOrder.status)" 
-                      [(ngModel)]="selectedOrder.status" 
-                      [disabled]="statusChangeLoading"
-                      (onChange)="confirmStatusChange(selectedOrder, $event.value)"
-                      appendTo="body">
-            <ng-template pTemplate="dropdownicon">
-              <i class="pi pi-cog"></i>
-            </ng-template>
-            <ng-template let-status pTemplate="item">
-              <span [class]="getStatusClass(status)">{{ status }}</span>
-            </ng-template>
-          </p-dropdown>
-        </div>
-      </div>
-    </p-dialog>
-  <!-- Buyer Address/Order Info Dialog -->
-  <p-dialog header="Order Info" [(visible)]="showAddressDialog" [modal]="true" [style]="{ width: '400px' }">
-    <form (ngSubmit)="saveAddressInfo()" class="space-y-4">
-      <div>
-        <label class="block text-sm font-semibold mb-1">Shipping Address</label>
-        <input type="text" [(ngModel)]="addressForm.shippingAddress" name="shippingAddress" class="p-inputtext p-component w-full border border-gray-300 rounded px-2 py-2" required />
-      </div>
-      <div>
-        <label class="block text-sm font-semibold mb-1">Recipient Name</label>
-        <input type="text" [(ngModel)]="addressForm.recipientName" name="recipientName" class="p-inputtext p-component w-full border border-gray-300 rounded px-2 py-2" required />
-      </div>
-      <div>
-        <label class="block text-sm font-semibold mb-1">Phone Number</label>
-        <input type="text" [(ngModel)]="addressForm.phoneNumber" name="phoneNumber" class="p-inputtext p-component w-full border border-gray-300 rounded px-2 py-2" required />
-      </div>
-      <div>
-        <label class="block text-sm font-semibold mb-1">Notes</label>
-        <textarea [(ngModel)]="addressForm.notes" name="notes" class="p-inputtext p-component w-full border border-gray-300 rounded px-2 py-2"></textarea>
-      </div>
-      <div class="flex justify-end gap-2 mt-6">
-        <button pButton type="button" class="p-button-text" (click)="showAddressDialog = false">Cancel</button>
-        <button pButton type="submit" class="p-button-primary px-6">Save</button>
-      </div>
-    </form>
-  </p-dialog>
+    <p class="text-gray-500 mt-1">Manage and track auction order statuses</p>
   </div>
 
-  <p-confirmDialog></p-confirmDialog>
-  <p-toast></p-toast>
+  <!-- Order Table -->
+  <div class="p-6">
+    <p-table [value]="orders" [loading]="loading" [rows]="10" [paginator]="true" 
+             [rowsPerPageOptions]="[5,10,20]" dataKey="id">
+      <ng-template pTemplate="header">
+        <tr>
+          <th *ngFor="let col of cols" [pSortableColumn]="col.field">
+            {{ col.header }}
+            <p-sortIcon [field]="col.field"></p-sortIcon>
+          </th>
+          <th style="width: 200px">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-order>
+        <tr (click)="onRowClick(order)" class="cursor-pointer hover:bg-gray-50">
+          <td>{{ order.id }}</td>
+          <td>{{ order.orderDate | date:'mediumDate' }}</td>
+          <td>
+            <div class="font-medium truncate max-w-xs">{{ order.auctionTitle || order.auctionId || 'N/A' }}</div>
+          </td>
+          <td *ngIf="showSellerColumn">{{ order.sellerName || 'N/A' }}</td>
+          <td *ngIf="showBuyerColumn">{{ order.buyerName || 'N/A' }}</td>
+          <td class="font-semibold">${{ order.amountPaid | number:'1.2-2' }}</td>
+          <td>
+            <span [class]="getStatusClass(order.status)">
+              {{ order.status }}
+            </span>
+          </td>
+          <td>
+            <div class="flex space-x-2" (click)="$event.stopPropagation()">
+              <button 
+                (click)="showOrderDetails(order)"
+                class="flex items-center gap-2 px-3 py-1 text-sm font-medium border rounded text-gray-700 border-gray-300 hover:bg-gray-100 transition">
+                <i class="pi pi-eye text-blue-600"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [attr.colspan]="cols.length + 1" class="text-center py-8">
+            <i class="pi pi-inbox text-3xl text-gray-300 mb-2"></i>
+            <p class="text-gray-500">No orders found</p>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Order Detail Dialog -->
+  <p-dialog header="Order Details" [(visible)]="orderDetailsVisible" 
+            [style]="{ width: '600px' }" [modal]="true">
+    <div *ngIf="selectedOrder" class="grid grid-cols-2 gap-4">
+      <div class="space-y-2">
+        <div>
+          <label class="text-sm font-medium text-gray-500">Order ID</label>
+          <p class="font-semibold">{{ selectedOrder.id }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-500">Order Date</label>
+          <p>{{ selectedOrder.orderDate | date:'medium' }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-500">Auction</label>
+          <p class="font-semibold">{{ selectedOrder.auctionTitle }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-500">Winning Bid ID</label>
+          <p>{{ selectedOrder.winningBidId }}</p>
+        </div>
+      </div>
+      
+      <div class="space-y-2">
+        <div>
+          <label class="text-sm font-medium text-gray-500">Payment Status</label>
+          <p>
+            <span [ngClass]="{
+              'bg-green-100 text-green-800': selectedOrder.paymentStatus === 1,
+              'bg-red-100 text-red-800': selectedOrder.paymentStatus === 2,
+              'bg-yellow-100 text-yellow-800': selectedOrder.paymentStatus === 0
+            }" class="px-2 py-1 rounded text-xs">
+            {{ selectedOrder.paymentStatus }}
+            </span>
+          </p>
+        </div>
+        <!-- <div>
+          <label class="text-sm font-medium text-gray-500">Transaction ID</label>
+          <p class="truncate">{{ selectedOrder.paymentTransactionId || 'N/A' }}</p>
+        </div> -->
+        <div>
+          <label class="text-sm font-medium text-gray-500">Amount Paid</label>
+          <p class="font-bold text-lg">${{ selectedOrder.amountPaid | number:'1.2-2' }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-500">Current Status</label>
+          <p>
+            <span [class]="getStatusClass(selectedOrder.status)">
+              {{ selectedOrder.status }}
+            </span>
+          </p>
+        </div>
+      </div>
+      
+      <!-- Parties Information -->
+      <div class="border-t pt-4 mt-4 col-span-2">
+        <h4 class="font-medium mb-2">Parties Information</h4>
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Seller Info -->
+          <div class="bg-blue-50 p-3 rounded-lg">
+            <div class="flex justify-between items-center">
+              <label class="text-sm font-medium text-gray-500">Seller</label>
+              <span *ngIf="isSellerOfThisOrder" class="text-xs text-gray-500">(You)</span>
+            </div>
+            <p class="font-semibold">{{ selectedOrder.sellerName || 'N/A' }}</p>
+          </div>
+          
+          <!-- Buyer Info -->
+          <div class="bg-green-50 p-3 rounded-lg">
+            <div class="flex justify-between items-center">
+              <label class="text-sm font-medium text-gray-500">Buyer</label>
+              <span *ngIf="isBuyerOfThisOrder" class="text-xs text-gray-500">(You)</span>
+            </div>
+            <p class="font-semibold">{{ selectedOrder.buyerName || 'N/A' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Information -->
+      <div *ngIf="selectedOrder.shippingAddress || selectedOrder.recipientName || selectedOrder.phoneNumber" 
+           class="border-t pt-4 mt-4 col-span-2">
+        <h4 class="font-medium mb-2">Shipping Information</h4>
+        <div class="bg-gray-50 p-3 rounded-lg space-y-2">
+          <div *ngIf="selectedOrder.shippingAddress">
+            <label class="text-sm font-medium text-gray-500">Shipping Address</label>
+            <p class="text-sm">{{ selectedOrder.shippingAddress }}</p>
+          </div>
+          <div *ngIf="selectedOrder.recipientName">
+            <label class="text-sm font-medium text-gray-500">Recipient Name</label>
+            <p class="text-sm">{{ selectedOrder.recipientName }}</p>
+          </div>
+          <div *ngIf="selectedOrder.phoneNumber">
+            <label class="text-sm font-medium text-gray-500">Phone Number</label>
+            <p class="text-sm">{{ selectedOrder.phoneNumber }}</p>
+          </div>
+          <div *ngIf="selectedOrder.notes">
+            <label class="text-sm font-medium text-gray-500">Notes</label>
+            <p class="text-sm">{{ selectedOrder.notes }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Alert for Buyer -->
+      <div *ngIf="isBuyerOfThisOrder && selectedOrder.paymentStatus === 0" 
+           class="border-t pt-4 mt-4 col-span-2">
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div class="flex items-center">
+            <i class="pi pi-exclamation-triangle text-yellow-600 mr-2"></i>
+            <div>
+              <h5 class="font-medium text-yellow-800">Payment Required</h5>
+              <p class="text-sm text-yellow-700 mt-1">
+                Please proceed to payment within 24 hours to save your order. 
+                Your order will be automatically cancelled if payment is not completed.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Button for Buyer -->
+      <div *ngIf="canProceedToPayment(selectedOrder)" 
+           class="border-t pt-4 mt-4 col-span-2">
+        <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <i class="pi pi-credit-card text-green-600 mr-2"></i>
+              <div>
+                <h5 class="font-medium text-green-800">Ready for Payment</h5>
+                <p class="text-sm text-green-700 mt-1">
+                  Total Amount: ${{ selectedOrder.amountPaid | number:'1.2-2' }}
+                </p>
+              </div>
+            </div>
+            <button
+              pButton
+              type="button"
+              label="Proceed to Payment"
+              icon="pi pi-credit-card"
+              class="p-button-raised bg-gradient-to-r from-green-500 to-blue-600 border-0 px-6 py-3 rounded-xl shadow-lg text-lg font-bold hover:from-green-600 hover:to-blue-700 transition-all duration-300"
+              (click)="proceedToPayment(selectedOrder)"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Missing Shipping Info Alert for Buyer -->
+      <div *ngIf="isBuyerOfThisOrder && selectedOrder.paymentStatus === 0 && isShippingInfoMissing(selectedOrder)" 
+           class="border-t pt-4 mt-4 col-span-2">
+        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+          <div class="flex items-center">
+            <i class="pi pi-exclamation-triangle text-orange-600 mr-2"></i>
+            <div>
+              <h5 class="font-medium text-orange-800">Shipping Information Required</h5>
+              <p class="text-sm text-orange-700 mt-1">
+                Please add your shipping information before proceeding to payment.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Status change actions -->
+    <div *ngIf="selectedOrder && (isSellerOfThisOrder || isBuyerOfThisOrder || userRole === 'Admin')" class="mt-6">
+      <!-- Seller/Admin actions -->
+      <div *ngIf="isSellerOfThisOrder || userRole === 'Admin'">
+        <label class="block text-sm font-semibold mb-1">
+          Change Status ({{ isSellerOfThisOrder ? 'Seller' : 'Admin' }})
+        </label>
+        <p-dropdown [options]="getValidStatuses(selectedOrder.status)" 
+                    [(ngModel)]="selectedOrder.status" 
+                    [disabled]="statusChangeLoading"
+                    (onChange)="confirmStatusChange(selectedOrder, $event.value)"
+                    appendTo="body">
+          <ng-template pTemplate="dropdownicon">
+            <i class="pi pi-cog"></i>
+          </ng-template>
+          <ng-template let-status pTemplate="item">
+            <span [class]="getStatusClass(status)">{{ status }}</span>
+          </ng-template>
+        </p-dropdown>
+      </div>
+      
+      <!-- Buyer actions -->
+      <div *ngIf="isBuyerOfThisOrder" class="mt-4">
+        <p-button *ngIf="isShippingInfoMissing(selectedOrder)"
+                  icon="pi pi-user"
+                  label="Add Shipping Info"
+                  class="p-button-lg p-button-secondary w-full mb-2"
+                  [ngStyle]="{ 'font-size': '1.1rem', 'font-weight': 600 }"
+                  (click)="openAddressDialog(selectedOrder)">
+        </p-button>
+        
+        <div class="mt-4">
+          <label class="block text-sm font-semibold mb-1">Change Status (Buyer)</label>
+          <p-dropdown [options]="getValidStatuses(selectedOrder.status)" 
+                      [(ngModel)]="selectedOrder.status" 
+                      [disabled]="statusChangeLoading"
+                      (onChange)="confirmStatusChange(selectedOrder, $event.value)"
+                      appendTo="body">
+            <ng-template pTemplate="dropdownicon">
+              <i class="pi pi-cog"></i>
+            </ng-template>
+            <ng-template let-status pTemplate="item">
+              <span [class]="getStatusClass(status)">{{ status }}</span>
+            </ng-template>
+          </p-dropdown>
+        </div>
+      </div>
+    </div>
+  </p-dialog>
+
+<!-- Buyer Address/Order Info Dialog -->
+<p-dialog header="Order Info" [(visible)]="showAddressDialog" [modal]="true" [style]="{ width: '400px' }">
+  <form (ngSubmit)="saveAddressInfo()" class="space-y-4">
+    <div>
+      <label class="block text-sm font-semibold mb-1">Shipping Address</label>
+      <input type="text" [(ngModel)]="addressForm.shippingAddress" name="shippingAddress" class="p-inputtext p-component w-full border border-gray-300 rounded px-2 py-2" required />
+    </div>
+    <div>
+      <label class="block text-sm font-semibold mb-1">Recipient Name</label>
+      <input type="text" [(ngModel)]="addressForm.recipientName" name="recipientName" class="p-inputtext p-component w-full border border-gray-300 rounded px-2 py-2" required />
+    </div>
+    <div>
+      <label class="block text-sm font-semibold mb-1">Phone Number</label>
+      <input type="text" [(ngModel)]="addressForm.phoneNumber" name="phoneNumber" class="p-inputtext p-component w-full border border-gray-300 rounded px-2 py-2" required />
+    </div>
+    <div>
+      <label class="block text-sm font-semibold mb-1">Notes</label>
+      <textarea [(ngModel)]="addressForm.notes" name="notes" class="p-inputtext p-component w-full border border-gray-300 rounded px-2 py-2"></textarea>
+    </div>
+    <div class="flex justify-end gap-2 mt-6">
+      <button pButton type="button" class="p-button-text" (click)="showAddressDialog = false">Cancel</button>
+      <button pButton type="submit" class="p-button-primary px-6">Save</button>
+    </div>
+  </form>
+</p-dialog>
+</div>
+
+<p-confirmDialog></p-confirmDialog>
+<p-toast></p-toast>

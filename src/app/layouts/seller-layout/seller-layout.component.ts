@@ -21,40 +21,23 @@ export class SellerLayoutComponent {
   ngOnInit() {
     this.items = [
       {
-        label: 'Dashboard',
-        icon: 'ti ti-home',
-        items: [
-          {
-            label: 'Dashboard',
-            icon: 'pi pi-home',
-            route: '/seller/dashboard'
-          }
-        ]
-      },
-      {
         label: 'Products',
         icon: 'ti ti-shopping-cart',
         badge: '5',
         items: [
           {
-            label: 'Compose',
-            icon: 'pi pi-file-edit',
-            shortcut: '⌘+N'
+            label: 'Add Product',
+            icon: 'ti ti-plus',
+            route: '/seller/add-product',
+            routerLink: '/seller/add-product',
+
           },
           {
-            label: 'Inbox',
-            icon: 'pi pi-inbox',
-            badge: '5'
-          },
-          {
-            label: 'Sent',
-            icon: 'pi pi-send',
-            shortcut: '⌘+S'
-          },
-          {
-            label: 'Trash',
-            icon: 'pi pi-trash',
-            shortcut: '⌘+T'
+            label: 'All Products',
+            icon: 'ti ti-box',
+            route: '/seller/view-product',
+            routerLink: '/seller/view-product',
+            routerLinkActiveOptions: { endWith: '/seller/products' }
           }
         ]
       },
@@ -77,6 +60,13 @@ export class SellerLayoutComponent {
             route: '/seller/orders',
             routerLink: '/seller/orders',
             routerLinkActiveOptions: { endWith: '/seller/orders' }
+          },
+          {
+            label: 'Requests',
+            icon: 'ti ti-file-pencil',
+            route: '/seller/orders/requests',
+            routerLink: '/seller/orders/requests',
+            routerLinkActiveOptions: { endWith: '/seller/orders/requests' }
           }
         ]
       },

@@ -18,6 +18,51 @@ export class AdminLayoutComponent {
     ngOnInit() {
         this.items = [
             {
+                label: 'Dashboard',
+                icon: 'ti ti-home',
+                items: [
+                    {
+                        label: 'Statistics',
+                        icon: 'pi pi-chart-bar',
+                        route: '/admin/orders/analysis',
+                        routerLink: '/admin/orders/analysis'
+                    },
+                    {
+                        label: 'Audit Log',
+                        icon: 'ti ti-report-search',
+                        route: '/admin/audit',
+                        routerLink: '/admin/audit'
+                    }
+                ]
+            },
+            {
+                label: 'Products',
+                icon: 'pi pi-box',
+                items: [
+                    {
+                        label: 'All Products',
+                        icon: 'ti ti-box',
+                        route: '/admin/products',
+                        routerLink: '/admin/products',
+                        routerLinkActiveOptions: { exact: true }
+                    },
+                    {
+                        label: 'Categories',
+                        icon: 'ti ti-category',
+                        route: '/admin/categories',
+                        routerLink: '/admin/categories',
+                        routerLinkActiveOptions: { exact: true }
+                    },
+                    {
+                        label: 'Tags',
+                        icon: 'ti ti-hash',
+                        route: '/admin/tags',
+                        routerLink: '/admin/tags',
+                        routerLinkActiveOptions: { exact: true }
+                    }
+                ]
+            },
+            {
                 label: 'Orders',
                 icon: 'ti ti-list-check',
                 items: [
@@ -25,26 +70,8 @@ export class AdminLayoutComponent {
                         label: 'Orders',
                         icon: 'ti ti-list-check',
                         route: '/admin/orders'
-                    },
-                    {
-                        label: 'Compose',
-                        icon: 'pi pi-file-edit',
-                        shortcut: '⌘+N'
-                    },
-                    {
-                        label: 'Inbox',
-                        icon: 'pi pi-inbox',
-                        badge: '5'
-                    },
-                    {
-                        label: 'Sent',
-                        icon: 'pi pi-send',
-                        shortcut: '⌘+S'
-                    },
-                    {
-                        label: 'Trash',
-                        icon: 'pi pi-trash',
-                        shortcut: '⌘+T'
+                        , routerLink: '/admin/orders',
+                        routerLinkActiveOptions: { exact: true }
                     }
                 ]
             },
@@ -111,40 +138,6 @@ export class AdminLayoutComponent {
                 ]
             },
             {
-                label: 'Reports',
-                icon: 'pi pi-chart-bar',
-                shortcut: '⌘+R',
-                items: [
-                    {
-                        label: 'Sales',
-                        icon: 'pi pi-chart-line',
-                        badge: '3'
-                    },
-                    {
-                        label: 'Products',
-                        icon: 'pi pi-list',
-                        badge: '6'
-                    }
-                ]
-            },
-            {
-                label: 'Profile',
-                icon: 'pi pi-user',
-                shortcut: '⌘+W',
-                items: [
-                    {
-                        label: 'Settings',
-                        icon: 'pi pi-cog',
-                        shortcut: '⌘+O'
-                    },
-                    {
-                        label: 'Privacy',
-                        icon: 'pi pi-shield',
-                        shortcut: '⌘+P'
-                    }
-                ]
-            },
-            {
                 label: 'AI Assistant',
                 icon: 'pi pi-robot',
                 items: [
@@ -163,3 +156,5 @@ export class AdminLayoutComponent {
     this.SidebarVisible = !this.SidebarVisible;
   }
 }
+
+

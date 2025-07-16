@@ -3,7 +3,7 @@ export interface AuctionOrderDto {
     orderDate: Date;
     status: OrderStatus;
     paymentTransactionId: string;
-    paymentStatus: boolean;
+    //paymentStatus: boolean;
     auctionId: number;
     winningBidId: number;
     amountPaid: number;
@@ -11,12 +11,30 @@ export interface AuctionOrderDto {
     sellerName?: string;
     auctionTitle?: string;
     buyerName?: string;
+    buyerId?: string;
     // New fields for shipping/order info
     shippingAddress?: string;
     recipientName?: string;
     phoneNumber?: string;
     notes?: string;
+
+    //
+    paymentStatus: PaymentStatus;
+    stripeSessionId?: string;
+    stripePaymentIntentId?: string;
+
+    // Enhanced fields from backend to avoid excessive API calls
+    auctionDescription?: string;
+    winningBidAmount?: number;
 }
+
+export enum PaymentStatus {
+    Pending = 0,
+    Paid = 1,
+    Failed = 2,
+    Refunded = 3
+}
+
 
 
 export enum OrderStatus {

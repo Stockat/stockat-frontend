@@ -1,7 +1,7 @@
 import { Component, SimpleChanges } from '@angular/core';
 import { ProductService } from '../../../../core/services/product.service';
 import { FeatureValue, ProductWithFeatures } from '../../../../core/models/product-models/product-with-features';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { GalleriaModule } from 'primeng/galleria';
@@ -24,7 +24,8 @@ interface GalleryImage {
 
 @Component({
   selector: 'app-add-stock',
-  imports: [CardModule, GalleriaModule, DividerModule, Select, FloatLabel, InputNumber, ButtonModule, FormsModule, ToastModule],
+  imports: [CardModule, GalleriaModule, DividerModule, Select, FloatLabel, InputNumber,
+    ButtonModule, FormsModule, ToastModule, RouterLink, RouterModule],
   templateUrl: './add-stock.component.html',
   styleUrl: './add-stock.component.css',
   providers: [MessageService]
@@ -133,6 +134,10 @@ export class AddStockComponent {
     return this.product.features.every(feat => this.selectedFeatures[feat.id]);
   }
 
+  // Returns the IDs of selected features as numbers
+  get selectedFeatureIds(): number[] {
+    return Object.keys(this.selectedFeatures).map(id => +id);
+  }
 
 
 }
