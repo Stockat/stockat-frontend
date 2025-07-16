@@ -183,9 +183,32 @@
         </div>
       </div>
 
-      <!-- Payment Button for Buyer -->
-      <div *ngIf="canProceedToPayment(selectedOrder)" 
-           class="border-t pt-4 mt-4 col-span-2">
+      <!-- Shipping Button for Buyer (only if missing shipping info) -->
+      <div *ngIf="isBuyerOfThisOrder && isShippingInfoMissing(selectedOrder)" class="border-t pt-4 mt-4 col-span-2">
+        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <i class="pi pi-exclamation-triangle text-orange-600 mr-2"></i>
+              <div>
+                <h5 class="font-medium text-orange-800">Shipping Information Required</h5>
+                <p class="text-sm text-orange-700 mt-1">
+                  Please add your shipping information before proceeding to payment.
+                </p>
+              </div>
+            </div>
+            <button
+              pButton
+              type="button"
+              label="Add Shipping Info"
+              icon="pi pi-user"
+              class="p-button-lg p-button-secondary px-6 py-2 font-semibold"
+              (click)="openAddressDialog(selectedOrder)"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Button for Buyer (only if shipping info is present) -->
+      <div *ngIf="isBuyerOfThisOrder && !isShippingInfoMissing(selectedOrder) && canProceedToPayment(selectedOrder)" class="border-t pt-4 mt-4 col-span-2">
         <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center">
@@ -204,22 +227,6 @@
               icon="pi pi-credit-card"
               class="p-button-raised bg-gradient-to-r from-green-500 to-blue-600 border-0 px-6 py-3 rounded-xl shadow-lg text-lg font-bold hover:from-green-600 hover:to-blue-700 transition-all duration-300"
               (click)="proceedToPayment(selectedOrder)"></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Missing Shipping Info Alert for Buyer -->
-      <div *ngIf="isBuyerOfThisOrder && selectedOrder.paymentStatus === 0 && isShippingInfoMissing(selectedOrder)" 
-           class="border-t pt-4 mt-4 col-span-2">
-        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
-          <div class="flex items-center">
-            <i class="pi pi-exclamation-triangle text-orange-600 mr-2"></i>
-            <div>
-              <h5 class="font-medium text-orange-800">Shipping Information Required</h5>
-              <p class="text-sm text-orange-700 mt-1">
-                Please add your shipping information before proceeding to payment.
-              </p>
-            </div>
           </div>
         </div>
       </div>
