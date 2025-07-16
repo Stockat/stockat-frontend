@@ -255,14 +255,6 @@
       
       <!-- Buyer actions -->
       <div *ngIf="isBuyerOfThisOrder" class="mt-4">
-        <p-button *ngIf="isShippingInfoMissing(selectedOrder)"
-                  icon="pi pi-user"
-                  label="Add Shipping Info"
-                  class="p-button-lg p-button-secondary w-full mb-2"
-                  [ngStyle]="{ 'font-size': '1.1rem', 'font-weight': 600 }"
-                  (click)="openAddressDialog(selectedOrder)">
-        </p-button>
-        
         <div class="mt-4">
           <label class="block text-sm font-semibold mb-1">Change Status (Buyer)</label>
           <p-dropdown [options]="getValidStatuses(selectedOrder.status)" 
