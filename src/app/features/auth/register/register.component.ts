@@ -32,7 +32,7 @@ declare const google: any;
     CheckboxModule,
     RouterModule
   ],
-  providers: [MessageService],
+   providers: [MessageService, ConfirmationService],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
