@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -8,11 +8,12 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { HttpClientModule } from '@angular/common/http';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { CheckboxModule } from 'primeng/checkbox';
 import { RouterModule } from '@angular/router';
+import { UserService } from '../../../core/services/user.service';
 declare const google: any;
 
 @Component({
@@ -42,6 +43,9 @@ export class RegisterComponent implements OnInit {
   error: string | null = null;
   message = '';
   token: string | null = null;
+
+  private confirmationService = inject(ConfirmationService);
+  private userService = inject(UserService);
 
   constructor(private fb: FormBuilder, public authService: AuthService, private router: Router, private messageService: MessageService) {
     this.registerForm = this.fb.group({
@@ -146,16 +150,56 @@ export class RegisterComponent implements OnInit {
           if (resp.credential) {
             this.authService.googleLogin(resp.credential).subscribe({
               next: (res: any) => {
-                this.token = res.token?.accessToken || null;
-                if (res.isAuthSuccessful) {
-                  this.messageService.add({severity:'success', summary:'Google Registration', detail:'Registration successful!'});
-                  this.router.navigate(['/admin']);
+                if (res.isDeleted) {
+                  this.confirmationService.confirm({
+                    message: 'Your account is deactivated. Do you want to reactivate it?',
+                    header: 'Reactivate Account',
+                    icon: 'pi pi-exclamation-triangle',
+                    accept: () => {
+                      this.authService.setTokens(res.token);
+                      this.userService.toggleUserActivation().subscribe({
+                        next: () => {
+                          // After reactivation, re-login automatically
+                          this.messageService.add({ severity: 'success', summary: 'Account Reactivated', detail: 'Welcome back!' });
+                          this.navigateBasedOnRoleAndApproval(true);
+                        },
+                        error: () => {
+                          this.messageService.add({ severity: 'error', summary: 'Reactivation Failed', detail: 'Could not reactivate your account.' });
+                        }
+                      });
+                    },
+                    reject: () => {
+                      this.messageService.add({
+                        severity: 'info',
+                        summary: 'Login Cancelled',
+                        detail: 'You must reactivate your account to log in.'
+                      });
+                    }
+                  });
+                } else if (res.isAuthSuccessful) {
+                  this.authService.setTokens(res.token);
+                  this.messageService.add({ severity: 'success', summary: 'Google Registration', detail: 'Registration successful!' });
+                  this.navigateBasedOnRoleAndApproval(res.isApproved);
                 } else {
-                  this.messageService.add({severity:'error', summary:'Google Registration', detail:'Google registration failed.'});
+                  this.messageService.add({ severity: 'error', summary: 'Google Registration', detail: 'Google registration failed.' });
                 }
               },
               error: (err: any) => {
-                this.messageService.add({severity:'error', summary:'Google Registration', detail:'Google registration failed: ' + (err.error?.title || err.statusText)});
+                if (err.status === 403) {
+                  // Handle blocked user
+                  const detail = (typeof err.error === 'string' ? err.error : err.error?.message) || 'Account is blocked';
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: 'Account Blocked',
+                    detail: detail
+                  });
+                } else {
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: 'Google Login',
+                    detail: 'Google login failed: ' + (err.error?.title || err.statusText)
+                  });
+                }
               }
             });
           } else {
@@ -183,6 +227,25 @@ export class RegisterComponent implements OnInit {
       }
     } else {
       console.error('Google Identity Services SDK not loaded.');
+    }
+  }
+
+
+  private navigateBasedOnRoleAndApproval(isApproved: boolean): void {
+    if (this.authService.isAdmin()) {
+      this.router.navigate(['/admin']);
+      return;
+    }
+    if (!isApproved) {
+      // Route to default page if not approved
+      this.router.navigate(['/']);
+      return;
+    }
+    if (this.authService.isSeller()) {
+      this.router.navigate(['/']);
+    } else {
+      // Default route for buyers or other roles
+      this.router.navigate(['/']);
     }
   }
 }
